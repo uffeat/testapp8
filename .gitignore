@@ -30,3 +30,5 @@ scratch_code/
 NOTES.md
 TODO.txt
 TODO.md
+
+# git rm -r --cached dist/
