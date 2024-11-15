@@ -15,7 +15,8 @@ export default defineConfig(({ mode }) => {
       //minify: false,
       emptyOutDir: true,
       manifest: true,
-      outDir: "../../theme/assets/dist",
+      //outDir: "../../theme/assets/dist",
+      outDir: "../../production_code",
       // Allow top-level await
       target: ["es2022", "edge89", "firefox89", "chrome89", "safari15"],
       rollupOptions: {
