@@ -10,6 +10,7 @@ const htmlx = import_htmlx('foo')
 
 create("button.btn.btn-primary", { parent: root }, "Hello W!");
 
+console.log('Changed')
 
 
 if (import.meta.env.DEV) {
