@@ -8,7 +8,7 @@ const htmlx = import_htmlx('foo')
 
 
 
-create("button.btn.btn-primary", { parent: root }, "Hello world");
+create("button.btn.btn-primary", { parent: root }, "Hello World");
 
 
 
