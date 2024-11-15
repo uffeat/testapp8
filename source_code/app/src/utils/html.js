@@ -4,3 +4,9 @@ export function html(strings, ...values) {
     ""
   );
 }
+
+/* 
+EXAMPLE
+
+const heading = html`<h1>Hello world!</h1>`
+ */

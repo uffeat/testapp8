@@ -1,6 +1,6 @@
 let base
 if (import.meta.env.DEV) {
-  base = './public/'
+  base = '/'
 } else {
   base = import.meta.env.BASE_URL
 }

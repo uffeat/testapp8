@@ -8,7 +8,7 @@ const api_origin = `${app_origin}/_/api`;
 
 let submission_id = 0;
 
-/* RCalls server endpoint. */
+/* Calls server endpoint. */
 const server = new Proxy(
   {},
   {
