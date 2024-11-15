@@ -22,3 +22,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+
+# Custom
+uplink_keys.json
+scratch_code/
+NOTES.md
+TODO.txt
+TODO.md
