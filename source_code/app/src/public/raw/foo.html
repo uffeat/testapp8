@@ -1,0 +1,28 @@
+<style name="my_sheet">
+  h1 {
+    color: pink;
+  }
+</style>
+
+<template name="my_template">
+  <h1>Hello from template!</h1>
+</template>
+
+<script dependencies="bar: test/bar.js">
+  console.log(my_template);
+  console.log(my_sheet);
+
+  
+
+
+
+  export default async function() {
+    console.log('bar:', bar)
+
+  }
+
+
+
+  export const foo = 42;
+  export { my_template, my_sheet }
+</script>
