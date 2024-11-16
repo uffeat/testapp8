@@ -33,7 +33,6 @@ export async function import_htmlx(path) {
   let js = assets.length === 0 ? "" : assets.join("\n");
   const script = wrapper.querySelector("script");
   if (script) {
-    js += `\nfunction import_js(path) {return import("${window.location.origin}/"+path)};\n`;
     js += script.textContent.trim();
   }
   js += `\n//# sourceURL=${path}`;
