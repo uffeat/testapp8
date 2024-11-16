@@ -13,11 +13,8 @@ export async function import_htmlx(path) {
   if (path in cache) {
     return cache[path];
   }
-
   const innerHTML = await import_html(path);
-
   const wrapper = create("div", { innerHTML });
-
   const assets = [
     ...wrapper
       .get_elements("template[name]")
@@ -30,20 +27,20 @@ export async function import_htmlx(path) {
     ...wrapper.get_elements("style[name]").map((element) => {
       const name = element.getAttribute("name");
       const css = JSON.stringify(element.textContent.trim());
-      return `const ${name} = new CSSStyleSheet();${name}.replaceSync(${css};`;
+      return `const ${name} = new CSSStyleSheet();${name}.replaceSync(${css});`;
     }),
-  ].join("\n");
-
-  console.log(assets);
-
-  let js = "";
-
+  ];
+  let js = assets.length === 0 ? "" : assets.join("\n");
   const script = wrapper.querySelector("script");
+  if (script) {
+    js += `\nfunction import_js(path) {return import("${window.location.origin}/"+path)};\n`;
+    js += script.textContent.trim();
+  }
+  js += `\n//# sourceURL=${path}`;
 
-  js = `\n//# sourceURL=${path}`;
+  console.log(js);
 
-  const asset = 42;
-
+  const asset = await construct_module(js)
   cache[path] = asset;
   return asset;
 }
