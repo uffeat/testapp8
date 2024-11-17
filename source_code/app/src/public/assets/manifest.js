@@ -1,0 +1,1 @@
+export default {"foo.htmlx.html": true}

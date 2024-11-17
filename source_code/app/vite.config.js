@@ -7,19 +7,11 @@ export default defineConfig(({ mode }) => {
     base: mode === "production" ? "./" : "/",
     plugins: [],
     build: {
-      //minify: false,
+      //minify: false, // Only use for debug
       emptyOutDir: true,
-      manifest: true,
       outDir: "../dist",
       // Allow top-level await
       target: ["es2022", "edge89", "firefox89", "chrome89", "safari15"],
-      rollupOptions: {
-        plugins: [],
-        output: {
-          //entryFileNames: "main.js",
-          //assetFileNames: "main.css",
-        },
-      },
     },
     resolve: {
       alias: {

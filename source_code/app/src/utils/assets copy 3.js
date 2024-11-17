@@ -1,4 +1,3 @@
-import manifest from "@/public/assets/manifest";
 import { create } from "@/utils/component";
 
 /* Exploit that Vite serves assets in 'public' as-is */
@@ -34,25 +33,18 @@ export const assets = new (class Asset {
     if (!path.includes(".")) {
       path = `${path}.htmlx.html`;
     }
-
     if (path in this.#cache) {
       return this.#cache[path];
     }
-
+    const arr = path.split(".");
+    const suffix = arr.pop();
+    const key = arr.join(".");
     let asset;
-    if (path in manifest) {
-      asset = await construct_module(await import_txt(`${path}.js`, false));
-    } else {
-      const arr = path.split(".");
-      const suffix = arr.pop();
-      const key = arr.join(".");
-      const handler = this.get_handler(suffix);
-      if (!handler) {
-        throw new Error(`Unsupported asset type: ${suffix}`);
-      }
-      asset = await handler(key);
+    const handler = this.get_handler(suffix);
+    if (!handler) {
+      throw new Error(`Unsupported asset type: ${suffix}`);
     }
-
+    asset = await handler(key);
     this.#cache[path] = asset;
     return asset;
   };
@@ -147,8 +139,8 @@ async function import_js(key) {
 }
 
 /* Returns (uncached!) asset as text. */
-async function import_txt(path, raw=true) {
-  return await (await fetch(`assets/${raw ? 'raw' : 'built'}/${base}${path}`)).text();
+async function import_txt(path) {
+  return await (await fetch(`assets/raw/${base}${path}`)).text();
 }
 
 assets.bind(import_css, "css");
