@@ -1,3 +1,3 @@
-console.log('FOO')
+console.log('BAR')
 
 export const bar = 'BAR'

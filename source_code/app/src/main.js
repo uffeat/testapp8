@@ -1,18 +1,23 @@
 import "./bootstrap.scss";
 import "./main.css";
 import { create } from "utils/component";
-import { asset } from "@/utils/asset";
+import { assets } from "utils/assets";
 
 
 
 
-const htmlx = asset.get('foo.htmlx')
+const htmlx = await assets.get('foo')
 
-async function import_js(path) {
-  return await new Function(`return import("./app/src/${path}.js")`)();
-}
+console.dir(htmlx);
 
-//const {bar} = await import_js('tests/bar')
+const {foo} = await assets.get('foo.js')
+console.log(foo)
+
+const foo_html = await assets.get('foo.html')
+console.log(foo_html)
+
+const foo_css = await assets.get('foo.css')
+console.log(foo_css)
 
 
 
