@@ -158,3 +158,7 @@ if __name__ == "__main__":
 """
 Thx. Re your comment about Conditional Transpilation... Yes, I could choose to include all native asset types - effectively converting them to JS modules. But since 
 """
+
+"""
+https://testapp8.vercel.app/.well-known/vercel/microfrontend-routing
+"""
