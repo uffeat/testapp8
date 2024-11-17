@@ -23,7 +23,7 @@ await (async () => {
 
 
 
-create("button.btn.btn-primary", { parent: root }, "Hello W!");
+create("button.btn.btn-primary", { parent: root }, "Hello World!");
 
 if (import.meta.env.DEV) {
   let path = "";
