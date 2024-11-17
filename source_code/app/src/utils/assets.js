@@ -147,8 +147,10 @@ async function import_js(key) {
 }
 
 /* Returns (uncached!) asset as text. */
-async function import_txt(path, raw=true) {
-  return await (await fetch(`assets/${raw ? 'raw' : 'built'}/${base}${path}`)).text();
+async function import_txt(path, raw = true) {
+  return await (
+    await fetch(`assets/${raw ? "raw" : "built"}/${base}${path}`)
+  ).text();
 }
 
 assets.bind(import_css, "css");
