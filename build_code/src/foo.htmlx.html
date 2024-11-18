@@ -8,14 +8,17 @@
   <h1>Hello from template!</h1>
 </template>
 
-<template name="my_other_template">
-  <h1>Hello from template!</h1>
+<template name="my_private_template">
+  <h1>Hello from private template!</h1>
 </template>
 
 <script>
-  //const {bar} = await assets.get('bar.htmlx')
-  //console.log(bar)
+  document.adoptedStyleSheets.push(my_sheet);
 
+  export function demo(root) {
+    root.insertAdjacentHTML("beforeend", my_private_template);
+    return root;
+  }
 
-  export const foo = 'FOO';
+  export const foo = "FOO";
 </script>

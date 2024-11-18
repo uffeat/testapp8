@@ -1,4 +1,4 @@
-"""Pre-building util to be used before creating built with Vite."""
+"""Pre-building util for Vite-powered app."""
 
 import datetime as dt
 import json
@@ -148,5 +148,46 @@ def transpile():
 
 if __name__ == "__main__":
     transpile()
+
+
+"""
+EXAMPLE
+
+build_code/src/foo.htmlx.html:
+
+<style name="my_sheet" export>
+  h1 {
+    color: pink;
+  }
+</style>
+
+<template name="my_template" export>
+  <h1>Hello from template!</h1>
+</template>
+
+<template name="my_private_template">
+  <h1>Hello from private template!</h1>
+</template>
+
+<script>
+  document.adoptedStyleSheets.push(my_sheet);
+
+  export function demo(root) {
+    root.insertAdjacentHTML("beforeend", my_private_template);
+    return root;
+  }
+
+  export const foo = "FOO";
+</script>
+
+main.js:
+
+await (async () => {
+  const root = document.getElementById('root')
+  const {demo, foo, my_template} = await import('htmlx/foo')
+  demo(root).insertAdjacentHTML('beforeend', my_template)
+  root.insertAdjacentText('beforeend', foo)
+})()
+"""
 
 

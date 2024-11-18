@@ -152,3 +152,47 @@ assets.bind(import_css, "css");
 assets.bind(import_html, "html");
 assets.bind(import_js, "js");
 assets.bind(import_txt, "svg", "txt");
+
+/*
+EXAMPLE
+
+public/assets/foo.htmlx.html:
+
+<style name="my_sheet" export>
+  h1 {
+    color: pink;
+  }
+</style>
+
+<template name="my_template" export>
+  <h1>Hello from template!</h1>
+</template>
+
+<template name="my_private_template">
+  <h1>Hello from private template!</h1>
+</template>
+
+<script>
+  document.adoptedStyleSheets.push(my_sheet);
+
+  export function demo(root) {
+    root.insertAdjacentHTML("beforeend", my_private_template);
+    return root;
+  }
+
+  export const foo = "FOO";
+</script>
+
+main.js:
+
+import { assets } from "utils/assets";
+
+
+await (async () => {
+  const root = document.getElementById('root')
+  const {demo, foo, my_template} = await assets.get('foo')
+  demo(root).insertAdjacentHTML('beforeend', my_template)
+  root.insertAdjacentText('beforeend', foo)
+})()
+
+*/
