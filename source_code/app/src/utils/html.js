@@ -1,3 +1,5 @@
+/* TODO Consider using for defining effects */
+
 /* Enables html linting via VS Code plugin. */
 export function html(strings, ...values) {
   return strings.reduce(

@@ -1,4 +1,4 @@
-
+// foo_endpoint
 import { server } from 'utils/server'
 
 await (async () => {
