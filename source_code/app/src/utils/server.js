@@ -41,5 +41,4 @@ export { server };
 EXAMPLE
 
 const result = await server.foo({ email: "name@company.com", number: 42, accept: true });
-
 */
