@@ -82,11 +82,10 @@ parsers = Parsers()
 
 @parsers.parser("html")
 def parse_html(name: str, content: str) -> tuple[str, str] | None:
-    """Returns js transpiled from htmlx-type assets."""
+    """Returns js name and js transpiled from htmlx-type assets."""
     name_without_suffix = name[: -len(".html")]
 
-    # NOTE Does the same job as construct_htmlx in assets.js
-    # and should therefore be kept in alignment with that function.
+    # NOTE Should be kept aligned with construct_htmlx in assets.js
 
     if name_without_suffix.endswith(".htmlx"):
         assets = []
@@ -94,22 +93,20 @@ def parse_html(name: str, content: str) -> tuple[str, str] | None:
 
         for element in soup.select("template[name]"):
             export = "" if element.get("export") is None else "export "
-            name = element.attrs["name"]
             html = json.dumps(element.decode_contents().strip())
-            assets.append(f"{export}const {name} = {html}")
+            assets.append(f"{export}const {element.attrs['name']} = {html}")
 
         for element in soup.select("style[name]"):
             export = "" if element.get("export") is None else "export "
-            name = element.attrs["name"]
             css = json.dumps(element.decode_contents().strip())
             assets.append(
-                f"{export}const {name} = new CSSStyleSheet();{name}.replaceSync({css});"
+                f"{export}const {element.attrs['name']} = new CSSStyleSheet();{element.attrs['name']}.replaceSync({css});"
             )
         js = ("\n").join(assets)
         script = soup.select_one("script")
         if script:
             js += script.decode_contents().strip()
-        return name_without_suffix[:-len(".htmlx")], js
+        return f'{name_without_suffix[:-len(".htmlx")]}', js
     else:
         return
         # NOTE Converting html to js gives no performance benefit in assets.js,
@@ -137,7 +134,6 @@ def transpile():
         parser = parsers.get(suffix)
         if not parser:
             continue
-
         parsed = parser(name, content)
         if not parsed:
             continue
@@ -145,8 +141,6 @@ def transpile():
         if js_name in js_names:
             raise ValueError(f"Name collision: {js_name}")
         js_names.append(js_name)
-
-
         write_to_target(js_name, js)
         
     print(f"Assets built: {len(js_names)}")

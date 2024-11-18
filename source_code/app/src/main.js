@@ -20,11 +20,8 @@ await (async () => {
 })()
 
 await (async () => {
-  const htmlx = await import('@/built/foo')
-
+  const htmlx = await import('htmlx/foo')
   console.dir(htmlx);
-  
-  
 })()
 
 
@@ -32,7 +29,9 @@ await (async () => {
 
 
 
-create("button.btn.btn-primary", { parent: root }, "Hello World!");
+
+
+create("button.btn.btn-primary", { parent: root }, "Yo World!");
 
 if (import.meta.env.DEV) {
   let path = "";
