@@ -1,6 +1,6 @@
 import "./bootstrap.scss";
 import "./main.css";
-import { create } from "utils/component";
+import { create } from "component/component";
 import { assets } from "utils/assets";
 
 
