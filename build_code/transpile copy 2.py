@@ -8,8 +8,10 @@ from bs4 import BeautifulSoup as bs
 
 timestamp = f"Auto-generated: {dt.datetime.now():%Y-%m-%d %H:%M:%S}"
 
-SOURCE = Path.cwd() / "build_code/src"
-TARGET = Path.cwd() / "source_code/app/src/built"
+
+MANIFEST = Path.cwd() / "source_code/app/src/public/assets/manifest.js"
+SOURCE = Path.cwd() / "source_code/app/src/public/assets/raw"
+TARGET = Path.cwd() / "source_code/app/src/public/assets/built"
 
 
 def delete_directory(path: Path) -> None:
@@ -81,7 +83,7 @@ parsers = Parsers()
 
 
 @parsers.parser("html")
-def parse_html(name: str, content: str) -> tuple[str, str] | None:
+def parse_html(name: str, content: str) -> str:
     """Returns js transpiled from htmlx-type assets."""
     name_without_suffix = name[: -len(".html")]
 
@@ -109,7 +111,8 @@ def parse_html(name: str, content: str) -> tuple[str, str] | None:
         script = soup.select_one("script")
         if script:
             js += script.decode_contents().strip()
-        return name_without_suffix[:-len(".htmlx")], js
+        return js
+
     else:
         return
         # NOTE Converting html to js gives no performance benefit in assets.js,
@@ -120,8 +123,7 @@ def parse_html(name: str, content: str) -> tuple[str, str] | None:
 def transpile():
     """Creates built assets."""
     delete_directory(TARGET)
-    
-    js_names = []
+    manifest = {}
     # Traverse asset src files
     for file in SOURCE.rglob("*.*"):
         name, content = read_from_source(file)
@@ -137,19 +139,14 @@ def transpile():
         parser = parsers.get(suffix)
         if not parser:
             continue
-
-        parsed = parser(name, content)
-        if not parsed:
+        js = parser(name, content)
+        if not js:
             continue
-        js_name, js = parsed
-        if js_name in js_names:
-            raise ValueError(f"Name collision: {js_name}")
-        js_names.append(js_name)
-
-
-        write_to_target(js_name, js)
-        
-    print(f"Assets built: {len(js_names)}")
+        write_to_target(name, js)
+        manifest[name] = True
+    MANIFEST.parent.mkdir(parents=True, exist_ok=True)
+    MANIFEST.write_text(f"export default {json.dumps(manifest)}", encoding="utf-8")
+    print(f"Assets built: {len(manifest)}")
 
 
 if __name__ == "__main__":

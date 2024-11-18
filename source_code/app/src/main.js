@@ -19,6 +19,14 @@ await (async () => {
   console.log(foo_css)
 })()
 
+await (async () => {
+  const htmlx = await import('@/built/foo')
+
+  console.dir(htmlx);
+  
+  
+})()
+
 
 
 
