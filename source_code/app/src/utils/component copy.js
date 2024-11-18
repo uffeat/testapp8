@@ -88,10 +88,6 @@ export const component = new (class {
       if (arg === undefined) {
         continue;
       }
-      if (is_html(arg)) {
-        fragment.add_html(arg);
-        continue;
-      }
       if (is_node(arg)) {
         fragment.append(arg);
         continue;
@@ -341,13 +337,13 @@ function base_factory(parent, config, ...factories) {
     }
     #css_class = new Proxy(this, {
       get(target, css_class) {
-        return target.classList.contains(css_class);
+        return target.classList.contains(css_class)
       },
       set(target, css_class, value) {
         if (value) {
-          target.classList.add(css_class);
+          target.classList.add(css_class)
         } else {
-          target.classList.remove(css_class);
+          target.classList.remove(css_class)
         }
         return true;
       },
@@ -437,14 +433,13 @@ function base_factory(parent, config, ...factories) {
       return this;
     };
 
-    /* Custom version of 'beforeend'-insertAdjacentHTML that converts native elements to 
-    instances of non-autonomous web components before injection. Chainable. */
-    add_html = (html) => {
-      const wrapper = create("div", { innerHTML: html });
+    /* Custom version of insertAdjacentHTML that converts native elements to 
+    instances of non-autonomous web components before injection. */
+    add_html = (html, pos='beforeend') => {
+      const wrapper = create('div', {innerHTML: html})
       convert_descendants(wrapper);
-      this.append(...wrapper.children)
-      return this
-    };
+      this.insertAdjacentHTML(pos, wrapper.innerHTML)
+    }
 
     /* Removes all child nodes. Chainable. */
     clear_content() {
@@ -647,22 +642,15 @@ function create_class(base, config = {}, ...factories) {
   return cls;
 }
 
-
-function is_html(text) {
-  if (!(typeof text === 'string')) {
-    return false
-  }
-  text = text.trim()
-  return /<([a-zA-Z]+)(\s[^>]*)?>.*<\/\1>|<([a-zA-Z]+)(\s[^>]*)?\/>/i.test(text);
-}
-
 function is_node(arg) {
   return (
     arg instanceof HTMLElement || ["number", "string"].includes(typeof arg)
   );
 }
 
-/* Replaces native element with its non-autonomous web component counterpart. */
+
+
+
 function element_to_component(element) {
   const component = create(element.tagName.toLowerCase());
   Array.from(element.attributes).forEach((attr) =>
@@ -672,22 +660,26 @@ function element_to_component(element) {
   element.replaceWith(component);
 }
 
-/* Replaces native descendants with non-autonomous web component counterparts. */
 function convert_descendants(element) {
   const descendants = [...element.querySelectorAll("*")];
   if (descendants.length === 0) {
-    if (!element.tagName.includes("-")) {
-      element_to_component(element);
-    }
+    element_to_component(element);
   } else {
     for (const descendant of [...descendants]) {
-      if (!descendant.tagName.includes("-")) {
-        element_to_component(descendant);
-      }
+      element_to_component(descendant);
       convert_descendants(descendant);
     }
   }
 }
+
+
+
+
+
+
+
+
+
 
 function shadow_factory(parent, config, ...factories) {
   return class Shadow extends parent {
