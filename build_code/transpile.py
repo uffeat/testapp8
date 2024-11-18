@@ -150,6 +150,3 @@ if __name__ == "__main__":
     transpile()
 
 
-"""
-https://testapp8.vercel.app/.well-known/vercel/microfrontend-routing
-"""

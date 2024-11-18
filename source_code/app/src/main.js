@@ -5,18 +5,8 @@ import { assets } from "utils/assets";
 
 
 await (async () => {
-  const htmlx = await assets.get('foo')
-
-  console.dir(htmlx);
-  
-  const {foo} = await assets.get('foo.js')
-  console.log(foo)
-  
-  const foo_html = await assets.get('foo.html')
-  console.log(foo_html)
-  
-  const foo_css = await assets.get('foo.css')
-  console.log(foo_css)
+  const {demo, my_template} = await assets.get('foo')
+  demo(document.getElementById('root')).insertAdjacentHTML('beforeend', my_template)
 })()
 
 await (async () => {
