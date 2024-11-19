@@ -17,6 +17,7 @@ export default defineConfig(({ mode }) => {
       alias: {
         "@": resolve(__dirname, 'src'),
         "component": resolve(__dirname, 'src/utils/component'),
+        "components": resolve(__dirname, 'src/components'),
         "htmlx": resolve(__dirname, 'src/built'),
         "utils": resolve(__dirname, 'src/utils'),
       },
