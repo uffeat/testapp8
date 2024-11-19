@@ -108,7 +108,7 @@ export const component = new (class {
       const result = hook.call(self, fragment);
       if (typeof result === "function") {
         deferred.push(result);
-      }
+      } 
     }
     /* Append children */
     self.append(...fragment.childNodes);

@@ -1,161 +1,110 @@
-import "@/bootstrap.scss";
-
 import { Modal } from "bootstrap";
-import { create_element } from "utils/create_element";
+import { create } from "component/component";
 
 /* Shows a modal and returns a promise that resolves to the modal's value, 
 when the modal hides. */
 export function modal(
   {
-    content = "",
+    content,
     centered,
     dismissible = true,
-    effects = [],
+    hooks = [],
     fade = true,
     scrollable,
     size,
     style,
     tag = "div",
-    title = "",
+    title,
   },
   ...buttons
 ) {
   // Create modal element
-  const element = create_element(
+  const element = create(
     // Handle fade animation
     `div.modal${fade ? ".fade" : ""}`,
-    { parent: document.body },
-    create_element(
-      // Handle centered and scrollable
+    { parent: document.body, attr_tabindex: "-1" },
+    create(
+      // Handle centered, scrollable and size
       `div.modal-dialog${scrollable ? ".modal-dialog-scrollable" : ""}${
         centered ? ".modal-dialog-centered" : ""
-      }`,
+      }${size ? ".modal-" + size : ""}`,
       {},
-      function set_size() {
-        if (size) {
-          if (!["sm", "lg", "xl", "fullscreen"].includes(size)) {
-            throw new Error(`Invalid size: ${size}`);
-          }
-          this.classList.add(`modal-${size}`);
-        }
-      },
-      create_element(
+      create(
         `${tag}.modal-content`,
         {},
-        create_element(
-          `div.modal-header`,
-          {},
-          function set_style() {
-            if (style) {
-              this.classList.add(`text-bg-${style}`);
-            }
-          },
-          function add_title() {
+        function add_header(fragment) {
+          if (dismissible || title) {
+            const header = create(
+              `div.modal-header${style ? ".text-bg-" + style : ""}`
+            );
             if (title) {
               if (typeof title === "string") {
-                title = create_element(`h1.modal-title.fs-3.text`, {}, title);
+                title = create(`h1.modal-title.fs-3.text`, {}, title);
               } else {
-                if (!(title instanceof HTMLElement)) {
-                  throw new Error(`Expected html element. Got:`, title);
-                }
                 title.classList.add("modal-title");
               }
-              return title;
+              header.append(title);
             }
-          },
-          function add_dismiss_button() {
             if (dismissible) {
-              return create_element(
-                `button.btn-close`,
-                {},
-                function set_style() {
-                  if (style) {
-                    if (
-                      ["danger", "primary", "secondary", "success"].includes(
-                        style
-                      )
-                    ) {
-                      this.classList.add(`btn-close-white`);
-                    }
+              header.append(
+                create(
+                  `button.btn-close${
+                    ["danger", "primary", "secondary", "success"].includes(
+                      style
+                    )
+                      ? ".btn-close-white"
+                      : ""
+                  }`,
+                  {
+                    data_bsDismiss: "modal",
                   }
-                }
-              ).update_dataset({
-                bsDismiss: "modal",
-              });
+                )
+              );
             }
+            this.append(header);
           }
-        ),
+        },
         // Handle body
-        create_element(`div.modal-body`, {}, function add_content() {
+        create(`div.modal-body`, {}, function add_content(fragment) {
           if (content) {
-            /* Handle content as multiple elements (or strings) wrapped in an array.
-            Useful for avoiding redundant wrapper divs */
-            if (Array.isArray(content)) {
-              content.forEach((element) => {
-                if (typeof element === "string") {
-                  /* Convert string to element */
-                  this.append(create_element("p", {}, element));
-                } else {
-                  if (!(element instanceof HTMLElement)) {
-                    throw new Error(
-                      `Expected html element or text. Got:`,
-                      element
-                    );
-                  }
-                  this.append(element);
-                }
-              });
-              return;
-            }
-            /* Handle monolithic content */
             if (typeof content === "string") {
-              /* Convert string to element */
-              content = create_element("p", {}, content);
+              fragment.append(create("p", {}, content));
             } else {
-              if (!(content instanceof HTMLElement)) {
-                throw new Error(`Expected html element. Got:`, content);
-              }
+              fragment.append(content);
             }
-            return content;
           }
         }),
-        function add_footer() {
+        function add_footer(fragment) {
           if (buttons.length > 0) {
-            return create_element(
-              `div.modal-footer`,
-              {},
-              /* Transform buttons */
-              ...buttons.map((b) => {
-                if (Array.isArray(b)) {
-                  let [text, value, style = ""] = b;
-                  if (style) {
-                    style = `.btn-${style}`;
-                  }
-                  return create_element(
-                    `button.btn${style}`,
-                    {
-                      onclick: (event) => {
-                        event.target.closest(".modal").close(value);
-                      },
-                    },
-                    text
-                  );
-                } else {
-                  if (!(b instanceof HTMLElement)) {
-                    throw new Error(`Expected html element. Got:`, b);
-                  }
-                  return b;
+            const footer = create(`div.modal-footer`, {});
+            /* Transform buttons */
+            buttons.forEach((b) => {
+              if (Array.isArray(b)) {
+                let [text, value, style = ""] = b;
+                if (style) {
+                  style = `.btn-${style}`;
                 }
-              })
-            );
+                const button = create(
+                  `button.btn${style}`,
+                  {
+                    onclick: (event) => {
+                      event.target.closest(".modal").close(value);
+                    },
+                  },
+                  text
+                );
+                footer.append(button);
+              } else {
+                footer.append(b);
+              }
+            });
+            fragment.append(footer);
           }
         }
       )
     ),
-    /* NOTE effect functions are added as child functions and therefore bound 
-    to modal element. */
-    ...effects
-  ).update_attrs({ tabindex: "-1" });
+    ...hooks
+  );
 
   // Handle dismissible
   const config = {};
@@ -183,8 +132,8 @@ export function modal(
   // Show the modal
   modal.show();
 
-  // Enable closing by bubbling x-close custom event
-  element.addEventListener("x-close", (event) => {
+  // Enable closing by bubbling close custom event
+  element.addEventListener("close", (event) => {
     event.stopPropagation();
     element.close(event.detail);
   });
@@ -206,34 +155,16 @@ export function close(value) {
 }
 
 /*
-# EXAMPLES
+EXAMPLES
 
-## Example: Hello World
-
+// Hello World
 await (async () => {
   const { modal } = await import("utils/modal");
-  modal({ title: "Hello world!", content: "The modal function is awesome." });
-})();
-
-
-## Example: Custom buttons
-
-await (async () => {
-  const { modal } = await import("utils/modal");
-  const { create_element } = await import("utils/create_element");
-  const value = await modal(
-    {
-      title: create_element('h2', {}, 'Modal with buttons'),
-      content: "This is the body!",
-      dismissible: false,
-    },
-    ["OK", true, "primary"],
-    ["Cancel", false, "secondary"]
+  const result = await modal(
+    { title: "Hello world!", content: "The modal function is awesome.", size: 'lg', style: 'primary' },
+    ["OK", true, 'success'], ["Cancel", false, 'danger']
   );
-  console.log("value:", value);
+  console.log("Modal result:", result);
 })();
-
-
-
 
 */
