@@ -1,5 +1,5 @@
 import { Modal } from "bootstrap";
-import { create } from "component/component";
+import { create } from "@/rollo";
 
 /* Shows a modal and returns a promise that resolves to the modal's value, 
 when the modal hides. */
@@ -65,7 +65,8 @@ export function modal(
           }
         },
         // Handle body
-        create(`div.modal-body`, {}, function add_content(fragment) {
+        create(`div.modal-body`, {}, 
+          function add_content(fragment) {
           if (content) {
             if (typeof content === "string") {
               fragment.append(create("p", {}, content));

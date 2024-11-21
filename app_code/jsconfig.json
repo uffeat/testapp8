@@ -4,8 +4,8 @@
     "paths": {
       "@/*": ["src/*"],
       "components/*": ["src/components/*"],
-      "component/*": ["src/utils/component/*"],
       "htmlx/*": ["src/built/*"],
+      "rolloui/*": ["src/rolloui/*"],
       "utils/*": ["src/utils/*"]
     }
   }

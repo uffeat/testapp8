@@ -1,4 +1,4 @@
-import { create } from "component/component";
+import { create } from "@/rollo";
 
 /* Exploit that Vite serves assets in 'public' as-is */
 let base;
