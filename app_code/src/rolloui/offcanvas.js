@@ -119,6 +119,14 @@ export function close(value) {
 /*
 # EXAMPLES
 
-## Example: Hello World
+const result = await offcanvas(
+  {
+    title: "Hello world!",
+    content: "The offcanvas function is awesome.",
+  },
+  ["OK", true, "success"],
+  ["Cancel", false, "danger"]
+);
+console.log("Modal result:", result);
 
 */
