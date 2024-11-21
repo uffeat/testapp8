@@ -1,5 +1,5 @@
 import { Offcanvas } from "bootstrap";
-import { create } from "@/rollo";
+import { create } from "rollo/component";
 
 
 

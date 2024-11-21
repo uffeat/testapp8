@@ -1,6 +1,6 @@
 // modal_custom
 
-import { create } from "@/rollo";
+import { create } from "rollo/component";
 import { close, modal } from "rolloui/modal";
 
 

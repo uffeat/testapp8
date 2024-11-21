@@ -1,6 +1,6 @@
 import "./bootstrap.scss";
 import "./main.css";
-import { create } from "./rollo";
+import { create } from "rollo/component";
 
 
 import { close, modal } from "rolloui/modal";

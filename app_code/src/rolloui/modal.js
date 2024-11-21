@@ -1,5 +1,5 @@
 import { Modal } from "bootstrap";
-import { create } from "@/rollo";
+import { create } from "rollo/component";
 
 /* Shows a modal and returns a promise that resolves to the modal's value, 
 when the modal hides. */

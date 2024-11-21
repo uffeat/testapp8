@@ -1,4 +1,4 @@
-import { create } from "@/rollo";
+import { create } from "rollo/component";
 
 export function Button({style, ...props}, ...children) {
   const component = create('button.btn', props, ...children)
