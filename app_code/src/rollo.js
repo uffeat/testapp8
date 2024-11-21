@@ -298,7 +298,7 @@ const components = new (class Components {
   })();
 
   /* Returns instance of non-autonomous web component  */
-  create = (arg = null, { parent, ...updates } = {}, ...args) => {
+  create = (arg = null, { parent, ...updates } = {}, ...children) => {
     let tag = "div";
     let css_classes;
     if (arg) {
@@ -307,35 +307,17 @@ const components = new (class Components {
       tag = arg_parts.shift();
       css_classes = arg_parts;
     }
-
     const element = new (this.get(tag))();
     /* Add css classes */
     if (css_classes && css_classes.length > 0) {
       /* NOTE Condition avoids adding empty class attr */
       element.classList.add(...css_classes);
     }
+    if (parent) {
+      element.parent = parent;
+    }
     element.update(updates);
-
-    /* Parse args (children and hooks) */
-    for (const arg of args) {
-      if (arg === undefined) {
-        continue;
-      }
-      if (typeof arg === "function") {
-        arg.call(element);
-        continue;
-      }
-      if (Array.isArray(arg)) {
-        element.append(...arg);
-        continue;
-      }
-      element.append(arg);
-    }
-
-    /* Add to parent */
-    if (parent && element.parentElement !== parent) {
-      parent.append(element);
-    }
+    element.append(...children);
     return element;
   };
 
@@ -434,16 +416,55 @@ const components = new (class Components {
         return this.#reactive.effects;
       }
 
+      get parent() {
+        return this.parentElement;
+      }
+
+      set parent(parent) {
+        if (parent) {
+          if (this.parentElement !== parent) {
+            parent.append(this);
+          }
+        } else {
+          this.remove();
+        }
+      }
+
       /* Exposes reactive instance for full access */
       get reactive() {
         return this.#reactive;
       }
       #reactive = Reactive.create(null, { owner: this });
 
+      /* Appends children and handles hooks. Chainable. */
+      append = (...children) => {
+        for (const child of children) {
+          if (child === undefined) {
+            continue;
+          }
+          if (typeof child === "function") {
+            const result = child.call(this);
+            if (result === undefined) {
+              continue;
+            }
+            if (Array.isArray(result)) {
+              super.append(...result);
+            } else {
+              super.append(result);
+            }
+            continue;
+          }
+          super.append(child);
+        }
+        return this
+      };
+
       /* Updates props, attributes and state. Chainable. */
       update = (updates) => {
         const $ = "$";
         const ATTR = "attr_";
+
+        // TODO handlers
 
         /* Handle props */
         Object.entries(updates)

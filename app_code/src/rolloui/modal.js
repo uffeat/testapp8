@@ -9,6 +9,7 @@ export function modal(
     centered,
     dismissible = true,
     fade = true,
+    hooks = [],
     scrollable,
     size,
     style,
@@ -23,7 +24,6 @@ export function modal(
     `div.modal${fade ? ".fade" : ""}`,
     { parent: document.body, attr_tabindex: "-1" }
   );
-  
 
   const modal_dialog = create(
     // Handle centered, scrollable and size
@@ -36,6 +36,8 @@ export function modal(
   const modal_content = create(`${tag}.modal-content`, {
     parent: modal_dialog,
   });
+
+
 
   /* Header */
   if (dismissible || title) {
@@ -66,7 +68,7 @@ export function modal(
     modal_content.append(header);
   }
 
-  const modal_body = create(`div.modal-body`, {parent: modal_content})
+  const modal_body = create(`div.modal-body`, { parent: modal_content });
   /* Content */
   if (content) {
     if (typeof content === "string") {
@@ -78,7 +80,7 @@ export function modal(
 
   /* Footer */
   if (buttons.length > 0) {
-    const footer = create(`div.modal-footer`, {parent: modal_content});
+    const footer = create(`div.modal-footer`, { parent: modal_content });
     /* Transform buttons */
     buttons.forEach((b) => {
       if (Array.isArray(b)) {
@@ -100,11 +102,9 @@ export function modal(
         footer.append(b);
       }
     });
-    
   }
 
-
-
+  element.append(...hooks)
 
   // Handle dismissible
   const config = {};
