@@ -463,12 +463,11 @@ const components = new (class Components {
       update = (updates) => {
         const $ = "$";
         const ATTR = "attr_";
+        const ON = "on_"
 
-        // TODO handlers
-
-        /* Handle props */
+        /* Props */
         Object.entries(updates)
-          .filter(([key, value]) => !key.startsWith($) && !key.startsWith(ATTR))
+          .filter(([key, value]) => !key.startsWith($) && !key.startsWith(ATTR) && !key.startsWith(ON))
           .forEach(([key, value]) => {
             if (key.startsWith("_")) {
               this[key] = value;
@@ -481,14 +480,21 @@ const components = new (class Components {
             }
           });
 
-        /* Handle attributes */
+        /* Attributes */
         Object.entries(updates)
-          .filter(([key, value]) => !key.startsWith($) && key.startsWith(ATTR))
+          .filter(([key, value]) => key.startsWith(ATTR))
           .forEach(
             ([key, value]) => (this.attribute[key.slice(ATTR.length)] = value)
           );
 
-        /* Handle reactive state */
+        /* Handlers */
+        Object.entries(updates)
+          .filter(([key, value]) => key.startsWith(ON))
+          .forEach(
+            ([key, value]) => (this.on[key.slice(ON.length)] = value)
+          );
+
+        /* Reactive state */
         const state = Object.fromEntries(
           Object.entries(updates)
             .filter(([key, value]) => key.startsWith($))

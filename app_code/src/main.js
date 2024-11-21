@@ -1,18 +1,49 @@
 import "./bootstrap.scss";
 import "./main.css";
 import { create } from "./rollo";
-import { toast } from "rolloui/toast";
-import { modal } from "rolloui/modal";
+
+
+import { close, modal } from "rolloui/modal";
 
 create(null, {id: 'root', parent: document.body})
 
 
-toast("Staying long", "Content", { delay: 20000, style: 'success' });
 
-const result = await modal(
-  { title: "Hello world!", content: "The modal function is awesome.", size: 'lg', style: 'primary' },
-  ["OK", true, 'success'], ["Cancel", false, 'danger']
+const form = create(
+  "form.d-flex.flex-column.row-gap-3.pt-2",
+  {
+    noValidate: true,
+    on_submit: (event) => {
+      event.preventDefault();
+      close(event.submitter?._value);
+    },
+  },
+  create("h1", {}, "Enter secret agent number"),
+  create("input.form-control", {
+    placeholder: "00...",
+    on_input: function (event) {
+      this.closest("form").querySelector('button[type="submit"]').disabled =
+        this.value !== "007";
+    },
+  }),
+  create(
+    "menu.d-flex.justify-content-end.column-gap-3.px-2.pt-2.m-0",
+    {},
+    create(
+      "button.btn.btn-primary",
+      { type: "submit", disabled: true, _value: true },
+      "OK"
+    ),
+    create("button.btn.btn-primary", {}, "Cancel")
+  )
 );
+
+const result = await modal({
+  content: form,
+  dismissible: false,
+  size: "lg",
+});
+
 console.log("Modal result:", result);
 
 if (import.meta.env.DEV) {
