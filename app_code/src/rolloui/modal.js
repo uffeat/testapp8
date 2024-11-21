@@ -1,5 +1,6 @@
 import { Modal } from "bootstrap";
 import { create } from "rollo/component";
+import { Button } from "rolloui/Button";
 
 /* Shows a modal and returns a promise that resolves to the modal's value, 
 when the modal hides. */
@@ -25,19 +26,15 @@ export function modal(
     { parent: document.body, attr_tabindex: "-1" }
   );
 
-  const modal_dialog = create(
-    // Handle centered, scrollable and size
-    `div.modal-dialog${scrollable ? ".modal-dialog-scrollable" : ""}${
-      centered ? ".modal-dialog-centered" : ""
-    }${size ? ".modal-" + size : ""}`,
-    { parent: element }
-  );
-
   const modal_content = create(`${tag}.modal-content`, {
-    parent: modal_dialog,
+    parent: create(
+      // Handle centered, scrollable and size
+      `div.modal-dialog${scrollable ? ".modal-dialog-scrollable" : ""}${
+        centered ? ".modal-dialog-centered" : ""
+      }${size ? ".modal-" + size : ""}`,
+      { parent: element }
+    ),
   });
-
-
 
   /* Header */
   if (dismissible || title) {
@@ -45,7 +42,6 @@ export function modal(
       `div.modal-header${style ? ".text-bg-" + style : ""}`,
       { parent: modal_content }
     );
-
     if (title) {
       if (typeof title === "string") {
         title = create(`h1.modal-title.fs-3.text`, {}, title);
@@ -68,43 +64,34 @@ export function modal(
     modal_content.append(header);
   }
 
-  const modal_body = create(`div.modal-body`, { parent: modal_content });
-  /* Content */
-  if (content) {
-    if (typeof content === "string") {
-      modal_body.append(create("p", {}, content));
-    } else {
-      modal_body.append(content);
-    }
-  }
+  /* Body/Content */
+  create(
+    `div.modal-body`,
+    { parent: modal_content },
+    typeof content === "string" ? create("p", {}, content) : content
+  );
 
   /* Footer */
   if (buttons.length > 0) {
     const footer = create(`div.modal-footer`, { parent: modal_content });
     /* Transform buttons */
-    buttons.forEach((b) => {
-      if (Array.isArray(b)) {
-        let [text, value, style = ""] = b;
-        if (style) {
-          style = `.btn-${style}`;
+    footer.append(
+      ...buttons.map((b) => {
+        if (Array.isArray(b)) {
+          const [text, value, style] = b;
+          return Button({
+            text,
+            value,
+            style,
+            on_click: (event) => event.target.closest(".modal").close(value),
+          });
         }
-        const button = create(
-          `button.btn${style}`,
-          {
-            onclick: (event) => {
-              event.target.closest(".modal").close(value);
-            },
-          },
-          text
-        );
-        footer.append(button);
-      } else {
-        footer.append(b);
-      }
-    });
+        return b;
+      })
+    );
   }
 
-  element.append(...hooks)
+  element.append(...hooks);
 
   // Handle dismissible
   const config = {};

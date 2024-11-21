@@ -1,10 +1,6 @@
 import { Offcanvas } from "bootstrap";
 import { create } from "rollo/component";
-
-
-
-
-const ID = "offcanvas";
+import { Button } from "rolloui/Button";
 
 /* Shows an offcanvas and returns a promise that resolves to the offcanvas' value, 
 when the offcanvas hides */
@@ -27,66 +23,49 @@ export function offcanvas(
   const element = create(
     // Handle placement
     `div.offcanvas.offcanvas-${placement}.d-flex.flex-column`,
-    { id: ID, parent: document.body },
+    { id: "offcanvas", parent: document.body, attr_tabindex: "-1" },
     create(
       `header.offcanvas-header`,
       {},
       // Handle title
-      function () {
-        if (title) {
-          if (typeof title === "string") {
-            title = create("h1.fs-2.text", {}, title);
-          }
-          return title;
-        }
-      },
-
-      create(`button.btn-close`, { type: "button" })
-        .update_dataset({
-          bsDismiss: "offcanvas",
-        })
-        .update_attrs({ "aria-label": "Close" })
+      typeof title === "string" ? create("h1.fs-2.text", {}, title) : title,
+      create(`button.btn-close`, {
+        type: "button",
+        attr_dataBsDismiss: "offcanvas",
+        attr_ariaLabel: "Close",
+      })
     ),
     create(
       `main.offcanvas-body.flex-grow-1`,
       {},
       // Handle content
-      function () {
-        if (content) {
-          if (typeof content === "string") {
-            content = create("p", {}, content);
-          }
-          return content;
-        }
-      }
+      typeof content === "string" ? create("p", {}, content) : content
     ),
     function () {
       if (buttons.length > 0) {
-        const menu = create_element(
-          "menu.d-flex.justify-content-end.column-gap-3.p-3.m-0"
+        const menu = create(
+          "menu.d-flex.justify-content-end.column-gap-3.p-3.m-0",
+          { parent: create(`footer`, { parent: this }) }
         );
-        const footer = create(`footer`, {}, menu);
-        for (const b of buttons) {
-          if (Array.isArray(b)) {
-            let [text, value, style] = b;
-            style = style ? `.btn-${style}` : "";
-            const button = create(
-              `button.btn${style}`,
-              {
-                onclick: () => close(value),
-              },
-              text
-            );
-            menu.append(button);
-          } else {
-            footer.append(b);
-          }
-        }
-
-        return footer;
+        /* Transform buttons */
+        menu.append(
+          ...buttons.map((b) => {
+            if (Array.isArray(b)) {
+              const [text, value, style] = b;
+              return Button({
+                text,
+                value,
+                style,
+                on_click: (event) =>
+                  event.target.closest(".offcanvas").close(value),
+              });
+            }
+            return b;
+          })
+        );
       }
     }
-  ).update_attrs({ tabindex: "-1" });
+  );
 
   // Handle dismissible
   const config = {};
@@ -116,8 +95,8 @@ export function offcanvas(
   // Show the offcanvas
   offcanvas.show();
 
-  // Enable closing by bubbling x-close custom event
-  element.addEventListener("x-close", (event) => {
+  // Enable closing by bubbling close custom event
+  element.addEventListener("close", (event) => {
     event.stopPropagation();
     element.close(event.detail);
   });
