@@ -44,7 +44,7 @@ export class Reactive {
       };
 
       clear = () => {
-        this.#registry[key] = {};
+        this.#registry = {};
       };
 
       has = (key) => {
@@ -80,7 +80,7 @@ export class Reactive {
 
       /* Removes all effects. Use with caution. Chainable with respect to reactive. */
       clear = () => {
-        this.reactive.#effect_registry = new Map();
+        reactive.#effect_registry = new Map();
         return reactive;
       };
 
@@ -164,13 +164,7 @@ export class Reactive {
     },
   });
 
-  /* Clears state data without publication. Use with caution. Chainable. */
-  clear = () => {
-    this.#previous = this.#current;
-    this.#current = {};
-    this.protected.clear();
-    return this;
-  };
+  
 
   /* Returns a shallowly frozen shallow copy of underlying state data as it was 
   before the most recent change. */
@@ -185,6 +179,20 @@ export class Reactive {
 
   get protected() {
     return this.#protected;
+  }
+
+  /* Clears state data without publication. Use with caution. Chainable. */
+  clear = () => {
+    this.#previous = this.#current;
+    this.#current = {};
+    this.protected.clear();
+    return this;
+  };
+
+  /* Clears state data without publication and removes all effects. Use with caution. Chainable */
+  reset = () => {
+    this.clear()
+    this.effects.clear()
   }
 
   /* Updates state from data (object). Chainable.

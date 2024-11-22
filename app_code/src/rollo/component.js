@@ -1,8 +1,8 @@
 import { Reactive } from "rollo/reactive";
-import { shadow } from "rollo/_factories/shadow";
-import { text } from "rollo/_factories/text";
-import { chain } from "rollo/_factories/chain";
-import { children } from "rollo/_factories/children";
+import { shadow } from "@/rollo/factories/shadow";
+import { text } from "@/rollo/factories/text";
+import { chain } from "@/rollo/factories/chain";
+import { children } from "@/rollo/factories/children";
 
 /* Uility for composing and registering non-autonomous web components on demand. */
 export const component = new (class {
@@ -97,7 +97,7 @@ export const component = new (class {
 
   /* Builds and returns web component class from native base and factories. */
   author = (native, ...factories) => {
-    let cls = this.#base(native);
+    let cls = this.base(native);
     const names = [cls.name];
     const chain = [native, cls];
     for (const factory of factories) {
@@ -127,12 +127,12 @@ export const component = new (class {
   };
 
   /* Returns base factory to be used for all web components. */
-  #base = (native) => {
+  base = (parent) => {
     function camel_to_kebab(camel) {
       return camel.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
     }
     /* Base factory that 'component' relies on */
-    const cls = class ReactiveBase extends native {
+    const cls = class ReactiveBase extends parent {
       #set_connected;
       constructor(...args) {
         super(...args);
@@ -419,7 +419,22 @@ export const component = new (class {
 
 export const create = component.create;
 
-component.factories.add(...shadow);
-component.factories.add(...text);
-component.factories.add(...chain);
-component.factories.add(...children);
+component.factories.add((tag) => {
+  const element = document.createElement(tag);
+  try {
+    element.attachShadow({ mode: "open" });
+    return true;
+  } catch {
+    return false;
+  }
+}, shadow);
+
+
+component.factories.add((tag) => {
+  const element = document.createElement(tag);
+  return "textContent" in element;
+} ,text);
+
+
+component.factories.add((tag) => true, chain);
+component.factories.add((tag) => true, children);

@@ -16,7 +16,6 @@ export function offcanvas(
 ) {
   // Create offcanvas element
   const element = create(
-    
     `div.offcanvas.d-flex.flex-column`,
     {
       parent: document.body,
