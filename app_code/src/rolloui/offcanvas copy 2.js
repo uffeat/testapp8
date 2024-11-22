@@ -14,23 +14,19 @@ export function offcanvas(
   },
   ...buttons
 ) {
+
+ 
+
   // Create offcanvas element
   const element = create(
-    
+    // Handle placement
     `div.offcanvas.d-flex.flex-column`,
-    {
-      parent: document.body,
-      attr_tabindex: "-1",
-      /* Handle placement */
-      [`.offcanvas-${placement}`]: function () {
-        {
-          if (!["bottom", "end", "start", "top"].includes(placement)) {
-            throw new Error(`Invalid placement: ${placement}`);
-          }
-          return true;
-        }
-      },
-    },
+    { parent: document.body, attr_tabindex: "-1", [`.offcanvas-${placement}`]: (()=> {
+      if (!["bottom", "end", "start", "top"].includes(placement)) {
+        throw new Error(`Invalid placement: ${placement}`);
+      }
+      return true
+    })() },
     create(
       `header.offcanvas-header`,
       {},
@@ -49,28 +45,27 @@ export function offcanvas(
       `main.offcanvas-body.flex-grow-1`,
       {},
       /* Handle content */
-      typeof content === "string" ? create("p", {}, content) : content
+      typeof content === "string" ? create("p", {}, content) : content,
     ),
     /* Handle footer/buttons */
     buttons.length === 0
-      ? undefined
-      : create(
-          "footer.d-flex.justify-content-end.column-gap-3.p-3.m-0",
-          {},
-          buttons.map((b) => {
-            if (Array.isArray(b)) {
-              const [text, value, style] = b;
-              return Button({
-                text,
-                value,
-                style,
-                on_click: (event) =>
-                  event.target.closest(".offcanvas").close(value),
-              });
-            }
-            return b;
-          })
-        )
+    ? undefined
+    : create("footer.d-flex.justify-content-end.column-gap-3.p-3.m-0", {}, 
+      buttons.map((b) => {
+        if (Array.isArray(b)) {
+          const [text, value, style] = b;
+          return Button({
+            text,
+            value,
+            style,
+            on_click: (event) =>
+              event.target.closest(".offcanvas").close(value),
+          });
+        }
+        return b;
+      })
+    )
+    
   );
 
   // Handle dismissible

@@ -91,7 +91,11 @@ export function modal(
     );
   }
 
-  element.append(...hooks);
+  for (const hook of hooks) {
+    hook.call(element)
+  }
+
+ 
 
   // Handle dismissible
   const config = {};

@@ -14,36 +14,28 @@ export function offcanvas(
   },
   ...buttons
 ) {
+  // Check placement
+  if (!["bottom", "end", "start", "top"].includes(placement)) {
+    throw new Error(`Invalid placement: ${placement}`);
+  }
+
   // Create offcanvas element
   const element = create(
-    
-    `div.offcanvas.d-flex.flex-column`,
-    {
-      parent: document.body,
-      attr_tabindex: "-1",
-      /* Handle placement */
-      [`.offcanvas-${placement}`]: function () {
-        {
-          if (!["bottom", "end", "start", "top"].includes(placement)) {
-            throw new Error(`Invalid placement: ${placement}`);
-          }
-          return true;
-        }
-      },
-    },
+    // Handle placement
+    `div.offcanvas.offcanvas-${placement}.d-flex.flex-column`,
+    { id: "offcanvas", parent: document.body, attr_tabindex: "-1" },
     create(
       `header.offcanvas-header`,
       {},
       // Handle title
       typeof title === "string" ? create("h1.fs-2.text", {}, title) : title,
       /* Add close button, if dismissible */
-      dismissible
-        ? create(`button.btn-close`, {
-            type: "button",
-            attr_dataBsDismiss: "offcanvas",
-            attr_ariaLabel: "Close",
-          })
-        : undefined
+      dismissible ? create(`button.btn-close`, {
+        type: "button",
+        attr_dataBsDismiss: "offcanvas",
+        attr_ariaLabel: "Close",
+      }) : undefined
+      
     ),
     create(
       `main.offcanvas-body.flex-grow-1`,
@@ -51,13 +43,13 @@ export function offcanvas(
       /* Handle content */
       typeof content === "string" ? create("p", {}, content) : content
     ),
-    /* Handle footer/buttons */
-    buttons.length === 0
-      ? undefined
-      : create(
-          "footer.d-flex.justify-content-end.column-gap-3.p-3.m-0",
-          {},
-          buttons.map((b) => {
+    function () {
+      if (buttons.length > 0) {
+        create(
+          "menu.d-flex.justify-content-end.column-gap-3.p-3.m-0",
+          { parent: create(`footer`, { parent: this }) }
+        ).append(
+          ...buttons.map((b) => {
             if (Array.isArray(b)) {
               const [text, value, style] = b;
               return Button({
@@ -70,7 +62,9 @@ export function offcanvas(
             }
             return b;
           })
-        )
+        );
+      }
+    }
   );
 
   // Handle dismissible

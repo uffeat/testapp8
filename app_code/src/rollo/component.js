@@ -4,7 +4,6 @@ import { text } from "rollo/_factories/text";
 import { chain } from "rollo/_factories/chain";
 import { children } from "rollo/_factories/children";
 
-
 /* Uility for composing and registering non-autonomous web components on demand. */
 export const component = new (class {
   get registry() {
@@ -59,9 +58,25 @@ export const component = new (class {
       /* NOTE Condition avoids adding empty class attr */
       element.classList.add(...css_classes);
     }
-    
+
     element.update(updates);
-    element.append(...children);
+
+    for (const child of children) {
+      if (typeof child === "function") {
+        const result = child.call(element);
+        if (result === undefined) {
+          continue;
+        }
+        if (Array.isArray(result)) {
+          element.append(...result);
+        } else {
+          element.append(result);
+        }
+        continue;
+      }
+      element.append(child);
+    }
+
     return element;
   };
 
@@ -173,6 +188,10 @@ export const component = new (class {
           return getComputedStyle(target).getPropertyValue(`--${key}`).trim();
         },
         set(target, key, value) {
+          if (typeof value === "function") {
+            value = value.call(target);
+          }
+          if (value === undefined) return true;
           if (value) {
             target.style.setProperty(`--${key}`, value);
           } else {
@@ -203,6 +222,9 @@ export const component = new (class {
           return value;
         },
         set(target, key, value) {
+          if (typeof value === "function") {
+            value = value.call(target);
+          }
           if (value === undefined) return true;
           key = camel_to_kebab(key);
           if ([false, null].includes(value)) {
@@ -233,6 +255,10 @@ export const component = new (class {
           return target.classList.contains(css_class);
         },
         set(target, css_class, value) {
+          if (typeof value === "function") {
+            value = value.call(target);
+          }
+          if (value === undefined) return true;
           if (value) {
             target.classList.add(css_class);
           } else {
@@ -266,12 +292,14 @@ export const component = new (class {
       }
 
       set parent(parent) {
-        if (parent) {
-          if (this.parentElement !== parent) {
-            parent.append(this);
-          }
-        } else {
+        if (typeof parent === "function") {
+          parent = parent.call(this);
+        }
+        if (parent === undefined) return;
+        if (parent === null) {
           this.remove();
+        } else if (this.parentElement !== parent) {
+          parent.append(this);
         }
       }
 
@@ -281,22 +309,17 @@ export const component = new (class {
       }
       #reactive = Reactive.create(null, { owner: this });
 
-      /* Appends children and handles hooks. Chainable. */
+      /* Appends children. Chainable.
+      NOTE Overloads native 'append', so that:
+      - undefined values are ignored.
+      - arrays of children can be passed in without spread syntax. */
       append = (...children) => {
         for (const child of children) {
           if (child === undefined) {
             continue;
           }
-          if (typeof child === "function") {
-            const result = child.call(this);
-            if (result === undefined) {
-              continue;
-            }
-            if (Array.isArray(result)) {
-              super.append(...result);
-            } else {
-              super.append(result);
-            }
+          if (Array.isArray(child)) {
+            child.forEach((c) => this.append(c));
             continue;
           }
           super.append(child);
@@ -332,13 +355,19 @@ export const component = new (class {
       update = (updates) => {
         const $ = "$";
         const ATTR = "attr_";
+        const CSS_CLASS = ".";
+        const CSS_VAR = "__";
         const ON = "on_";
 
         /* Props */
         Object.entries(updates)
           .filter(
             ([key, value]) =>
-              !key.startsWith($) && !key.startsWith(ATTR) && !key.startsWith(ON)
+              !key.startsWith($) &&
+              !key.startsWith(ATTR) &&
+              !key.startsWith(ON) &&
+              !key.startsWith(CSS_CLASS) &&
+              !key.startsWith(CSS_VAR)
           )
           .forEach(([key, value]) => {
             if (key.startsWith("_")) {
@@ -359,6 +388,16 @@ export const component = new (class {
             ([key, value]) => (this.attribute[key.slice(ATTR.length)] = value)
           );
 
+        /* CSS classes */
+        Object.entries(updates)
+          .filter(([key, value]) => key.startsWith(CSS_CLASS))
+          .forEach(([key, value]) => (this.css[key.slice(CSS_CLASS.length)] = value));
+
+        /* CSS vars */
+        Object.entries(updates)
+          .filter(([key, value]) => key.startsWith(CSS_VAR))
+          .forEach(([key, value]) => (this.__[key.slice(CSS_VAR.length)] = value));
+
         /* Handlers */
         Object.entries(updates)
           .filter(([key, value]) => key.startsWith(ON))
@@ -378,10 +417,9 @@ export const component = new (class {
   };
 })();
 
-export const create = component.create
+export const create = component.create;
 
-
-component.factories.add(...shadow)
-component.factories.add(...text)
-component.factories.add(...chain)
-component.factories.add(...children)
+component.factories.add(...shadow);
+component.factories.add(...text);
+component.factories.add(...chain);
+component.factories.add(...children);

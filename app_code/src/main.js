@@ -11,6 +11,7 @@ const result = await offcanvas(
   {
     title: "Hello world!",
     content: "The offcanvas function is awesome.",
+    placement: 'top'
   },
   ["OK", true, "success"],
   ["Cancel", false, "danger"]
