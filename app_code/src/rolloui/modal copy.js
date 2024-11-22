@@ -17,6 +17,11 @@ function onclick(event) {
 let imported_buttons = []
 
 
+function ModalComponent() {
+  
+}
+
+
 
 
 

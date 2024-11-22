@@ -4,7 +4,7 @@ import { text } from "@/rollo/factories/text";
 import { chain } from "@/rollo/factories/chain";
 import { children } from "@/rollo/factories/children";
 
-/* Uility for authoring and creating web components. */
+/* Uility for authoring and creating web components and component functions. */
 export const component = new (class {
   get registry() {
     return this.#registry;
@@ -15,12 +15,16 @@ export const component = new (class {
     add = (tag, cls) => {
       if (tag.includes("-")) {
         customElements.define(tag, cls);
-        console.info(`Registered autonomous web component with tag '${tag}'.`)
+        console.info(
+          `Registered autonomous web component with tag '${tag}'.`
+        );
       } else {
         customElements.define(`native-${tag}`, cls, {
           extends: tag,
         });
-        console.info(`Registered non-autonomous web component extended from '${tag}'.`)
+        console.info(
+          `Registered non-autonomous web component extended from '${tag}'.`
+        );
       }
       this.#registry[tag] = cls;
       return cls;
@@ -88,7 +92,6 @@ export const component = new (class {
       css_classes = arg_parts;
     }
     const element = new (this.get(tag))(updates, ...children);
-
     /* Add css classes */
     if (css_classes && css_classes.length > 0) {
       /* NOTE Condition avoids adding empty class attr */
@@ -119,7 +122,7 @@ export const component = new (class {
     if (cls) {
       return cls;
     }
-    if (tag.includes("-")) {
+    if (tag.includes("-") || tag !== tag.toLowerCase()) {
       throw new Error(`No component registered with tag: ${tag}`);
     }
     /* Create and register non-autonomous web component */
@@ -328,6 +331,14 @@ export const component = new (class {
             continue;
           }
           super.append(child);
+        }
+        return this;
+      };
+
+      /* Removes all children. Chainable. */
+      clear = () => {
+        while (this.firstChild) {
+          this.firstChild.remove();
         }
         return this;
       };

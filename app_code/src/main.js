@@ -3,9 +3,9 @@ import "./main.css";
 import { component, create } from "rollo/component";
 
 const Component = component.author('x-stuff', HTMLElement)
-
-
 console.log(Component)
+
+
 
 
 

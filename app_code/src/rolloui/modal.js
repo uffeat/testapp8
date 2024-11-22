@@ -18,7 +18,7 @@ let imported_buttons = []
 
 
 function ModalComponent() {
-  
+
 }
 
 
