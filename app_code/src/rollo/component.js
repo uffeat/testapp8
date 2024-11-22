@@ -4,7 +4,7 @@ import { text } from "@/rollo/factories/text";
 import { chain } from "@/rollo/factories/chain";
 import { children } from "@/rollo/factories/children";
 
-/* Uility for composing and registering non-autonomous web components on demand. */
+/* Uility for authoring and creating web components. */
 export const component = new (class {
   get registry() {
     return this.#registry;
@@ -13,9 +13,15 @@ export const component = new (class {
     #registry = {};
     /*  */
     add = (tag, cls) => {
-      customElements.define(`native-${tag}`, cls, {
-        extends: tag,
-      });
+      if (tag.includes("-")) {
+        customElements.define(tag, cls);
+        console.info(`Registered autonomous web component with tag '${tag}'.`)
+      } else {
+        customElements.define(`native-${tag}`, cls, {
+          extends: tag,
+        });
+        console.info(`Registered non-autonomous web component extended from '${tag}'.`)
+      }
       this.#registry[tag] = cls;
       return cls;
     };
@@ -31,18 +37,47 @@ export const component = new (class {
   #factories = new (class Factories {
     #registry = [];
     /* Registers conditional web component class factory */
-    add = (condition, factory) => {
-      this.#registry.push([condition, factory]);
+    add = (factory, condition) => {
+      this.#registry.push([factory, condition]);
     };
     /* Returns factories relevant for a given tag */
     get = (tag) => {
       return this.#registry
-        .filter(([condition, factory]) => condition(tag))
-        .map(([condition, factory]) => factory);
+        .filter(([factory, condition]) => !condition || condition(tag))
+        .map(([factory, condition]) => factory);
     };
   })();
 
-  /* Returns instance of non-autonomous web component  */
+  /* Builds, registers and returns web component from native base and factories. */
+  author = (tag, native, ...factories) => {
+    let cls = this.#base(native);
+    const names = [cls.name];
+    const chain = [native, cls];
+    for (const factory of factories) {
+      cls = factory(cls);
+      if (names.includes(cls.name)) {
+        console.warn(
+          `Factory class names should be unique for better traceability. Got duplicate: ${cls.name}`
+        );
+      }
+      names.push(cls.name);
+      chain.push(cls);
+    }
+    /* Create __chain__ as instance prop that returns a frozen array of prototypes in mro.
+    NOTE __chain__ represents the prototype chain as created here. 
+    If the chain is subsequently tinkred with, use the 'chain' prop provided by the chain factory. */
+    const __chain__ = Object.freeze(chain.reverse());
+    Object.defineProperty(cls.prototype, "__chain__", {
+      configurable: true,
+      enumerable: false,
+      get: function () {
+        return __chain__;
+      },
+    });
+    return this.registry.add(tag, cls);
+  };
+
+  /* Returns instance of web component  */
   create = (arg = null, updates = {}, ...children) => {
     let tag = "div";
     let css_classes;
@@ -53,14 +88,13 @@ export const component = new (class {
       css_classes = arg_parts;
     }
     const element = new (this.get(tag))(updates, ...children);
+
     /* Add css classes */
     if (css_classes && css_classes.length > 0) {
       /* NOTE Condition avoids adding empty class attr */
       element.classList.add(...css_classes);
     }
-
     element.update(updates);
-
     for (const child of children) {
       if (typeof child === "function") {
         const result = child.call(element);
@@ -76,58 +110,29 @@ export const component = new (class {
       }
       element.append(child);
     }
-
     return element;
   };
 
-  /* Returns non-autonomous web component class. */
+  /* Returns non-autonomous web component class defined on-demand. */
   get = (tag) => {
     let cls = this.registry.get(tag);
     if (cls) {
       return cls;
     }
+    if (tag.includes("-")) {
+      throw new Error(`No component registered with tag: ${tag}`);
+    }
+    /* Create and register non-autonomous web component */
     const native = document.createElement(tag).constructor;
     if (native === HTMLUnknownElement) {
       throw new Error(`Invalid tag: ${tag}`);
     }
     const factories = this.factories.get(tag);
-    cls = this.author(native, ...factories);
-    return this.registry.add(tag, cls);
+    return this.author(tag, native, ...factories);
   };
 
-  /* Builds and returns web component class from native base and factories. */
-  author = (native, ...factories) => {
-    let cls = this.base(native);
-    const names = [cls.name];
-    const chain = [native, cls];
-    for (const factory of factories) {
-      cls = factory(cls);
-      if (names.includes(cls.name)) {
-        console.warn(
-          `Factory class names should be unique for better traceability. Got duplicate: ${cls.name}`
-        );
-      }
-      names.push(cls.name);
-      chain.push(cls);
-    }
-
-    /* Create __chain__ as instance prop that returns a frozen array of prototypes in mro.
-    NOTE __chain__ represents the prototype chain as created here. 
-    If the chain is subsequently tinkred with, use the 'chain' prop provided by the chain factory. */
-    const __chain__ = Object.freeze(chain.reverse());
-    Object.defineProperty(cls.prototype, "__chain__", {
-      configurable: true,
-      enumerable: false,
-      get: function () {
-        return __chain__;
-      },
-    });
-
-    return cls;
-  };
-
-  /* Returns base factory to be used for all web components. */
-  base = (parent) => {
+  /* Base factory for all web components. */
+  #base = (parent) => {
     function camel_to_kebab(camel) {
       return camel.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
     }
@@ -391,12 +396,16 @@ export const component = new (class {
         /* CSS classes */
         Object.entries(updates)
           .filter(([key, value]) => key.startsWith(CSS_CLASS))
-          .forEach(([key, value]) => (this.css[key.slice(CSS_CLASS.length)] = value));
+          .forEach(
+            ([key, value]) => (this.css[key.slice(CSS_CLASS.length)] = value)
+          );
 
         /* CSS vars */
         Object.entries(updates)
           .filter(([key, value]) => key.startsWith(CSS_VAR))
-          .forEach(([key, value]) => (this.__[key.slice(CSS_VAR.length)] = value));
+          .forEach(
+            ([key, value]) => (this.__[key.slice(CSS_VAR.length)] = value)
+          );
 
         /* Handlers */
         Object.entries(updates)
@@ -419,7 +428,7 @@ export const component = new (class {
 
 export const create = component.create;
 
-component.factories.add((tag) => {
+component.factories.add(shadow, (tag) => {
   const element = document.createElement(tag);
   try {
     element.attachShadow({ mode: "open" });
@@ -427,14 +436,11 @@ component.factories.add((tag) => {
   } catch {
     return false;
   }
-}, shadow);
+});
 
-
-component.factories.add((tag) => {
+component.factories.add(text, (tag) => {
   const element = document.createElement(tag);
   return "textContent" in element;
-} ,text);
-
-
-component.factories.add((tag) => true, chain);
-component.factories.add((tag) => true, children);
+});
+component.factories.add(chain);
+component.factories.add(children);

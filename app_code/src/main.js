@@ -2,9 +2,8 @@ import "./bootstrap.scss";
 import "./main.css";
 import { component, create } from "rollo/component";
 
-//const Component = component.author(HTMLElement)
+const Component = component.author('x-stuff', HTMLElement)
 
-const Component = component.base(HTMLElement)
 
 console.log(Component)
 
