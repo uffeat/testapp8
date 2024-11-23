@@ -25,13 +25,10 @@ export function FileInput(
   const error_feedback = ErrorFeedback({}, file_control);
   const select_trigger = SelectTrigger({}, file_control);
   const clear_trigger = ClearTrigger({}, file_control);
-  const selection_display = SelectionDisplay(
-    {
-      floating,
-      placeholder,
-    },
-    file_control
-  );
+  const selection_display = SelectionDisplay({}, file_control, {
+    floating,
+    placeholder,
+  });
 
   const input_group = InputGroup(
     {},
@@ -39,33 +36,7 @@ export function FileInput(
     floating ? Floating({ label }, selection_display) : selection_display,
     clear_trigger
   );
-
-  const set_value = file_control.reactive.protected.add("value");
-  const set_error = file_control.reactive.protected.add("error");
-
-  /* Add handler to update value state from selected file(s) */
-  file_control.on.change = (event) => {
-    if (file_control.multiple) {
-      set_value(file_control.files.length > 0 ? [...file_control.files] : null);
-    } else {
-      set_value(file_control.files.length > 0 ? file_control.files[0] : null);
-    }
-  };
-
-  /* Add effect to update error state from value state */
-  file_control.effects.add((data) => {
-    if (file_control.required) {
-      set_error(!file_control.$.value ? "Required" : null);
-    }
-  }, "value");
-
-  /* Add handler to reset file input value state */
-  clear_trigger.on.click = (event) => {
-    event.preventDefault();
-    set_value(null);
-  };
-
-  const self = create(
+  return create(
     "section",
     updates,
     label && !floating ? Label({ text: label }, file_control) : undefined,
@@ -74,8 +45,6 @@ export function FileInput(
     file_control,
     ...children
   );
-
-  return self;
 }
 
 function ClearTrigger(updates = {}, file_input, ...children) {
@@ -85,8 +54,12 @@ function ClearTrigger(updates = {}, file_input, ...children) {
     CancelIcon({ size: 24 }),
     ...children
   );
-
-  return self;
+  /* Add handler to reset file input value state */
+  self.on.click = (event) => {
+    event.preventDefault();
+    file_input.$.value = null;
+  };
+  return self
 }
 
 function FileControl(
@@ -109,6 +82,29 @@ function FileControl(
     },
     ...children
   );
+
+  const set_value = self.reactive.protected.add("value");
+  const set_error = self.reactive.protected.add("error");
+
+  /* Add handler to update value state from selected file(s) */
+  self.on.change = (event) => {
+    if (self.multiple) {
+      //self.$.value = this.files.length > 0 ? [...self.files] : null;
+      set_value(self.files.length > 0 ? [...self.files] : null)
+    } else {
+      //self.$.value = self.files.length > 0 ? self.files[0] : null;
+      set_value(self.files.length > 0 ? self.files[0] : null)
+    }
+  };
+
+  /* Add effect to update error state from value state */
+  self.effects.add((data) => {
+    if (self.required) {
+      //self.$.error = !self.$.value ? "Required" : null;
+      set_error(!self.$.value ? "Required" : null)
+    }
+  }, "value");
+
 
   /* Add mixin to provide external API */
   mixin(

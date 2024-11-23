@@ -1,8 +1,6 @@
 import { base } from "rolloui/form/input/base";
 import { mixin } from "rollo/utils/mixin";
 
-// TODO label and float
-
 /* Returns text-family input element. Use for password- and text-type inputs */
 export function TextInput(
   {

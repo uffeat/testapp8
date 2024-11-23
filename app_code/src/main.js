@@ -2,56 +2,27 @@ import "./bootstrap.scss";
 import "./main.css";
 import { create } from "rollo/component";
 
+// TODO email and number
+
 create("", { id: "root", parent: document.body });
 
 await (async () => {
   const { create } = await import("rollo/component");
-  const { ErrorFeedback } = await import("rolloui/form/ErrorFeedback");
-  const { TextInput } = await import("rolloui/form/input/TextInput");
-  const { Label } = await import("rolloui/form/Label");
-  const { Floating } = await import("rolloui/form/Floating");
+  const { FileInput } = await import("rolloui/form/input/FileInput");
 
   const form = create(
     "form.d-flex.flex-column.row-gap-3.p-3",
     { parent: root, noValidate: true },
-    create(
-      "SECTION",
-      {},
-      Label({ for_name: "my_name" }, "My name"),
-      TextInput({
-        name: "my_name",
-        required: true,
-        min: 3,
-        validations: [
-          function () {
-            if (this.value !== "uffe") {
-              return "Not uffe";
-            }
-          },
-        ],
-      }),
-      ErrorFeedback({ for_name: "my_name" })
-    ),
-    Floating(
-      { label: "Foo" },
-      TextInput({ name: "foo", required: true }),
-      ErrorFeedback({ for_name: "foo" })
-    ),
-    create(
-      "DIV.input-group",
-      {},
-      create("SPAN.input-group-text", {}, "@"),
-      Floating({ label: "Bar" }, TextInput({ name: "bar", required: true })),
-      ErrorFeedback({ for_name: "bar" })
-    )
+    FileInput({ label: "Foo", name: "foo", required: false }),
+    FileInput({ label: "Bar", name: "bar", multiple: true, required: true }),
+    FileInput({
+      label: "Stuff",
+      name: "stuff",
+      floating: true,
+      multiple: true,
+      required: true,
+    })
   );
-
-  const my_name = form.get('input[name="my_name"]')[0];
-  ////my_name.value = "rufus";
-
-  my_name.effects.add((data) => {
-    ////console.log('Value state is:', my_name.value);
-  }, "value");
 })();
 
 if (import.meta.env.DEV) {

@@ -2,7 +2,7 @@
 
 await (async () => {
   const { create } = await import("rollo/component");
-  const { CheckInput } = await import("./rolloui/form/input/CheckInput");
+  const { CheckInput } = await import("rolloui/form/input/CheckInput");
 
   const form = create(
     "form.d-flex.flex-column.row-gap-3.p-3",

@@ -7,9 +7,7 @@ export function Floating({ label, ...updates }, form_control, ...children) {
     throw new Error(`No label provided.`);
   }
 
-  if (!form_control.name) {
-    throw new Error(`No named form control provided.`);
-  }
+  
   form_control.placeholder = label;
   const label_component = Label({}, label);
   if (!form_control.id) {

@@ -211,7 +211,10 @@ export const component = new (class {
             if (key && key.startsWith($)) {
               updates[key.slice($.length)] = current;
             } else {
-              this.attribute[`state-${key}`] = current;
+              if (current === null || ['boolean', 'number', 'string'].includes(typeof current)) {
+                this.attribute[`state-${key}`] = current;
+              }
+              
             }
           }
           this.update(updates);
@@ -446,6 +449,7 @@ export const component = new (class {
         Object.entries(updates)
           .filter(
             ([key, value]) =>
+              value !== undefined &&
               !key.startsWith($) &&
               !key.startsWith(ATTR) &&
               !key.startsWith(ON) &&
@@ -453,7 +457,7 @@ export const component = new (class {
               !key.startsWith(CSS_VAR)
           )
           .forEach(([key, value]) => {
-            if (key.startsWith("_")) {
+           if (key.startsWith("_")) {
               this[key] = value;
             } else if (key in this) {
               this[key] = value;
