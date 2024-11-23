@@ -1,30 +1,10 @@
 import { Modal } from "bootstrap";
 import { create } from "rollo/component";
-import { Button } from "rolloui/Button";
 import { CloseButton } from "rolloui/CloseButton";
-
+import { Text } from "rolloui/Text";
 
 const ID = "modal";
 const PARENT = document.body;
-
-
-function onclick(event) {
-  const element = this.closest(".modal");
-  element._value = this.value;
-  element.$.close = true;
-}
-
-let imported_buttons = []
-
-
-function ModalComponent() {
-
-}
-
-
-
-
-
 
 /* Shows a modal and returns a promise that resolves to the modal's value, 
 when the modal hides. */
@@ -45,77 +25,63 @@ export function modal(
 ) {
   // Create modal element
   const element = create(
-    // Handle fade animation
     `div.modal`,
     {
       id: ID,
       parent: PARENT,
       attr_tabindex: "-1",
-      ".fade": fade,
-      _value: undefined,
+      css_fade: fade,
     },
     create(
-      `div.modal-dialog${size ? ".modal-" + size : ""}`,
+      `DIV.modal-dialog${size ? ".modal-" + size : ""}`,
       {
-        ".modal-dialog-scrollable": scrollable,
-        ".modal-dialog-centered": centered,
+        "css_modal-dialog-scrollable": scrollable,
+        "css_modal-dialog-centered": centered,
       },
       create(
         `${tag}.modal-content`,
         {
-          parent: create(
-            `div.modal-dialog${size ? ".modal-" + size : ""}`,
-            {
-              ".modal-dialog-scrollable": scrollable,
-              ".modal-dialog-centered": centered,
-            }
-          ),
+          parent: create(`div.modal-dialog${size ? ".modal-" + size : ""}`, {
+            "css_modal-dialog-scrollable": scrollable,
+            "css_modal-dialog-centered": centered,
+          }),
         },
         !dismissible && !title
           ? undefined
           : create(
-              `div.modal-header${style ? ".text-bg-" + style : ""}`,
+              `HEADER.modal-header${style ? ".text-bg-" + style : ""}`,
               {},
-              typeof title === "string"
-                ? create(`h1.modal-title.fs-3.text`, {}, title)
-                : title,
+              Text(`H1.modal-title.fs-3.text`, {}, title),
               dismissible
                 ? CloseButton({ style, attr_dataBsDismiss: "modal" })
                 : undefined
             ),
-        create(
-          `div.modal-body`,
-          {},
-          typeof content === "string" ? create("p", {}, content) : content
-        ),
+        create(`MAIN.modal-body`, {}, Text(`P`, {}, content)),
         buttons.length === 0
           ? undefined
           : create(
-              `div.modal-footer`,
+              `FOOTER.modal-footer`,
               {},
-              buttons.map((b) => {
-                if (Array.isArray(b)) {
-                  const [text, value, style] = b;
-                  return Button({
+              buttons.map((button) => {
+                if (Array.isArray(button)) {
+                  const [text, value, style] = button;
+                  return create("button.btn", {
                     text,
-                    value,
-                    style,
-                    on_click: onclick,
+                    _value: value,
+                    [`css_btn-${style}`]: style,
+                  }).add_event_handler("click", function onclick(event) {
+                    const element = document.getElementById(ID);
+                    element._value = this._value;
+                    element.$.close = true;
                   });
-                } else {
-                  imported_buttons.push(b)
                 }
-
-                b.addEventListener('click', onclick)
-                return b;
+                return button;
               })
             )
       )
     ),
     ...hooks
   );
-
-  
 
   // Handle dismissible
   const config = {};
@@ -142,8 +108,6 @@ export function modal(
     element.reactive.reset();
     element.removeEventListener("close", onclose);
     delete element._value;
-    imported_buttons.forEach((button) => button.removeEventListener('click', button))
-    imported_buttons = []
   });
 
   /* Add effect to close modal */

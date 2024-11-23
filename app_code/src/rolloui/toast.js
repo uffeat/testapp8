@@ -1,5 +1,7 @@
 import { Toast } from "bootstrap";
 import { create } from "rollo/component";
+import { CloseButton } from "rolloui/CloseButton";
+import { Text } from "rolloui/Text";
 
 /* Prepare container suitable for stacking toasts */
 document.body.classList.add("position-relative");
@@ -20,37 +22,30 @@ export function toast(
   } = {}
 ) {
   // Create toast element
-  const element = create(`div.toast`, {
-    parent: toast_container,
-    role: "alert",
-  });
-  element.attribute.ariaLive = "assertive";
-  element.attribute.ariaAtomic = "true";
-
-  const header = create(
-    `div.toast-header.d-flex.align-items-center`,
-    {},
-    typeof title === "string" ? create("h1.fs-6", {}, title) : title
+  const element = create(
+    `div.toast`,
+    {
+      parent: toast_container,
+      role: "alert",
+      attr_ariaLive: "assertive",
+      attr_ariaAtomic: "true",
+    },
+    create(
+      `div.toast-header.d-flex.align-items-center${
+        style ? ".text-bg-" + style : ""
+      }`,
+      {},
+      Text(`h1.fs-6`, { "css_my-0": true }, title),
+      dismissible
+        ? CloseButton({
+            style,
+            attr_dataBsDismiss: "toast",
+            "css_ms-auto": true,
+          })
+        : undefined
+    ),
+    create(`div.toast-body`, {}, Text(`p`, {}, content))
   );
-  header.classList.add(`text-bg-${style}`);
-
-  console.log(header)
-
-  const body = create(`div.toast-body`, {}, content);
-  // Handle dismiss button
-  if (dismissible) {
-    const dismiss_button = create(`button.btn-close.ms-auto`, {
-      type: "button",
-    });
-    dismiss_button.attribute.dataBsDismiss = "toast"
-    dismiss_button.attribute.ariaLabel = "Close"
-    if (["danger", "primary", "secondary", "success"].includes(style)) {
-      dismiss_button.classList.add(`btn-close-white`);
-    }
-    header.append(dismiss_button);
-  }
-
-  element.append(header, body);
 
   const toast = new Toast(element, { animation, autohide, delay });
   // Ensure clean-up

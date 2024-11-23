@@ -1,13 +1,13 @@
-/* Use with small source classes. */
-export function mixin(source, ...args) {
+export const mixin = (target, source, ...args) => {
   for (const [name, descriptor] of Object.entries(
-    Object.getOwnPropertyDescriptors(source.prototype)
+    Object.getOwnPropertyDescriptors(source)
   )) {
+    if (name === "constructor") continue;
     if (name === "__init__") {
-      descriptor.value.call(this, ...args);
+      descriptor.value.call(target, ...args);
       continue;
     }
-    Object.defineProperty(this, name, descriptor);
+    Object.defineProperty(target, name, descriptor);
   }
-  return this;
+  return target
 }

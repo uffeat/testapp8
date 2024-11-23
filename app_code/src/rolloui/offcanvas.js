@@ -1,75 +1,70 @@
 import { Offcanvas } from "bootstrap";
 import { create } from "rollo/component";
-import { Button } from "rolloui/Button";
+import { CloseButton } from "rolloui/CloseButton";
+import { Text } from "rolloui/Text";
+
+const ID = "modal";
+const PARENT = document.body;
 
 /* Shows an offcanvas and returns a promise that resolves to the offcanvas' value, 
 when the offcanvas hides */
 export function offcanvas(
   {
-    bodyScroll = false,
-    content = null,
+    content,
     dismissible = true,
+    hooks = [],
     placement = "bottom",
+    scroll = false,
+    style,
     title = null,
   },
   ...buttons
 ) {
-  // Create offcanvas element
+  if (!["bottom", "end", "start", "top"].includes(placement)) {
+    throw new Error(`Invalid placement: ${placement}`);
+  }
   const element = create(
     `div.offcanvas.d-flex.flex-column`,
     {
-      parent: document.body,
+      id: ID,
+      parent: PARENT,
       attr_tabindex: "-1",
-      /* Handle placement */
-      [`.offcanvas-${placement}`]: function () {
-        {
-          if (!["bottom", "end", "start", "top"].includes(placement)) {
-            throw new Error(`Invalid placement: ${placement}`);
-          }
-          return true;
-        }
-      },
+      [`css_offcanvas-${placement}`]: true,
     },
-    create(
-      `header.offcanvas-header`,
-      {},
-      // Handle title
-      typeof title === "string" ? create("h1.fs-2.text", {}, title) : title,
-      /* Add close button, if dismissible */
-      dismissible
-        ? create(`button.btn-close`, {
-            type: "button",
-            attr_dataBsDismiss: "offcanvas",
-            attr_ariaLabel: "Close",
-          })
-        : undefined
-    ),
-    create(
-      `main.offcanvas-body.flex-grow-1`,
-      {},
-      /* Handle content */
-      typeof content === "string" ? create("p", {}, content) : content
-    ),
-    /* Handle footer/buttons */
+    !dismissible && !title
+      ? undefined
+      : create(
+          `DIV.offcanvas-header${style ? ".text-bg-" + style : ""}`,
+          {},
+          Text(`H1.fs-2.text`, {}, title),
+          dismissible
+            ? CloseButton({ style, attr_dataBsDismiss: "offcanvas" })
+            : undefined
+        ),
+
+    create(`MAIN.offcanvas-body.flex-grow-1`, {}, Text(`P`, {}, content)),
     buttons.length === 0
       ? undefined
       : create(
-          "footer.d-flex.justify-content-end.column-gap-3.p-3.m-0",
+          "FOOTER.d-flex.justify-content-end.column-gap-3.p-3.m-0",
           {},
-          buttons.map((b) => {
-            if (Array.isArray(b)) {
-              const [text, value, style] = b;
-              return Button({
+          buttons.map((button) => {
+            if (Array.isArray(button)) {
+              const [text, value, style] = button;
+              return create("button.btn", {
                 text,
-                value,
-                style,
-                on_click: (event) =>
-                  event.target.closest(".offcanvas").close(value),
+                _value: value,
+                [`css_btn-${style}`]: style,
+              }).add_event_handler("click", function onclick(event) {
+                const element = document.getElementById(ID);
+                element._value = this._value;
+                element.$.close = true;
               });
             }
-            return b;
+            return button;
           })
-        )
+        ),
+    ...hooks
   );
 
   // Handle dismissible
@@ -79,16 +74,35 @@ export function offcanvas(
     config.keyboard = false;
   }
   // Handle scroll
-  config.scroll = bodyScroll;
+  config.scroll = scroll;
 
   // Create Bootstrap Offcanvas
   const offcanvas = new Offcanvas(element, config);
 
-  // Ensure clean-up
-  element.addEventListener("hidden.bs.offcanvas", () => {
-    offcanvas.dispose();
+  // Enable closing by bubbling 'close' custom event
+  const onclose = (event) => {
+    event.stopPropagation();
+    element._value = event.detail;
+    element.$.close = true;
+  };
+  element.addEventListener("close", onclose);
+
+  // Clean up
+  element.addEventListener("hidden.bs.modal", () => {
+    modal.dispose();
     element.remove();
+    element.reactive.reset();
+    element.removeEventListener("close", onclose);
+    delete element._value;
   });
+
+  /* Add effect to close offcanvas */
+  element.effects.add(
+    (data) => {
+      offcanvas.hide();
+    },
+    { close: true }
+  );
 
   /* Give offcanvas element a 'close' method that can set value 
   (on offcanvas element) and close the offcanvas */
@@ -100,25 +114,21 @@ export function offcanvas(
   // Show the offcanvas
   offcanvas.show();
 
-  // Enable closing by bubbling close custom event
-  element.addEventListener("close", (event) => {
-    event.stopPropagation();
-    element.close(event.detail);
-  });
-
   /* Return a promise that resolves to the offcanvas element's value, 
   when the offcanvas hides */
   return new Promise((resolve, reject) => {
     element.addEventListener("hide.bs.offcanvas", (event) => {
-      resolve(element.value);
+      resolve(element._value);
     });
   });
 }
 
-/* Helper function for closing offcanvas with a given value. */
+/* Helper function for closing offcanvas with a given value. 
+Use when conditional closing and/or flexibility re modal value is needed. */
 export function close(value) {
   const element = document.getElementById(ID);
-  element.close(value);
+  element._value = value;
+  element.$.close = true;
 }
 
 /*

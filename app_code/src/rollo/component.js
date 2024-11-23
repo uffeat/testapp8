@@ -4,7 +4,17 @@ import { text } from "@/rollo/factories/text";
 import { chain } from "@/rollo/factories/chain";
 import { children } from "@/rollo/factories/children";
 
-/* Uility for authoring and creating web components and component functions. */
+const $ = "$";
+const ATTR = "attr_";
+const CSS_CLASS = "css_";
+const CSS_VAR = "__";
+const ON = "on_";
+
+function camel_to_kebab(camel) {
+  return camel.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
+}
+
+/* Utility for authoring web components and instantiating elements. */
 export const component = new (class {
   get registry() {
     return this.#registry;
@@ -15,9 +25,7 @@ export const component = new (class {
     add = (tag, cls) => {
       if (tag.includes("-")) {
         customElements.define(tag, cls);
-        console.info(
-          `Registered autonomous web component with tag '${tag}'.`
-        );
+        console.info(`Registered autonomous web component with tag '${tag}'.`);
       } else {
         customElements.define(`native-${tag}`, cls, {
           extends: tag,
@@ -91,14 +99,60 @@ export const component = new (class {
       tag = arg_parts.shift();
       css_classes = arg_parts;
     }
-    const element = new (this.get(tag))(updates, ...children);
+    const web_component = tag !== tag.toUpperCase();
+
+    let element;
+    if (web_component) {
+      element = new (this.get(tag))(updates, ...children);
+    } else {
+      element = document.createElement(tag);
+    }
+
     /* Add css classes */
     if (css_classes && css_classes.length > 0) {
       /* NOTE Condition avoids adding empty class attr */
       element.classList.add(...css_classes);
     }
-    element.update(updates);
+
+    if (web_component) {
+      element.update(updates);
+    } else {
+      for (const [key, value] of Object.entries(updates)) {
+        if (key.startsWith("_")) {
+          element[key] = value;
+        } else if (key in element) {
+          element[key] = value;
+        } else if (key in element.style) {
+          element.style[key] = value;
+        } else if (key.startsWith(ATTR)) {
+          if (value === undefined) continue;
+          const attr_key = camel_to_kebab(key.slice(ATTR.length));
+          if (value === true) {
+            element.setAttribute(attr_key, "");
+          } else {
+            element.setAttribute(attr_key, value);
+          }
+        } else if (key.startsWith(CSS_CLASS)) {
+          if (value === undefined) continue;
+          const css_class = camel_to_kebab(key.slice(CSS_CLASS.length));
+
+          element.classList[value ? "add" : "remove"](css_class);
+        } else if (key === "text") {
+          element.textContent = value;
+        } else if (key === "parent") {
+          if (value && element.parentElement !== value) {
+            value.append(element);
+          }
+        } else {
+          throw new Error(`Invalid key: ${key}`);
+        }
+      }
+    }
+
     for (const child of children) {
+      if (child === undefined) {
+        continue;
+      }
       if (typeof child === "function") {
         const result = child.call(element);
         if (result === undefined) {
@@ -111,6 +165,11 @@ export const component = new (class {
         }
         continue;
       }
+      if (Array.isArray(child)) {
+        element.append(...child);
+        continue;
+      }
+
       element.append(child);
     }
     return element;
@@ -136,9 +195,6 @@ export const component = new (class {
 
   /* Base factory for all web components. */
   #base = (parent) => {
-    function camel_to_kebab(camel) {
-      return camel.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
-    }
     /* Base factory that 'component' relies on */
     const cls = class ReactiveBase extends parent {
       #set_connected;
@@ -147,6 +203,19 @@ export const component = new (class {
         /* Identify as web component. */
         this.setAttribute("web-component", "");
         this.#set_connected = this.reactive.protected.add("connected");
+        /* Show state as data attribute */
+
+        this.effects.add((data) => {
+          const updates = {};
+          for (const [key, { current, previous }] of Object.entries(data)) {
+            if (key && key.startsWith($)) {
+              updates[key.slice($.length)] = current;
+            } else {
+              this.attribute[`dataState-${key}`] = current;
+            }
+          }
+          this.update(updates);
+        });
       }
 
       connectedCallback() {
@@ -267,11 +336,9 @@ export const component = new (class {
             value = value.call(target);
           }
           if (value === undefined) return true;
-          if (value) {
-            target.classList.add(css_class);
-          } else {
-            target.classList.remove(css_class);
-          }
+
+          target.classList[value ? "add" : "remove"](css_class);
+
           return true;
         },
       });
@@ -316,6 +383,14 @@ export const component = new (class {
         return this.#reactive;
       }
       #reactive = Reactive.create(null, { owner: this });
+
+      add_event_handler = (type, handler, return_handler = false) => {
+        this.addEventListener(type, handler);
+        if (return_handler) {
+          return handler;
+        }
+        return this;
+      };
 
       /* Appends children. Chainable.
       NOTE Overloads native 'append', so that:
@@ -369,12 +444,6 @@ export const component = new (class {
 
       /* Updates props, attributes and state. Chainable. */
       update = (updates) => {
-        const $ = "$";
-        const ATTR = "attr_";
-        const CSS_CLASS = ".";
-        const CSS_VAR = "__";
-        const ON = "on_";
-
         /* Props */
         Object.entries(updates)
           .filter(
@@ -455,3 +524,9 @@ component.factories.add(text, (tag) => {
 });
 component.factories.add(chain);
 component.factories.add(children);
+
+/*
+EXAMPLES
+
+const Component = component.author('x-stuff', HTMLElement)
+*/
