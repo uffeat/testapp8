@@ -74,5 +74,5 @@ export function connect(error_feedback, form_control) {
     ["visited", "value"]
   );
 
-  return [error_feedback, form_control];
+  
 }
