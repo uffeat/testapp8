@@ -1,11 +1,10 @@
-import 'rolloui/form/form.css'
+import "rolloui/form/form.css";
 import { base } from "rolloui/form/input/base";
-
 
 // TODO label and float
 
- /* Add mixin to provide external access to value state 
- class {
+/* Add mixin to provide external access to value state */
+ class ValueMixin {
   get value() {
     return this.$.value;
   }
@@ -19,7 +18,7 @@ import { base } from "rolloui/form/input/base";
     this.$.value = this.__super__.value = value;
   }
 }
-  */
+  
 
 /* Returns text-family input element. Use for password- and text-type inputs */
 export function TextInput(
@@ -64,20 +63,19 @@ export function TextInput(
   }
   return base(
     {
-      
       name,
       required,
       type,
       validations,
       $value: value,
+      attr_constructorName: 'TextInput',
       ...props,
     },
-    function (fragment) {
+    function () {
       /* Add handler that updates value state */
       this.on.input = (event) => {
-        this.value = this.__super__.value;
-      }
-      
+        this.$.value = this.__super__.value;
+      };
     },
     ...children
   );

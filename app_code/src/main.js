@@ -2,24 +2,25 @@ import "./bootstrap.scss";
 import "./main.css";
 import { create } from "rollo/component";
 
+create('', { id: "root", parent: document.body });
 
-create(null, { id: "root", parent: document.body });
 
 await (async () => {
-  const { close, modal } = await import("rolloui/modal");
-  const result = await modal(
-    {
-      title: "Hello world!",
-      centered: true,
-      content: "The modal function is awesome.",
-      size: "lg",
-      style: "primary",
-    },
-    ["OK", true, "success"],
-    ["Cancel", false, "danger"]
+  const { create } = await import("rollo/component");
+  const { TextInput } = await import("rolloui/form/input/TextInput");
+
+  const form = create(
+    "form.d-flex.flex-column.row-gap-3.p-3",
+    { parent: root, noValidate: true },
+    TextInput({name: "my_name", required: true }),
+    
+    //CheckInput({ label: "Agree", name: "agree", required: false, value: true })
   );
-  console.log("Modal result:", result);
+  
 })();
+
+
+
 
 
 

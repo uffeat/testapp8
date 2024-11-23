@@ -18,7 +18,7 @@ export function modal(
     scrollable,
     size,
     style,
-    tag = "div",
+    tag = "DIV",
     title,
   },
   ...buttons

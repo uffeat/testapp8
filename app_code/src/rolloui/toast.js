@@ -6,7 +6,7 @@ import { Text } from "rolloui/Text";
 /* Prepare container suitable for stacking toasts */
 document.body.classList.add("position-relative");
 const toast_container = create(
-  `div.position-fixed.bottom-0.end-0.p-3.d-flex.flex-column.row-gap-3.z-3`,
+  `DIV.position-fixed.bottom-0.end-0.p-3.d-flex.flex-column.row-gap-3.z-3`,
   { parent: document.body }
 );
 
@@ -23,7 +23,7 @@ export function toast(
 ) {
   // Create toast element
   const element = create(
-    `div.toast`,
+    `DIV.toast`,
     {
       parent: toast_container,
       role: "alert",
@@ -31,11 +31,11 @@ export function toast(
       attr_ariaAtomic: "true",
     },
     create(
-      `div.toast-header.d-flex.align-items-center${
+      `DIV.toast-header.d-flex.align-items-center${
         style ? ".text-bg-" + style : ""
       }`,
       {},
-      Text(`h1.fs-6`, { "css_my-0": true }, title),
+      Text(`H1.fs-6`, { "css_my-0": true }, title),
       dismissible
         ? CloseButton({
             style,
@@ -44,7 +44,7 @@ export function toast(
           })
         : undefined
     ),
-    create(`div.toast-body`, {}, Text(`p`, {}, content))
+    create(`DIV.toast-body`, {}, Text(`P`, {}, content))
   );
 
   const toast = new Toast(element, { animation, autohide, delay });

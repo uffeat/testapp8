@@ -91,7 +91,7 @@ export const component = new (class {
 
   /* Returns instance of web component  */
   create = (arg = null, updates = {}, ...children) => {
-    let tag = "div";
+    let tag = "DIV";
     let css_classes;
     if (arg) {
       /* Extract tag and css_classes from arg */
@@ -118,6 +118,7 @@ export const component = new (class {
       element.update(updates);
     } else {
       for (const [key, value] of Object.entries(updates)) {
+        if (value === undefined) continue;
         if (key.startsWith("_")) {
           element[key] = value;
         } else if (key in element) {
@@ -125,7 +126,6 @@ export const component = new (class {
         } else if (key in element.style) {
           element.style[key] = value;
         } else if (key.startsWith(ATTR)) {
-          if (value === undefined) continue;
           const attr_key = camel_to_kebab(key.slice(ATTR.length));
           if (value === true) {
             element.setAttribute(attr_key, "");
@@ -133,10 +133,10 @@ export const component = new (class {
             element.setAttribute(attr_key, value);
           }
         } else if (key.startsWith(CSS_CLASS)) {
-          if (value === undefined) continue;
           const css_class = camel_to_kebab(key.slice(CSS_CLASS.length));
-
           element.classList[value ? "add" : "remove"](css_class);
+        } else if (key.startsWith(ON)) {
+          element.addEventListener(key.slice(ON.length), value);
         } else if (key === "text") {
           element.textContent = value;
         } else if (key === "parent") {
@@ -211,7 +211,7 @@ export const component = new (class {
             if (key && key.startsWith($)) {
               updates[key.slice($.length)] = current;
             } else {
-              this.attribute[`dataState-${key}`] = current;
+              this.attribute[`state-${key}`] = current;
             }
           }
           this.update(updates);
@@ -336,9 +336,7 @@ export const component = new (class {
             value = value.call(target);
           }
           if (value === undefined) return true;
-
           target.classList[value ? "add" : "remove"](css_class);
-
           return true;
         },
       });
