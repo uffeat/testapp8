@@ -6,19 +6,15 @@ create("", { id: "root", parent: document.body });
 
 await (async () => {
   const { create } = await import("rollo/component");
-  const { ErrorFeedback } = await import("rolloui/form/ErrorFeedback");
   const { TextInput } = await import("rolloui/form/input/TextInput");
-  const { Label } = await import("rolloui/form/Label");
-  const { Floating } = await import("rolloui/form/Floating");
+  const { ErrorFeedback, connect } = await import("rolloui/form/ErrorFeedback");
 
   const form = create(
-    "form.d-flex.flex-column.row-gap-3.p-3",
+    "form.d-flex.flex-column.row-gap-0.p-3",
     { parent: root, noValidate: true },
-    create(
-      "SECTION",
-      {},
-      Label({ for_name: "my_name" }, "My name"),
-      TextInput({
+    function () {
+
+      const text_input = TextInput({
         name: "my_name",
         required: true,
         min: 3,
@@ -29,21 +25,14 @@ await (async () => {
             }
           },
         ],
-      }),
-      ErrorFeedback({ for_name: "my_name" })
-    ),
-    Floating(
-      { label: "Foo" },
-      TextInput({ name: "foo", required: true }),
-      ErrorFeedback({ for_name: "foo" })
-    ),
-    create(
-      "DIV.input-group",
-      {},
-      create("SPAN.input-group-text", {}, "@"),
-      Floating({ label: "Bar" }, TextInput({ name: "bar", required: true })),
-      ErrorFeedback({ for_name: "bar" })
-    )
+      })
+
+      const error_feedback = ErrorFeedback()
+      return connect(text_input, error_feedback)
+
+    },
+    
+    
   );
 
   const my_name = form.get('input[name="my_name"]')[0];
@@ -51,7 +40,9 @@ await (async () => {
 
   my_name.effects.add((data) => {
     ////console.log('Value state is:', my_name.value);
-  }, "value");
+  }, 'value')
+
+ 
 })();
 
 if (import.meta.env.DEV) {

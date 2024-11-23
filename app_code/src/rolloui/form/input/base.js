@@ -1,5 +1,6 @@
 import "rolloui/form/form.css";
 import { create } from "rollo/component";
+import { mixin } from "rollo/utils/mixin";
 
 export function base(
   {
@@ -8,7 +9,7 @@ export function base(
     type = "text",
     validations,
     $value = null,
-    ...props
+    ...updates
   } = {},
   ...children
 ) {
@@ -44,7 +45,7 @@ export function base(
       $error: null,
       $visited: false,
       $value,
-      ...props,
+      ...updates,
     },
     ...children
   );
@@ -96,6 +97,20 @@ export function base(
     self.removeEventListener('blur', onblur)
   };
   self.on.blur = onblur;
+
+  /* Add mixin to provide external API */
+  mixin(
+    self,
+    class {
+      get error() {
+        return this.$.error;
+      }
+      get visited() {
+        return this.$.visited;
+      }
+      
+    }.prototype
+  );
 
   return self;
 }

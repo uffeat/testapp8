@@ -1,4 +1,3 @@
-import "rolloui/form/form.css";
 import { base } from "rolloui/form/input/base";
 import { mixin } from "rollo/utils/mixin";
 
@@ -14,7 +13,7 @@ export function TextInput(
     type = "text",
     validations,
     value = null,
-    ...props
+    ...updates
   } = {},
   ...children
 ) {
@@ -53,7 +52,7 @@ export function TextInput(
       validations,
       $value: value,
       attr_constructorName: "TextInput",
-      ...props,
+      ...updates,
     },
 
     ...children
@@ -67,22 +66,25 @@ export function TextInput(
     set_value(trimmed ? trimmed : null);
   };
 
-  /* Add mixin to provide external value API */
-  mixin(self, (class {
-    get value() {
-      return this.$.value;
-    }
-    set value(value) {
-      if (value !== null) {
-        value = value.trim();
-        if (value === "") {
-          value = null;
-        }
+  /* Add mixin to provide external API */
+  mixin(
+    self,
+    class {
+      get value() {
+        return this.$.value;
       }
-      set_value(value);
-      this.__super__.value = value;
-    }
-  }).prototype);
+      set value(value) {
+        if (value !== null) {
+          value = value.trim();
+          if (value === "") {
+            value = null;
+          }
+        }
+        set_value(value);
+        this.__super__.value = value;
+      }
+    }.prototype
+  );
 
   return self;
 }

@@ -1,60 +1,68 @@
 import { create } from "rollo/component";
 
-/* Returns invalid-feedback element "state-bound" to an input element. */
-export function ErrorFeedback(input_element, props = {}, ...children) {
+/* Returns error-feedback component for use with form control. */
+export function ErrorFeedback({ for_name, ...updates } = {}, ...children) {
   const self = create(
     "div.invalid-feedback",
     {
       attr_ariaLive: "assertive",
-      $invisible: null,
-      $soft: null,
-      ...props,
-    },
-    function () {
-      /* Handle soft */
-      this.effects.add((data) => {
-        this.css["text-secondary"] = this.$.soft
-      }, "soft");
-      /* Handle invisible */
-      this.effects.add((data) => {
-        this.css.invisible = this.$.invisible
-      }, "invisible");
+      attr_constructorName: "ErrorFeedback",
+      ...updates,
     },
     ...children
   );
-  /* Add effects to feedback text */
-  input_element.effects.add(
+
+  if (for_name) {
+    self.effects.add(
+      (data) => {
+        const form = self.closest("form");
+        if (!form) {
+          throw new Error(`ErrorFeedback components should reside in a form.`);
+        }
+        const form_control = form.querySelector(`*[name="${for_name}"]`);
+        if (!form_control) {
+          throw new Error(
+            `Could not find form control with name: ${for_name}.`
+          );
+        }
+        connect(self, form_control);
+        self.attribute.forName = for_name;
+      },
+      { connected: true }
+    );
+  }
+
+  return self;
+}
+
+/* Connects error feedback to form control state. */
+export function connect(error_feedback, form_control) {
+  if (error_feedback._form_control) {
+    throw new Error(
+      `ErrorFeedback component already connected to form control.`
+    );
+  }
+  error_feedback._form_control = form_control;
+
+  /* Add effects to control feedback text */
+  form_control.effects.add(
     (data) => {
-      self.text = input_element.$.error;
+      error_feedback.text = form_control.error;
     },
     ["error"]
   );
-  /* Add effects to control feedback styling */
-  input_element.effects.add(
+
+  /* Add effect to control feedback style */
+  form_control.effects.add(
     (data) => {
-      self.$.soft =
-        input_element.required &&
-        !input_element.$.value &&
-        !input_element.$.visited;
+      error_feedback.css.invisible =
+        !form_control.visited &&
+        !(form_control.required && !form_control.value);
+      error_feedback.css["text-secondary"] =
+        !form_control.visited && form_control.required && !form_control.value;
     },
-    ["error", "visited"]
-  );
-  /* Add effects to control feedback visibility */
-  input_element.effects.add(
-    (data) => {
-      /* TODO Make the conditional logic more concise (not critial - it works as-is) */
-      if (input_element.required && !input_element.$.value) {
-        self.$.invisible = false;
-        return;
-      }
-      if (!input_element.$.visited || !input_element.$.error) {
-        self.$.invisible = false;
-        return;
-      }
-      self.$.invisible = true;
-    },
-    ["error", "visited", "value"]
+    ["visited", "value"]
   );
 
-  return self;
+  return [error_feedback, form_control];
 }
