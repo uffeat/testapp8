@@ -12,7 +12,8 @@ await (async () => {
   const form = create(
     "form.d-flex.flex-column.row-gap-3.p-3",
     { parent: root, noValidate: true },
-    TextInput({name: "my_name", required: true }),
+    TextInput({name: "my_name", required: true, min: 3 }),
+    //TextInput({name: "my_name", min: 3, required: true }),
     
     //CheckInput({ label: "Agree", name: "agree", required: false, value: true })
   );

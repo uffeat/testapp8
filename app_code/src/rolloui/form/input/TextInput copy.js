@@ -1,8 +1,24 @@
 import "rolloui/form/form.css";
 import { base } from "rolloui/form/input/base";
-import { mixin } from "rollo/utils/mixin";
 
 // TODO label and float
+
+/* Add mixin to provide external access to value state */
+ class ValueMixin {
+  get value() {
+    return this.$.value;
+  }
+  set value(value) {
+    if (value !== null) {
+      value = value.trim();
+      if (value === "") {
+        value = null;
+      }
+    }
+    this.$.value = this.__super__.value = value;
+  }
+}
+  
 
 /* Returns text-family input element. Use for password- and text-type inputs */
 export function TextInput(
@@ -45,44 +61,26 @@ export function TextInput(
       validations = [validate_min];
     }
   }
-  const self = base(
+  return base(
     {
       name,
       required,
       type,
       validations,
       $value: value,
-      attr_constructorName: "TextInput",
+      attr_constructorName: 'TextInput',
       ...props,
     },
+    function () {
+      /* Add handler that updates value state */
+      this.on.input = (event) => {
+        const trimmed = this.__super__.value.trim()
+        this.$.value = trimmed ? trimmed : null
 
+        
+        
+      };
+    },
     ...children
   );
-
-  const set_value = self.reactive.protected.add("value");
-
-  /* Add handler that updates value state */
-  self.on.input = (event) => {
-    const trimmed = self.__super__.value.trim();
-    set_value(trimmed ? trimmed : null);
-  };
-
-  /* Add mixin to provide external value API */
-  mixin(self, (class {
-    get value() {
-      return this.$.value;
-    }
-    set value(value) {
-      if (value !== null) {
-        value = value.trim();
-        if (value === "") {
-          value = null;
-        }
-      }
-      set_value(value);
-      this.__super__.value = value;
-    }
-  }).prototype);
-
-  return self;
 }

@@ -1,4 +1,4 @@
-import 'rolloui/form/form.css'
+import "rolloui/form/form.css";
 import { create } from "rollo/component";
 
 export function base(
@@ -13,7 +13,7 @@ export function base(
   ...children
 ) {
   /* NOTE validations not passed on as prop item */
-  return create(
+  const self = create(
     (() => {
       if (
         [
@@ -46,51 +46,56 @@ export function base(
       $value,
       ...props,
     },
-
-    function () {
-      /* Add effect to control "is-invalid" css class */
-      this.effects.add(
-        (data) => {
-          this.css["is-invalid"] =
-            this.$.error && this.$.visited;
-        },
-        ["error", "visited"]
-      );
-      /* Add effect to control custom validity */
-      this.effects.add((data) => {
-        this.setCustomValidity(this.$.error ? " " : "");
-      }, "error");
-      /* Add effect to set error state from required validation */
-      this.effects.add((data) => {
-        if (this.required) {
-          this.$.error = this.$.value === null ? "Required" : null;
-        }
-      }, "value");
-      /* Add effect to set error state from validations */
-      if (validations) {
-        this.effects.add((data) => {
-          /* Abort, if required and value state is null */
-          if (this.required && this.$.value === null) return;
-          /* Run validations in order. 
-          error state is successively set to validation result.
-          Validation aborts, once a truthy validation result is received. */
-          for (const validation of validations) {
-            const message = validation.call(this, this.$.value);
-            this.$.error = message;
-            if (message) {
-              break;
-            }
-          }
-        }, "value");
-      }
-      /* Add handler to set visited state */
-      const onblur = (event) => {
-        this.$.visited = true;
-        //this.removeEventListener('blur', onblur)
-      }
-      this.on.blur = onblur
-      
-    },
     ...children
   );
+
+  const set_visited = self.reactive.protected.add("visited");
+  const set_error = self.reactive.protected.add("error");
+
+  /* Add effect to control "is-invalid" css class */
+  self.effects.add(
+    (data) => {
+      self.css["is-invalid"] = self.$.error && self.$.visited;
+    },
+    ["error", "visited"]
+  );
+
+  /* Add effect to control custom validity */
+  self.effects.add((data) => {
+    self.setCustomValidity(self.$.error ? " " : "");
+  }, "error");
+
+  /* Add effect to set error state from required validation */
+  self.effects.add((data) => {
+    if (self.required) {
+      set_error(self.$.value === null ? "Required" : null)
+    }
+  }, "value");
+
+  /* Add effect to set error state from validations */
+  if (validations) {
+    self.effects.add((data) => {
+      /* Abort, if required and value state is null */
+      if (self.required && self.$.value === null) return;
+      /* Run validations in order. 
+      error state is successively set to validation result.
+      Validation aborts, once a truthy validation result is received. */
+      for (const validation of validations) {
+        const message = validation.call(self, self.$.value);
+        set_error(message)
+        if (message) {
+          break;
+        }
+      }
+    }, "value");
+  }
+
+  /* Add handler to set visited state */
+  const onblur = (event) => {
+    set_visited(true)
+    self.removeEventListener('blur', onblur)
+  };
+  self.on.blur = onblur;
+
+  return self;
 }
