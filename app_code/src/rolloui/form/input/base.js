@@ -1,6 +1,6 @@
 import "rolloui/form/form.css";
 import { create } from "rollo/component";
-import { mixin } from "rollo/utils/mixin";
+
 
 export function base(
   {
