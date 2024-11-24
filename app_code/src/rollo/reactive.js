@@ -152,19 +152,17 @@ export class Reactive {
   }
   #$ = new Proxy(this, {
     get: (target, key) => {
-      return this.#current[key];
+      return target.#current[key];
     },
     set: (target, key, value) => {
       /* Handle function value */
       if (typeof value === "function") {
-        value = value.call(this);
+        value = value.call(target);
       }
-      this.update({ [key]: value });
+      target.update({ [key]: value });
       return true;
     },
   });
-
-  
 
   /* Returns a shallowly frozen shallow copy of underlying state data as it was 
   before the most recent change. */
@@ -191,9 +189,9 @@ export class Reactive {
 
   /* Clears state data without publication and removes all effects. Use with caution. Chainable */
   reset = () => {
-    this.clear()
-    this.effects.clear()
-  }
+    this.clear();
+    this.effects.clear();
+  };
 
   /* Updates state from data (object). Chainable.
   Convenient for updating multiple state items in one go.
@@ -201,6 +199,7 @@ export class Reactive {
   update = (data) => {
     /* Detect changes */
     const changes = this.#get_changes(data);
+
     /* Abort if no change */
     if (!changes) return;
     /* Update data stores */
@@ -259,7 +258,7 @@ export class Reactive {
 
   /* Updates stores with 'data'. Chainable. */
   #update_stores = (data) => {
-    this.#previous = this.#current;
+    this.#previous = { ...this.#current };
     for (const [key, value] of Object.entries(data)) {
       this.#current[key] = value;
     }

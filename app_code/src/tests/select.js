@@ -1,25 +1,4 @@
-import "./bootstrap.scss";
-import "./main.css";
-import { create } from "rollo/component";
-
-// TODO form
-// ... then dropdown and popover
-// ... then ProgressiveImage
-
-create("", { id: "root", parent: document.body });
-
-
-const button = create('button', {$foo: 'foo'})
-
-button.effects.add('foo', (data) => {
-  console.log(data.foo.previous)
-  console.log(data.foo.current)
-  console.log()
-}, 'foo')
-
-button.reactive.$.foo = 'bar'
-
-
+// select
 
 await (async () => {
   const { create } = await import("rollo/component");
@@ -100,15 +79,3 @@ await (async () => {
     )
   );
 })();
-
-
-
-if (import.meta.env.DEV) {
-  let path = "";
-  window.addEventListener("keydown", async (event) => {
-    if (event.code === "KeyT" && event.shiftKey) {
-      path = prompt("Path:", path);
-      await import(`./tests/${path}.js`);
-    }
-  });
-}

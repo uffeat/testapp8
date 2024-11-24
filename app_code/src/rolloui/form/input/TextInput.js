@@ -66,7 +66,7 @@ export function TextInput(
     const trimmed = self.__super__.value.trim();
     set_value(trimmed ? trimmed : null);
   };
-  /* Mixin for external API */
+  /* Create external API */
   mixin(
     self,
     class {

@@ -46,7 +46,6 @@ export function NumberInput(
   const set_value = self.reactive.protected.add("value");
   /* Handler: Update value state */
   self.on.input = (event) => {
-   
     self.__super__.value = self.__super__.value.trim();
     if (self.__super__.value === "") {
       set_value(null)
@@ -55,15 +54,13 @@ export function NumberInput(
       self.__super__.value = to_number_text(self.__super__.value);
       const number = Number(self.__super__.value.replaceAll(",", "."));
       if (typeof number === "number" && number === number) {
-       
         set_value(number)
       } else {
-       
         set_value(null)
       }
     }
   };
-  /* Mixin for external API */
+  /* Create external API */
   mixin(
     self,
     class {
@@ -71,7 +68,12 @@ export function NumberInput(
         return this.$.value;
       }
       set value(value) {
-        // TODO Check that value is a number
+        if (value !== null) {
+          const number = Number(value);
+          if (!(typeof number === "number" && number === number)) {
+            throw new Error(`'${value}' is not a number.`)
+          }
+        }
         set_value(value);
         this.__super__.value = this.$.value;
       }
@@ -81,11 +83,7 @@ export function NumberInput(
   return self;
 }
 
-/* Returns 'value' filtered to a string that can be converted to number.
-NOTE 
-'value' is a non-empty trimmed string other than '-'.
-Only the first '.' in 'value' is included in the filtered result
-*/
+/* Returns 'value' converted to a string that can be converted to number. */
 function to_number_text(value) {
   let decimal = false;
   return value
@@ -101,10 +99,3 @@ function to_number_text(value) {
     .join("");
 }
 
-function is_number(value) {
-  const number = Number(value);
-  if (typeof number === "number" && number === number) {
-    return true;
-  }
-  return false;
-}
