@@ -9,7 +9,7 @@ from bs4 import BeautifulSoup as bs
 timestamp = f"Auto-generated: {dt.datetime.now():%Y-%m-%d %H:%M:%S}"
 
 SOURCE = Path.cwd() / "build_code/src"
-TARGET = Path.cwd() / "source_code/app/src/built"
+TARGET = Path.cwd() / "app_code/src/built"
 
 
 def delete_directory(path: Path) -> None:

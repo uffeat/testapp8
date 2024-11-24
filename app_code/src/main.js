@@ -9,18 +9,6 @@ import { create } from "rollo/component";
 create("", { id: "root", parent: document.body });
 
 
-const button = create('button', {$foo: 'foo'})
-
-button.effects.add('foo', (data) => {
-  console.log(data.foo.previous)
-  console.log(data.foo.current)
-  console.log()
-}, 'foo')
-
-button.reactive.$.foo = 'bar'
-
-
-
 await (async () => {
   const { create } = await import("rollo/component");
   const { Select } = await import("rolloui/form/input/Select");
