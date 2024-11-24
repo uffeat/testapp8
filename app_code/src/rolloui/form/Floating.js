@@ -2,7 +2,7 @@ import { create } from "rollo/component";
 import { Label } from "rolloui/form/Label";
 import { create_id } from "rolloui/form/utils/create_id";
 
-export function Floating({ label, ...updates }, form_control, ...children) {
+export function Floating({ label, ...updates }, form_control, ...hooks) {
   if (!label) {
     throw new Error(`No label provided.`);
   }
@@ -20,7 +20,7 @@ export function Floating({ label, ...updates }, form_control, ...children) {
     { attr_constructorName: "Floating", ...updates },
     form_control,
     label_component,
-    ...children
+    ...hooks
   );
 
   return self;

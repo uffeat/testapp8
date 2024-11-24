@@ -11,7 +11,7 @@ export function base(
     $value = null,
     ...updates
   } = {},
-  ...children
+  ...hooks
 ) {
   /* NOTE validations not passed on as prop item */
   const self = create(
@@ -47,7 +47,7 @@ export function base(
       $value,
       ...updates,
     },
-    ...children
+    ...hooks
   );
 
   const set_visited = self.reactive.protected.add("visited");

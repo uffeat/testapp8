@@ -17,7 +17,7 @@ export function InvalidFeedback(updates = {}, ...hooks) {
       set form_control(form_control) {
         if (this._form_control) {
           throw new Error(
-            `InvalidFeedback component already connected to form control.`
+            `Component already connected to form control.`
           );
         }
 
@@ -60,7 +60,7 @@ export function InvalidFeedback(updates = {}, ...hooks) {
           const form = self.closest("form");
           if (!form) {
             throw new Error(
-              `InvalidFeedback components should reside in a form.`
+              `Component should reside in a form.`
             );
           }
           const form_control = form.querySelector(`*[name="${for_name}"]`);
@@ -90,10 +90,7 @@ export function InvalidFeedback(updates = {}, ...hooks) {
   );
 
   self.update(updates);
-
-  hooks.forEach((hook) => {
-    hook.call(this);
-  });
+  self.call(...hooks)
 
   return self;
 }

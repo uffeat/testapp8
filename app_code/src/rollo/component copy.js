@@ -90,7 +90,7 @@ export const component = new (class {
   };
 
   /* Returns instance of web component  */
-  create = (arg = null, updates = {}, ...hooks) => {
+  create = (arg = null, updates = {}, ...children) => {
     let tag = "DIV";
     let css_classes;
     if (arg) {
@@ -103,7 +103,7 @@ export const component = new (class {
 
     let element;
     if (web_component) {
-      element = new (this.get(tag))(updates, ...hooks);
+      element = new (this.get(tag))(updates, ...children);
     } else {
       element = document.createElement(tag);
     }
@@ -116,9 +116,7 @@ export const component = new (class {
 
     if (web_component) {
       element.update(updates);
-      element.call(...hooks)
     } else {
-      /* Apply updates */
       for (const [key, value] of Object.entries(updates)) {
         if (value === undefined) continue;
         if (key.startsWith("_")) {
@@ -149,31 +147,30 @@ export const component = new (class {
           throw new Error(`Invalid key: ${key}`);
         }
       }
-      /* Apply hooks */
-      for (const hook of hooks) {
-        if (hook === undefined) {
-          continue;
-        }
-        if (typeof hook === "function") {
-          const result = hook.call(element);
-          if (result === undefined) {
-            continue;
-          }
-          if (Array.isArray(result)) {
-            element.append(...result);
-          } else {
-            element.append(result);
-          }
-          continue;
-        }
-        if (Array.isArray(hook)) {
-          element.append(...hook);
-          continue;
-        }
-        element.append(hook);
-      }
     }
 
+    for (const child of children) {
+      if (child === undefined) {
+        continue;
+      }
+      if (typeof child === "function") {
+        const result = child.call(element);
+        if (result === undefined) {
+          continue;
+        }
+        if (Array.isArray(result)) {
+          element.append(...result);
+        } else {
+          element.append(result);
+        }
+        continue;
+      }
+      if (Array.isArray(child)) {
+        element.append(...child);
+        continue;
+      }
+      element.append(child);
+    }
     return element;
   };
 
@@ -213,12 +210,10 @@ export const component = new (class {
             if (key && key.startsWith($)) {
               updates[key.slice($.length)] = current;
             } else {
-              if (
-                current === null ||
-                ["boolean", "number", "string"].includes(typeof current)
-              ) {
+              if (current === null || ['boolean', 'number', 'string'].includes(typeof current)) {
                 this.attribute[`state-${key}`] = current;
               }
+              
             }
           }
           this.update(updates);
@@ -397,6 +392,24 @@ export const component = new (class {
         return this;
       };
 
+      /* Appends children. Chainable.
+      NOTE Overloads native 'append', so that:
+      - undefined values are ignored.
+      - arrays of children can be passed in without spread syntax. */
+      append = (...children) => {
+        for (const child of children) {
+          if (child === undefined) {
+            continue;
+          }
+          if (Array.isArray(child)) {
+            child.forEach((c) => this.append(c));
+            continue;
+          }
+          super.append(child);
+        }
+        return this;
+      };
+
       /* */
       call = (...hooks) => {
         for (const hook of hooks) {
@@ -421,8 +434,8 @@ export const component = new (class {
           }
           this.append(hook);
         }
-        return this;
-      };
+        return this
+      }
 
       /* Removes all children. Chainable. */
       clear = () => {
@@ -470,7 +483,7 @@ export const component = new (class {
               !key.startsWith(CSS_VAR)
           )
           .forEach(([key, value]) => {
-            if (key.startsWith("_")) {
+           if (key.startsWith("_")) {
               this[key] = value;
             } else if (key in this) {
               this[key] = value;

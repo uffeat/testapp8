@@ -13,7 +13,7 @@ export function TextInput(
     value = null,
     ...updates
   } = {},
-  ...children
+  ...hooks
 ) {
   if (!["email", "password", "text", "textarea"].includes(type)) {
     throw new Error(`Unsupported type: ${type}`);
@@ -52,8 +52,7 @@ export function TextInput(
       attr_constructorName: "TextInput",
       ...updates,
     },
-
-    ...children
+    ...hooks
   );
 
   const set_value = self.reactive.protected.add("value");
