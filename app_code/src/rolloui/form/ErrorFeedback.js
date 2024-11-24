@@ -2,25 +2,22 @@ import { create } from "rollo/component";
 
 /* Returns error-feedback component for use with form control. */
 export function ErrorFeedback({ for_name } = {}, form_control) {
-  const self = create(
-    "div.invalid-feedback",
-    {
-      attr_ariaLive: "assertive",
-      attr_constructorName: "ErrorFeedback",
-      
-    },
-   
-  );
+  const self = create("div.invalid-feedback", {
+    attr_ariaLive: "assertive",
+    attr_constructorName: "ErrorFeedback",
+  });
 
   if (form_control) {
-    connect(self, form_control)
+    connect(self, form_control);
   } else {
     if (for_name) {
       self.effects.add(
         (data) => {
           const form = self.closest("form");
           if (!form) {
-            throw new Error(`ErrorFeedback components should reside in a form.`);
+            throw new Error(
+              `ErrorFeedback components should reside in a form.`
+            );
           }
           const form_control = form.querySelector(`*[name="${for_name}"]`);
           if (!form_control) {
@@ -29,15 +26,11 @@ export function ErrorFeedback({ for_name } = {}, form_control) {
             );
           }
           connect(self, form_control);
-          
         },
         { connected: true }
       );
     }
-
   }
-
-  
 
   return self;
 }
@@ -57,7 +50,7 @@ export function connect(error_feedback, form_control) {
   /* Add effects to control feedback text */
   form_control.effects.add(
     (data) => {
-      error_feedback.text = form_control.error;
+      error_feedback.text = form_control.$.error;
     },
     ["error"]
   );
@@ -66,13 +59,11 @@ export function connect(error_feedback, form_control) {
   form_control.effects.add(
     (data) => {
       error_feedback.css.invisible =
-        !form_control.visited &&
-        !(form_control.required && !form_control.value);
+        !form_control.$.visited &&
+        !(form_control.required && !form_control.$.value);
       error_feedback.css["text-secondary"] =
-        !form_control.visited && form_control.required && !form_control.value;
+        !form_control.$.visited && form_control.required && !form_control.$.value;
     },
     ["visited", "value"]
   );
-
-  
 }

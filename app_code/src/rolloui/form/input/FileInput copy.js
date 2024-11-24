@@ -12,6 +12,7 @@ export function FileInput(
   {
     accept,
     floating = false,
+    id,
     label = null,
     multiple = false,
     name,
@@ -21,91 +22,77 @@ export function FileInput(
   } = {},
   ...children
 ) {
-  const file_control = FileControl({ accept, multiple, name, required });
-  const error_feedback = ErrorFeedback(file_control);
-  const select_trigger = SelectTrigger(file_control);
-  const clear_trigger = ClearTrigger(file_control);
-  const selection_display = SelectionDisplay(file_control, {
-    floating,
-    placeholder,
+  /* Prepare tree */
+  const file_input = create("input", {
+    accept,
+    display: "none",
+    id,
+    multiple,
+    name,
+    required,
+    type: "file",
+    $error: null,
+    $visited: false,
+    $value: null,
   });
-
+  const error_feedback = ErrorFeedback({}, file_input);
+  const select_trigger = SelectTrigger({}, file_input);
+  const clear_trigger = create(
+    "button.btn.btn-outline-secondary",
+    {},
+    CancelIcon({ size: 24 })
+  );
+  const selection_display = SelectionDisplay(
+    {
+      floating,
+      placeholder,
+    },
+    file_input
+  );
   const input_group = InputGroup(
     {},
     select_trigger,
     floating ? Floating({ label }, selection_display) : selection_display,
     clear_trigger
   );
-  return create(
+  /* Protect state */
+  const set_value = file_input.reactive.protected.add("value");
+  const set_error = file_input.reactive.protected.add("error");
+  /* Handler: selected file(s) -> value state */
+  file_input.on.change = (event) => {
+    if (file_input.multiple) {
+      set_value(file_input.files.length > 0 ? [...file_input.files] : null);
+    } else {
+      set_value(file_input.files.length > 0 ? file_input.files[0] : null);
+    }
+  };
+  /* Effect: value state -> error state */
+  file_input.effects.add((data) => {
+    if (file_input.required) {
+      set_error(!file_input.$.value ? "Required" : null);
+    }
+  }, "value");
+  /* Handler: Reset value state */
+  clear_trigger.on.click = (event) => {
+    event.preventDefault();
+    set_value(null);
+  };
+  /* Build tree */
+  const self = create(
     "section",
-    updates,
-    label && !floating ? Label(file_control, { text: label }) : undefined,
+    { attr_constructorName: "FileInput", ...updates },
+    label && !floating ? Label({ text: label }, file_input) : undefined,
     input_group,
     error_feedback,
-    file_control,
+    file_input,
     ...children
   );
-}
-
-function ClearTrigger(file_input, updates = {}, ...children) {
-  return create(
-    "button.btn.btn-outline-secondary",
-    updates,
-    CancelIcon({ size: 24 }),
-    function () {
-      /* Add handler to reset file input value state */
-      this.on.click = (event) => {
-        event.preventDefault();
-        file_input.$.value = null;
-      };
-    },
-    ...children
-  );
-}
-
-function FileControl(
-  { accept, multiple = false, name, required = false, ...updates } = {},
-  ...children
-) {
-  const self = create(
-    "input",
-    {
-      accept,
-      display: "none",
-      multiple,
-      name,
-      required,
-      type: "file",
-      $error: null,
-      $visited: false,
-      $value: null,
-      ...updates,
-    },
-    function () {
-      /* Add handler to update value state from selected file(s) */
-      this.on.change = (event) => {
-        if (this.multiple) {
-          this.$.value = this.files.length > 0 ? [...this.files] : null;
-        } else {
-          this.$.value = this.files.length > 0 ? this.files[0] : null;
-        }
-      };
-      /* Add effect to update error state from value state */
-      this.effects.add((data) => {
-        if (this.required) {
-          this.$.error = !this.$.value ? "Required" : null;
-        }
-      }, "value");
-    },
-    ...children
-  );
-
-  /* Add mixin to provide external API */
+  /* Provide external API */
   mixin(
-    self,
+    file_input,
     class {
       get value() {
-        return this.$.value;
+        return file_input.$.value;
       }
     }.prototype
   );
@@ -113,99 +100,84 @@ function FileControl(
   return self;
 }
 
-function Label(input_element, updates = {}, ...children) {
-  return create(
-    /* HACK Style as btn to avoid focus outline */
+function Label({ text }, input_element) {
+  const self = create(
     "label.form-label.btn.p-0.mb-1",
-    { attr_tabindex: "0", ...updates },
-    function () {
-      if (!input_element.id) {
-        input_element.id = create_id();
-      }
-      this.attribute.for = input_element.id;
-      /* Add handler to set data_visited state */
-      /* Blur happens, when file selector opens; therefore flag needed to determine,
-      if file selector has been opened previously . */
-      let visited;
-      const on_blur = (event) => {
-        if (visited) {
-          input_element.$.visited = true;
-          this.removeEventListener("blur", on_blur);
-        }
-        visited = true;
-      };
-      this.on.blur = on_blur;
-    },
-    ...children
+    { attr_tabindex: "0", text }
   );
+  if (!input_element.id) {
+    input_element.id = create_id();
+  }
+  self.attribute.for = input_element.id;
+
+  /* Handler to set visited state */
+  let visited;
+  /* Blur happens, when file selector opens; therefore flag needed to determine,
+  if file selector has been opened previously . */
+  const on_blur = (event) => {
+    if (visited) {
+      input_element.$.visited = true;
+      self.removeEventListener("blur", on_blur);
+    }
+    visited = true;
+  };
+  self.on.blur = on_blur;
+  return self;
 }
 
-function SelectionDisplay(
-  file_input,
-  { floating, placeholder, ...updates },
-  ...children
-) {
-  return create(
-    "input.form-control",
-    {
-      attr_ariaLive: "polite",
-      inert: true,
-      ...updates,
-    },
-    function () {
-      /* Add effect to update selection display */
-      file_input.effects.add((data) => {
-        if (file_input.multiple) {
-          if (file_input.$.value) {
-            if (file_input.$.value.length === 1) {
-              this.value = file_input.$.value[0].name;
-            } else {
-              this.value = `${file_input.$.value.length} files selected`;
-            }
-          } else {
-            this.value = floating ? null : placeholder;
-          }
+function SelectionDisplay({ floating, placeholder }, file_input) {
+  const self = create("input.form-control", {
+    attr_ariaLive: "polite",
+    inert: true,
+  });
+
+  /* Effect: value state -> selection display */
+  file_input.effects.add((data) => {
+    if (file_input.multiple) {
+      if (file_input.$.value) {
+        if (file_input.$.value.length === 1) {
+          self.value = file_input.$.value[0].name;
         } else {
-          const value = floating ? null : placeholder;
-          this.value = file_input.$.value ? file_input.$.value.name : value;
+          self.value = `${file_input.$.value.length} files selected`;
         }
-      }, "value");
-      /* Add effect to handle error styling */
-      file_input.effects.add(
-        (data) => {
-          this.css["is-invalid"] = file_input.$.error && file_input.$.visited;
-        },
-        ["error", "visited"]
-      );
+      } else {
+        self.value = floating ? null : placeholder;
+      }
+    } else {
+      const value = floating ? null : placeholder;
+      self.value = file_input.$.value ? file_input.$.value.name : value;
+    }
+  }, "value");
+  /* Effect: error & visited state -> feedback style */
+  file_input.effects.add(
+    (data) => {
+      self.css["is-invalid"] = file_input.$.error && file_input.$.visited;
     },
-    ...children
+    ["error", "visited"]
   );
+
+  return self;
 }
 
-function SelectTrigger(file_input, updates = {}, ...children) {
-  return create(
-    "button.btn.btn-outline-secondary",
-    updates,
-    SelectIcon(),
-    function (fragment) {
-      /* Add handler to open file selector */
-      this.on.click = (event) => {
-        event.preventDefault();
-        file_input.click();
-      };
-      /* Add handler to set data_visited state */
-      /* Blur happens, when file selector opens; therefore flag needed to determine,
-      if file selector has been opened previously . */
-      let visited;
-      const on_blur = (event) => {
-        if (visited) {
-          file_input.$.visited = true;
-          this.removeEventListener("blur", on_blur);
-        }
-        visited = true;
-      };
-      this.on.blur = on_blur;
-    },
-    ...children
-  );
+function SelectTrigger(_, file_input) {
+  const self = create("button.btn.btn-outline-secondary", {}, SelectIcon());
+  /* Add handler to open file selector */
+  self.on.click = (event) => {
+    event.preventDefault();
+    file_input.click();
+  };
+  /* Add handler to set data_visited state */
+  /* Blur happens, when file selector opens; therefore flag needed to determine,
+  if file selector has been opened previously . */
+  let visited;
+  const on_blur = (event) => {
+    if (visited) {
+      file_input.$.visited = true;
+      self.removeEventListener("blur", on_blur);
+    }
+    visited = true;
+  };
+  self.on.blur = on_blur;
+
+  return self;
 }

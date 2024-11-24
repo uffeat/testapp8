@@ -98,7 +98,19 @@ export function base(
   };
   self.on.blur = onblur;
 
-
+  /* Add mixin to provide external API */
+  mixin(
+    self,
+    class {
+      get error() {
+        return this.$.error;
+      }
+      get visited() {
+        return this.$.visited;
+      }
+      
+    }.prototype
+  );
 
   return self;
 }
