@@ -1,5 +1,6 @@
 // text_input
 
+
 await (async () => {
   const { create } = await import("rollo/component");
   const { Floating } = await import("rolloui/form/Floating");
@@ -43,10 +44,10 @@ await (async () => {
       {},
       create("SPAN.input-group-text", {}, "@"),
       Floating(
-        { label: "Bar" },
-        TextInput({ name: "bar", required: true, ["css_rounded-end"]: true })
+        { label: "My email" },
+        TextInput({ name: "my_email", type: 'email', required: true, ["css_rounded-end"]: true })
       ),
-      InvalidFeedback({for_name: 'bar'}),
+      InvalidFeedback({for_name: 'my_email'}),
       
     ),
   );

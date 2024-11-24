@@ -21,6 +21,7 @@ export function base(
           "datetime-local",
           "email",
           "file",
+          "number",
           "password",
           "text",
         ].includes(type)

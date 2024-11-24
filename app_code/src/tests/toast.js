@@ -1,4 +1,5 @@
 // toast
+
 await (async () => {
   const { toast } = await import("rolloui/toast");
   toast("Awesome", "Content");

@@ -8,8 +8,6 @@ import { Floating } from "rolloui/form/Floating";
 import { InvalidFeedback } from "rolloui/form/InvalidFeedback";
 import { Label } from "rolloui/form/Label";
 
-// TODO check where natives can be used
-
 export function FileInput(
   {
     accept,
