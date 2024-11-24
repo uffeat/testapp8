@@ -3,6 +3,7 @@ import "./main.css";
 import { create } from "rollo/component";
 
 // TODO email and number and select - and form
+// ... then dropdown and popover
 
 create("", { id: "root", parent: document.body });
 
