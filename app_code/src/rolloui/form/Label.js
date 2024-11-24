@@ -49,7 +49,7 @@ export function Label(updates = {}, ...hooks) {
           this.form_control = form_control;
         }, 0);
       }
-    }.prototype
+    }
   );
 
   self.update(updates);

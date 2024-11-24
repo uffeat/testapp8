@@ -1,12 +1,10 @@
-export const mixin = (target, source, ...args) => {
+/* Assigns members from prototype of source to target.
+Useful for adding props to a component instance/element. */
+export const mixin = (target, source) => {
   for (const [name, descriptor] of Object.entries(
-    Object.getOwnPropertyDescriptors(source)
+    Object.getOwnPropertyDescriptors(source.prototype)
   )) {
     if (name === "constructor") continue;
-    if (name === "__init__") {
-      descriptor.value.call(target, ...args);
-      continue;
-    }
     Object.defineProperty(target, name, descriptor);
   }
   return target

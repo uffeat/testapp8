@@ -2,26 +2,26 @@ import "./bootstrap.scss";
 import "./main.css";
 import { create } from "rollo/component";
 
-// TODO email and number
+// TODO email and number and select - and form
 
 create("", { id: "root", parent: document.body });
 
-
 await (async () => {
   const { create } = await import("rollo/component");
-  const { CheckInput } = await import("rolloui/form/input/CheckInput");
+  const { FileInput } = await import("rolloui/form/input/FileInput");
 
   const form = create(
     "form.d-flex.flex-column.row-gap-3.p-3",
     { parent: root, noValidate: true },
-    CheckInput({
-      label: "Accept",
-      name: "accept",
+    FileInput({ label: "Foo", name: "foo", required: true }),
+    FileInput({ label: "Bar", name: "bar", multiple: true, required: true }),
+    FileInput({
+      label: "Stuff",
+      name: "stuff",
+      floating: true,
+      multiple: true,
       required: true,
-      toggle: true,
-      value: true,
-    }),
-    CheckInput({ label: "Agree", name: "agree", required: false, value: true })
+    })
   );
 })();
 

@@ -85,7 +85,7 @@ export function FileInput(
   const self = create(
     "section",
     { attr_constructorName: "FileInput", ...updates },
-    label && !floating ? Label({ text: label }, form_control) : undefined,
+    label && !floating ? Label({ form_control, text: label }, ) : undefined,
     input_group,
     error_feedback,
     form_control,
@@ -106,24 +106,16 @@ export function FileInput(
   return self;
 }
 
-// TODO Use Label as base
-function Label({ text }, input_element) {
-  const self = create(
-    "label.form-label.btn.p-0.mb-1",
-    { attr_tabindex: "0", text }
-  );
-  if (!input_element.id) {
-    input_element.id = create_id();
-  }
-  self.attribute.for = input_element.id;
-
+function Label({ form_control, text }) {
+  const self = _Label({form_control, text})
+  self.classList.add('btn', 'p-0', 'mb-1')
   /* One-time handler: Set visited state */
   let visited;
   /* Blur happens, when file selector opens; therefore flag needed to determine,
   if file selector has been opened previously . */
   const on_blur = (event) => {
     if (visited) {
-      input_element.$.visited = true;
+      form_control.$.visited = true;
       self.removeEventListener("blur", on_blur);
     }
     visited = true;

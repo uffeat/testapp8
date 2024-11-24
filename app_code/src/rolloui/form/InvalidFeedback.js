@@ -14,22 +14,21 @@ export function InvalidFeedback(updates = {}, ...hooks) {
       get form_control() {
         return this._form_control;
       }
+      /* Lets form control state control component */
       set form_control(form_control) {
         if (this._form_control) {
           throw new Error(
             `Component already connected to form control.`
           );
         }
-
-        /* Add effects to control feedback text */
+        /* Effects: Error state -> feedback text */
         form_control.effects.add(
           (data) => {
             this.text = form_control.$.error;
           },
           ["error"]
         );
-
-        /* Add effect to control feedback style */
+        /* Effect: Visited & value state -> feedback style */
         form_control.effects.add(
           (data) => {
             this.invisible =
@@ -42,7 +41,7 @@ export function InvalidFeedback(updates = {}, ...hooks) {
           },
           ["visited", "value"]
         );
-
+        /* Provide dom hint */
         if (form_control.name) {
           this.attribute.forName = form_control.name;
         }
@@ -53,6 +52,8 @@ export function InvalidFeedback(updates = {}, ...hooks) {
         return this.attribute.forName;
       }
 
+      /* Alternative to setting the 'form_control' prop directly.
+      Gets form control by name-based dom search. */
       set for_name(for_name) {
         /* Since component likely does not yet reside in a form at construction,
         look for form in task */
@@ -86,7 +87,7 @@ export function InvalidFeedback(updates = {}, ...hooks) {
       set soft(soft) {
         this.css["text-secondary"] = soft;
       }
-    }.prototype
+    }
   );
 
   self.update(updates);

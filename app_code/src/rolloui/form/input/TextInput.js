@@ -54,16 +54,14 @@ export function TextInput(
     },
     ...hooks
   );
-
+  /* Protect value state */
   const set_value = self.reactive.protected.add("value");
-
-  /* Add handler that updates value state */
+  /* Handler: Update value state */
   self.on.input = (event) => {
     const trimmed = self.__super__.value.trim();
     set_value(trimmed ? trimmed : null);
   };
-
-  /* Add mixin to provide external API */
+  /* Mixin for external API */
   mixin(
     self,
     class {
@@ -80,7 +78,7 @@ export function TextInput(
         set_value(value);
         this.__super__.value = value;
       }
-    }.prototype
+    }
   );
 
   return self;

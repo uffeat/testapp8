@@ -1,5 +1,6 @@
 // check_input
 
+
 await (async () => {
   const { create } = await import("rollo/component");
   const { CheckInput } = await import("rolloui/form/input/CheckInput");
@@ -16,4 +17,7 @@ await (async () => {
     }),
     CheckInput({ label: "Agree", name: "agree", required: false, value: true })
   );
+  const check_input = CheckInput({ label: "Foo", name: "foo" })
+  console.log(check_input.name)
+  console.log(check_input.value)
 })();

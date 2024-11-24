@@ -1,10 +1,8 @@
 import "rolloui/form/form.css";
 import { create } from "rollo/component";
 
-
 export function base(
   {
-    name,
     required = false,
     type = "text",
     validations,
@@ -16,6 +14,7 @@ export function base(
   /* NOTE validations not passed on as prop item */
   const self = create(
     (() => {
+      /* Component creation string factory */
       if (
         [
           "date",
@@ -38,7 +37,6 @@ export function base(
       }
     })(),
     {
-      name,
       required,
       /* Take into account that native select and textarea do not have a type prop */
       type: ["select", "textarea"].includes(type) ? undefined : type,
@@ -49,56 +47,50 @@ export function base(
     },
     ...hooks
   );
-
-  const set_visited = self.reactive.protected.add("visited");
+  /* Protect error and visited states */
   const set_error = self.reactive.protected.add("error");
-
-  /* Add effect to control "is-invalid" css class */
+  const set_visited = self.reactive.protected.add("visited");
+  /* Effect: Error & visited states -> "is-invalid" css class */
   self.effects.add(
     (data) => {
       self.css["is-invalid"] = self.$.error && self.$.visited;
     },
     ["error", "visited"]
   );
-
-  /* Add effect to control custom validity */
+  /* Effect: Error state -> custom validity */
   self.effects.add((data) => {
     self.setCustomValidity(self.$.error ? " " : "");
   }, "error");
-
-  /* Add effect to set error state from required validation */
+  /* Effect: Value state -> error state re required */
   self.effects.add((data) => {
     if (self.required) {
-      set_error(self.$.value === null ? "Required" : null)
+      set_error(self.$.value === null ? "Required" : null);
     }
   }, "value");
-
-  /* Add effect to set error state from validations */
+  /* Effect: Validation result (other than required) -> error state */
   if (validations) {
     self.effects.add((data) => {
       /* Abort, if required and value state is null */
       if (self.required && self.$.value === null) return;
       /* Run validations in order. 
       error state is successively set to validation result.
-      Validation aborts, once a truthy validation result is received. */
+      Validation aborts, once a truthy validation result (the error message)
+      is received. */
       for (const validation of validations) {
         const message = validation.call(self, self.$.value);
-        set_error(message)
+        set_error(message);
         if (message) {
           break;
         }
       }
     }, "value");
   }
-
-  /* Add handler to set visited state */
+  /* One-time handler: Set visited state */
   const onblur = (event) => {
-    set_visited(true)
-    self.removeEventListener('blur', onblur)
+    set_visited(true);
+    self.removeEventListener("blur", onblur);
   };
   self.on.blur = onblur;
-
-
 
   return self;
 }
