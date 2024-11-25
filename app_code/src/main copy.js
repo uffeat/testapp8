@@ -17,36 +17,38 @@ function Collapsible({ open = false, ...updates } = {}, ...hooks) {
 
   let controller;
   const initialize = () => {
-    if (controller) {
-      throw new Error(`'initialize' can only be called once.`);
-    }
     controller = new Collapse(self);
   };
 
-  
-
   self.$.open = open;
+
+  /* Protect value state */
+  //const set_open = self.reactive.protected.add("open");
 
   if (open) {
     initialize();
+    self.effects.add((data) => {
+      if (self.$.open) {
+        controller.show();
+      } else {
+        controller.hide();
+      }
+    }, "open");
   } else {
-    /* Bootstrap cannot handle JS-initialized collapse components with a hidden 
-    start state. Therefore postpone init until first call to open. */
-    self.effects.add(
-      function effect(data) {
+    self.effects.add((data) => {
+      if (!controller && self.$.open) {
         initialize();
-        self.effects.remove(effect);
-      },
-      { open: true }
-    );
+      }
+
+      if (controller) {
+        if (self.$.open) {
+          controller.show();
+        } else {
+          controller.hide();
+        }
+      }
+    }, "open");
   }
-
-  self.effects.add((data) => {
-    controller && controller[self.$.open ? "show" : "hide"]();
-  }, "open");
-
-  /* Protect value state */
-  const set_open = self.reactive.protected.add("open");
 
   /* Create external API */
   mixin(
@@ -56,11 +58,13 @@ function Collapsible({ open = false, ...updates } = {}, ...hooks) {
         return this.$.open;
       }
       set open(open) {
-        set_open(open);
-        //this.$.open = open;
+        //set_open(value);
+        this.$.open = open;
       }
     }
   );
+
+  
 
   self.update(updates);
   self.call(...hooks);

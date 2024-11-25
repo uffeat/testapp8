@@ -23,7 +23,8 @@ function Collapsible({ open = false, ...updates } = {}, ...hooks) {
     controller = new Collapse(self);
   };
 
-  
+  /* Protect value state */
+  //const set_open = self.reactive.protected.add("open");
 
   self.$.open = open;
 
@@ -45,9 +46,6 @@ function Collapsible({ open = false, ...updates } = {}, ...hooks) {
     controller && controller[self.$.open ? "show" : "hide"]();
   }, "open");
 
-  /* Protect value state */
-  const set_open = self.reactive.protected.add("open");
-
   /* Create external API */
   mixin(
     self,
@@ -56,8 +54,8 @@ function Collapsible({ open = false, ...updates } = {}, ...hooks) {
         return this.$.open;
       }
       set open(open) {
-        set_open(open);
-        //this.$.open = open;
+        //set_open(value);
+        this.$.open = open;
       }
     }
   );
