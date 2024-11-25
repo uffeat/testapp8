@@ -29,11 +29,10 @@ function Collapsible({ open = false, ...updates } = {}, ...hooks) {
       throw new Error(`'initialize' can only be called once.`);
     }
     controller = new Collapse(self);
-
+    /* Set transitions state */
     self.on["hidden.bs.collapse"] = (event) => {
       set_transition(false);
     };
-
     self.on["shown.bs.collapse"] = (event) => {
       set_transition(false);
     };
@@ -61,7 +60,7 @@ function Collapsible({ open = false, ...updates } = {}, ...hooks) {
     }
   }, "open");
 
-  /* Create "state machine" with 4 reactive states:
+  /* Create state machine with 4 reactive states:
   - showing
   - shown
   - hiding
@@ -72,7 +71,7 @@ function Collapsible({ open = false, ...updates } = {}, ...hooks) {
     (data) => {
       set_showing(self.$.open && self.$.transition);
     },
-    ['open', 'transition']
+    ["open", "transition"]
   );
 
   /* Set shown state */
@@ -80,7 +79,7 @@ function Collapsible({ open = false, ...updates } = {}, ...hooks) {
     (data) => {
       set_shown(self.$.open && !self.$.transition);
     },
-    ['open', 'transition']
+    ["open", "transition"]
   );
 
   /* Set hiding state */
@@ -88,7 +87,7 @@ function Collapsible({ open = false, ...updates } = {}, ...hooks) {
     (data) => {
       set_hiding(!self.$.open && self.$.transition);
     },
-    ['open', 'transition']
+    ["open", "transition"]
   );
 
   /* Set hidden state */
@@ -96,7 +95,7 @@ function Collapsible({ open = false, ...updates } = {}, ...hooks) {
     (data) => {
       set_hidden(!self.$.open && !self.$.transition);
     },
-    ['open', 'transition']
+    ["open", "transition"]
   );
 
   /* Create external API */
@@ -112,19 +111,43 @@ function Collapsible({ open = false, ...updates } = {}, ...hooks) {
           this.effects.remove(this._on_hidden);
         }
         this._on_hidden = on_hidden;
-        this.effects.add(this._on_hidden, {hidden: true});
+        this.effects.add(this._on_hidden, { hidden: true });
       }
 
-      /* Shortcut for setting an effect that reacts to shown state */
+      get on_hiding() {
+        return this._on_hiding;
+      }
+      /* Shortcut for setting an effect that reacts to hiding state */
+      set on_hiding(on_hiding) {
+        if (this._on_hiding) {
+          this.effects.remove(this._on_hiding);
+        }
+        this._on_hiding = on_hiding;
+        this.effects.add(this._on_hiding, { hiding: true });
+      }
+
+      get on_showing() {
+        return this._on_showing;
+      }
+      /* Shortcut for setting an effect that reacts to showing state */
+      set on_showing(on_showing) {
+        if (this._on_showing) {
+          this.effects.remove(this._on_showing);
+        }
+        this._on_showing = on_showing;
+        this.effects.add(this._on_showing, { showing: true });
+      }
+
       get on_shown() {
         return this._on_shown;
       }
+      /* Shortcut for setting an effect that reacts to shown state */
       set on_shown(on_shown) {
         if (this._on_shown) {
           this.effects.remove(this._on_shown);
         }
         this._on_shown = on_shown;
-        this.effects.add(this._on_shown, {shown: true});
+        this.effects.add(this._on_shown, { shown: true });
       }
 
       get open() {
@@ -142,15 +165,17 @@ function Collapsible({ open = false, ...updates } = {}, ...hooks) {
   return self;
 }
 
-const content = create("h1", {}, "Foo");
+const content = create("h1.text-bg-primary.p-3", {}, "Foo");
 const collapsible = Collapsible(
   {
     parent: root,
-    //open: true,
+    open: true,
   },
   content
 );
+collapsible.on_showing = (data) => console.log("Showing...");
 collapsible.on_shown = (data) => console.log("Shown!");
+collapsible.on_hiding = (data) => console.log("Hiding...");
 collapsible.on_hidden = (data) => console.log("Hidden!");
 
 const show_button = create(
