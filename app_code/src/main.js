@@ -15,17 +15,29 @@ import { Collapse } from "bootstrap";
 function Collapsible({ open = false, ...updates } = {}, ...hooks) {
   const self = create("div.collapse", { attr_constructorName: "Collapsible" });
 
+  /* Create protected state items */
+  const set_open = self.reactive.protected.add("open", open);
+  const set_transition = self.reactive.protected.add("transition", false);
+  const set_showing = self.reactive.protected.add("showing");
+  const set_hiding = self.reactive.protected.add("hiding");
+  const set_shown = self.reactive.protected.add("shown");
+  const set_hidden = self.reactive.protected.add("hidden");
+
   let controller;
   const initialize = () => {
     if (controller) {
       throw new Error(`'initialize' can only be called once.`);
     }
     controller = new Collapse(self);
+
+    self.on["hidden.bs.collapse"] = (event) => {
+      set_transition(false);
+    };
+
+    self.on["shown.bs.collapse"] = (event) => {
+      set_transition(false);
+    };
   };
-
-  
-
-  self.$.open = open;
 
   if (open) {
     initialize();
@@ -41,23 +53,85 @@ function Collapsible({ open = false, ...updates } = {}, ...hooks) {
     );
   }
 
+  /* Open/close and set transition state */
   self.effects.add((data) => {
-    controller && controller[self.$.open ? "show" : "hide"]();
+    if (controller) {
+      controller[self.$.open ? "show" : "hide"]();
+      set_transition(true);
+    }
   }, "open");
 
-  /* Protect value state */
-  const set_open = self.reactive.protected.add("open");
+  /* Create "state machine" with 4 reactive states:
+  - showing
+  - shown
+  - hiding
+  - hidden */
+
+  /* Set showing state */
+  self.effects.add(
+    (data) => {
+      set_showing(self.$.open && self.$.transition);
+    },
+    ['open', 'transition']
+  );
+
+  /* Set shown state */
+  self.effects.add(
+    (data) => {
+      set_shown(self.$.open && !self.$.transition);
+    },
+    ['open', 'transition']
+  );
+
+  /* Set hiding state */
+  self.effects.add(
+    (data) => {
+      set_hiding(!self.$.open && self.$.transition);
+    },
+    ['open', 'transition']
+  );
+
+  /* Set hidden state */
+  self.effects.add(
+    (data) => {
+      set_hidden(!self.$.open && !self.$.transition);
+    },
+    ['open', 'transition']
+  );
 
   /* Create external API */
   mixin(
     self,
     class {
+      get on_hidden() {
+        return this._on_hidden;
+      }
+      /* Shortcut for setting an effect that reacts to hidden state */
+      set on_hidden(on_hidden) {
+        if (this._on_hidden) {
+          this.effects.remove(this._on_hidden);
+        }
+        this._on_hidden = on_hidden;
+        this.effects.add(this._on_hidden, {hidden: true});
+      }
+
+      /* Shortcut for setting an effect that reacts to shown state */
+      get on_shown() {
+        return this._on_shown;
+      }
+      set on_shown(on_shown) {
+        if (this._on_shown) {
+          this.effects.remove(this._on_shown);
+        }
+        this._on_shown = on_shown;
+        this.effects.add(this._on_shown, {shown: true});
+      }
+
       get open() {
         return this.$.open;
       }
       set open(open) {
         set_open(open);
-        //this.$.open = open;
       }
     }
   );
@@ -76,6 +150,8 @@ const collapsible = Collapsible(
   },
   content
 );
+collapsible.on_shown = (data) => console.log("Shown!");
+collapsible.on_hidden = (data) => console.log("Hidden!");
 
 const show_button = create(
   "button.btn",
