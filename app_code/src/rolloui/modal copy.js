@@ -1,6 +1,5 @@
 import { Modal } from "bootstrap";
 import { create } from "rollo/component";
-import { Button } from "rolloui/Button";
 import { CloseButton } from "rolloui/CloseButton";
 import { Text } from "rolloui/Text";
 
@@ -64,19 +63,19 @@ export function modal(
               `FOOTER.modal-footer`,
               {},
               buttons.map((button) => {
-                if (button instanceof HTMLElement) {
-                  return button;
+                if (Array.isArray(button)) {
+                  const [text, value, style] = button;
+                  return create("button.btn", {
+                    text,
+                    _value: value,
+                    [`css_btn-${style}`]: style,
+                  }).add_event_handler("click", function onclick(event) {
+                    const element = document.getElementById(ID);
+                    element._value = this._value;
+                    element.$.close = true;
+                  });
                 }
-                return Button({on_click: function(event) {
-                  const element = document.getElementById(ID);
-                  element._value = this.value;
-                  element.$.close = true;
-                }, ...button})
-
-
-
-                
-                
+                return button;
               })
             )
       )

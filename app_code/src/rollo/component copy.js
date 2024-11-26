@@ -89,41 +89,40 @@ export const component = new (class {
     return this.registry.add(tag, cls);
   };
 
-  create_from_object = ({ tag = "div", ...updates } = {}) => {
-    return this.create(tag, updates)
-  };
-
   /* Returns instance of web component  */
-  create = (arg, updates = {}, ..._hooks) => {
-    const [tag, ...css_classes] = arg.split(".");
-    const is_web_component = tag !== tag.toUpperCase();
+  create = (arg = null, {hooks, ...updates} = {}, ..._hooks) => {
+    if (!hooks) {
+      hooks = []
+    }
+    hooks = [...hooks, ..._hooks]
+    
+    let tag = "DIV";
+    let css_classes;
+    if (arg) {
+      /* Extract tag and css_classes from arg */
+      const arg_parts = arg.split(".");
+      tag = arg_parts.shift();
+      css_classes = arg_parts;
+    }
+    const web_component = tag !== tag.toUpperCase();
+
     let element;
-    if (is_web_component) {
-      element = new (this.get(tag))(updates, ..._hooks);
+    if (web_component) {
+      element = new (this.get(tag))(updates, ...hooks);
     } else {
       element = document.createElement(tag);
     }
 
     /* Add css classes */
-    if (css_classes.length > 0) {
+    if (css_classes && css_classes.length > 0) {
       /* NOTE Condition avoids adding empty class attr */
       element.classList.add(...css_classes);
     }
 
-    if (is_web_component) {
+    if (web_component) {
       element.update(updates);
-      element.call(..._hooks);
+      element.call(...hooks)
     } else {
-
-
-      //
-      // TODO css and hooks
-      //
-
-
-
-
-
       /* Apply updates */
       for (const [key, value] of Object.entries(updates)) {
         if (value === undefined) continue;
@@ -145,33 +144,18 @@ export const component = new (class {
           element.classList[value ? "add" : "remove"](css_class);
         } else if (key.startsWith(ON)) {
           element.addEventListener(key.slice(ON.length), value);
-        } else if (key === "css") {
-
-        }
-        
-        
-        
-        else if (key === "text") {
+        } else if (key === "text") {
           element.textContent = value;
         } else if (key === "parent") {
           if (value && element.parentElement !== value) {
             value.append(element);
           }
-        } 
-
-        else if (key === "hooks") {
-
-        }
-        
-        
-        
-        
-        else {
+        } else {
           throw new Error(`Invalid key: ${key}`);
         }
       }
       /* Apply hooks */
-      for (const hook of _hooks) {
+      for (const hook of hooks) {
         if (hook === undefined) {
           continue;
         }
@@ -479,27 +463,6 @@ export const component = new (class {
 
       /* Updates props, attributes and state. Chainable. */
       update = (updates) => {
-        /* CSS classes (multiple) */
-        if (updates.css) {
-          const css = updates.css
-          delete updates.css
-          if (Array.isArray(css)) {
-            css = css.filter((c) => c !== undefined);
-          } else {
-            css = css.split(".");
-          }
-          this.classList.add(...css);
-        }
-
-        /* Extract hooks */
-        let hooks
-        if (updates.hooks) {
-          hooks = updates.hooks
-          delete updates.hooks
-        }
-
-
-
         /* Props */
         Object.entries(updates)
           .filter(
@@ -530,7 +493,7 @@ export const component = new (class {
             ([key, value]) => (this.attribute[key.slice(ATTR.length)] = value)
           );
 
-        /* CSS classes (individual) */
+        /* CSS classes */
         Object.entries(updates)
           .filter(([key, value]) => key.startsWith(CSS_CLASS))
           .forEach(
@@ -556,12 +519,6 @@ export const component = new (class {
             .map(([key, value]) => [key.slice(1), value])
         );
         this.reactive.update(state);
-
-        /* Apply hooks */
-        if (hooks) {
-          this.call(...hooks)
-        }
-
         return this;
       };
     };

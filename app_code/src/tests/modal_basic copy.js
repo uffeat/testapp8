@@ -9,8 +9,8 @@ await (async () => {
       size: "lg",
       style: "primary",
     },
-    {text: "OK", value: true, css: "btn-success"},
-    {text: "Cancel", value: false, css: "btn-danger"}
+    ["OK", true, "success"],
+    ["Cancel", false, "danger"]
   );
   console.log("Modal result:", result);
 })();
