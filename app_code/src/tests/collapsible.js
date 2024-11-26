@@ -18,19 +18,28 @@ await (async () => {
   collapsible.on_hidden = (data) => console.log("Hidden!");
 
   Menu(
-    { parent: root, css: "column-gap-3.ps-0" },
-    create('button.btn',
+    {
+      parent: root,
+      css: {
+        //"column-gap-3.ps-0": true,
+        "column-gap-3": true,
+        "ps-0": true,
+      },
+    },
+    create(
+      "button.btn",
       {
-        css: "btn-primary",
+        css: { btnPrimary: true },
         on_click: (event) => {
           collapsible.open = true;
         },
       },
       "Show"
     ),
-    create('button.btn',
+    create(
+      "button.btn",
       {
-        css: "btn-primary",
+        css: { btnPrimary: true },
         on_click: (event) => {
           collapsible.open = false;
         },

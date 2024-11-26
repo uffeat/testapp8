@@ -2,17 +2,9 @@ import { create } from "rollo/component";
 import { mixin } from "rollo/utils/mixin";
 import { base } from "rolloui/form/input/base";
 
-
 /* Returns text-family input element or textarea. */
 export function TextInput(
-  {
-    max,
-    min,
-    type = "text",
-    validations,
-    value = null,
-    ...updates
-  } = {},
+  { max, min, type = "text", validations, value = null, ...updates } = {},
   ...hooks
 ) {
   if (!["email", "password", "text", "textarea"].includes(type)) {
@@ -88,10 +80,6 @@ export function TextInput(
 
   return self;
 }
-
-
-
-
 
 function validate_email(value) {
   return value &&

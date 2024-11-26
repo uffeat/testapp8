@@ -1,12 +1,12 @@
 import { create } from "rollo/component";
 
-export function CloseButton({ style, ...props }, ...children) {
-  const component = create("BUTTON.btn-close", {attr_ariaLabel: "close", ...props}, ...children);
+export function CloseButton({ attributes = {}, css, style, ...updates }, ...hooks) {
+  const self = create("BUTTON.btn-close", {attributes: {ariaLabel: "close", ...attributes}, css, ...updates}, ...hooks);
   /* Adapt the component to be used in container with the given style */
   if (style && ["danger", "primary", "secondary", "success"].includes(style)) {
-    component.classList.add("btn-close-white");
+    self.classList.add("btn-close-white");
   }
-  return component;
+  return self;
 }
 
 

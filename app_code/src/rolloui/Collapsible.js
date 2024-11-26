@@ -3,8 +3,13 @@ import { create } from "rollo/component";
 import { mixin } from "rollo/utils/mixin";
 
 
-export function Collapsible({ open = false, ...updates } = {}, ...hooks) {
-  const self = create("div.collapse", { attr_constructorName: "Collapsible" });
+export function Collapsible({ open = false, css, attributes = {}, ...updates } = {}, ...hooks) {
+  const self = create("div.collapse", { 
+    attributes: {
+      constructorName: "Collapsible",
+      ...attributes
+    },
+  });
 
   /* Create protected state items */
   const set_open = self.reactive.protected.add("open", open);
@@ -174,7 +179,7 @@ export function Collapsible({ open = false, ...updates } = {}, ...hooks) {
     }
   );
 
-  self.update(updates);
+  self.update({css, ...updates});
   self.call(...hooks);
 
   return self;

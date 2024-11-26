@@ -41,12 +41,7 @@ export function modal(
       },
       create(
         `${tag}.modal-content`,
-        {
-          parent: create(`div.modal-dialog${size ? ".modal-" + size : ""}`, {
-            "css_modal-dialog-scrollable": scrollable,
-            "css_modal-dialog-centered": centered,
-          }),
-        },
+        {},
         !dismissible && !title
           ? undefined
           : create(
@@ -71,6 +66,8 @@ export function modal(
                   tag: "button.btn",
                   _value: button.value,
                   on_click: function (event) {
+                    /* Take into account that button may reside in a form */
+                    event.preventDefault()
                     const element = document.getElementById(ID);
                     element._value = this._value;
                     element.$.close = true;
@@ -83,17 +80,14 @@ export function modal(
     ),
     use_hooks(hooks)
   );
-
   // Handle dismissible
   const config = {};
   if (!dismissible) {
     config.backdrop = "static";
     config.keyboard = false;
   }
-
   // Create Bootstrap Modal
   const modal = new Modal(element, config);
-
   // Enable closing by bubbling 'close' custom event
   const onclose = (event) => {
     event.stopPropagation();
@@ -101,7 +95,6 @@ export function modal(
     element.$.close = true;
   };
   element.addEventListener("close", onclose);
-
   // Clean up
   element.addEventListener("hidden.bs.modal", () => {
     modal.dispose();
@@ -110,7 +103,6 @@ export function modal(
     element.removeEventListener("close", onclose);
     delete element._value;
   });
-
   /* Add effect to close modal */
   element.effects.add(
     (data) => {
@@ -118,10 +110,8 @@ export function modal(
     },
     { close: true }
   );
-
   // Show the modal
   modal.show();
-
   /* Return a promise that resolves to the modal element's _value, 
   when the modal hides */
   return new Promise((resolve, reject) => {
@@ -139,19 +129,3 @@ export function close(value) {
   element.$.close = true;
 }
 
-/*
-EXAMPLE
-
-const result = await modal(
-  {
-    title: "Hello world!",
-    content: "The modal function is awesome.",
-    size: "lg",
-    style: "primary",
-  },
-  ["OK", true, "success"],
-  ["Cancel", false, "danger"]
-);
-console.log("Modal result:", result);
-
-*/

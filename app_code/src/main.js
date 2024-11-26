@@ -9,6 +9,19 @@ import { create } from "rollo/component";
 
 create("DIV", { id: "root", parent: document.body });
 
+const my_button = create("button.btn", {
+  text: "My button",
+  parent: root,
+  on_click: (event) => console.log('Clicked!'),
+  attributes: { fooBar: true },
+  css: { btnPrimary: true },
+},
+function() {
+  console.log('Hook has this:', this)
+}
+);
+
+
 await (async () => {
   const { create } = await import("rollo/component");
   const { Collapsible } = await import("rolloui/Collapsible");
@@ -19,7 +32,7 @@ await (async () => {
       parent: root,
       open: true,
     },
-    create("h1.text-bg-primary.p-3", {}, "Foo")
+    create("h1.textBgPrimary.p3", {}, "Foo")
   );
   collapsible.on_showing = (data) => console.log("Showing...");
   collapsible.on_shown = (data) => console.log("Shown!");
@@ -27,19 +40,24 @@ await (async () => {
   collapsible.on_hidden = (data) => console.log("Hidden!");
 
   Menu(
-    { parent: root, css: "column-gap-3.ps-0" },
-    create('button.btn',
+    {
+      parent: root,
+      css: "columnGap3.ps0",
+    },
+    create(
+      "button.btn",
       {
-        css: "btn-primary",
+        css: { btnPrimary: true },
         on_click: (event) => {
           collapsible.open = true;
         },
       },
       "Show"
     ),
-    create('button.btn',
+    create(
+      "button.btn",
       {
-        css: "btn-primary",
+        css: 'btnPrimary',
         on_click: (event) => {
           collapsible.open = false;
         },
@@ -48,13 +66,3 @@ await (async () => {
     )
   );
 })();
-
-if (import.meta.env.DEV) {
-  let path = "";
-  window.addEventListener("keydown", async (event) => {
-    if (event.code === "KeyT" && event.shiftKey) {
-      path = prompt("Path:", path);
-      await import(`./tests/${path}.js`);
-    }
-  });
-}

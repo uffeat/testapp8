@@ -7,10 +7,11 @@ import { create_id } from "rolloui/form/utils/create_id";
 
 /* Returns checkbox-type input element with reactive type-aligned value prop. 
 Primarily intended for use as base. */
-export function Check(updates = {}, ...hooks) {
+export function Check({ attributes = {}, css, ...updates } = {}, ...hooks) {
   const self = base({
+    attributes: { constructorName: "Check", ...attributes },
+    css,
     type: "checkbox",
-    attr_constructorName: "Check",
   });
   /* Protect value state */
   const set_value = self.reactive.protected.add("value");
@@ -36,7 +37,7 @@ export function Check(updates = {}, ...hooks) {
     }
   );
 
-  self.update(updates);
+  self.update({ css, ...updates });
   self.call(...hooks);
 
   return self;
@@ -45,7 +46,17 @@ export function Check(updates = {}, ...hooks) {
 /* Returns checkbox-type input element with reactive type-aligned value prop.
 Options for switch (toggle), label and invalid feedback (via required). */
 export function CheckInput(
-  { id, name, label, required = false, toggle = false, value, ...updates },
+  {
+    attributes = {},
+    css,
+    id,
+    name,
+    label,
+    required = false,
+    toggle = false,
+    value,
+    ...updates
+  } = {},
   ...hooks
 ) {
   /* Prepare tree */
@@ -72,7 +83,10 @@ export function CheckInput(
   const self = create(
     `div.d-flex.flex-column.align-items-start.row-gap-1`,
     {
-      attr_constructorName: "CheckInput",
+      attributes: {
+        constructorName: "CheckInput",
+        ...attributes,
+      },
     },
     form_check,
     invalid_feedback
@@ -80,7 +94,7 @@ export function CheckInput(
   /* Mirror for external API */
   mirror(self, check, "name", "value");
 
-  self.update(updates);
+  self.update({ css, ...updates });
   self.call(...hooks);
 
   return self;

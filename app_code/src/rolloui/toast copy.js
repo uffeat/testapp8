@@ -31,18 +31,21 @@ export function toast(
         ariaLive: "assertive",
         ariaAtomic: "true",
       },
+      attr_ariaLive: "assertive",
+      attr_ariaAtomic: "true",
     },
     create(
       `DIV.toast-header.d-flex.align-items-center${
         style ? ".text-bg-" + style : ""
       }`,
       {},
-      Text(`H1.fs-6`, { css: {'my-0': true},  }, title),
+      Text(`H1.fs-6`, { "css_my-0": true }, title),
       dismissible
         ? CloseButton({
             style,
-            attributes: {dataBsDismiss: "toast"},
-            css: {'ms-auto': true}
+            attr_dataBsDismiss: "toast",
+            ////"css_ms-auto": true,
+            css: 'ms-auto'////
           })
         : undefined
     ),
