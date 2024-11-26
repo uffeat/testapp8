@@ -2,7 +2,6 @@
 
 await (async () => {
   const { create } = await import("rollo/component");
-  const { Button } = await import("rolloui/Button");
   const { Collapsible } = await import("rolloui/Collapsible");
   const { Menu } = await import("rolloui/Menu");
 
@@ -20,7 +19,7 @@ await (async () => {
 
   Menu(
     { parent: root, css: "column-gap-3.ps-0" },
-    Button(
+    create('button.btn',
       {
         css: "btn-primary",
         on_click: (event) => {
@@ -29,7 +28,7 @@ await (async () => {
       },
       "Show"
     ),
-    Button(
+    create('button.btn',
       {
         css: "btn-primary",
         on_click: (event) => {
@@ -37,7 +36,6 @@ await (async () => {
         },
       },
       "Hide"
-    ),
-    
+    )
   );
 })();

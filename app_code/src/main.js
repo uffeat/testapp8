@@ -10,18 +10,43 @@ import { create } from "rollo/component";
 create("DIV", { id: "root", parent: document.body });
 
 await (async () => {
-  const { close, modal } = await import("rolloui/modal");
-  const result = await modal(
+  const { create } = await import("rollo/component");
+  const { Collapsible } = await import("rolloui/Collapsible");
+  const { Menu } = await import("rolloui/Menu");
+
+  const collapsible = Collapsible(
     {
-      title: "Hello world!",
-      content: "The modal function is awesome.",
-      size: "lg",
-      style: "primary",
+      parent: root,
+      open: true,
     },
-    {text: "OK", value: true, css: "btn-success"},
-    {text: "Cancel", value: false, css: "btn-danger"}
+    create("h1.text-bg-primary.p-3", {}, "Foo")
   );
-  console.log("Modal result:", result);
+  collapsible.on_showing = (data) => console.log("Showing...");
+  collapsible.on_shown = (data) => console.log("Shown!");
+  collapsible.on_hiding = (data) => console.log("Hiding...");
+  collapsible.on_hidden = (data) => console.log("Hidden!");
+
+  Menu(
+    { parent: root, css: "column-gap-3.ps-0" },
+    create('button.btn',
+      {
+        css: "btn-primary",
+        on_click: (event) => {
+          collapsible.open = true;
+        },
+      },
+      "Show"
+    ),
+    create('button.btn',
+      {
+        css: "btn-primary",
+        on_click: (event) => {
+          collapsible.open = false;
+        },
+      },
+      "Hide"
+    )
+  );
 })();
 
 if (import.meta.env.DEV) {

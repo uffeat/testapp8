@@ -1,6 +1,6 @@
 import { Modal } from "bootstrap";
 import { create } from "rollo/component";
-import { Button } from "rolloui/Button";
+import { use_hooks } from "rollo/hooks/use_hooks";
 import { CloseButton } from "rolloui/CloseButton";
 import { Text } from "rolloui/Text";
 
@@ -15,7 +15,7 @@ export function modal(
     centered,
     dismissible = true,
     fade = true,
-    hooks = [],
+    hooks,
     scrollable,
     size,
     style,
@@ -67,21 +67,21 @@ export function modal(
                 if (button instanceof HTMLElement) {
                   return button;
                 }
-                return Button({on_click: function(event) {
-                  const element = document.getElementById(ID);
-                  element._value = this.value;
-                  element.$.close = true;
-                }, ...button})
-
-
-
-                
-                
+                return create({
+                  tag: "button.btn",
+                  _value: button.value,
+                  on_click: function (event) {
+                    const element = document.getElementById(ID);
+                    element._value = this._value;
+                    element.$.close = true;
+                  },
+                  ...button,
+                });
               })
             )
       )
     ),
-    ...hooks
+    use_hooks(hooks)
   );
 
   // Handle dismissible

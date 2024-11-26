@@ -14,7 +14,14 @@ function camel_to_kebab(camel) {
   return camel.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
 }
 
-/* */
+/* Adds one or more css classes. 
+Bind to element with call or bind.
+args can be:
+- Individual css class names
+- String with multiple css class names separated by '.'
+- Arrays of css class names
+undefined handlers are ignored to support iife's. 
+Chainable. */
 function add_css_classes(...args) {
   for (let css_classes of args) {
     if (css_classes && css_classes.length > 0) {
@@ -29,7 +36,14 @@ function add_css_classes(...args) {
   return this;
 }
 
-/* */
+/* Adds one or more event handlers from object. 
+Bind to event target with call or bind.
+Keys should be prefixed with 'on_'.
+undefined handlers are ignored to support iife's.
+Chainable.
+Example: 
+my_component.add_event_handlers({on_click: () => console.log('Clicked!')})
+ */
 function add_event_handlers(updates) {
   if (updates) {
     Object.entries(updates)
@@ -41,7 +55,16 @@ function add_event_handlers(updates) {
   return this;
 }
 
-/* */
+/* Calls one or more hooks. 
+Bind to element with call or bind.
+A hook is a function that is called bound to an element.
+Any hook return values are appended to the element.
+Useful during component contruction to:
+- Add effects
+- Add handlers, potentially conditionally
+- Conditionally add one or more children
+undefined hooks are ignored to support iife's. 
+Chainable. */
 function call_hooks(...hooks) {
   for (const hook of hooks) {
     if (hook === undefined) {
@@ -68,7 +91,13 @@ function call_hooks(...hooks) {
   return this;
 }
 
-/* */
+/* Updates one or more element attributes from object. 
+Bind to element with call or bind.
+Keys should be prefixed with 'attr_'.
+Items with undefined values are ignored to support iife's.
+Items with false values removes the attribute.
+Items with true values add no-value attribute. 
+Chainable. */
 function update_attributes(updates) {
   if (updates) {
     Object.entries(updates)
@@ -87,7 +116,14 @@ function update_attributes(updates) {
   return this;
 }
 
-/* */
+/* Updates one or more css classes from object. 
+Bind to element with call or bind.
+Keys should be prefixed with 'css_'.
+Items with undefined values are ignored to support iife's.
+Items with false values removes the css class.
+Items with true values adds the css class. 
+Camel-case keys are converted to kebab. 
+Chainable. */
 function update_css_classes(updates) {
   if (updates) {
     Object.entries(updates)
@@ -102,7 +138,14 @@ function update_css_classes(updates) {
   return this;
 }
 
-/* */
+/* Updates one or more props from object. 
+Bind to element with call or bind.
+Keys with shorthand prefixed are ignored.
+Items with undefined values are ignored to support iife's.
+Items with '_'-prefixed keys are allowed.
+Items with keys that match a style key are added to the style object.
+Items with other invalid keys throws an error.
+Chainable. */
 function update_properties(updates) {
   if (updates) {
     Object.entries(updates)
@@ -131,7 +174,7 @@ function update_properties(updates) {
 }
 
 /* Utility for authoring web components and instantiating elements. */
-export const component = new (class {
+export const component = new (class Controller {
   get registry() {
     return this.#registry;
   }
@@ -206,66 +249,50 @@ export const component = new (class {
   };
 
   /* */
-  create_from_object = ({ tag = "div", ...updates } = {}) => {
-    return this.create(tag, updates);
+  create_from_object = ({css, hooks, tag = "div", ...updates } = {}) => {
+    hooks = hooks || []
+    return this.create(tag, {css, ...updates}, ...hooks);
   };
 
   create_native = (
     arg,
-    { css, hooks, parent, text, ...updates } = {},
-    ..._hooks
+    { css, parent, text, ...updates } = {},
+    ...hooks
   ) => {
     const [tag, ...css_classes] = arg.split(".");
     const element = document.createElement(tag);
-    /* Add css classes */
     add_css_classes.call(element, css, css_classes);
     update_css_classes.call(element, updates);
-    /* Handle special prop kwargs */
     if (parent && element.parentElement !== parent) {
       parent.append(element);
     }
     if (text !== undefined) {
       element.textContent = text;
     }
-    /* Set properties */
     update_properties.call(element, updates);
-    /* Set attributes  */
     update_attributes.call(element, updates);
-    /* Add event handlers */
     add_event_handlers.call(element, updates);
-    /* Apply hooks */
-    if (hooks) {
-      _hooks = [...hooks, ..._hooks];
-    }
-    call_hooks.call(element, hooks, ..._hooks);
-
+    call_hooks.call(element, ...hooks);
     return element;
   };
 
   /* Returns element  */
-  create = (arg, { css, hooks, ...updates } = {}, ..._hooks) => {
+  create = (arg, { css, ...updates } = {}, ...hooks) => {
     if (typeof arg !== "string") {
       return this.create_from_object(arg);
     }
-
     const [tag, ...css_classes] = arg.split(".");
-
     if (tag === tag.toUpperCase()) {
       return this.create_native(
         tag,
-        { css: css_classes, hooks, ...updates },
-        ..._hooks
+        { css: css_classes, ...updates },
+        ...hooks
       );
     }
-
-    const element = new (this.get(tag))(updates, ..._hooks);
+    const element = new (this.get(tag))(updates, ...hooks);
     element.add_css_classes(css, css_classes);
     element.update(updates);
-    if (hooks) {
-      element.call(...hooks);
-    }
-    element.call(..._hooks);
-
+    element.call(...hooks);
     return element;
   };
 
@@ -538,15 +565,14 @@ export const component = new (class {
       };
 
       /* Updates props, attributes and state. Chainable. */
-      update = ({ css, hooks, ...updates }) => {
+      update = (updates) => {
         /* Props */
         this.update_properties(updates);
 
         /* Attributes */
         this.update_attributes(updates);
 
-        /* CSS classes (multiple) */
-        this.add_css_classes(css);
+        
 
         /* CSS classes (individual) */
         this.update_css_classes(updates);
@@ -569,10 +595,7 @@ export const component = new (class {
         );
         this.reactive.update(state);
 
-        /* Apply hooks */
-        if (hooks) {
-          this.call(...hooks);
-        }
+        
 
         return this;
       };

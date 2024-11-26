@@ -1,5 +1,6 @@
 import { Offcanvas } from "bootstrap";
 import { create } from "rollo/component";
+import { use_hooks } from "rollo/hooks/use_hooks";
 import { CloseButton } from "rolloui/CloseButton";
 import { Text } from "rolloui/Text";
 
@@ -12,7 +13,7 @@ export function offcanvas(
   {
     content,
     dismissible = true,
-    hooks = [],
+    hooks,
     placement = "bottom",
     scroll = false,
     style,
@@ -46,25 +47,24 @@ export function offcanvas(
     buttons.length === 0
       ? undefined
       : create(
-          "FOOTER.d-flex.justify-content-end.column-gap-3.p-3.m-0",
+          `FOOTER.d-flex.justify-content-end.column-gap-3.p-3.m-0`,
           {},
-          buttons.map((button) => {
-            if (Array.isArray(button)) {
-              const [text, value, style] = button;
-              return create("button.btn", {
-                text,
-                _value: value,
-                [`css_btn-${style}`]: style,
-              }).add_event_handler("click", function onclick(event) {
-                const element = document.getElementById(ID);
-                element._value = this._value;
-                element.$.close = true;
-              });
-            }
-            return button;
-          })
+          buttons.map((button) =>
+            button instanceof HTMLElement
+              ? button
+              : create({
+                  tag: "button.btn",
+                  _value: button.value,
+                  on_click: function (event) {
+                    const element = document.getElementById(ID);
+                    element._value = this._value;
+                    element.$.close = true;
+                  },
+                  ...button,
+                })
+          )
         ),
-    ...hooks
+    use_hooks(hooks)
   );
 
   // Handle dismissible

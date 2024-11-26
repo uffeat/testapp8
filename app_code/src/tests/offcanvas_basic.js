@@ -8,9 +8,14 @@ await (async () => {
       content: "The offcanvas function is awesome.",
       placement: "start",
       style: "primary",
+      hooks: [function() {
+        console.log('Hello from hook')
+        console.log(this)
+
+      }]
     },
-    ["OK", true, "success"],
-    ["Cancel", false, "danger"]
+    {text: "OK", value: true, css: "btn-success"},
+    {text: "Cancel", value: false, css: "btn-danger"}
   );
-  console.log("Modal result:", result);
+  console.log("Result:", result);
 })();
