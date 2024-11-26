@@ -42,6 +42,33 @@ function add_event_handlers(updates) {
 }
 
 /* */
+function call_hooks(...hooks) {
+  for (const hook of hooks) {
+    if (hook === undefined) {
+      continue;
+    }
+    if (typeof hook === "function") {
+      const result = hook.call(this);
+      if (result === undefined) {
+        continue;
+      }
+      if (Array.isArray(result)) {
+        this.append(...result);
+      } else {
+        this.append(result);
+      }
+      continue;
+    }
+    if (Array.isArray(hook)) {
+      this.append(...hook);
+      continue;
+    }
+    this.append(hook);
+  }
+  return this;
+}
+
+/* */
 function update_attributes(updates) {
   if (updates) {
     Object.entries(updates)
@@ -190,12 +217,9 @@ export const component = new (class {
   ) => {
     const [tag, ...css_classes] = arg.split(".");
     const element = document.createElement(tag);
-
     /* Add css classes */
-    add_css_classes.call(element, css);
-    add_css_classes.call(element, css_classes);
+    add_css_classes.call(element, css, css_classes);
     update_css_classes.call(element, updates);
-
     /* Handle special prop kwargs */
     if (parent && element.parentElement !== parent) {
       parent.append(element);
@@ -203,49 +227,23 @@ export const component = new (class {
     if (text !== undefined) {
       element.textContent = text;
     }
-
     /* Set properties */
     update_properties.call(element, updates);
-
     /* Set attributes  */
     update_attributes.call(element, updates);
-
     /* Add event handlers */
     add_event_handlers.call(element, updates);
-
-    
     /* Apply hooks */
     if (hooks) {
       _hooks = [...hooks, ..._hooks];
     }
-    for (const hook of _hooks) {
-      if (hook === undefined) {
-        continue;
-      }
-      if (typeof hook === "function") {
-        const result = hook.call(element);
-        if (result === undefined) {
-          continue;
-        }
-        if (Array.isArray(result)) {
-          element.append(...result);
-        } else {
-          element.append(result);
-        }
-        continue;
-      }
-      if (Array.isArray(hook)) {
-        element.append(...hook);
-        continue;
-      }
-      element.append(hook);
-    }
+    call_hooks.call(element, hooks, ..._hooks);
 
     return element;
   };
 
   /* Returns element  */
-  create = (arg, updates = {}, ..._hooks) => {
+  create = (arg, { css, hooks, ...updates } = {}, ..._hooks) => {
     if (typeof arg !== "string") {
       return this.create_from_object(arg);
     }
@@ -255,17 +253,17 @@ export const component = new (class {
     if (tag === tag.toUpperCase()) {
       return this.create_native(
         tag,
-        { css: css_classes, ...updates },
+        { css: css_classes, hooks, ...updates },
         ..._hooks
       );
     }
 
     const element = new (this.get(tag))(updates, ..._hooks);
-
-    /* Add css classes */
-    add_css_classes.call(element, css_classes);
-
+    element.add_css_classes(css, css_classes);
     element.update(updates);
+    if (hooks) {
+      element.call(...hooks);
+    }
     element.call(..._hooks);
 
     return element;
@@ -500,29 +498,7 @@ export const component = new (class {
 
       /* */
       call = (...hooks) => {
-        for (const hook of hooks) {
-          if (hook === undefined) {
-            continue;
-          }
-          if (typeof hook === "function") {
-            const result = hook.call(this);
-            if (result === undefined) {
-              continue;
-            }
-            if (Array.isArray(result)) {
-              this.append(...result);
-            } else {
-              this.append(result);
-            }
-            continue;
-          }
-          if (Array.isArray(hook)) {
-            this.append(...hook);
-            continue;
-          }
-          this.append(hook);
-        }
-        return this;
+        return call_hooks.call(this, ...hooks);
       };
 
       /* Removes all children. Chainable. */
