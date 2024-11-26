@@ -2,106 +2,79 @@ import "./bootstrap.scss";
 import "./main.css";
 import { create } from "rollo/component";
 
-// TODO form
+// TODO
+// ... then nav bar
+// ... then Accordion
+// ... then form
 // ... then dropdown and popover
 // ... then ProgressiveImage
-// ... then nav bar
 
-create("", { id: "root", parent: document.body });
+// ... then loader
+// ... then carousel
+// ... then placeholder
+// ... then tooltip
+// ... then scrollspy
 
-import { mixin } from "rollo/utils/mixin";
-import { Collapse } from "bootstrap";
+create("DIV", { id: "root", parent: document.body });
 
-function Collapsible({ open = false, ...updates } = {}, ...hooks) {
-  const self = create("div.collapse", { attr_constructorName: "Collapsible" });
+//////
+const ID = "navbar";
 
-  let controller;
-  const initialize = () => {
-    controller = new Collapse(self);
-  };
-
-  self.$.open = open;
-
-  /* Protect value state */
-  //const set_open = self.reactive.protected.add("open");
-
-  if (open) {
-    initialize();
-    self.effects.add((data) => {
-      if (self.$.open) {
-        controller.show();
-      } else {
-        controller.hide();
-      }
-    }, "open");
-  } else {
-    self.effects.add((data) => {
-      if (!controller && self.$.open) {
-        initialize();
-      }
-
-      if (controller) {
-        if (self.$.open) {
-          controller.show();
-        } else {
-          controller.hide();
-        }
-      }
-    }, "open");
-  }
-
-  /* Create external API */
-  mixin(
-    self,
-    class {
-      get open() {
-        return this.$.open;
-      }
-      set open(open) {
-        //set_open(value);
-        this.$.open = open;
-      }
-    }
-  );
-
-  
-
-  self.update(updates);
-  self.call(...hooks);
-
-  return self;
-}
-
-const content = create("h1", {}, "Foo");
-const collapsible = Collapsible(
-  {
-    parent: root,
-    //open: true,
-  },
-  content
+const nav_bar = create(
+  "NAV.navbar-expand-lg.bg-body-tertiary",
+  {parent: root},
+  create(
+    "DIV.container-fluid",
+    {},
+    create("a.navbar-brand", {}, 
+      create('span', {}, 'Brand')
+    ),
+    create(
+      "BUTTON.navbar-toggler.pink",
+      {
+        type: "button",
+        attributes: {
+          dataBsToggle: "collapse",
+          dataBsTarget: `#${ID}`,
+          ariaControls: ID,
+          ariaExpanded: "false",
+          ariaLabel: "Toggle navigation",
+        },
+      },
+      create("SPAN.navbar-toggler-icon")
+    ),
+    create(
+      "DIV.collapse.navbar-collapse",
+      { id: ID },
+      /* TODO Use state to set active class and aria-current="page" */
+      /* TODO Generate nav from array or object - a create controller to do so */
+      create(
+        "a.nav-link.active",
+        {
+          href: "#",
+          attributes: {
+            ariaCurrent: "page",
+          },
+        },
+        "Home"
+      ),
+      create("a.nav-link", { href: "#" }, "Features"),
+      create("a.nav-link", { href: "#" }, "Pricing"),
+      create(
+        "a.nav-link",
+        {
+          href: "#",
+          attributes: {
+            ariaDisabled: "true",
+          },
+        },
+        "Disabled"
+      )
+    )
+  )
 );
 
-const show_button = create(
-  "button.btn",
-  {
-    parent: root,
-    on_click: (event) => {
-      collapsible.open = true;
-    },
-  },
-  "Show"
-);
-const hide_button = create(
-  "button.btn",
-  {
-    parent: root,
-    on_click: (event) => {
-      collapsible.open = false;
-    },
-  },
-  "Hide"
-);
-
+//////
 if (import.meta.env.DEV) {
   let path = "";
   window.addEventListener("keydown", async (event) => {

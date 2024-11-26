@@ -68,7 +68,8 @@ await (async () => {
             name: "my_foo",
             placeholder: "Please select...",
             required: true,
-            ["css_rounded-end"]: true,
+            css: "roundedEnd",
+            
           },
           ["Foo", "foo"],
           ["Bar", "green"],

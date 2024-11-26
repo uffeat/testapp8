@@ -4,7 +4,15 @@ import { base } from "rolloui/form/input/base";
 
 /* Returns text-family input element or textarea. */
 export function Select(
-  { hooks = [], placeholder, validations, value = null, ...updates } = {},
+  {
+    attributes = {},
+    css,
+    hooks = [],
+    placeholder,
+    validations,
+    value = null,
+    ...updates
+  } = {},
   ...options
 ) {
   if (options.length === 0) {
@@ -16,10 +24,14 @@ export function Select(
 
   const self = base(
     {
+      attributes: {
+        constructorName: "Select",
+        ...attributes,
+      },
+      css,
       type: "select",
       validations,
       $value: value,
-      attr_constructorName: "Select",
       ...updates,
     },
     ...hooks
@@ -33,7 +45,9 @@ export function Select(
   /* NOTE placeholder_element.attribute.value is null */
   const option_elements = [
     placeholder_element,
-    ...options.map(([text, value]) => create("option", { value, _value: value }, text)),
+    ...options.map(([text, value]) =>
+      create("option", { value, _value: value }, text)
+    ),
   ];
   /* Effect: Value state -> show selected option */
   self.effects.add((data) => {

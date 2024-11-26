@@ -1,113 +1,67 @@
 import "./bootstrap.scss";
 import "./main.css";
 import { create } from "rollo/component";
+import { html } from "rollo/utils/html";
 
-// TODO form
+// TODO
+// ... then nav bar
+// ... then Accordion
+// ... then form
 // ... then dropdown and popover
 // ... then ProgressiveImage
-// ... then nav bar
 
-create("", { id: "root", parent: document.body });
+// ... then loader
+// ... then carousel
+// ... then placeholder
+// ... then tooltip
+// ... then scrollspy
 
-import { mixin } from "rollo/utils/mixin";
-import { Collapse } from "bootstrap";
+const root = create("DIV", { id: "root", parent: document.body });
 
-function Collapsible({ open = false, ...updates } = {}, ...hooks) {
-  const self = create("div.collapse", { attr_constructorName: "Collapsible" });
+//////
+const ID = "navbar";
 
-  let controller;
-  const initialize = () => {
-    controller = new Collapse(self);
-  };
-
-  self.$.open = open;
-
-  /* Protect value state */
-  //const set_open = self.reactive.protected.add("open");
-
-  const toggle = () => {
-    controller && controller[self.$.open ? 'show' : 'hide']()
-  }
-
-
-
-
-  if (open) {
-
-    initialize();
-
-    self.effects.add((data) => {
-
-      toggle()
-      
-    }, "open");
-
-  } else {
-
-    self.effects.add((data) => {
-
-      if (!controller && self.$.open) {
-        initialize();
-      }
-
-      toggle()
-
-    }, "open");
-
-  }
-
-  /* Create external API */
-  mixin(
-    self,
-    class {
-      get open() {
-        return this.$.open;
-      }
-      set open(open) {
-        //set_open(value);
-        this.$.open = open;
-      }
-    }
-  );
-
+const nav_bar = create(
+  "NAV.navbar-expand-lg.bg-body-tertiary",
+  {parent: root},
   
-
-  self.update(updates);
-  self.call(...hooks);
-
-  return self;
-}
-
-const content = create("h1", {}, "Foo");
-const collapsible = Collapsible(
-  {
-    parent: root,
-    //open: true,
-  },
-  content
 );
 
-const show_button = create(
-  "button.btn",
-  {
-    parent: root,
-    on_click: (event) => {
-      collapsible.open = true;
-    },
-  },
-  "Show"
-);
-const hide_button = create(
-  "button.btn",
-  {
-    parent: root,
-    on_click: (event) => {
-      collapsible.open = false;
-    },
-  },
-  "Hide"
-);
+root.innerHTML = html`
+<nav class="navbar navbar-expand-lg bg-body-tertiary">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">Navbar</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavDropdown">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="#">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Features</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Pricing</a>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Dropdown link
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#">Action</a></li>
+            <li><a class="dropdown-item" href="#">Another action</a></li>
+            <li><a class="dropdown-item" href="#">Something else here</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+`
 
+//////
 if (import.meta.env.DEV) {
   let path = "";
   window.addEventListener("keydown", async (event) => {

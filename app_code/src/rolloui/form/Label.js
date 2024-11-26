@@ -3,9 +3,9 @@ import { mixin } from "rollo/utils/mixin";
 import { create_id } from "rolloui/form/utils/create_id";
 
 /* Returns non-container label component for use with form control. */
-export function Label(updates = {}, ...hooks) {
+export function Label({ attributes = {}, css, ...updates } = {}, ...hooks) {
   const self = create("label.form-label", {
-    attr_constructorName: "Label",
+    attributes: { constructorName: "Label", ...attributes },
   });
 
   mixin(
@@ -52,7 +52,7 @@ export function Label(updates = {}, ...hooks) {
     }
   );
 
-  self.update(updates);
+  self.update({ css, ...updates });
   self.call(...hooks);
 
   return self;

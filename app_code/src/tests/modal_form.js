@@ -35,5 +35,5 @@ await (async () => {
     create("BUTTON.btn.btn-primary", { _value: null }, "Cancel")
   );
 
-  console.log("Modal result:", result);
+  console.log("Result:", result);
 })();

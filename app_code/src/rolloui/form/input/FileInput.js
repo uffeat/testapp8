@@ -10,7 +10,9 @@ import { Label } from "rolloui/form/Label";
 
 export function FileInput(
   {
+    attributes = {},
     accept,
+    css,
     floating = false,
     id,
     label = null,
@@ -47,7 +49,8 @@ export function FileInput(
     CancelIcon({ size: 24 })
   );
   const selection_display = create("input.form-control", {
-    attr_ariaLive: "polite",
+    attributes: { ariaLive: "polite" },
+
     inert: true,
   });
   const input_group = create(
@@ -137,7 +140,14 @@ export function FileInput(
   /* Build tree */
   const self = create(
     "section",
-    { attr_constructorName: "FileInput", ...updates },
+    {
+      attributes: {
+        constructorName: "FileInput",
+        ...attributes,
+      },
+
+      ...updates,
+    },
     (() => {
       if (label && !floating) {
         const self = Label({ form_control, text: label });

@@ -41,5 +41,5 @@ await (async () => {
     size: "lg",
   });
 
-  console.log("Modal result:", result);
+  console.log("Result:", result);
 })();

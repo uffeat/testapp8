@@ -1,68 +1,98 @@
 import "./bootstrap.scss";
 import "./main.css";
 import { create } from "rollo/component";
+import { html } from "rollo/utils/html";
 
-// TODO form
+// TODO
+// ... then nav bar
+// ... then Accordion
+// ... then form
 // ... then dropdown and popover
 // ... then ProgressiveImage
-// ... then nav bar
 
-create("DIV", { id: "root", parent: document.body });
+// ... then loader
+// ... then carousel
+// ... then placeholder
+// ... then tooltip
+// ... then scrollspy
 
-const my_button = create("button.btn", {
-  text: "My button",
-  parent: root,
-  on_click: (event) => console.log('Clicked!'),
-  attributes: { fooBar: true },
-  css: { btnPrimary: true },
-},
-function() {
-  console.log('Hook has this:', this)
-}
+const root = create("DIV", { id: "root", parent: document.body });
+
+//////
+const ID = "mainnav";
+
+
+
+const toggler = create(
+  "BUTTON.navbar-toggler",
+  {
+    type: "button",
+    attributes: {
+      dataBsToggle: "collapse",
+      dataBsTarget: `#${ID}`,
+      ariaControls: ID,
+      ariaExpanded: "false",
+      ariaLabel: "Toggle navigation",
+    },
+  },
+  create("SPAN.navbar-toggler-icon")
+)
+
+const { Collapsible } = await import("rolloui/Collapsible");
+
+const collapsible = create(
+  "DIV.collapse.navbar-collapse",
+  { id: ID },
+  /* TODO Use state to set active class and aria-current="page" */
+  /* TODO Generate nav from array or object - a create controller to do so */
+  create(
+    "a.nav-link.active",
+    {
+      href: "#",
+      attributes: {
+        ariaCurrent: "page",
+      },
+    },
+    "Home"
+  ),
+  create("a.nav-link", { href: "#" }, "Features"),
+  create("a.nav-link", { href: "#" }, "Pricing"),
+  create(
+    "a.nav-link",
+    {
+      href: "#",
+      attributes: {
+        ariaDisabled: "true",
+      },
+    },
+    "Disabled"
+  )
+)
+
+
+const nav_bar = create(
+  "NAV.navbar.navbar-expand-md.bg-body-tertiary",
+  {parent: root},
+  create(
+    "DIV.container-fluid",
+    {},
+    create("a.navbar-brand", {}, 
+      create('span', {}, 'Brand')
+    ),
+    toggler,
+    collapsible
+  )
 );
 
 
-await (async () => {
-  const { create } = await import("rollo/component");
-  const { Collapsible } = await import("rolloui/Collapsible");
-  const { Menu } = await import("rolloui/Menu");
 
-  const collapsible = Collapsible(
-    {
-      parent: root,
-      open: true,
-    },
-    create("h1.textBgPrimary.p3", {}, "Foo")
-  );
-  collapsible.on_showing = (data) => console.log("Showing...");
-  collapsible.on_shown = (data) => console.log("Shown!");
-  collapsible.on_hiding = (data) => console.log("Hiding...");
-  collapsible.on_hidden = (data) => console.log("Hidden!");
-
-  Menu(
-    {
-      parent: root,
-      css: "columnGap3.ps0",
-    },
-    create(
-      "button.btn",
-      {
-        css: { btnPrimary: true },
-        on_click: (event) => {
-          collapsible.open = true;
-        },
-      },
-      "Show"
-    ),
-    create(
-      "button.btn",
-      {
-        css: 'btnPrimary',
-        on_click: (event) => {
-          collapsible.open = false;
-        },
-      },
-      "Hide"
-    )
-  );
-})();
+//////
+if (import.meta.env.DEV) {
+  let path = "";
+  window.addEventListener("keydown", async (event) => {
+    if (event.code === "KeyT" && event.shiftKey) {
+      path = prompt("Path:", path);
+      await import(`./tests/${path}.js`);
+    }
+  });
+}

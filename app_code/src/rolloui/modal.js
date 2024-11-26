@@ -30,14 +30,18 @@ export function modal(
     {
       id: ID,
       parent: PARENT,
-      attr_tabindex: "-1",
-      css_fade: fade,
+      attributes: {
+        tabindex: "-1",
+      },
+      css: { fade },
     },
     create(
       `DIV.modal-dialog${size ? ".modal-" + size : ""}`,
       {
-        "css_modal-dialog-scrollable": scrollable,
-        "css_modal-dialog-centered": centered,
+        css: {
+          modalDialogScrollable: scrollable,
+          modalDialogCentered: centered,
+        },
       },
       create(
         `${tag}.modal-content`,
@@ -49,7 +53,7 @@ export function modal(
               {},
               Text(`H1.modal-title.fs-3.text`, {}, title),
               dismissible
-                ? CloseButton({ style, attr_dataBsDismiss: "modal" })
+                ? CloseButton({ style, attributes: { dataBsDismiss: "modal" } })
                 : undefined
             ),
         create(`MAIN.modal-body`, {}, Text(`P`, {}, content)),
@@ -67,7 +71,7 @@ export function modal(
                   _value: button.value,
                   on_click: function (event) {
                     /* Take into account that button may reside in a form */
-                    event.preventDefault()
+                    event.preventDefault();
                     const element = document.getElementById(ID);
                     element._value = this._value;
                     element.$.close = true;
@@ -128,4 +132,3 @@ export function close(value) {
   element._value = value;
   element.$.close = true;
 }
-

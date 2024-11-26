@@ -31,3 +31,9 @@ main {
 a {
   text-decoration: none;
 }
+
+
+/*** For testing */
+.pink {
+  background-color: pink;
+}

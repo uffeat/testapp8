@@ -4,7 +4,15 @@ import { base } from "rolloui/form/input/base";
 
 /* Returns number-type input element. */
 export function NumberInput(
-  { max, min, validations, value = null, ...updates } = {},
+  {
+    attributes = {},
+    css,
+    max,
+    min,
+    validations,
+    value = null,
+    ...updates
+  } = {},
   ...hooks
 ) {
   /* NOTE max/min not passed on as props */
@@ -33,11 +41,14 @@ export function NumberInput(
 
   const self = base(
     {
+      attributes: {
+        constructorName: "NumberInput",
+        ...attributes,
+      },
+      css,
       type: "text",
       validations,
       $value: value,
-      //$convertible_value: null,
-      attr_constructorName: "NumberInput",
       ...updates,
     },
     ...hooks
@@ -48,15 +59,15 @@ export function NumberInput(
   self.on.input = (event) => {
     self.__super__.value = self.__super__.value.trim();
     if (self.__super__.value === "") {
-      set_value(null)
+      set_value(null);
     } else {
       /* Filter to number text */
       self.__super__.value = to_number_text(self.__super__.value);
       const number = Number(self.__super__.value.replaceAll(",", "."));
       if (typeof number === "number" && number === number) {
-        set_value(number)
+        set_value(number);
       } else {
-        set_value(null)
+        set_value(null);
       }
     }
   };
@@ -71,7 +82,7 @@ export function NumberInput(
         if (value !== null) {
           const number = Number(value);
           if (!(typeof number === "number" && number === number)) {
-            throw new Error(`'${value}' is not a number.`)
+            throw new Error(`'${value}' is not a number.`);
           }
         }
         set_value(value);
@@ -98,4 +109,3 @@ function to_number_text(value) {
     })
     .join("");
 }
-

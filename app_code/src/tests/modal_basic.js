@@ -12,5 +12,5 @@ await (async () => {
     {text: "OK", value: true, css: "btn-success"},
     {text: "Cancel", value: false, css: "btn-danger"}
   );
-  console.log("Modal result:", result);
+  console.log("Result:", result);
 })();

@@ -29,8 +29,13 @@ export function offcanvas(
     {
       id: ID,
       parent: PARENT,
-      attr_tabindex: "-1",
-      [`css_offcanvas-${placement}`]: true,
+      attributes: {
+        tabindex: "-1",
+      },
+      css: {
+        [`offcanvas-${placement}`]: true,
+      }
+      
     },
     !dismissible && !title
       ? undefined
@@ -39,7 +44,7 @@ export function offcanvas(
           {},
           Text(`H1.fs-2.text`, {}, title),
           dismissible
-            ? CloseButton({ style, attr_dataBsDismiss: "offcanvas" })
+            ? CloseButton({ style, attributes: { dataBsDismiss: "offcanvas" } })
             : undefined
         ),
 

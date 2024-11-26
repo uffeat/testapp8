@@ -4,7 +4,16 @@ import { base } from "rolloui/form/input/base";
 
 /* Returns text-family input element or textarea. */
 export function TextInput(
-  { max, min, type = "text", validations, value = null, ...updates } = {},
+  {
+    attributes = {},
+    css,
+    max,
+    min,
+    type = "text",
+    validations,
+    value = null,
+    ...updates
+  } = {},
   ...hooks
 ) {
   if (!["email", "password", "text", "textarea"].includes(type)) {
@@ -43,10 +52,14 @@ export function TextInput(
 
   const self = base(
     {
+      attributes: {
+        constructorName: "TextInput",
+        ...attributes,
+      },
+      css,
       type,
       validations,
       $value: value,
-      attr_constructorName: "TextInput",
       ...updates,
     },
     ...hooks

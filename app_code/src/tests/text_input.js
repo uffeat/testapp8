@@ -48,7 +48,8 @@ await (async () => {
           name: "my_email",
           type: "email",
           required: true,
-          ["css_rounded-end"]: true,
+          /* Negative z-index to allow password managers on top */
+          css: "roundedEnd.z-n1",
         })
       ),
       InvalidFeedback({ for_name: "my_email" })
