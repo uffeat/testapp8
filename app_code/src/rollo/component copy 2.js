@@ -30,52 +30,6 @@ function add_css_classes(...args) {
 }
 
 /* */
-function add_event_handlers(updates) {
-  if (updates) {
-    Object.entries(updates)
-      .filter(([key, value]) => value !== undefined && key.startsWith(ON))
-      .forEach(([key, value]) =>
-        this.addEventListener(key.slice(ON.length), value)
-      );
-  }
-  return this;
-}
-
-/* */
-function update_attributes(updates) {
-  if (updates) {
-    Object.entries(updates)
-      .filter(([key, value]) => value !== undefined && key.startsWith(ATTR))
-      .forEach(([key, value]) => {
-        const attr_key = camel_to_kebab(key.slice(ATTR.length));
-        if (value === true) {
-          this.setAttribute(attr_key, "");
-        } else if ([false, null].includes(key)) {
-          this.removeAttribute(attr_key);
-        } else {
-          this.setAttribute(attr_key, value);
-        }
-      });
-  }
-  return this;
-}
-
-/* */
-function update_css_classes(updates) {
-  if (updates) {
-    Object.entries(updates)
-      .filter(
-        ([key, value]) => value !== undefined && key.startsWith(CSS_CLASS)
-      )
-      .forEach(([key, value]) => {
-        const css_class = camel_to_kebab(key.slice(CSS_CLASS.length));
-        this.classList[value ? "add" : "remove"](css_class);
-      });
-  }
-  return this;
-}
-
-/* */
 function update_properties(updates) {
   if (updates) {
     Object.entries(updates)
@@ -183,18 +137,13 @@ export const component = new (class {
     return this.create(tag, updates);
   };
 
-  create_native = (
-    arg,
-    { css, hooks, parent, text, ...updates } = {},
-    ..._hooks
-  ) => {
+  create_native = (arg, { css, hooks, parent, text, ...updates } = {}, ..._hooks) => {
     const [tag, ...css_classes] = arg.split(".");
     const element = document.createElement(tag);
 
     /* Add css classes */
     add_css_classes.call(element, css);
     add_css_classes.call(element, css_classes);
-    update_css_classes.call(element, updates);
 
     /* Handle special prop kwargs */
     if (parent && element.parentElement !== parent) {
@@ -204,16 +153,38 @@ export const component = new (class {
       element.textContent = text;
     }
 
-    /* Set properties */
-    update_properties.call(element, updates);
 
-    /* Set attributes  */
-    update_attributes.call(element, updates);
-
-    /* Add event handlers */
-    add_event_handlers.call(element, updates);
-
-    
+    /* Apply updates */
+    for (const [key, value] of Object.entries(updates)) {
+      if (value === undefined) continue;
+      if (key.startsWith("_")) {
+        element[key] = value;
+      } else if (key in element) {
+        element[key] = value;
+      } else if (key in element.style) {
+        element.style[key] = value;
+      } else if (key.startsWith(ATTR)) {
+        const attr_key = camel_to_kebab(key.slice(ATTR.length));
+        if (value === true) {
+          element.setAttribute(attr_key, "");
+        } else {
+          element.setAttribute(attr_key, value);
+        }
+      } else if (key.startsWith(CSS_CLASS)) {
+        const css_class = camel_to_kebab(key.slice(CSS_CLASS.length));
+        element.classList[value ? "add" : "remove"](css_class);
+      } 
+      
+      else if (key.startsWith(ON)) {
+        element.addEventListener(key.slice(ON.length), value);
+      } 
+      
+      
+      
+       else {
+        throw new Error(`Invalid key: ${key}`);
+      }
+    }
     /* Apply hooks */
     if (hooks) {
       _hooks = [...hooks, ..._hooks];
@@ -494,10 +465,6 @@ export const component = new (class {
         return this;
       };
 
-      add_event_handlers = (updates) => {
-        return add_event_handlers.call(this, updates);
-      };
-
       /* */
       call = (...hooks) => {
         for (const hook of hooks) {
@@ -564,16 +531,44 @@ export const component = new (class {
       /* Updates props, attributes and state. Chainable. */
       update = ({ css, hooks, ...updates }) => {
         /* Props */
-        this.update_properties(updates);
+        Object.entries(updates)
+          .filter(
+            ([key, value]) =>
+              value !== undefined &&
+              !key.startsWith($) &&
+              !key.startsWith(ATTR) &&
+              !key.startsWith(ON) &&
+              !key.startsWith(CSS_CLASS) &&
+              !key.startsWith(CSS_VAR)
+          )
+          .forEach(([key, value]) => {
+            if (key.startsWith("_")) {
+              this[key] = value;
+            } else if (key in this) {
+              this[key] = value;
+            } else if (key in this.style) {
+              this.style[key] = value;
+            } else {
+              throw new Error(`Invalid key: ${key}`);
+            }
+          });
 
         /* Attributes */
-        this.update_attributes(updates);
+        Object.entries(updates)
+          .filter(([key, value]) => key.startsWith(ATTR))
+          .forEach(
+            ([key, value]) => (this.attribute[key.slice(ATTR.length)] = value)
+          );
 
         /* CSS classes (multiple) */
         this.add_css_classes(css);
 
         /* CSS classes (individual) */
-        this.update_css_classes(updates);
+        Object.entries(updates)
+          .filter(([key, value]) => key.startsWith(CSS_CLASS))
+          .forEach(
+            ([key, value]) => (this.css[key.slice(CSS_CLASS.length)] = value)
+          );
 
         /* CSS vars */
         Object.entries(updates)
@@ -583,7 +578,9 @@ export const component = new (class {
           );
 
         /* Handlers */
-        this.add_event_handlers(updates);
+        Object.entries(updates)
+          .filter(([key, value]) => key.startsWith(ON))
+          .forEach(([key, value]) => (this.on[key.slice(ON.length)] = value));
 
         /* Reactive state */
         const state = Object.fromEntries(
@@ -599,18 +596,6 @@ export const component = new (class {
         }
 
         return this;
-      };
-
-      update_css_classes = (updates) => {
-        return update_css_classes.call(this, updates);
-      };
-
-      update_attributes = (updates) => {
-        return update_attributes.call(this, updates);
-      };
-
-      update_properties = (updates) => {
-        return update_properties.call(this, updates);
       };
     };
     return cls;
