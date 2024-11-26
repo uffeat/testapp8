@@ -28,13 +28,14 @@ function add_css(...args) {
     if (css_classes && css_classes.length > 0) {
       if (Array.isArray(css_classes)) {
         this.classList.add(
-          ...css_classes
-            .filter((c) => c !== undefined)
-            .map((c) => camel_to_kebab(c))
+          ...css_classes.filter((c) => c).map((c) => camel_to_kebab(c))
         );
       } else {
         this.classList.add(
-          ...css_classes.split(".").map((c) => camel_to_kebab(c))
+          ...css_classes
+            .split(".")
+            .filter((c) => c)
+            .map((c) => camel_to_kebab(c))
         );
       }
     }
@@ -131,16 +132,7 @@ Chainable. */
 function update_css(css) {
   if (css) {
     if (Array.isArray(css) || typeof css === "string") {
-
-
-
-
       add_css.call(this, css);
-
-
-
-
-      
     } else {
       Object.entries(css)
         .filter(([key, value]) => value !== undefined)
@@ -282,7 +274,7 @@ export const component = new (class Controller {
   ) => {
     const [tag, ...css_classes] = arg.split(".");
     const element = document.createElement(tag);
-    update_css.call(element, css_classes);
+    add_css.call(element, css_classes);
     update_css.call(element, css);
 
     if (parent && element.parentElement !== parent) {
@@ -312,7 +304,7 @@ export const component = new (class Controller {
       return this.create_native(arg, { attributes, css, ...updates }, ...hooks);
     }
     const element = new (this.get(tag))(updates, ...hooks);
-    element.update_css(css_classes);
+    element.add_css(css_classes);
     element.update({ attributes, css, ...updates });
     element.call(...hooks);
     return element;
