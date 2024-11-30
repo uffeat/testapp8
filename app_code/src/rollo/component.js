@@ -8,6 +8,11 @@ const $ = "$";
 const CSS_VAR = "__";
 const ON = "on_";
 
+
+/* Returns kebab-interpretation of camel.
+First digit in digit sequences are treated as upper-case characters,
+i.e., p10 -> p-10. This often (but not always) the desired behaviour, 
+when dealing with css classes. */
 function camel_to_kebab(camel) {
   return camel
     .replace(/([a-z])([A-Z0-9])/g, "$1-$2")
@@ -178,7 +183,7 @@ function update_properties(updates) {
 }
 
 /* Utility for authoring web components and instantiating elements. */
-export const component = new (class Controller {
+export const Component = new (class {
   get registry() {
     return this.#registry;
   }
@@ -338,23 +343,32 @@ export const component = new (class Controller {
         /* Identify as web component. */
         this.setAttribute("web-component", "");
         this.#set_connected = this.reactive.protected.add("connected");
+        
+        
+        
         /* Show state as data attribute */
+        this.effects.add((data) => {
+          for (const [key, { current, previous }] of Object.entries(data)) {
+            if (
+              current === null ||
+              ["boolean", "number", "string"].includes(typeof current)
+            ) {
+              this.attribute[`state-${key}`] = current;
+            }
+          }
+        });
+
+        /* Set up automatic prop updates from $-prefixed state */
         this.effects.add((data) => {
           const updates = {};
           for (const [key, { current, previous }] of Object.entries(data)) {
             if (key && key.startsWith($)) {
               updates[key.slice($.length)] = current;
-            } else {
-              if (
-                current === null ||
-                ["boolean", "number", "string"].includes(typeof current)
-              ) {
-                this.attribute[`state-${key}`] = current;
-              }
-            }
+            } 
           }
-          this.update(updates);
+          this.update_properties(updates);
         });
+        
       }
 
       connectedCallback() {
@@ -624,9 +638,10 @@ export const component = new (class Controller {
   };
 })();
 
-export const create = component.create;
+/* Short-hand */
+export const create = Component.create;
 
-component.factories.add(shadow, (tag) => {
+Component.factories.add(shadow, (tag) => {
   const element = document.createElement(tag);
   try {
     element.attachShadow({ mode: "open" });
@@ -636,15 +651,15 @@ component.factories.add(shadow, (tag) => {
   }
 });
 
-component.factories.add(text, (tag) => {
+Component.factories.add(text, (tag) => {
   const element = document.createElement(tag);
   return "textContent" in element;
 });
-component.factories.add(chain);
-component.factories.add(children);
+Component.factories.add(chain);
+Component.factories.add(children);
 
 /*
 EXAMPLES
 
-const Component = component.author('x-stuff', HTMLElement)
+const Component = Component.author('x-stuff', HTMLElement)
 */

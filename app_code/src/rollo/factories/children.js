@@ -64,7 +64,7 @@ export const children = (parent) => {
           return this.#use;
         }
 
-        /* Contols useage of child observer.
+        /* Contols usage of child observer.
         falsy: Stops observer.
         true: Runs observer and keeps it running.
         1: Runs observer, whenever component is connected. */
