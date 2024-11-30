@@ -34,11 +34,11 @@ const factory = (parent) => {
 
       this.effects.add((data) => {
         if (this.$.connected) {
-          ////console.log("Connected"); ////
+          
 
           this.sheet = this.parentElement;
         } else {
-          ////console.log("Not connected"); ////
+          
 
           this.sheet = null;
         }

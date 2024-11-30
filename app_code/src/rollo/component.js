@@ -8,7 +8,6 @@ const $ = "$";
 const CSS_VAR = "__";
 const ON = "on_";
 
-
 /* Returns kebab-interpretation of camel.
 First digit in digit sequences are treated as upper-case characters,
 i.e., p10 -> p-10. This often (but not always) the desired behaviour, 
@@ -343,9 +342,6 @@ export const Component = new (class {
         /* Identify as web component. */
         this.setAttribute("web-component", "");
         this.#set_connected = this.reactive.protected.add("connected");
-        
-        
-        
         /* Show state as data attribute */
         this.effects.add((data) => {
           for (const [key, { current, previous }] of Object.entries(data)) {
@@ -357,18 +353,16 @@ export const Component = new (class {
             }
           }
         });
-
         /* Set up automatic prop updates from $-prefixed state */
         this.effects.add((data) => {
           const updates = {};
           for (const [key, { current, previous }] of Object.entries(data)) {
             if (key && key.startsWith($)) {
               updates[key.slice($.length)] = current;
-            } 
+            }
           }
           this.update_properties(updates);
         });
-        
       }
 
       connectedCallback() {
