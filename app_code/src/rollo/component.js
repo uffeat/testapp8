@@ -3,6 +3,13 @@ import { base } from "rollo/factories/base";
 import { update } from "rollo/factories/update";
 import { state } from "rollo/factories/state";
 import { hooks } from "rollo/factories/hooks";
+import { parent } from "rollo/factories/parent";
+
+import { clear } from "rollo/factories/clear";
+import { css_classes } from "rollo/factories/css_classes";
+import { find } from "rollo/factories/find";
+import { send } from "rollo/factories/send";
+
 import { shadow } from "rollo/factories/shadow";
 import { text } from "rollo/factories/text";
 import { chain } from "rollo/factories/chain";
@@ -142,6 +149,13 @@ Component.factories.add(base);
 Component.factories.add(update);
 Component.factories.add(state)
 Component.factories.add(hooks);
+Component.factories.add(parent);
+Component.factories.add(clear);
+Component.factories.add(css_classes);
+Component.factories.add(find);
+Component.factories.add(send);
+
+
 Component.factories.add(text, (tag) => {
   const element = document.createElement(tag);
   return "textContent" in element;

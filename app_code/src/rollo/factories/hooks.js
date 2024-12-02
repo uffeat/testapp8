@@ -14,7 +14,7 @@ export const hooks = (parent) => {
     - Conditionally add one or more children
     undefined hooks are ignored to support iife's. 
     Chainable. */
-    call = (...hooks) => {
+    call(...hooks) {
       for (const hook of hooks) {
         if (hook === undefined) {
           continue;

@@ -1,4 +1,6 @@
 const $ = "$";
+const ATTRIBUTE = 'attribute_'
+const CSS_CLASS = '.'
 const CSS_VAR = "__";
 const ON = "on_";
 
@@ -20,34 +22,147 @@ export const update = (parent) => {
       super(...args);
     }
 
-    
+    /* Getter/setter interface for component-scoped css vars. */
+    get __() {
+      return this.#__;
+    }
+    #__ = new Proxy(this, {
+      get(target, key) {
+        return getComputedStyle(target).getPropertyValue(`--${key}`).trim();
+      },
+      set(target, key, value) {
+        if (typeof value === "function") {
+          value = value.call(target);
+        }
+        if (value === undefined) return true;
+        if (value) {
+          target.style.setProperty(`--${key}`, value);
+        } else {
+          target.style.removeProperty(`--${key}`);
+        }
+        return true;
+      },
+    });
 
-    /* Updates properties, attributes, css classes, css vars and handlers. 
-    Chainable. */
+    /* Getter/setter interface to attributes. */
+    get attribute() {
+      return this.#attribute;
+    }
+    #attribute = new Proxy(this, {
+      get(target, key) {
+        key = camel_to_kebab(key);
+        if (!target.hasAttribute(key)) {
+          return null;
+        }
+        const value = target.getAttribute(key);
+        if (value === "") {
+          return true;
+        }
+        const number = Number(value);
+        if (typeof number === "number" && number === number) {
+          return number;
+        }
+        return value;
+      },
+      set(target, key, value) {
+        if (typeof value === "function") {
+          value = value.call(target);
+        }
+        if (value === undefined) return true;
+        key = camel_to_kebab(key);
+        if ([false, null].includes(value)) {
+          /* Remove attr */
+          target.removeAttribute(key);
+          return true;
+        }
+        if (["", true].includes(value)) {
+          /* Set no-value attr */
+          target.setAttribute(key, "");
+          return true;
+        }
+        /* Set value attr */
+        if (!["number", "string"].includes(typeof value)) {
+          throw new Error(`Invalid attr value: ${value}`);
+        }
+        target.setAttribute(key, value);
+        return true;
+      },
+    });
+
+    /* Getter/setter interface to css classes. */
+    get css() {
+      return this.#css;
+    }
+    #css = new Proxy(this, {
+      get(target, css_class) {
+        return target.classList.contains(camel_to_kebab(css_class));
+      },
+      set(target, css_class, value) {
+        if (typeof value === "function") {
+          value = value.call(target);
+        }
+        if (value === undefined) return true;
+        target.classList[value ? "add" : "remove"](camel_to_kebab(css_class));
+        return true;
+      },
+    });
+
+    /* Syntactic sugar for event handler registration. */
+    get on() {
+      return this.#on;
+    }
+    #on = new Proxy(this, {
+      get() {
+        throw new Error(`'on' is write-only.`);
+      },
+      set(target, type, handler) {
+        target.addEventListener(type, handler);
+        return true;
+      },
+    });
+
+    /* Updates properties, attributes, css classes, css vars and handlers. */
     update({ attributes, css, ...updates } = {}) {
+      
+      
       /* Props */
       this.#update_properties(updates);
+      
+      
       /* Attributes */
+      Object.entries(updates)
+        .filter(([key, value]) => key.startsWith(ATTRIBUTE))
+        .forEach(
+          ([key, value]) => (this.attribute[key.slice(ATTRIBUTE.length)] = value)
+        );
       this.#update_attributes(attributes);
+
+
+
       /* CSS classes */
+      Object.entries(updates)
+        .filter(([key, value]) => key.startsWith(CSS_CLASS))
+        .forEach(
+          ([key, value]) => (this.css[key.slice(CSS_CLASS.length)] = value)
+        );
       this.#update_css(css);
+
+
       /* CSS vars */
       Object.entries(updates)
         .filter(([key, value]) => key.startsWith(CSS_VAR))
         .forEach(
           ([key, value]) => (this.__[key.slice(CSS_VAR.length)] = value)
         );
+
+      
       /* Handlers */
       this.#add_handlers(updates);
-      return this;
     }
 
     /* Adds one or more event handlers from object. 
     Keys should be prefixed with 'on_'.
     undefined handlers are ignored to support iife's.
-    Chainable.
-    Example: 
-    my_component.add_handlers({on_click: () => console.log('Clicked!')})
     */
     #add_handlers = (updates) => {
       if (updates) {
@@ -57,10 +172,7 @@ export const update = (parent) => {
             this.addEventListener(key.slice(ON.length), value)
           );
       }
-      return this;
     };
-
-    
 
     /* Updates one or more element attributes from object. 
     Items with undefined values are ignored to support iife's.
@@ -120,8 +232,11 @@ export const update = (parent) => {
             ([key, value]) =>
               value !== undefined &&
               !key.startsWith($) &&
-              !key.startsWith(ON) &&
-              !key.startsWith(CSS_VAR)
+              !key.startsWith(ATTRIBUTE) &&
+              !key.startsWith(CSS_CLASS) &&
+              !key.startsWith(CSS_VAR) &&
+              !key.startsWith(ON)
+              
           )
           .forEach(([key, value]) => {
             if (key.startsWith("_")) {

@@ -17,17 +17,36 @@ import { Reactive } from "rollo/reactive";
 // ... then tooltip
 // ... then scrollspy
 
-const root = create("div", { id: "root", parent: document.body });
-const button = create("button.btn", { parent: root, $$text: "Hello World", $foo: 'FOO' }, function() {
-  console.log(this)
+const root = create("div", {
+  id: "root",
+  parent: document.body,
+  on_click: (event) => {
+    console.log("Clicked");
+  },
 });
+const button = create(
+  "button.btn",
+  { 
+    parent: root, 
+    $$text: "Hello World", 
+    $foo: "FOO", 
+    attribute_bar: 'BAR',
+    //'.btn-primary': true,
+    },
+  function () {
+    console.log(this);
+  }
+);
+
+button.css_classes.add('btn-primary')
+
+
 
 button.effects.add((data) => {
-  console.log('foo:', button.$.foo)
-}, 'foo')
+  console.log("foo:", button.$.foo);
+}, "foo");
 
-button.$.foo = 'FOOFOO'
-
+button.$.foo = "FOOFOO";
 
 /* Enable tests */
 if (import.meta.env.DEV) {
