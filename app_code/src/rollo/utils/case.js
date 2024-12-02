@@ -5,6 +5,17 @@ export function camel_to_kebab(camel) {
   return camel.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
 }
 
+/* Returns kebab-interpretation of camel.
+First digit in digit sequences are treated as upper-case characters,
+i.e., p10 -> p-10. This often (but not always) the desired behaviour, 
+when dealing with css classes. */
+export function camel_to_kebab_css(camel) {
+  return camel
+    .replace(/([a-z])([A-Z0-9])/g, "$1-$2")
+    .replace(/([0-9])([a-zA-Z])/g, "$1-$2")
+    .toLowerCase();
+}
+
 
 
 export function camel_to_snake(camel) {

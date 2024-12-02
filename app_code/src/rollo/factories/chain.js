@@ -1,6 +1,6 @@
 // TODO Rethink as mixin, composition, decorator and/or util - or functional web component!
 
-export const chain = (parent) => {
+export const chain = (parent, config, ...factories) => {
   /* Factory with prototype chain utils */
   const cls = class Chain extends parent {
     constructor(...args) {

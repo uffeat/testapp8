@@ -1,5 +1,5 @@
 /* Base factory for all web components. */
-export const hooks = (parent) => {
+export const hooks = (parent, config, ...factories) => {
   const cls = class Hooks extends parent {
     constructor(...args) {
       super(...args);

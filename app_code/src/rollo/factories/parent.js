@@ -1,5 +1,5 @@
 /* Factory for all web components. */
-export const parent = (parent) => {
+export const parent = (parent, config, ...factories) => {
   const cls = class Parent extends parent {
     constructor(...args) {
       super(...args);

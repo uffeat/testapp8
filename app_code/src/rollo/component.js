@@ -1,19 +1,21 @@
-import { Reactive } from "rollo/reactive";
 import { base } from "rollo/factories/base";
-import { update } from "rollo/factories/update";
-import { state } from "rollo/factories/state";
-import { hooks } from "rollo/factories/hooks";
-import { parent } from "rollo/factories/parent";
-
 import { clear } from "rollo/factories/clear";
+import { connected } from "rollo/factories/connected";
 import { css_classes } from "rollo/factories/css_classes";
 import { find } from "rollo/factories/find";
+import { hooks } from "rollo/factories/hooks";
+import { observer } from "rollo/factories/observer";
+import { parent } from "rollo/factories/parent";
 import { send } from "rollo/factories/send";
-
 import { shadow } from "rollo/factories/shadow";
+import { state } from "rollo/factories/state";
 import { text } from "rollo/factories/text";
-import { chain } from "rollo/factories/chain";
-import { children } from "rollo/factories/children";
+import { update } from "rollo/factories/update";
+
+import { constants } from "rollo/constants";
+import { can_have_shadow } from "rollo/utils/can_have_shadow";
+
+const STATE_CSS_CLASS = `${constants.STATE}${constants.CSS_CLASS}`;
 
 /* Utility for authoring web components and instantiating elements. */
 export const Component = new (class {
@@ -62,13 +64,13 @@ export const Component = new (class {
   })();
 
   /* Builds, registers and returns web component from native base and factories. */
-  author = (tag, native, ...factories) => {
-    const _factories = [...factories]
-    let cls = factories.shift()(native, ..._factories);
+  author = (tag, native, config, ...factories) => {
+    const _factories = [...factories];
+    let cls = factories.shift()(native, config, ..._factories);
     const names = [cls.name];
     const chain = [native, cls];
     for (const factory of factories) {
-      cls = factory(cls, ..._factories);
+      cls = factory(cls, config, ..._factories);
       if (names.includes(cls.name)) {
         console.warn(
           `Factory class names should be unique for better traceability. Got duplicate: ${cls.name}`
@@ -78,8 +80,7 @@ export const Component = new (class {
       chain.push(cls);
     }
     /* Create __chain__ as instance prop that returns a frozen array of prototypes in mro.
-    NOTE __chain__ represents the prototype chain as created here. 
-    If the chain is subsequently tinkered with, use the 'chain' prop provided by the chain factory. */
+    __chain__ represents the prototype chain as created here. */
     const __chain__ = Object.freeze(chain.reverse());
     Object.defineProperty(cls.prototype, "__chain__", {
       configurable: true,
@@ -88,6 +89,16 @@ export const Component = new (class {
         return __chain__;
       },
     });
+
+    const __config__ = Object.freeze(config || {});
+    Object.defineProperty(cls.prototype, "__config__", {
+      configurable: true,
+      enumerable: false,
+      get: function () {
+        return __config__;
+      },
+    });
+
     return this.registry.add(tag, cls);
   };
 
@@ -119,7 +130,28 @@ export const Component = new (class {
       element.classList.add(...css_classes);
     }
     element.update({ attributes, css, ...updates });
-    element.call(...hooks);
+
+    element.css_classes.add(
+      ...hooks.filter(
+        (hook) =>
+          typeof hook === "string" &&
+          (hook.startsWith(constants.CSS_CLASS) ||
+            hook.startsWith(STATE_CSS_CLASS))
+      )
+    );
+
+    element.call(
+      ...hooks.filter((hook) => {
+        if (
+          typeof hook === "string" &&
+          (hook.startsWith(constants.CSS_CLASS) ||
+            hook.startsWith(STATE_CSS_CLASS))
+        ) {
+          return false;
+        }
+        return true;
+      })
+    );
     return element;
   };
 
@@ -138,50 +170,34 @@ export const Component = new (class {
       throw new Error(`Invalid tag: ${tag}`);
     }
     const factories = this.factories.get(tag);
-    return this.author(tag, native, ...factories);
+    return this.author(tag, native, {}, ...factories);
   };
 })();
 
 /* Short-hand */
 export const create = Component.create;
 
+
+/* Add factories; order matters */
 Component.factories.add(base);
 Component.factories.add(update);
-Component.factories.add(state)
-Component.factories.add(hooks);
-Component.factories.add(parent);
+Component.factories.add(state);
+/* Add factories; order does not matter */
 Component.factories.add(clear);
+Component.factories.add(connected);
 Component.factories.add(css_classes);
 Component.factories.add(find);
+Component.factories.add(hooks);
+Component.factories.add(observer);
+Component.factories.add(parent);
 Component.factories.add(send);
-
-
+Component.factories.add(shadow, can_have_shadow);
 Component.factories.add(text, (tag) => {
   const element = document.createElement(tag);
   return "textContent" in element;
 });
 
-/*
-Component.factories.add(shadow, (tag) => {
-  const element = document.createElement(tag);
-  try {
-    element.attachShadow({ mode: "open" });
-    return true;
-  } catch {
-    return false;
-  }
-});
-*/
 
-
-
-/*
-Component.factories.add(chain);
-*/
-
-/*
-Component.factories.add(children);
-*/
 
 /*
 EXAMPLES

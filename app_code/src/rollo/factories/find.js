@@ -1,5 +1,5 @@
 /* Factory for all web components. */
-export const find = (parent) => {
+export const find = (parent, config, ...factories) => {
   const cls = class Find extends parent {
     constructor(...args) {
       super(...args);

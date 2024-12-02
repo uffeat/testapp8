@@ -1,57 +1,44 @@
 import { Reactive } from "rollo/reactive";
 import { update } from "rollo/factories/update";
-
-const $ = "$";
+import { constants } from "rollo/constants";
 
 /* Factory for all web components. */
-export const state = (parent, ...factories) => {
+export const state = (parent, config, ...factories) => {
   if (!factories.includes(update)) {
-    throw new Error(`state factory requires update factory`)
+    throw new Error(`state factory requires update factory`);
   }
 
-
   const cls = class State extends parent {
-    #set_connected;
     constructor(...args) {
       super(...args);
-
-      console.log("state constructor"); ////
-
-      this.#set_connected = this.reactive.protected.add("connected");
-      /* Show state as data attribute */
+      /* Show state as attribute */
       this.effects.add((data) => {
         for (const [key, { current, previous }] of Object.entries(data)) {
-          if (key.startsWith($)) {
+          if (key.startsWith(constants.STATE)) {
             continue;
           }
           if (
             current === null ||
             ["boolean", "number", "string"].includes(typeof current)
           ) {
-            this.attribute[`state-${key}`] = current;
+            if (key.startsWith("__") && key.endsWith("__")) {
+              this.attribute[key] = current;
+            } else {
+              this.attribute[`state-${key}`] = current;
+            }
           }
         }
       });
-      /* Set up automatic prop updates from $-prefixed state */
+      /* Set up automatic prop updates from NATIVE-prefixed state */
       this.effects.add((data) => {
         const updates = {};
         for (const [key, { current, previous }] of Object.entries(data)) {
-          if (key && key.startsWith($)) {
-            updates[key.slice($.length)] = current;
+          if (key && key.startsWith(constants.NATIVE)) {
+            updates[key.slice(constants.NATIVE.length)] = current;
           }
         }
         this.update(updates);
       });
-    }
-
-    connectedCallback() {
-      super.connectedCallback && super.connectedCallback();
-      this.#set_connected(true);
-    }
-
-    disconnectedCallback() {
-      super.disconnectedCallback && super.disconnectedCallback();
-      this.#set_connected(false);
     }
 
     /* Returns an object, from which single state items can be retrieved 
@@ -78,8 +65,8 @@ export const state = (parent, ...factories) => {
       /* Reactive state */
       const state = Object.fromEntries(
         Object.entries(updates)
-          .filter(([key, value]) => key.startsWith($))
-          .map(([key, value]) => [key.slice(1), value])
+          .filter(([key, value]) => key.startsWith(constants.STATE))
+          .map(([key, value]) => [key.slice(constants.STATE.length), value])
       );
       this.reactive.update(state);
       return this;

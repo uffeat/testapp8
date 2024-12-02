@@ -1,5 +1,5 @@
 /* Factory for all web components. */
-export const send = (parent) => {
+export const send = (parent, config, ...factories) => {
   const cls = class Send extends parent {
     constructor(...args) {
       super(...args);

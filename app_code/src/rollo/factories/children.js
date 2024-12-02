@@ -1,7 +1,7 @@
 // TODO Rethink as mixin, composition, decorator and/or util - or functional web component!
 
 
-export const children = (parent) => {
+export const children = (parent, config, ...factories) => {
   /* Factory with MutationsObserver  */
   const cls = class Children extends parent {
     #child_observer;

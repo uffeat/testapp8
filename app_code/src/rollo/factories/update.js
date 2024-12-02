@@ -1,22 +1,11 @@
-const $ = "$";
-const ATTRIBUTE = 'attribute_'
-const CSS_CLASS = '.'
-const CSS_VAR = "__";
-const ON = "on_";
+import { constants } from "rollo/constants";
+import { camel_to_kebab, camel_to_kebab_css } from "rollo/utils/case";
 
-/* Returns kebab-interpretation of camel.
-First digit in digit sequences are treated as upper-case characters,
-i.e., p10 -> p-10. This often (but not always) the desired behaviour, 
-when dealing with css classes. */
-function camel_to_kebab(camel) {
-  return camel
-    .replace(/([a-z])([A-Z0-9])/g, "$1-$2")
-    .replace(/([0-9])([a-zA-Z])/g, "$1-$2")
-    .toLowerCase();
-}
+
+
 
 /* Factory for all web components. */
-export const update = (parent) => {
+export const update = (parent, config, ...factories) => {
   const cls = class Update extends parent {
     constructor(...args) {
       super(...args);
@@ -95,14 +84,14 @@ export const update = (parent) => {
     }
     #css = new Proxy(this, {
       get(target, css_class) {
-        return target.classList.contains(camel_to_kebab(css_class));
+        return target.classList.contains(camel_to_kebab_css(css_class));
       },
       set(target, css_class, value) {
         if (typeof value === "function") {
           value = value.call(target);
         }
         if (value === undefined) return true;
-        target.classList[value ? "add" : "remove"](camel_to_kebab(css_class));
+        target.classList[value ? "add" : "remove"](camel_to_kebab_css(css_class));
         return true;
       },
     });
@@ -131,9 +120,9 @@ export const update = (parent) => {
       
       /* Attributes */
       Object.entries(updates)
-        .filter(([key, value]) => key.startsWith(ATTRIBUTE))
+        .filter(([key, value]) => key.startsWith(constants.ATTRIBUTE))
         .forEach(
-          ([key, value]) => (this.attribute[key.slice(ATTRIBUTE.length)] = value)
+          ([key, value]) => (this.attribute[key.slice(constants.ATTRIBUTE.length)] = value)
         );
       this.#update_attributes(attributes);
 
@@ -141,18 +130,18 @@ export const update = (parent) => {
 
       /* CSS classes */
       Object.entries(updates)
-        .filter(([key, value]) => key.startsWith(CSS_CLASS))
+        .filter(([key, value]) => key.startsWith(constants.CSS_CLASS))
         .forEach(
-          ([key, value]) => (this.css[key.slice(CSS_CLASS.length)] = value)
+          ([key, value]) => (this.css[key.slice(constants.CSS_CLASS.length)] = value)
         );
       this.#update_css(css);
 
 
       /* CSS vars */
       Object.entries(updates)
-        .filter(([key, value]) => key.startsWith(CSS_VAR))
+        .filter(([key, value]) => key.startsWith(constants.CSS_VAR))
         .forEach(
-          ([key, value]) => (this.__[key.slice(CSS_VAR.length)] = value)
+          ([key, value]) => (this.__[key.slice(constants.CSS_VAR.length)] = value)
         );
 
       
@@ -167,9 +156,9 @@ export const update = (parent) => {
     #add_handlers = (updates) => {
       if (updates) {
         Object.entries(updates)
-          .filter(([key, value]) => value !== undefined && key.startsWith(ON))
+          .filter(([key, value]) => value !== undefined && key.startsWith(constants.HANDLER))
           .forEach(([key, value]) =>
-            this.addEventListener(key.slice(ON.length), value)
+            this.addEventListener(key.slice(constants.HANDLER.length), value)
           );
       }
     };
@@ -211,7 +200,7 @@ export const update = (parent) => {
           Object.entries(css)
             .filter(([key, value]) => value !== undefined)
             .forEach(([key, value]) => {
-              this.classList[value ? "add" : "remove"](camel_to_kebab(key));
+              this.classList[value ? "add" : "remove"](camel_to_kebab_css(key));
             });
         }
       }
@@ -231,11 +220,11 @@ export const update = (parent) => {
           .filter(
             ([key, value]) =>
               value !== undefined &&
-              !key.startsWith($) &&
-              !key.startsWith(ATTRIBUTE) &&
-              !key.startsWith(CSS_CLASS) &&
-              !key.startsWith(CSS_VAR) &&
-              !key.startsWith(ON)
+              !key.startsWith(constants.STATE) &&
+              !key.startsWith(constants.ATTRIBUTE) &&
+              !key.startsWith(constants.CSS_CLASS) &&
+              !key.startsWith(constants.CSS_VAR) &&
+              !key.startsWith(constants.HANDLER)
               
           )
           .forEach(([key, value]) => {

@@ -1,6 +1,6 @@
 
 /* Base factory for all web components. */
-export const base = (parent) => {
+export const base = (parent, config, ...factories) => {
   /* Base factory that 'component' relies on */
   const cls = class Base extends parent {
     constructor(...args) {

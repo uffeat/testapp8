@@ -1,20 +1,19 @@
-/* Returns kebab-interpretation of camel.
-First digit in digit sequences are treated as upper-case characters,
-i.e., p10 -> p-10. This often (but not always) the desired behaviour, 
-when dealing with css classes. */
-function camel_to_kebab(camel) {
-  return camel
-    .replace(/([a-z])([A-Z0-9])/g, "$1-$2")
-    .replace(/([0-9])([a-zA-Z])/g, "$1-$2")
-    .toLowerCase();
-}
+import { state } from "rollo/factories/state";
+import { constants } from "rollo/constants";
+import { camel_to_kebab_css } from "rollo/utils/case";
+
+
 
 /*
 TODO css_classes.remove/css_classes.has
 */
 
 /* Factory for all web components. */
-export const css_classes = (parent) => {
+export const css_classes = (parent, config, ...factories) => {
+  if (!factories.includes(state)) {
+    throw new Error(`css_classes factory requires state factory`)
+  }
+
   const cls = class CssClasses extends parent {
     #css_classes;
     constructor(...args) {
@@ -29,20 +28,37 @@ export const css_classes = (parent) => {
         undefined values are ignored to support iife's. 
         Chainable. */
         add = (...args) => {
-          for (const css_classes of args) {
-            if (css_classes && css_classes.length > 0) {
-              if (Array.isArray(css_classes)) {
-                component.classList.add(
-                  ...css_classes.filter((c) => c).map((c) => camel_to_kebab(c))
-                );
-              } else {
-                component.classList.add(
-                  ...css_classes
-                    .split(".")
-                    .filter((c) => c)
-                    .map((c) => camel_to_kebab(c))
-                );
+          for (const arg of args) {
+            if (arg === undefined) {
+              continue;
+            }
+            if (arg.length === 0) {
+              continue;
+            }
+
+            if (Array.isArray(arg)) {
+              component.classList.add(
+                ...arg.filter((c) => c).map((c) => camel_to_kebab_css(c))
+              );
+            } else if (typeof arg === "string") {
+              let class_string = arg;
+              if (class_string.startsWith(constants.STATE)) {
+                component.$[`${class_string}`] = true
+                continue
+
               }
+              if (class_string.startsWith(constants.CSS_CLASS)) {
+                class_string = class_string.slice(constants.CSS_CLASS.length)
+              }
+
+              component.classList.add(
+                ...class_string
+                  .split(".")
+                  .filter((c) => c)
+                  .map((c) => camel_to_kebab_css(c))
+              );
+            } else {
+              throw new Error(`Invalid arg: ${arg}`);
             }
           }
           return component;

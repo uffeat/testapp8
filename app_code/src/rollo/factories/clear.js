@@ -1,5 +1,5 @@
 /* Factory for all web components. */
-export const clear = (parent) => {
+export const clear = (parent, config, ...factories) => {
   const cls = class Clear extends parent {
     constructor(...args) {
       super(...args);

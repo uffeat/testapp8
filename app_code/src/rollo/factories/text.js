@@ -1,4 +1,4 @@
-export const text = (parent) => {
+export const text = (parent, config, ...factories) => {
   /* Factory for components with 'textContent' prop */
   const cls = class Text extends parent {
     constructor(...args) {

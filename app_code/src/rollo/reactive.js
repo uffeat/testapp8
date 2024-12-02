@@ -30,6 +30,7 @@ export class Reactive {
       #registry = {};
 
       add = (key, value) => {
+
         const set = (value) => {
           if (!reactive.#is_equal(value, reactive.#current[key])) {
             reactive.#update_stores({ [key]: value });
@@ -47,9 +48,17 @@ export class Reactive {
         this.#registry = {};
       };
 
+      get = (key) => {
+        return this.#registry[key]
+      }
+
       has = (key) => {
         return key in this.#registry;
       };
+
+      remove = (key) => {
+        delete this.#registry[key]
+      }
     })();
 
     /* Storage util for, potentially conditional, effect functions. */
