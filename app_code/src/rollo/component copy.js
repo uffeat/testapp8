@@ -5,16 +5,21 @@ import { chain } from "@/rollo/factories/chain";
 import { children } from "@/rollo/factories/children";
 
 const $ = "$";
-const ATTR = "attr_";
-const CSS_CLASS = "css_";
 const CSS_VAR = "__";
 const ON = "on_";
 
+/* Returns kebab-interpretation of camel.
+First digit in digit sequences are treated as upper-case characters,
+i.e., p10 -> p-10. This often (but not always) the desired behaviour, 
+when dealing with css classes. */
 function camel_to_kebab(camel) {
-  return camel.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
+  return camel
+    .replace(/([a-z])([A-Z0-9])/g, "$1-$2")
+    .replace(/([0-9])([a-zA-Z])/g, "$1-$2")
+    .toLowerCase();
 }
 
-/* Adds one or more css classes. 
+/* Adds one or more css classes.  
 Bind to element with call or bind.
 args can be:
 - Individual css class names
@@ -22,18 +27,21 @@ args can be:
 - Arrays of css class names
 undefined handlers are ignored to support iife's. 
 Chainable. */
-function add_css_classes(...args) {
+function add_css(...args) {
   for (const css_classes of args) {
     if (css_classes && css_classes.length > 0) {
       if (Array.isArray(css_classes)) {
-        this.classList.add(...css_classes.filter((c) => c !== undefined));
+        this.classList.add(
+          ...css_classes.filter((c) => c).map((c) => camel_to_kebab(c))
+        );
       } else {
-
-        console.log(css_classes)////
-
-        this.classList.add(...css_classes.split("."));
+        this.classList.add(
+          ...css_classes
+            .split(".")
+            .filter((c) => c)
+            .map((c) => camel_to_kebab(c))
+        );
       }
-      
     }
   }
   return this;
@@ -47,7 +55,7 @@ Chainable.
 Example: 
 my_component.add_event_handlers({on_click: () => console.log('Clicked!')})
  */
-function add_event_handlers(updates) {
+function add_handlers(updates) {
   if (updates) {
     Object.entries(updates)
       .filter(([key, value]) => value !== undefined && key.startsWith(ON))
@@ -96,17 +104,16 @@ function call_hooks(...hooks) {
 
 /* Updates one or more element attributes from object. 
 Bind to element with call or bind.
-Keys should be prefixed with 'attr_'.
 Items with undefined values are ignored to support iife's.
 Items with false values removes the attribute.
 Items with true values add no-value attribute. 
 Chainable. */
-function update_attributes(updates) {
-  if (updates) {
-    Object.entries(updates)
-      .filter(([key, value]) => value !== undefined && key.startsWith(ATTR))
+function update_attributes(attributes) {
+  if (attributes) {
+    Object.entries(attributes)
+      .filter(([key, value]) => value !== undefined)
       .forEach(([key, value]) => {
-        const attr_key = camel_to_kebab(key.slice(ATTR.length));
+        const attr_key = camel_to_kebab(key);
         if (value === true) {
           this.setAttribute(attr_key, "");
         } else if ([false, null].includes(key)) {
@@ -121,22 +128,22 @@ function update_attributes(updates) {
 
 /* Updates one or more css classes from object. 
 Bind to element with call or bind.
-Keys should be prefixed with 'css_'.
 Items with undefined values are ignored to support iife's.
 Items with false values removes the css class.
 Items with true values adds the css class. 
 Camel-case keys are converted to kebab. 
 Chainable. */
-function update_css_classes(updates) {
-  if (updates) {
-    Object.entries(updates)
-      .filter(
-        ([key, value]) => value !== undefined && key.startsWith(CSS_CLASS)
-      )
-      .forEach(([key, value]) => {
-        const css_class = camel_to_kebab(key.slice(CSS_CLASS.length));
-        this.classList[value ? "add" : "remove"](css_class);
-      });
+function update_css(css) {
+  if (css) {
+    if (Array.isArray(css) || typeof css === "string") {
+      add_css.call(this, css);
+    } else {
+      Object.entries(css)
+        .filter(([key, value]) => value !== undefined)
+        .forEach(([key, value]) => {
+          this.classList[value ? "add" : "remove"](camel_to_kebab(key));
+        });
+    }
   }
   return this;
 }
@@ -156,9 +163,7 @@ function update_properties(updates) {
         ([key, value]) =>
           value !== undefined &&
           !key.startsWith($) &&
-          !key.startsWith(ATTR) &&
           !key.startsWith(ON) &&
-          !key.startsWith(CSS_CLASS) &&
           !key.startsWith(CSS_VAR)
       )
       .forEach(([key, value]) => {
@@ -177,7 +182,7 @@ function update_properties(updates) {
 }
 
 /* Utility for authoring web components and instantiating elements. */
-export const component = new (class Controller {
+export const Component = new (class {
   get registry() {
     return this.#registry;
   }
@@ -253,22 +258,29 @@ export const component = new (class Controller {
 
   /* Creates an returns element from object. 
   Supports rich in-line configuration, incl. hooks. */
-  create_from_object = ({css, hooks, tag = "div", ...updates } = {}) => {
-    hooks = hooks || []
-    return this.create(tag, {css, ...updates}, ...hooks);
+  create_from_object = ({
+    attributes,
+    css,
+    hooks,
+    tag = "div",
+    ...updates
+  } = {}) => {
+    hooks = hooks || [];
+    return this.create(tag, { attributes, css, ...updates }, ...hooks);
   };
 
   /* Creates and returns a native element. 
   Supports rich in-line configuration, incl. hooks. */
   create_native = (
     arg,
-    { css, parent, text, ...updates } = {},
+    { attributes, css, parent, text, ...updates } = {},
     ...hooks
   ) => {
     const [tag, ...css_classes] = arg.split(".");
     const element = document.createElement(tag);
-    add_css_classes.call(element, css, css_classes);
-    update_css_classes.call(element, updates);
+    add_css.call(element, css_classes);
+    update_css.call(element, css);
+
     if (parent && element.parentElement !== parent) {
       parent.append(element);
     }
@@ -276,8 +288,8 @@ export const component = new (class Controller {
       element.textContent = text;
     }
     update_properties.call(element, updates);
-    update_attributes.call(element, updates);
-    add_event_handlers.call(element, updates);
+    update_attributes.call(element, attributes);
+    add_handlers.call(element, updates);
     call_hooks.call(element, ...hooks);
     return element;
   };
@@ -287,22 +299,17 @@ export const component = new (class Controller {
   - Rich in-line configuration, incl. hooks.
   - Construction from objects.
   - On-demand authoring of non-autonomous web component. */
-  create = (arg, { css, ...updates } = {}, ...hooks) => {
+  create = (arg, { attributes, css, ...updates } = {}, ...hooks) => {
     if (typeof arg !== "string") {
       return this.create_from_object(arg);
     }
     const [tag, ...css_classes] = arg.split(".");
     if (tag === tag.toUpperCase()) {
-     
-      return this.create_native(
-        tag,
-        { css: [css, ...css_classes], ...updates },
-        ...hooks
-      );
+      return this.create_native(arg, { attributes, css, ...updates }, ...hooks);
     }
     const element = new (this.get(tag))(updates, ...hooks);
-    element.add_css_classes(css, css_classes);
-    element.update(updates);
+    element.add_css(css_classes);
+    element.update({ attributes, css, ...updates });
     element.call(...hooks);
     return element;
   };
@@ -337,20 +344,24 @@ export const component = new (class Controller {
         this.#set_connected = this.reactive.protected.add("connected");
         /* Show state as data attribute */
         this.effects.add((data) => {
+          for (const [key, { current, previous }] of Object.entries(data)) {
+            if (
+              current === null ||
+              ["boolean", "number", "string"].includes(typeof current)
+            ) {
+              this.attribute[`state-${key}`] = current;
+            }
+          }
+        });
+        /* Set up automatic prop updates from $-prefixed state */
+        this.effects.add((data) => {
           const updates = {};
           for (const [key, { current, previous }] of Object.entries(data)) {
             if (key && key.startsWith($)) {
               updates[key.slice($.length)] = current;
-            } else {
-              if (
-                current === null ||
-                ["boolean", "number", "string"].includes(typeof current)
-              ) {
-                this.attribute[`state-${key}`] = current;
-              }
             }
           }
-          this.update(updates);
+          this.update_properties(updates);
         });
       }
 
@@ -465,14 +476,14 @@ export const component = new (class Controller {
       }
       #css = new Proxy(this, {
         get(target, css_class) {
-          return target.classList.contains(css_class);
+          return target.classList.contains(camel_to_kebab(css_class));
         },
         set(target, css_class, value) {
           if (typeof value === "function") {
             value = value.call(target);
           }
           if (value === undefined) return true;
-          target.classList[value ? "add" : "remove"](css_class);
+          target.classList[value ? "add" : "remove"](camel_to_kebab(css_class));
           return true;
         },
       });
@@ -518,20 +529,27 @@ export const component = new (class Controller {
       }
       #reactive = Reactive.create(null, { owner: this });
 
-      add_css_classes = (...args) => {
-        return add_css_classes.call(this, ...args);
+      add_css = (...args) => {
+        return add_css.call(this, ...args);
       };
 
-      add_event_handler = (type, handler, return_handler = false) => {
+      add_event_handler = (
+        type,
+        handler,
+        { return_handler = false, run = false } = {}
+      ) => {
         this.addEventListener(type, handler);
+        if (run) {
+          handler({});
+        }
         if (return_handler) {
           return handler;
         }
         return this;
       };
 
-      add_event_handlers = (updates) => {
-        return add_event_handlers.call(this, updates);
+      add_handlers = (updates) => {
+        return add_handlers.call(this, updates);
       };
 
       /* */
@@ -572,28 +590,21 @@ export const component = new (class Controller {
       };
 
       /* Updates props, attributes and state. Chainable. */
-      update = (updates) => {
+      update = ({ attributes, css, ...updates } = {}) => {
         /* Props */
         this.update_properties(updates);
-
         /* Attributes */
-        this.update_attributes(updates);
-
-        
-
-        /* CSS classes (individual) */
-        this.update_css_classes(updates);
-
+        this.update_attributes(attributes);
+        /* CSS classes */
+        this.update_css(css);
         /* CSS vars */
         Object.entries(updates)
           .filter(([key, value]) => key.startsWith(CSS_VAR))
           .forEach(
             ([key, value]) => (this.__[key.slice(CSS_VAR.length)] = value)
           );
-
         /* Handlers */
-        this.add_event_handlers(updates);
-
+        this.add_handlers(updates);
         /* Reactive state */
         const state = Object.fromEntries(
           Object.entries(updates)
@@ -602,13 +613,11 @@ export const component = new (class Controller {
         );
         this.reactive.update(state);
 
-        
-
         return this;
       };
 
-      update_css_classes = (updates) => {
-        return update_css_classes.call(this, updates);
+      update_css = (updates) => {
+        return update_css.call(this, updates);
       };
 
       update_attributes = (updates) => {
@@ -623,9 +632,11 @@ export const component = new (class Controller {
   };
 })();
 
-export const create = component.create;
+/* Short-hand */
+export const create = Component.create;
 
-component.factories.add(shadow, (tag) => {
+/*
+Component.factories.add(shadow, (tag) => {
   const element = document.createElement(tag);
   try {
     element.attachShadow({ mode: "open" });
@@ -634,16 +645,24 @@ component.factories.add(shadow, (tag) => {
     return false;
   }
 });
+*/
 
-component.factories.add(text, (tag) => {
+Component.factories.add(text, (tag) => {
   const element = document.createElement(tag);
   return "textContent" in element;
 });
-component.factories.add(chain);
-component.factories.add(children);
+
+/*
+Component.factories.add(chain);
+*/
+
+
+/*
+Component.factories.add(children);
+*/
 
 /*
 EXAMPLES
 
-const Component = component.author('x-stuff', HTMLElement)
+const Component = Component.author('x-stuff', HTMLElement)
 */

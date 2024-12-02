@@ -19,7 +19,7 @@ export function modal(
     scrollable,
     size,
     style,
-    tag = "DIV",
+    tag = "div",
     title,
   },
   ...buttons
@@ -36,7 +36,7 @@ export function modal(
       css: { fade },
     },
     create(
-      `DIV.modal-dialog${size ? ".modal-" + size : ""}`,
+      `div.modal-dialog${size ? ".modal-" + size : ""}`,
       {
         css: {
           modalDialogScrollable: scrollable,
@@ -49,18 +49,18 @@ export function modal(
         !dismissible && !title
           ? undefined
           : create(
-              `HEADER.modal-header${style ? ".text-bg-" + style : ""}`,
+              `header.modal-header${style ? ".text-bg-" + style : ""}`,
               {},
-              Text(`H1.modal-title.fs-3.text`, {}, title),
+              Text(`h1.modal-title.fs-3.text`, {}, title),
               dismissible
                 ? CloseButton({ style, attributes: { dataBsDismiss: "modal" } })
                 : undefined
             ),
-        create(`MAIN.modal-body`, {}, Text(`P`, {}, content)),
+        create(`main.modal-body`, {}, Text(`p`, {}, content)),
         buttons.length === 0
           ? undefined
           : create(
-              `FOOTER.modal-footer`,
+              `footer.modal-footer`,
               {},
               buttons.map((button) => {
                 if (button instanceof HTMLElement) {

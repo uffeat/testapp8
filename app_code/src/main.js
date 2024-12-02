@@ -17,51 +17,17 @@ import { Reactive } from "rollo/reactive";
 // ... then tooltip
 // ... then scrollspy
 
-const root = create("DIV", { id: "root", parent: document.body });
-
-/* Create state items container */
-const state = document.createElement("div");
-state.setAttribute("state", "");
-state.setAttribute("name", "my_state");
-
-state._current_attributes = {};
-state._previous_attributes = {};
-
-const observer = new MutationObserver((mutations, observer) => {
-  mutations
-    .filter((mutation) => mutation.type === "attributes")
-    
-
-    .forEach((mutation) => {
-      const name = mutation.attributeName;
-      const previous = (state._previous_attributes[name] =
-        state._current_attributes[name]);
-      const current = (state._current_attributes[name] =
-        state.getAttribute(name));
-
-        
-      if (previous !== current) {
-        console.log(`Attribute ${name} was modified`);
-        console.log(`Current value: ${current}`);
-        console.log(`Previous value: ${previous}`);
-
-        
-      }
-    });
+const root = create("div", { id: "root", parent: document.body });
+const button = create("button.btn", { parent: root, $$text: "Hello World", $foo: 'FOO' }, function() {
+  console.log(this)
 });
 
-observer.observe(state, {
-  attributes: true,
-});
+button.effects.add((data) => {
+  console.log('foo:', button.$.foo)
+}, 'foo')
 
-state.setAttribute("foo", "FOO");
-state.setAttribute("foo", "FOO");
-state.setAttribute("foo", "FOOFOO");
-state.setAttribute("bar", "bar");
+button.$.foo = 'FOOFOO'
 
-
-
-root.append(state);
 
 /* Enable tests */
 if (import.meta.env.DEV) {
