@@ -2,16 +2,15 @@ import { state } from "rollo/factories/state";
 import { constants } from "rollo/constants";
 import { camel_to_kebab_css } from "rollo/utils/case";
 
-
-
 /*
-TODO css_classes.remove/css_classes.has
+TODO
+Consider purging camel_to_kebab_css feature
 */
 
 /* Factory for all web components. */
 export const css_classes = (parent, config, ...factories) => {
   if (!factories.includes(state)) {
-    throw new Error(`css_classes factory requires state factory`)
+    throw new Error(`css_classes factory requires state factory`);
   }
 
   const cls = class CssClasses extends parent {
@@ -43,15 +42,55 @@ export const css_classes = (parent, config, ...factories) => {
             } else if (typeof arg === "string") {
               let class_string = arg;
               if (class_string.startsWith(constants.STATE)) {
-                component.$[`${class_string}`] = true
-                continue
-
+                component.$[`${class_string}`] = true;
+                continue;
               }
               if (class_string.startsWith(constants.CSS_CLASS)) {
-                class_string = class_string.slice(constants.CSS_CLASS.length)
+                class_string = class_string.slice(constants.CSS_CLASS.length);
               }
 
               component.classList.add(
+                ...class_string
+                  .split(".")
+                  .filter((c) => c)
+                  .map((c) => camel_to_kebab_css(c))
+              );
+            } else {
+              throw new Error(`Invalid arg: ${arg}`);
+            }
+          }
+          return component;
+        };
+
+        has = (css_class) => {
+          if (css_class === undefined) {
+            return
+          }
+          return component.classList.contains(css_class)
+
+        }
+
+        remove = (...args) => {
+          for (const arg of args) {
+            if (arg === undefined) {
+              continue;
+            }
+            if (arg.length === 0) {
+              continue;
+            }
+
+            if (Array.isArray(arg)) {
+              component.classList.remove(
+                ...arg.filter((c) => c).map((c) => camel_to_kebab_css(c))
+              );
+            } else if (typeof arg === "string") {
+              let class_string = arg;
+
+              if (class_string.startsWith(constants.CSS_CLASS)) {
+                class_string = class_string.slice(constants.CSS_CLASS.length);
+              }
+
+              component.classList.remove(
                 ...class_string
                   .split(".")
                   .filter((c) => c)

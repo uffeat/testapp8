@@ -197,10 +197,3 @@ Component.factories.add(text, (tag) => {
   return "textContent" in element;
 });
 
-
-
-/*
-EXAMPLES
-
-const Component = Component.author('x-stuff', HTMLElement)
-*/
