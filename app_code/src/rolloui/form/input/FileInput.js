@@ -39,12 +39,12 @@ export function FileInput(
   });
   const error_feedback = InvalidFeedback({ form_control });
   const select_trigger = create(
-    "BUTTON.btn.btn-outline-secondary",
+    "button.btn.btn-outline-secondary",
     {},
     SelectIcon()
   );
   const clear_trigger = create(
-    "BUTTON.btn.btn-outline-secondary",
+    "button.btn.btn-outline-secondary",
     {},
     CancelIcon({ size: 24 })
   );
@@ -54,7 +54,7 @@ export function FileInput(
     inert: true,
   });
   const input_group = create(
-    "DIV.input-group",
+    "div.input-group",
     {},
     select_trigger,
     floating ? Floating({ label }, selection_display) : selection_display,
@@ -150,8 +150,12 @@ export function FileInput(
     },
     (() => {
       if (label && !floating) {
-        const self = Label({ form_control, text: label });
-        self.classList.add("btn", "p-0", "mb-1");
+        const self = Label({ form_control, text: label }, '.btn.p-0.mb-1');
+        //
+        //
+        //self.classList.add("btn", "p-0", "mb-1");
+        //
+        //
         /* Set visited state (one-time handler) */
         let visited;
         /* Blur happens, when file selector opens; therefore flag needed to determine,

@@ -1,9 +1,12 @@
 import { create } from "rollo/component";
 
-export function Menu({ attributes = {}, css, ...updates } = {}, ...hooks) {
+export function Menu(updates = {}, ...hooks) {
   return create(
     "menu.d-flex",
-    { attributes: { constructorName: "Menu", ...attributes }, css, ...updates },
+    { 
+      attribute_constructorName: "Menu",
+      ...updates
+  },
     ...hooks
   );
 }

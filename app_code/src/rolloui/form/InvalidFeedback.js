@@ -2,14 +2,10 @@ import { create } from "rollo/component";
 import { mixin } from "rollo/utils/mixin";
 
 /* Returns invalid feedback component for use with form control. */
-export function InvalidFeedback({ attributes = {}, css, ...updates } = {}, ...hooks) {
+export function InvalidFeedback(updates = {}, ...hooks) {
   const self = create("div.invalid-feedback", {
-    attributes: {
-      ariaLive: "assertive",
-      constructorName: "InvalidFeedback",
-      ...attributes
-    },
-    css,
+    attribute_ariaLive: "assertive",
+    attribute_constructorName: "InvalidFeedback",
   });
 
   mixin(

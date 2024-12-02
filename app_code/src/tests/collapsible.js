@@ -10,7 +10,7 @@ await (async () => {
       parent: root,
       open: true,
     },
-    create("h1.textBgPrimary.p3", {}, "Foo")
+    create("h1.text-bg-primary.p-3", {}, "Foo")
   );
   collapsible.on_showing = (data) => console.log("Showing...");
   collapsible.on_shown = (data) => console.log("Shown!");
@@ -20,12 +20,12 @@ await (async () => {
   Menu(
     {
       parent: root,
-      css: "columnGap3.ps0",
+      '.column-gap-3.ps-0': true,
     },
     create(
       "button.btn",
       {
-        css: { btnPrimary: true },
+        '.btn-primary': true,
         on_click: (event) => {
           collapsible.open = true;
         },
@@ -35,11 +35,11 @@ await (async () => {
     create(
       "button.btn",
       {
-        css: 'btnPrimary',
         on_click: (event) => {
           collapsible.open = false;
         },
       },
+      '.btn-primary',
       "Hide"
     )
   );

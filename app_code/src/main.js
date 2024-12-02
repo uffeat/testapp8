@@ -20,56 +20,27 @@ import { create } from "rollo/component";
 const root = create("div", {
   id: "root",
   parent: document.body,
-  on_click: (event) => {
-    console.log("Clicked");
-  },
 });
-const button = create(
-  "button.btn",
-  {
-    parent: root,
-    $$text: "Hello World",
-    $foo: "FOO",
-    observe: true,
-    //attribute_bar: 'BAR',
-    $$attribute_bar: "BAR",
-    //'.btn-primary': true,
-    //'$$.btn-primary': true
-  },
-  ".btn-primary"
-  //'$.btn-primary'
-);
-
-//button.$['$.btn-primary'] = true
-//button.css_classes.add('.btn-primary')
-//button.$['$.btn-primary'] = true
-//button.css_classes.add('$.btn-primary')
-
-button.effects.add((data) => {
-  ////console.log("foo:", button.$.foo);////
-}, "foo");
-
-button.effects.add((data) => {
-  console.log("__connected__:", button.$.__connected__);////
-}, "__connected__");
 
 
+await (async () => {
+  const { create } = await import("rollo/component");
+  const { FileInput } = await import("rolloui/form/input/FileInput");
 
-button.$.foo = "FOOFOO";
-
-const my_paragraph = create("p", {}, "Some text");
-my_paragraph.effects.add((data) => {
-  console.log("Previous parent state:", data.__parent__.previous);
-  console.log("Current parent state:", data.__parent__.current);
-}, "__parent__");
-
-button.append(my_paragraph);
-
-my_paragraph.remove();
-
-setTimeout(() => {
-  //my_paragraph.$.parent = 42
-}, 0);
+  const form = create(
+    "form.d-flex.flex-column.row-gap-3.p-3",
+    { parent: root, noValidate: true },
+    FileInput({ label: "Foo", name: "foo", required: true }),
+    FileInput({ label: "Bar", name: "bar", multiple: true, required: true }),
+    FileInput({
+      label: "Stuff",
+      name: "stuff",
+      floating: true,
+      multiple: true,
+      required: true,
+    })
+  );
+})();
 
 /* Enable tests */
 if (import.meta.env.DEV) {

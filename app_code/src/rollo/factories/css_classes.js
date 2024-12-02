@@ -2,10 +2,7 @@ import { state } from "rollo/factories/state";
 import { constants } from "rollo/constants";
 import { camel_to_kebab_css } from "rollo/utils/case";
 
-/*
-TODO
-Consider purging camel_to_kebab_css feature
-*/
+
 
 /* Factory for all web components. */
 export const css_classes = (parent, config, ...factories) => {

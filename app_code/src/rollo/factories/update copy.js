@@ -158,9 +158,9 @@ export const update = (parent, config, ...factories) => {
       /* CSS classes */
       Object.entries(updates)
         .filter(([key, value]) => key.startsWith(constants.CSS_CLASS))
-        .forEach(([key, value]) => this.css_classes[value ? 'add' : 'remove'](key)
-          
-
+        .forEach(
+          ([key, value]) =>
+            (this.css[key.slice(constants.CSS_CLASS.length)] = value)
         );
       if (css) {
         if (Array.isArray(css) || typeof css === "string") {
