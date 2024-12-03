@@ -6,9 +6,9 @@ await (async () => {
 
   const result = await modal(
     {
-      tag: "FORM",
+      tag: "form",
       title: "Enter secret agent number",
-      content: create("INPUT.form-control", {
+      content: create("input.form-control", {
         placeholder: "00...",
         on_input: function (event) {
           this.closest("form").querySelector('button[type="submit"]').disabled =
@@ -28,11 +28,11 @@ await (async () => {
       ],
     },
     create(
-      "BUTTON.btn.btn-primary",
+      "button.btn.btn-primary",
       { type: "submit", disabled: true, _value: true },
       "OK"
     ),
-    create("BUTTON.btn.btn-primary", { _value: null }, "Cancel")
+    create("button.btn.btn-primary", { _value: null }, "Cancel")
   );
 
   console.log("Result:", result);

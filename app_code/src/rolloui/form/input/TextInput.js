@@ -5,8 +5,6 @@ import { base } from "rolloui/form/input/base";
 /* Returns text-family input element or textarea. */
 export function TextInput(
   {
-    attributes = {},
-    css,
     max,
     min,
     type = "text",
@@ -52,11 +50,7 @@ export function TextInput(
 
   const self = base(
     {
-      attributes: {
-        constructorName: "TextInput",
-        ...attributes,
-      },
-      css,
+      attribute_constructorName: "TextInput",
       type,
       validations,
       $value: value,

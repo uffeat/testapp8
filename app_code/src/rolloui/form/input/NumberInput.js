@@ -5,8 +5,6 @@ import { base } from "rolloui/form/input/base";
 /* Returns number-type input element. */
 export function NumberInput(
   {
-    attributes = {},
-    css,
     max,
     min,
     validations,
@@ -41,11 +39,7 @@ export function NumberInput(
 
   const self = base(
     {
-      attributes: {
-        constructorName: "NumberInput",
-        ...attributes,
-      },
-      css,
+      attribute_constructorName: "NumberInput",
       type: "text",
       validations,
       $value: value,

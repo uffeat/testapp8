@@ -14,8 +14,8 @@ await (async () => {
 
       }]
     },
-    {text: "OK", value: true, css: "btn-success"},
-    {text: "Cancel", value: false, css: "btn-danger"}
+    {text: "OK", value: true, ".btn-success": true},
+    {text: "Cancel", value: false, ".btn-danger": true}
   );
   console.log("Result:", result);
 })();

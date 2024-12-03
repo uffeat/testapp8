@@ -1,6 +1,5 @@
 import { Modal } from "bootstrap";
 import { create } from "rollo/component";
-import { use_hooks } from "rollo/hooks/use_hooks";
 import { CloseButton } from "rolloui/CloseButton";
 import { Text } from "rolloui/Text";
 
@@ -30,18 +29,15 @@ export function modal(
     {
       id: ID,
       parent: PARENT,
-      attributes: {
-        tabindex: "-1",
-      },
-      css: { fade },
+      attribute_tabindex: "-1",
+      ".fade": fade,
+      hooks,
     },
     create(
       `div.modal-dialog${size ? ".modal-" + size : ""}`,
       {
-        css: {
-          modalDialogScrollable: scrollable,
-          modalDialogCentered: centered,
-        },
+        ".modal-dialog-scrollable": scrollable,
+        ".modal-dialog-centered": centered,
       },
       create(
         `${tag}.modal-content`,
@@ -53,7 +49,11 @@ export function modal(
               {},
               Text(`h1.modal-title.fs-3.text`, {}, title),
               dismissible
-                ? CloseButton({ style, attributes: { dataBsDismiss: "modal" } })
+                ? CloseButton({ 
+                  style, 
+                  attribute_dataBsDismiss: "modal",
+                 
+                })
                 : undefined
             ),
         create(`main.modal-body`, {}, Text(`p`, {}, content)),
@@ -82,7 +82,6 @@ export function modal(
             )
       )
     ),
-    use_hooks(hooks)
   );
   // Handle dismissible
   const config = {};

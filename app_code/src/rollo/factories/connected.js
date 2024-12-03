@@ -1,9 +1,9 @@
-import { state } from "rollo/factories/state";
+import { base } from "rollo/factories/base";
 
 /* Factory for all web components. */
 export const connected = (parent, config, ...factories) => {
-  if (!factories.includes(state)) {
-    throw new Error(`connected factory requires state factory`);
+  if (!factories.includes(base)) {
+    throw new Error(`connected factory requires base factory`);
   }
 
   const cls = class Connected extends parent {

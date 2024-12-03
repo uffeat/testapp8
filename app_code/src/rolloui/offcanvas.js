@@ -1,6 +1,5 @@
 import { Offcanvas } from "bootstrap";
 import { create } from "rollo/component";
-import { use_hooks } from "rollo/hooks/use_hooks";
 import { CloseButton } from "rolloui/CloseButton";
 import { Text } from "rolloui/Text";
 
@@ -29,30 +28,26 @@ export function offcanvas(
     {
       id: ID,
       parent: PARENT,
-      attributes: {
-        tabindex: "-1",
-      },
-      css: {
-        [`offcanvas-${placement}`]: true,
-      }
-      
+      attribute_tabindex: "-1",
+      hooks,
     },
+    `.offcanvas-${placement}`,
     !dismissible && !title
       ? undefined
       : create(
-          `DIV.offcanvas-header${style ? ".text-bg-" + style : ""}`,
+          `div.offcanvas-header${style ? ".text-bg-" + style : ""}`,
           {},
-          Text(`H1.fs-2.text`, {}, title),
+          Text(`h1.fs-2.text`, {}, title),
           dismissible
-            ? CloseButton({ style, attributes: { dataBsDismiss: "offcanvas" } })
+            ? CloseButton({ style, attribute_dataBsDismiss: "offcanvas" })
             : undefined
         ),
 
-    create(`MAIN.offcanvas-body.flex-grow-1`, {}, Text(`P`, {}, content)),
+    create(`main.offcanvas-body.flex-grow-1`, {}, Text(`p`, {}, content)),
     buttons.length === 0
       ? undefined
       : create(
-          `FOOTER.d-flex.justify-content-end.column-gap-3.p-3.m-0`,
+          `footer.d-flex.justify-content-end.column-gap-3.p-3.m-0`,
           {},
           buttons.map((button) =>
             button instanceof HTMLElement
@@ -68,8 +63,7 @@ export function offcanvas(
                   ...button,
                 })
           )
-        ),
-    use_hooks(hooks)
+        )
   );
 
   // Handle dismissible
@@ -136,17 +130,3 @@ export function close(value) {
   element.$.close = true;
 }
 
-/*
-# EXAMPLES
-
-const result = await offcanvas(
-  {
-    title: "Hello world!",
-    content: "The offcanvas function is awesome.",
-  },
-  ["OK", true, "success"],
-  ["Cancel", false, "danger"]
-);
-console.log("Modal result:", result);
-
-*/

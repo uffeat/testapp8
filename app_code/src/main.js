@@ -17,6 +17,8 @@ import { create } from "rollo/component";
 // ... then tooltip
 // ... then scrollspy
 
+import { Sheet } from "rollo/components/sheet";
+
 
 
 const root = create("div", {
@@ -25,27 +27,26 @@ const root = create("div", {
 });
 
 ////
-await (async () => {
-  const { create } = await import("rollo/component");
-  const { FileInput } = await import("rolloui/form/input/FileInput");
+const button = create(
+  "button",
+  {
+    parent: root,
+    text: "Hello World",
+    
+    on_click: (event) => {
+      console.log("Clicked");
+    },
+  },
+  
+);
 
-  const form = create(
-    "form.d-flex.flex-column.row-gap-3.p-3",
-    { parent: root, noValidate: true },
-    FileInput({ label: "Foo", name: "foo", required: true }),
-    FileInput({ label: "Bar", name: "bar", multiple: true, required: true }),
-    FileInput({
-      label: "Stuff",
-      name: "stuff",
-      floating: true,
-      multiple: true,
-      required: true,
-    })
-  );
-})();
+//const sheet_component = new Sheet()
+//button.append(sheet_component)
 
+//button.style['background-color'] = 'pink'
 
-
+button.rules.add({'': {'background-color': 'pink'}})
+button.rules.add({':hover': {'background-color': 'green'}})
 
 
 

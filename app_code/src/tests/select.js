@@ -11,7 +11,7 @@ await (async () => {
     "form.d-flex.flex-column.row-gap-3.p-3",
     { parent: root, noValidate: true },
     create(
-      "SECTION",
+      "section",
       {},
       Label({ for_name: "my_choice" }, "My name"),
       Select(
@@ -33,10 +33,10 @@ await (async () => {
             function () {
               this.effects.add((data) => {
                 if (data.value.previous) {
-                  this.css[`text-bg-${data.value.previous}`] = false;
+                  this.css_class[`text-bg-${data.value.previous}`] = false;
                 }
                 if (data.value.current) {
-                  this.css[`text-bg-${data.value.current}`] = true;
+                  this.css_class[`text-bg-${data.value.current}`] = true;
                 }
               }, "value");
             },
@@ -58,9 +58,9 @@ await (async () => {
       }
     ),
     create(
-      "DIV.input-group",
+      "div.input-group",
       {},
-      create("SPAN.input-group-text", {}, "@"),
+      create("span.input-group-text", {}, "@"),
       Floating(
         { label: "My foo" },
         Select(
@@ -68,7 +68,7 @@ await (async () => {
             name: "my_foo",
             placeholder: "Please select...",
             required: true,
-            css: "roundedEnd",
+            ".rounded-end": true,
             
           },
           ["Foo", "foo"],

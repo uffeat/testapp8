@@ -1,9 +1,9 @@
-import { state } from "rollo/factories/state";
+import { base } from "rollo/factories/base";
 
 /* Factory for components that support shadow dom */
 export const shadow = (parent, config, ...factories) => {
-  if (!factories.includes(state)) {
-    throw new Error(`shadow factory requires state factory`);
+  if (!factories.includes(base)) {
+    throw new Error(`shadow factory requires base factory`);
   }
 
   const cls = class Shadow extends parent {
@@ -13,11 +13,11 @@ export const shadow = (parent, config, ...factories) => {
       super(...args);
       /* Init shadow-dom-enabled protected state */
       this.#set_has_children = this.reactive.protected.add(
-        "__has_children__",
+        "has_children",
         false
       );
       this.#set_has_content = this.reactive.protected.add(
-        "__has_content__",
+        "has_content",
         false
       );
 

@@ -7,7 +7,7 @@ await (async () => {
 
   const result = await modal({
     content: create(
-      "FORM.d-flex.flex-column.row-gap-3.pt-2",
+      "form.d-flex.flex-column.row-gap-3.pt-2",
       {
         noValidate: true,
         on_submit: function (event) {
@@ -18,8 +18,8 @@ await (async () => {
           );
         },
       },
-      create("H1", {}, "Enter secret agent number"),
-      create("INPUT.form-control", {
+      create("h1", {}, "Enter secret agent number"),
+      create("input.form-control", {
         placeholder: "00...",
         on_input: function (event) {
           this.closest("form").querySelector('button[type="submit"]').disabled =
@@ -27,14 +27,14 @@ await (async () => {
         },
       }),
       create(
-        "MENU.d-flex.justify-content-end.column-gap-3.px-2.pt-2.m-0",
+        "menu.d-flex.justify-content-end.column-gap-3.px-2.pt-2.m-0",
         {},
         create(
-          "BUTTON.btn.btn-primary",
+          "button.btn.btn-primary",
           { type: "submit", disabled: true, _value: true },
           "OK"
         ),
-        create("BUTTON.btn.btn-primary", { _value: null }, "Cancel")
+        create("button.btn.btn-primary", { _value: null }, "Cancel")
       )
     ),
     dismissible: false,

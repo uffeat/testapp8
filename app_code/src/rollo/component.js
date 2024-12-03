@@ -1,25 +1,18 @@
 import { base } from "rollo/factories/base";
 import { clear } from "rollo/factories/clear";
 import { connected } from "rollo/factories/connected";
-
-
 import { find } from "rollo/factories/find";
-
-
 import { observer } from "rollo/factories/observer";
 import { parent } from "rollo/factories/parent";
 import { send } from "rollo/factories/send";
 import { shadow } from "rollo/factories/shadow";
-
-import { state } from "rollo/factories/state";
-
 import { text } from "rollo/factories/text";
 
 
-import { constants } from "rollo/constants";
+import { sheet } from "rollo/factories/sheet";
+
 import { can_have_shadow } from "rollo/utils/can_have_shadow";
 
-const STATE_CSS_CLASS = `${constants.STATE}${constants.CSS_CLASS}`;
 
 /* Utility for authoring web components and instantiating elements. */
 export const Component = new (class {
@@ -102,19 +95,17 @@ export const Component = new (class {
         return __config__;
       },
     });
-
     return this.registry.add(tag, cls);
   };
 
   /* Creates an returns element from object. 
   Supports rich in-line configuration, incl. hooks. */
   create_from_object = ({
-    hooks,
     tag = "div",
     ...updates
   } = {}) => {
-    hooks = hooks || [];
-    return this.create(tag, updates, ...hooks);
+   
+    return this.create(tag, updates);
   };
 
   /* Creates an element. 
@@ -122,20 +113,17 @@ export const Component = new (class {
   - Rich in-line configuration, incl. hooks.
   - Construction from objects.
   - On-demand authoring of non-autonomous web component. */
-  create = (arg, updates = {}, ...hooks) => {
+  create = (arg, updates = {}, ..._hooks) => {
     if (typeof arg !== "string") {
       return this.create_from_object(arg);
     }
     const [tag, ...css_classes] = arg.split(".");
-    const element = new (this.get(tag))(updates, ...hooks);
+    const element = new (this.get(tag))(updates, ..._hooks);
     if (css_classes.length > 0) {
       element.classList.add(...css_classes);
     }
     element.update(updates);
-
-    element.call(...hooks)
-
-    
+    element.call(..._hooks)
     return element;
   };
 
@@ -162,10 +150,8 @@ export const Component = new (class {
 export const create = Component.create;
 
 
-/* Add factories; order matters */
+/* Add factories */
 Component.factories.add(base);
-Component.factories.add(state);
-/* Add factories; order does not matter */
 Component.factories.add(clear);
 Component.factories.add(connected);
 Component.factories.add(find);
@@ -177,4 +163,7 @@ Component.factories.add(text, (tag) => {
   const element = document.createElement(tag);
   return "textContent" in element;
 });
+
+
+Component.factories.add(sheet);
 

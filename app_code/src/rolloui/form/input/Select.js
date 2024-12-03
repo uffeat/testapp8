@@ -2,17 +2,9 @@ import { create } from "rollo/component";
 import { mixin } from "rollo/utils/mixin";
 import { base } from "rolloui/form/input/base";
 
-/* Returns text-family input element or textarea. */
+/* Returns select component. */
 export function Select(
-  {
-    attributes = {},
-    css,
-    hooks = [],
-    placeholder,
-    validations,
-    value = null,
-    ...updates
-  } = {},
+  { placeholder, validations, value = null, ...updates } = {},
   ...options
 ) {
   if (options.length === 0) {
@@ -22,20 +14,13 @@ export function Select(
     throw new Error(`Component does not support multiple selections.`);
   }
 
-  const self = base(
-    {
-      attributes: {
-        constructorName: "Select",
-        ...attributes,
-      },
-      css,
-      type: "select",
-      validations,
-      $value: value,
-      ...updates,
-    },
-    ...hooks
-  );
+  const self = base({
+    attribute_constructorName: "Select",
+    type: "select",
+    validations,
+    $value: value,
+    ...updates,
+  });
 
   /* Protect value state */
   const set_value = self.reactive.protected.add("value");

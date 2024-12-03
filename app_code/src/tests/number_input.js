@@ -10,7 +10,7 @@ await (async () => {
     "form.d-flex.flex-column.row-gap-3.p-3",
     { parent: root, noValidate: true },
     create(
-      "SECTION",
+      "section",
       {},
       Label({ for_name: "my_number" }, "My number"),
       NumberInput({

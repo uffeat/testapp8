@@ -1,5 +1,6 @@
-let id = 0
-
-export function create_id() {
-  return `${id++}`
-}
+export const create_id = (() => {
+  let count = 0;
+  return () => {
+    return `${count++}`;
+  };
+})();

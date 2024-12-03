@@ -11,7 +11,7 @@ await (async () => {
     "form.d-flex.flex-column.row-gap-3.p-3",
     { parent: root, noValidate: true },
     create(
-      "SECTION",
+      "section",
       {},
       Label({ for_name: "my_name" }, "My name"),
       TextInput({
@@ -39,18 +39,19 @@ await (async () => {
       }
     ),
     create(
-      "DIV.input-group",
+      "div.input-group",
       {},
-      create("SPAN.input-group-text", {}, "@"),
+      create("span.input-group-text", {}, "@"),
       Floating(
         { label: "My email" },
-        TextInput({
-          name: "my_email",
-          type: "email",
-          required: true,
-          /* Negative z-index to allow password managers on top */
-          css: "roundedEnd.z-n1",
-        })
+        TextInput(
+          {
+            name: "my_email",
+            type: "email",
+            required: true,
+          },
+          ".rounded-end"
+        )
       ),
       InvalidFeedback({ for_name: "my_email" })
     )
