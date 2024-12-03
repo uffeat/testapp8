@@ -3,8 +3,6 @@ import { create } from "rollo/component";
 
 export function base(
   {
-    attributes,
-    css,
     required = false,
     type = "text",
     validations,
@@ -40,8 +38,6 @@ export function base(
       }
     })(),
     {
-      attributes,
-      css,
       required,
       /* Take into account that native select and textarea do not have a type prop */
       type: ["select", "textarea"].includes(type) ? undefined : type,
@@ -58,7 +54,7 @@ export function base(
   /* Effect: Error & visited states -> "is-invalid" css class */
   self.effects.add(
     (data) => {
-      self.css["is-invalid"] = self.$.error && self.$.visited;
+      self.css_class.isInvalid = self.$.error && self.$.visited;
     },
     ["error", "visited"]
   );

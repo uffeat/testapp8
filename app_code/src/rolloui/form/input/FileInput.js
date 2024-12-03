@@ -10,9 +10,9 @@ import { Label } from "rolloui/form/Label";
 
 export function FileInput(
   {
-    attributes = {},
+   
     accept,
-    css,
+  
     floating = false,
     id,
     label = null,
@@ -49,7 +49,7 @@ export function FileInput(
     CancelIcon({ size: 24 })
   );
   const selection_display = create("input.form-control", {
-    attributes: { ariaLive: "polite" },
+    attribute_ariaLive: "polite",
 
     inert: true,
   });
@@ -109,7 +109,7 @@ export function FileInput(
   form_control.effects.add(
     (data) => {
       /* Error & visited state -> feedback style */
-      selection_display.css["is-invalid"] =
+      selection_display.css_class.isInvalid =
         form_control.$.error && form_control.$.visited;
     },
     ["error", "visited"]
@@ -141,21 +141,12 @@ export function FileInput(
   const self = create(
     "section",
     {
-      attributes: {
-        constructorName: "FileInput",
-        ...attributes,
-      },
-
+      attribute_constructorName: "FileInput",
       ...updates,
     },
     (() => {
       if (label && !floating) {
         const self = Label({ form_control, text: label }, '.btn.p-0.mb-1');
-        //
-        //
-        //self.classList.add("btn", "p-0", "mb-1");
-        //
-        //
         /* Set visited state (one-time handler) */
         let visited;
         /* Blur happens, when file selector opens; therefore flag needed to determine,

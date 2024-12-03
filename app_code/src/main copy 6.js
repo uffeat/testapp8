@@ -24,25 +24,32 @@ const root = create("div", {
   parent: document.body,
 });
 
-////
-await (async () => {
-  const { create } = await import("rollo/component");
-  const { FileInput } = await import("rolloui/form/input/FileInput");
+const button = create(
+  "button",
+  {
+    parent: root,
+    $$text: "Hello World",
+    $foo: "FOO",
+    //observe: true,
+    //attribute_bar: 'BAR',
+    $$attribute_bar: "BAR",
+    //'.btn.btn-primary': true,
+    //'$$.btn.btn-primary': true,
+    on_click: (event) => {
+      console.log("Clicked");
+    },
+  },
+  //".btn.btn-primary"
+  '$.btn.btn-primary'
+);
 
-  const form = create(
-    "form.d-flex.flex-column.row-gap-3.p-3",
-    { parent: root, noValidate: true },
-    FileInput({ label: "Foo", name: "foo", required: true }),
-    FileInput({ label: "Bar", name: "bar", multiple: true, required: true }),
-    FileInput({
-      label: "Stuff",
-      name: "stuff",
-      floating: true,
-      multiple: true,
-      required: true,
-    })
-  );
-})();
+button.effects.add((data) => {
+  console.log(button.$['$.btn.btn-primary'])
+}, '$.btn.btn-primary')
+
+button.$['$.btn.btn-primary'] = false
+button.$['$.btn.btn-primary'] = true
+
 
 
 

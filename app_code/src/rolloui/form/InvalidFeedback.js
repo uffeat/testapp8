@@ -3,6 +3,7 @@ import { mixin } from "rollo/utils/mixin";
 
 /* Returns invalid feedback component for use with form control. */
 export function InvalidFeedback(updates = {}, ...hooks) {
+  
   const self = create("div.invalid-feedback", {
     attribute_ariaLive: "assertive",
     attribute_constructorName: "InvalidFeedback",
@@ -75,17 +76,17 @@ export function InvalidFeedback(updates = {}, ...hooks) {
       }
 
       get invisible() {
-        return this.css.invisible;
+        return this.css_class.invisible;
       }
       set invisible(invisible) {
-        this.css.invisible = invisible;
+        this.css_class.invisible = invisible;
       }
 
       get soft() {
-        return this.css.textSecondary;
+        return this.css_class.textSecondary;
       }
       set soft(soft) {
-        this.css.textSecondary = soft;
+        this.css_class.textSecondary = soft;
       }
     }
   );

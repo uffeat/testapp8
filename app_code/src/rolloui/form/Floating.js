@@ -3,11 +3,7 @@ import { mirror } from "rollo/utils/mirror";
 import { Label } from "rolloui/form/Label";
 import { create_id } from "rolloui/form/utils/create_id";
 
-export function Floating(
-  { attributes = {}, css, label, ...updates },
-  form_control,
-  ...hooks
-) {
+export function Floating({ label, ...updates }, form_control, ...hooks) {
   if (!label) {
     throw new Error(`No label provided.`);
   }
@@ -23,11 +19,7 @@ export function Floating(
   self = create(
     "div.form-floating",
     {
-      attributes: {
-        constructorName: "Floating",
-        ...attributes,
-      },
-      css,
+      attribute_constructorName: "Floating",
       ...updates,
     },
     form_control,
