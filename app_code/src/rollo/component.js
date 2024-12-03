@@ -1,16 +1,20 @@
 import { base } from "rollo/factories/base";
 import { clear } from "rollo/factories/clear";
 import { connected } from "rollo/factories/connected";
-import { css_classes } from "rollo/factories/css_classes";
+
+
 import { find } from "rollo/factories/find";
-import { hooks } from "rollo/factories/hooks";
+
+
 import { observer } from "rollo/factories/observer";
 import { parent } from "rollo/factories/parent";
 import { send } from "rollo/factories/send";
 import { shadow } from "rollo/factories/shadow";
+
 import { state } from "rollo/factories/state";
+
 import { text } from "rollo/factories/text";
-import { update } from "rollo/factories/update";
+
 
 import { constants } from "rollo/constants";
 import { can_have_shadow } from "rollo/utils/can_have_shadow";
@@ -105,14 +109,12 @@ export const Component = new (class {
   /* Creates an returns element from object. 
   Supports rich in-line configuration, incl. hooks. */
   create_from_object = ({
-    attributes,
-    css,
     hooks,
     tag = "div",
     ...updates
   } = {}) => {
     hooks = hooks || [];
-    return this.create(tag, { attributes, css, ...updates }, ...hooks);
+    return this.create(tag, updates, ...hooks);
   };
 
   /* Creates an element. 
@@ -120,7 +122,7 @@ export const Component = new (class {
   - Rich in-line configuration, incl. hooks.
   - Construction from objects.
   - On-demand authoring of non-autonomous web component. */
-  create = (arg, { attributes, css, ...updates } = {}, ...hooks) => {
+  create = (arg, updates = {}, ...hooks) => {
     if (typeof arg !== "string") {
       return this.create_from_object(arg);
     }
@@ -129,29 +131,11 @@ export const Component = new (class {
     if (css_classes.length > 0) {
       element.classList.add(...css_classes);
     }
-    element.update({ attributes, css, ...updates });
+    element.update(updates);
 
-    element.css_classes.add(
-      ...hooks.filter(
-        (hook) =>
-          typeof hook === "string" &&
-          (hook.startsWith(constants.CSS_CLASS) ||
-            hook.startsWith(STATE_CSS_CLASS))
-      )
-    );
+    element.call(...hooks)
 
-    element.call(
-      ...hooks.filter((hook) => {
-        if (
-          typeof hook === "string" &&
-          (hook.startsWith(constants.CSS_CLASS) ||
-            hook.startsWith(STATE_CSS_CLASS))
-        ) {
-          return false;
-        }
-        return true;
-      })
-    );
+    
     return element;
   };
 
@@ -180,14 +164,11 @@ export const create = Component.create;
 
 /* Add factories; order matters */
 Component.factories.add(base);
-Component.factories.add(update);
 Component.factories.add(state);
 /* Add factories; order does not matter */
 Component.factories.add(clear);
 Component.factories.add(connected);
-Component.factories.add(css_classes);
 Component.factories.add(find);
-Component.factories.add(hooks);
 Component.factories.add(observer);
 Component.factories.add(parent);
 Component.factories.add(send);

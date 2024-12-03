@@ -10,7 +10,7 @@ export const connected = (parent, config, ...factories) => {
     #set_connected;
     constructor(...args) {
       super(...args);
-      this.#set_connected = this.reactive.protected.add("__connected__");
+      this.#set_connected = this.reactive.protected.add("connected");
     }
 
     connectedCallback() {

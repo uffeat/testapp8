@@ -28,7 +28,7 @@ const button = create(
     parent: root,
     $$text: "Hello World",
     $foo: "FOO",
-    observe: true,
+    //observe: true,
     attribute_bar: 'BAR',
     //$$attribute_bar: "BAR",
     '.btn-primary': true,
