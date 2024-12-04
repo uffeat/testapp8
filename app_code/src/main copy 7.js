@@ -1,20 +1,6 @@
 import "./bootstrap.scss";
 import "./main.css";
 import { create } from "rollo/component";
-import { Reactive } from "rollo/factories/reactive";
-
-
-
-const reactive = Reactive.create()
-
-reactive.$.foo = 42
-
-reactive.effects.add((data) => {
-  console.log('foo:', reactive.$.foo)
-}, 'foo')
-
-
-reactive.$.foo = 43
 
 // TODO
 // ... then nav bar
@@ -40,15 +26,35 @@ const root = create("div", {
 const button = create("button", {
   parent: root,
   text: "Hello World",
-  attribute_foo: 'FOO',
+
   on_click: (event) => {
     console.log("Clicked");
   },
 });
 
+//const sheet_component = new Sheet()
+//button.append(sheet_component)
+
+console.log('color:', button.style.color)
+
+//button.style['background-color'] = 'pink'
 
 
 
+button.rules.update(
+  { "": { backgroundColor: "pink" } },
+  { ":hover": { backgroundColor: "green" } }
+);
+
+button.rules.update(
+  { "": { color: "blue" } },
+);
+
+console.log(button.rules.get('', 'color'))
+console.log(button.rules.get(''))
+
+//button.rules.update({':hover': {backgroundColor: 'green'}})
+//button.__.backgroundColor = "linen";
 
 /* Enable tests */
 if (import.meta.env.DEV) {

@@ -10,6 +10,7 @@ TODO
 
 - #sheet should be a class, with a text prop and a create method
 - Move validate back into rules and use __super__
+- find a way to avoid the '' selector syntax
 
 */
 import { camel_to_kebab, kebab_to_camel } from "rollo/utils/case";
@@ -82,6 +83,7 @@ export const sheet = (parent, config, ...factories) => {
     get rules() {
       return this.#rules;
     }
+    
     #rules = new (class {
       /* . */
       #owner;
@@ -107,6 +109,7 @@ export const sheet = (parent, config, ...factories) => {
         }
       };
 
+      /* Creates sheet on-demand */
       update = (...rules) => {
         this.#owner.#create_sheet();
         for (const r of rules) {
@@ -158,7 +161,11 @@ export const sheet = (parent, config, ...factories) => {
           if (key) {
             rule.style.removeProperty(key)
           } else {
-            /* TODO */
+            /* TODO 
+            Find a way to get set keys/items; also for use in 'get'
+            
+            
+            */
           }
         }
 

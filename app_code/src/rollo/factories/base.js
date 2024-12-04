@@ -1,6 +1,8 @@
-import { Reactive } from "rollo/reactive";
+//import { Reactive } from "rollo/reactive";
+import { Reactive } from "rollo/factories/reactive";
 import { constants } from "rollo/constants";
 import { camel_to_kebab, camel_to_kebab_css } from "rollo/utils/case";
+import { create_observed_attributes } from "rollo/utils/create_observed_attributes";
 
 const STATE_CSS_CLASS = `${constants.STATE}${constants.CSS_CLASS}`;
 
@@ -8,6 +10,7 @@ const STATE_CSS_CLASS = `${constants.STATE}${constants.CSS_CLASS}`;
 export const base = (parent, config, ...factories) => {
   /* Base factory that 'component' relies on */
   const cls = class Base extends parent {
+   
     constructor(...args) {
       super(...args);
       /* Identify as web component. */
@@ -37,6 +40,8 @@ export const base = (parent, config, ...factories) => {
         this.update(updates);
       });
     }
+
+    
 
     
 
@@ -228,7 +233,7 @@ export const base = (parent, config, ...factories) => {
     get reactive() {
       return this.#reactive;
     }
-    #reactive = Reactive.create(null, { owner: this });
+    #reactive = Reactive.create();
 
     /* Calls one or more hooks. 
     A hook is a function that is called bound the component.

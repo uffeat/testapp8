@@ -8,8 +8,8 @@ import { send } from "rollo/factories/send";
 import { shadow } from "rollo/factories/shadow";
 import { text } from "rollo/factories/text";
 
-
-import { sheet } from "rollo/factories/sheet";
+import { uid } from "rollo/factories/uid";
+//import { sheet } from "rollo/factories/sheet";
 
 import { can_have_shadow } from "rollo/utils/can_have_shadow";
 
@@ -156,6 +156,11 @@ Component.factories.add(clear);
 Component.factories.add(connected);
 Component.factories.add(find);
 Component.factories.add(observer);
+
+
+
+
+
 Component.factories.add(parent);
 Component.factories.add(send);
 Component.factories.add(shadow, can_have_shadow);
@@ -164,6 +169,9 @@ Component.factories.add(text, (tag) => {
   return "textContent" in element;
 });
 
+Component.factories.add(uid);
 
-Component.factories.add(sheet);
+
+
+//Component.factories.add(sheet);
 
