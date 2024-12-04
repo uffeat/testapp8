@@ -74,7 +74,7 @@ export const reactive = (parent, config, ...factories) => {
       },
     });
 
-    /* Returns controller for certain opreations re underlying state data. */
+    /* Returns controller for certain oprations re underlying state data. */
     get data() {
       return this.#data
     }
