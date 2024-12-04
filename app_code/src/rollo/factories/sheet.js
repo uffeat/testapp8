@@ -5,6 +5,11 @@ TODO
 - Find a way to react to rules in force:
   - querySelector trigger by: ...
   - animation start event
+  - rule also sets width of some dummy element that is watched by an intersection or resize observer
+  - iframe
+
+- #sheet should be a class, with a text prop and a create method
+- Move validate back into rules and use __super__
 
 */
 import { camel_to_kebab, kebab_to_camel } from "rollo/utils/case";
