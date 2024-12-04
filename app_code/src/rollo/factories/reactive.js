@@ -1,4 +1,5 @@
-/* Factory for all web components. */
+/* General factory for web components and other classes.
+Provides pub-sub-based reactive functionality with fine-grained control options. */
 export const reactive = (parent, config, ...factories) => {
   const cls = class Reactive extends parent {
     /* Alternative constructor without 'new' */
@@ -13,6 +14,25 @@ export const reactive = (parent, config, ...factories) => {
     The actual functionality is provided by #state.
     The job of other class members is to provide an elegant API around #state.
     */
+
+    /* Returns an object, from which individual state items can be retrieved and 
+    set reactively. */
+    get $() {
+      return this.#$;
+    }
+    #$ = new Proxy(this, {
+      get: (target, key) => {
+        return target.#state.current[key];
+      },
+      set: (target, key, value) => {
+        /* Handle function value */
+        if (typeof value === "function") {
+          value = value.call(target);
+        }
+        target.update({ [key]: value });
+        return true;
+      },
+    });
 
     /* Returns controller for managing effects. */
     get effects() {
@@ -55,26 +75,7 @@ export const reactive = (parent, config, ...factories) => {
       };
     })(this);
 
-    /* Returns an object, from which individual state items can be retrieved and 
-    set reactively. */
-    get $() {
-      return this.#$;
-    }
-    #$ = new Proxy(this, {
-      get: (target, key) => {
-        return target.#state.current[key];
-      },
-      set: (target, key, value) => {
-        /* Handle function value */
-        if (typeof value === "function") {
-          value = value.call(target);
-        }
-        target.update({ [key]: value });
-        return true;
-      },
-    });
-
-    /* Returns controller for certain oprations re underlying state data. */
+    /* Returns controller for clearing and exposing underlying state data. */
     get data() {
       return this.#data
     }
@@ -85,11 +86,13 @@ export const reactive = (parent, config, ...factories) => {
         this.#owner = owner;
       }
 
+      /* Returns a shallowly frozen shallow copy of underlying state data. */
       get current() {
         return Object.freeze({ ...this.#owner.#state.current })
-
       }
 
+      /* Returns a shallowly frozen shallow copy of underlying state data as it was 
+      before the most recent change. */
       get previous() {
         return Object.freeze({ ...this.#owner.#state.previous })
       }
@@ -97,11 +100,54 @@ export const reactive = (parent, config, ...factories) => {
       /* Clears state data without publication. Use with caution. Chainable. */
       clear = () => {
         this.#owner.#state.clear_data();
-        return this;
+        return this.#owner;
       };
     })(this);
 
-    /* Provides core functionality. */
+    /* Returns controller for managing protection of keys. */
+    get protected() {
+      return this.#protected;
+    }
+    #protected = new (class {
+      #owner;
+
+      constructor(owner) {
+        this.#owner = owner;
+      }
+
+      add = (key, value) => {
+        return this.#owner.#state.protect(key, value);
+      };
+
+      /* Resets protection registry. Use with caution; risk of memory leaks! */
+      clear = () => {
+        this.#owner.#state.clear_protected;
+        return this.#owner;
+      };
+
+      has = (key) => {
+        return this.#owner.#state.is_protected(key);
+      };
+
+      remove = (setter) => {
+        this.#owner.#state.unprotect(setter);
+        return this.#owner;
+      };
+    })(this);
+
+    /* Updates state from data (object). 
+    Chainable.
+    Overloadable/super-callable.
+    Convenient for updating multiple state items in one go.
+    Can reduce redundant effect calls. */
+    update(data) {
+      if (data) {
+        this.#state.update_data(data);
+      }
+      return this;
+    }
+
+    /* Provides core functionality - without attention to API. */
     #state = new (class State {
       /* Helper for conditionally calling effect function. */
       static #call_effect = (effect, condition, ...args) => {
@@ -245,6 +291,7 @@ export const reactive = (parent, config, ...factories) => {
         this.clear_protected();
       };
 
+      /* Updates data and triggers effects subject to changes and conditions. */
       update_data = (data) => {
         /* Detect changes */
         const changes = this.#get_changes(data);
@@ -259,8 +306,16 @@ export const reactive = (parent, config, ...factories) => {
         );
       };
 
+      /* Returns Boolean result of simple equality comparison. 
+      NOTE
+      Included as separate method for potential future refactor to handle more 
+      complex data structures/types.
+      */
       #is_equal = (value_1, value_2) => value_1 === value_2;
 
+      /* Creates and returns object of the form
+      { <key>: { current: <current value>, previous: <previous value> }, <key>: ... }
+      to be passed into effects/conditions. */
       #create_effect_data = (...keys) => {
         const data = {};
         for (const key of keys) {
@@ -273,6 +328,9 @@ export const reactive = (parent, config, ...factories) => {
         return data;
       };
 
+      /* Compares current with 'data'. Returns null, if all items in 'data' 
+      are present in current; otherwise, an object with 'data' items that are 
+      different from current is returned. */
       #get_changes = (data) => {
         const changes = {};
         for (const [key, value] of Object.entries(data)) {
@@ -289,6 +347,7 @@ export const reactive = (parent, config, ...factories) => {
         return Object.keys(changes).length === 0 ? null : changes;
       };
 
+      /* Updates data stores. */
       #update_stores = (data) => {
         this.#previous = { ...this.#current };
         for (const [key, value] of Object.entries(data)) {
@@ -296,53 +355,16 @@ export const reactive = (parent, config, ...factories) => {
         }
       };
 
+      /* Publishes to effects subject to any conditions. */
       #notify = (...args) => {
         for (const [effect, condition] of this.#effects_registry) {
           State.#call_effect(effect, condition, ...args);
         }
       };
     })(this);
-
-    /* Returns controller for managing protection of keys. */
-    get protected() {
-      return this.#protected;
-    }
-    #protected = new (class {
-      #owner;
-
-      constructor(owner) {
-        this.#owner = owner;
-      }
-
-      add = (key, value) => {
-        return this.#owner.#state.protect(key, value);
-      };
-
-      /* Resets protection registry. Use with caution; risk of memory leaks! */
-      clear = () => {
-        this.#owner.#state.clear_protected;
-        return this.#owner;
-      };
-
-      has = (key) => {
-        return this.#owner.#state.is_protected(key);
-      };
-
-      remove = (setter) => {
-        this.#owner.#state.unprotect(setter);
-        return this.#owner;
-      };
-    })(this);
-
-    /* Updates state from data (object). Chainable.
-    Convenient for updating multiple state items in one go.
-    Can reduce redundant effect calls. */
-    update(data) {
-      this.#state.update_data(data);
-      return this;
-    }
   };
   return cls;
 };
 
+/* Expose Reactive for use as stand-alone or in composition. */
 export const Reactive = reactive(class {});

@@ -122,8 +122,12 @@ export const Component = new (class {
     if (css_classes.length > 0) {
       element.classList.add(...css_classes);
     }
-    element.update(updates);
-    element.call(..._hooks)
+
+    
+
+
+    element.update && element.update(updates);
+    element.call && element.call(..._hooks)
     return element;
   };
 
