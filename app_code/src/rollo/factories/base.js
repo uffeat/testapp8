@@ -310,7 +310,7 @@ export const base = (parent, config, ...factories) => {
             this[key] = value;
           } else if (key in this) {
             this[key] = value;
-          } else if (key in this.style) {
+          } else if (key in super.style) {
             this.style[key] = value;
           } else {
             throw new Error(`Invalid key: ${key}`);

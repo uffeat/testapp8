@@ -2,8 +2,6 @@ import "./bootstrap.scss";
 import "./main.css";
 import { create } from "rollo/component";
 
-
-
 // TODO
 // ... then nav bar
 // ... then Accordion
@@ -19,36 +17,44 @@ import { create } from "rollo/component";
 
 import { Sheet } from "rollo/components/sheet";
 
-
-
 const root = create("div", {
   id: "root",
   parent: document.body,
 });
 
 ////
-const button = create(
-  "button",
-  {
-    parent: root,
-    text: "Hello World",
-    
-    on_click: (event) => {
-      console.log("Clicked");
-    },
+const button = create("button", {
+  parent: root,
+  text: "Hello World",
+
+  on_click: (event) => {
+    console.log("Clicked");
   },
-  
-);
+});
 
 //const sheet_component = new Sheet()
 //button.append(sheet_component)
 
+console.log('color:', button.style.color)
+
 //button.style['background-color'] = 'pink'
 
-button.rules.add({'': {'background-color': 'pink'}})
-button.rules.add({':hover': {'background-color': 'green'}})
 
 
+button.rules.update(
+  { "": { backgroundColor: "pink" } },
+  { ":hover": { backgroundColor: "green" } }
+);
+
+button.rules.update(
+  { "": { color: "blue" } },
+);
+
+console.log(button.rules.get('', 'color'))
+console.log(button.rules.get(''))
+
+//button.rules.update({':hover': {backgroundColor: 'green'}})
+//button.__.backgroundColor = "linen";
 
 /* Enable tests */
 if (import.meta.env.DEV) {
