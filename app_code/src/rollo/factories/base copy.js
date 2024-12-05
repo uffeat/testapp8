@@ -107,7 +107,62 @@ export const base = (parent, config, ...factories) => {
       },
     });
 
-    
+    /* */
+    get css_classes() {
+      return this.#css_classes;
+    }
+    #css_classes = new (class {
+      /* Adds one or more css classes.  
+      args can be:
+      - Individual css class names
+      - String with multiple css class names separated by '.'
+      - Arrays of css class names
+      undefined values are ignored to support iife's. 
+      Chainable. */
+      #owner;
+      constructor(owner) {
+        this.#owner = owner;
+      }
+
+      add = (...args) => {
+        this.#handle("add", ...args);
+        return this.#owner;
+      };
+
+      has = (css_class) => {
+        return this.#owner.classList.contains(css_class);
+      };
+
+      remove = (...args) => {
+        this.#handle("remove", ...args);
+        return this.#owner;
+      };
+
+      #handle = (action, ...args) => {
+        for (let arg of args) {
+          if (typeof arg === "function") {
+            arg = arg.call(this.#owner);
+          }
+          if (arg === undefined) {
+            continue;
+          }
+          if (typeof arg !== "string") {
+            throw new Error(`Invalid css_classes argument: ${arg}`);
+          }
+          if (arg.length === 0) {
+            continue;
+          }
+          if (arg.startsWith(constants.STATE)) {
+            this.#owner.$[`${arg}`] = true;
+            continue;
+          }
+          if (arg.startsWith(constants.CSS_CLASS)) {
+            arg = arg.slice(constants.CSS_CLASS.length);
+          }
+          this.#owner.classList[action](...arg.split("."));
+        }
+      };
+    })(this);
 
     /* Syntactic sugar for event handler registration. */
     get on() {
@@ -188,7 +243,7 @@ export const base = (parent, config, ...factories) => {
       }
       setTimeout(() => {
         for (const hook of deffered) {
-          hook.call(this);
+          this.call(hook);
         }
       }, 0);
       return this;
@@ -197,20 +252,42 @@ export const base = (parent, config, ...factories) => {
     /* Updates properties, attributes, css classes, css vars, handlers and state,
     and runs any hooks. 
     The idea is, that the method should be able to configure the component 
-    completely. 
-    Returns unhandled updates.
-    */
+    completely. */
     update({ hooks, ...updates } = {}) {
       if (super.update) {
         updates = super.update(updates);
       }
       
 
-      
+      /* Props */
+      Object.entries(updates)
+        .filter(
+          ([key, value]) =>
+            value !== undefined &&
+            !key.startsWith(constants.STATE) &&
+            !key.startsWith(constants.ATTRIBUTE) &&
+            !key.startsWith(constants.CSS_CLASS) &&
+            !key.startsWith(constants.CSS_VAR) &&
+            !key.startsWith(constants.HANDLER)
+        )
+        .forEach(([key, value]) => {
+          if (key.startsWith("_")) {
+            this[key] = value;
+          } else if (key in this) {
+            this[key] = value;
+          } else {
+            throw new Error(`Invalid key: ${key}`);
+          }
+        });
+
       
 
-     
-      
+      /* CSS classes */
+      Object.entries(updates)
+        .filter(([key, value]) => key.startsWith(constants.CSS_CLASS))
+        .forEach(([key, value]) =>
+          this.css_classes[value ? "add" : "remove"](key)
+        );
 
       /* CSS vars */
       Object.entries(updates)

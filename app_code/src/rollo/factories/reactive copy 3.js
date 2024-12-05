@@ -1,5 +1,3 @@
-import { constants } from "rollo/constants";
-
 /* General factory for web components and other classes.
 Provides pub-sub-based reactive functionality with fine-grained control options. */
 export const reactive = (parent, config, ...factories) => {
@@ -31,9 +29,7 @@ export const reactive = (parent, config, ...factories) => {
         if (typeof value === "function") {
           value = value.call(target);
         }
-
-        target.#state.update_data({ [key]: value });
-
+        target.update({ [key]: value });
         return true;
       },
     });
@@ -81,7 +77,7 @@ export const reactive = (parent, config, ...factories) => {
 
     /* Returns controller for clearing and exposing underlying state data. */
     get data() {
-      return this.#data;
+      return this.#data
     }
     #data = new (class {
       #owner;
@@ -92,13 +88,13 @@ export const reactive = (parent, config, ...factories) => {
 
       /* Returns a shallowly frozen shallow copy of underlying state data. */
       get current() {
-        return Object.freeze({ ...this.#owner.#state.current });
+        return Object.freeze({ ...this.#owner.#state.current })
       }
 
       /* Returns a shallowly frozen shallow copy of underlying state data as it was 
       before the most recent change. */
       get previous() {
-        return Object.freeze({ ...this.#owner.#state.previous });
+        return Object.freeze({ ...this.#owner.#state.previous })
       }
 
       /* Clears state data without publication. Use with caution. Chainable. */
@@ -140,29 +136,15 @@ export const reactive = (parent, config, ...factories) => {
     })(this);
 
     /* Updates state from data (object). 
+    Chainable.
     Overloadable/super-callable.
     Convenient for updating multiple state items in one go.
-    Can reduce redundant effect calls. 
-    Retuns unhandled updates.
-    */
-    update(updates = {}) {
-      if (super.update) {
-        updates = super.update(updates);
+    Can reduce redundant effect calls. */
+    update(data) {
+      if (data) {
+        this.#state.update_data(data);
       }
-
-      this.#state.update_data(
-        Object.fromEntries(
-          Object.entries(updates)
-            .filter(([key, value]) => key.startsWith(constants.STATE))
-            .map(([key, value]) => [key.slice(constants.STATE.length), value])
-        )
-      );
-
-      return Object.fromEntries(
-        Object.entries(updates).filter(
-          ([key, value]) => !key.startsWith(constants.STATE)
-        )
-      );
+      return this;
     }
 
     /* Provides core functionality - without attention to API. */
@@ -314,7 +296,7 @@ export const reactive = (parent, config, ...factories) => {
         /* Detect changes */
         const changes = this.#get_changes(data);
         /* Abort if no change */
-        if (!changes) return;
+        if (!changes) return this;
         /* Update data stores */
         this.#update_stores(changes);
         /* Call effects */

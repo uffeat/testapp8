@@ -1,9 +1,12 @@
+import { attribute } from "rollo/factories/attribute";
 import { base } from "rollo/factories/base";
 import { clear } from "rollo/factories/clear";
 import { connected } from "rollo/factories/connected";
+import { css_classes } from "rollo/factories/css_classes";
 import { find } from "rollo/factories/find";
 import { observer } from "rollo/factories/observer";
 import { parent } from "rollo/factories/parent";
+import { properties } from "rollo/factories/properties";
 import { send } from "rollo/factories/send";
 import { shadow } from "rollo/factories/shadow";
 import { text } from "rollo/factories/text";
@@ -76,9 +79,18 @@ export const Component = new (class {
       names.push(cls.name);
       chain.push(cls);
     }
+
+
     /* Create __chain__ as instance prop that returns a frozen array of prototypes in mro.
     __chain__ represents the prototype chain as created here. */
     const __chain__ = Object.freeze(chain.reverse());
+
+
+
+
+
+
+
     Object.defineProperty(cls.prototype, "__chain__", {
       configurable: true,
       enumerable: false,
@@ -155,6 +167,9 @@ export const create = Component.create;
 
 
 /* Add factories */
+Component.factories.add(attribute);
+Component.factories.add(properties);
+Component.factories.add(css_classes);
 Component.factories.add(base);
 Component.factories.add(clear);
 Component.factories.add(connected);

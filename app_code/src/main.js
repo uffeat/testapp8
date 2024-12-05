@@ -1,11 +1,7 @@
 import "./bootstrap.scss";
 import "./main.css";
 import { create } from "rollo/component";
-import { Reactive } from "rollo/components/reactive";
-
-
-
-
+import "rollo/components/reactive";
 
 // TODO
 // ... then nav bar
@@ -28,36 +24,29 @@ const root = create("div", {
 });
 
 ////
-const reactive = create('data-reactive')
-
-root.append(reactive)
-
-
-reactive.$.foo = 42
+const reactive = create("data-reactive", {
+  name: "my_reactive",
+  parent: root,
+  $foo: 40,
+  attribute_bar: 'bar'
+});
 
 reactive.effects.add((data) => {
-  console.log('foo:', reactive.$.foo)
-}, 'foo')
+  console.log("foo:", reactive.$.foo);
+}, "foo");
 
-
-reactive.$.foo = 43
-
-
-
-
+reactive.$.foo = 42;
+reactive.$.foo = 43;
 
 const button = create("button", {
   parent: root,
   text: "Hello World",
-  attribute_foo: 'FOO',
+  attribute_foo: "FOO",
+  ".btn": true,
   on_click: (event) => {
     console.log("Clicked");
   },
 });
-
-
-
-
 
 /* Enable tests */
 if (import.meta.env.DEV) {
