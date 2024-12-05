@@ -53,24 +53,16 @@ export const attribute = (parent, config, ...factories) => {
       },
     });
 
-    /* Updates attributes. Returns unhandled updates. */
     update(updates = {}) {
-      if (super.update) {
-        updates = super.update(updates);
-      }
-
+      super.update && super.update(updates);
+      /* Update attributes. */
       Object.entries(updates)
         .filter(([key, value]) => key.startsWith(constants.ATTRIBUTE))
         .forEach(
           ([key, value]) =>
             (this.attribute[key.slice(constants.ATTRIBUTE.length)] = value)
         );
-
-      return Object.fromEntries(
-        Object.entries(updates).filter(
-          ([key, value]) => !key.startsWith(constants.ATTRIBUTE)
-        )
-      );
+      return this;
     }
   };
   return cls;

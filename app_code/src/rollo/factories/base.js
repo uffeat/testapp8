@@ -1,8 +1,5 @@
 import { Reactive } from "rollo/factories/reactive";
 import { constants } from "rollo/constants";
-import { camel_to_kebab_css } from "rollo/utils/case";
-
-const STATE_CSS_CLASS = `${constants.STATE}${constants.CSS_CLASS}`;
 
 /* Base factory for all web components. */
 export const base = (parent, config, ...factories) => {
@@ -11,8 +8,21 @@ export const base = (parent, config, ...factories) => {
       super(...args);
       /* Identify as web component. */
       this.setAttribute("web-component", "");
-      
-      
+    }
+
+    created_callback(...args) {
+      super.created_callback && super.created_callback(...args);
+
+      /* Append children */
+      this.append(
+        ...args.filter(
+          (arg) =>
+            arg instanceof HTMLElement ||
+            typeof arg === "number" ||
+            (typeof arg === "string" && !arg.startsWith(constants.CSS_CLASS))
+        )
+      );
+
       /* Show state as attribute */
       this.effects.add((data) => {
         for (let [key, { current, previous }] of Object.entries(data)) {
@@ -20,16 +30,13 @@ export const base = (parent, config, ...factories) => {
             continue;
           }
           key = `state-${key}`;
-          if (
-            ["boolean", "number", "string"].includes(typeof current)
-          ) {
+          if (["boolean", "number", "string"].includes(typeof current)) {
             this.attribute[key] = current;
           } else {
             this.attribute[key] = null;
           }
         }
       });
-
 
       /* Set up automatic prop updates from NATIVE-prefixed state */
       this.effects.add((data) => {
@@ -85,45 +92,6 @@ export const base = (parent, config, ...factories) => {
       },
     });
 
-    
-
-    /* Getter/setter interface to css class. */
-    get css_class() {
-      return this.#css_class;
-    }
-    #css_class = new Proxy(this, {
-      get(target, css_class) {
-        return target.classList.contains(camel_to_kebab_css(css_class));
-      },
-      set(target, css_class, value) {
-        if (typeof value === "function") {
-          value = value.call(target);
-        }
-        if (value === undefined) return true;
-        target.classList[value ? "add" : "remove"](
-          camel_to_kebab_css(css_class)
-        );
-        return true;
-      },
-    });
-
-    
-
-    /* Syntactic sugar for event handler registration. */
-    get on() {
-      return this.#on;
-    }
-    #on = new Proxy(this, {
-      get() {
-        throw new Error(`'on' is write-only.`);
-      },
-      set(target, type, handler) {
-        if (handler === undefined) return true;
-        target.addEventListener(type, handler);
-        return true;
-      },
-    });
-
     /* Returns controller for managing effects. */
     get effects() {
       return this.#reactive.effects;
@@ -135,82 +103,8 @@ export const base = (parent, config, ...factories) => {
     }
     #reactive = Reactive.create();
 
-    /* Calls one or more hooks. 
-    A hook is a function that is called bound the component.
-    Qualified hook return values are appended to the component.
-    Supports css classes (incl. reactive) and deferred hooks.
-    Useful during component contruction to:
-    - Add effects
-    - Add handlers, potentially conditionally
-    - Conditionally add one or more children
-    undefined hooks are ignored to support iife's. 
-    Chainable. 
-    The idea is, that the method should be able to configure the component 
-    with respect to configurations that a additive in nature 
-    (children and css classes). */
-    call(...hooks) {
-      const deffered = [];
-      for (let hook of hooks) {
-        if (typeof hook === "function") {
-          hook = hook.call(this);
-          if (typeof hook === "function") {
-            deffered.push(hook);
-            continue;
-          }
-        }
-        if (hook === undefined) {
-          continue;
-        }
-        if (Array.isArray(hook)) {
-          this.call(...hook);
-          continue;
-        }
-        if (hook instanceof HTMLElement) {
-          this.append(hook);
-          continue;
-        }
-        if (typeof hook === "number") {
-          this.append(hook);
-          continue;
-        }
-        if (typeof hook === "string") {
-          if (
-            hook.startsWith(constants.CSS_CLASS) ||
-            hook.startsWith(STATE_CSS_CLASS)
-          ) {
-            this.css_classes.add(hook);
-          } else {
-            this.append(hook);
-          }
-          continue;
-        }
-        throw new Error(`Invalid hook: ${hook}`);
-      }
-      setTimeout(() => {
-        for (const hook of deffered) {
-          hook.call(this);
-        }
-      }, 0);
-      return this;
-    }
-
-    /* Updates properties, attributes, css classes, css vars, handlers and state,
-    and runs any hooks. 
-    The idea is, that the method should be able to configure the component 
-    completely. 
-    Returns unhandled updates.
-    */
-    update({ hooks, ...updates } = {}) {
-      if (super.update) {
-        updates = super.update(updates);
-      }
-      
-
-      
-      
-
-     
-      
+    update(updates = {}) {
+      super.update && super.update(updates);
 
       /* CSS vars */
       Object.entries(updates)
@@ -220,29 +114,10 @@ export const base = (parent, config, ...factories) => {
             (this.__[key.slice(constants.CSS_VAR.length)] = value)
         );
 
-      /* Handlers */
-      Object.entries(updates)
-        .filter(
-          ([key, value]) =>
-            value !== undefined && key.startsWith(constants.HANDLER)
-        )
-        .map(([key, value]) => [key.slice(constants.HANDLER.length), value])
-        .forEach(([key, value]) => (this.on[key] = value));
-
-      /* Hooks */
-      if (hooks) {
-        if (!Array.isArray(hooks)) {
-          throw new Error(`'hooks' should be an array.`);
-        }
-        this.call(...hooks);
-      }
-
       /* Reactive state */
       this.reactive.update(updates);
 
-
-
-      return {};
+      return this;
     }
   };
   return cls;

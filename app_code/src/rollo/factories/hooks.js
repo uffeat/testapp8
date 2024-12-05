@@ -5,31 +5,26 @@ export const hooks = (parent, config, ...factories) => {
       super(...args);
     }
 
-    call(...hooks) {
-      if (super.call) {
-        hooks = super.call(hooks);
-      }
+    created_callback(...args) {
+      super.created_callback && super.created_callback(...args);
+      this.call(...args)
+    }
+
+    call(...args) {
+      super.call && super.call(...args);
+
       const deffered = [];
-      const unhandled = []
-      for (let hook of hooks) {
-        if (typeof hook === "function") {
-          hook = hook.call(this);
-          if (typeof hook === "function") {
-            deffered.push(hook);
-            continue;
+      args
+        .filter((arg) => typeof arg === "function")
+        .forEach((hook) => {
+          const result = hook.call(this);
+          if (typeof result === "function") {
+            deffered.push(result);
           }
-        }
-        if (hook === undefined) {
-          continue;
-        }
-        unhandled.push(hook)
-      }
+        });
       setTimeout(() => {
-        for (const hook of deffered) {
-          hook.call(this);
-        }
+        deffered.forEach((hook) => hook.call(this));
       }, 0);
-      return unhandled;
     }
   };
   return cls;

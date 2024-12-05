@@ -1,5 +1,5 @@
 import { constants } from "rollo/constants";
-
+import { camel_to_kebab_css } from "rollo/utils/case";
 
 /* Base factory for all web components. */
 export const css_classes = (parent, config, ...factories) => {
@@ -7,6 +7,34 @@ export const css_classes = (parent, config, ...factories) => {
     constructor(...args) {
       super(...args);
     }
+
+    created_callback(...args) {
+      super.created_callback && super.created_callback(...args);
+
+      args.filter(
+        (arg) => typeof arg === "string" && arg.startsWith(constants.CSS_CLASS)
+      ).forEach((arg) => this.css_classes.add(arg))
+    }
+
+    /* Getter/setter interface to css class. */
+    get css_class() {
+      return this.#css_class;
+    }
+    #css_class = new Proxy(this, {
+      get(target, css_class) {
+        return target.classList.contains(camel_to_kebab_css(css_class));
+      },
+      set(target, css_class, value) {
+        if (typeof value === "function") {
+          value = value.call(target);
+        }
+        if (value === undefined) return true;
+        target.classList[value ? "add" : "remove"](
+          camel_to_kebab_css(css_class)
+        );
+        return true;
+      },
+    });
 
     /* */
     get css_classes() {
@@ -53,10 +81,7 @@ export const css_classes = (parent, config, ...factories) => {
           if (arg.length === 0) {
             continue;
           }
-          if (arg.startsWith(constants.STATE)) {
-            this.#owner.$[`${arg}`] = true;
-            continue;
-          }
+
           if (arg.startsWith(constants.CSS_CLASS)) {
             arg = arg.slice(constants.CSS_CLASS.length);
           }
@@ -70,11 +95,9 @@ export const css_classes = (parent, config, ...factories) => {
     call
     */
 
-    /* Updates css classes. Returns unhandled updates. */
+    /* Updates css classes. */
     update(updates = {}) {
-      if (super.update) {
-        updates = super.update(updates);
-      }
+      super.update && super.update(updates)
 
       Object.entries(updates)
         .filter(([key, value]) => key.startsWith(constants.CSS_CLASS))
@@ -82,11 +105,7 @@ export const css_classes = (parent, config, ...factories) => {
           this.css_classes[value ? "add" : "remove"](key)
         );
 
-      return Object.fromEntries(
-        Object.entries(updates).filter(
-          ([key, value]) => !key.startsWith(constants.CSS_CLASS)
-        )
-      );
+      
     }
   };
   return cls;

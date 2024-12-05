@@ -1,13 +1,16 @@
+import { constants } from "rollo/constants";
+
 import { attribute } from "rollo/factories/attribute";
 import { base } from "rollo/factories/base";
 import { clear } from "rollo/factories/clear";
 import { connected } from "rollo/factories/connected";
 import { css_classes } from "rollo/factories/css_classes";
 import { find } from "rollo/factories/find";
+import { hooks } from "rollo/factories/hooks";
 import { observer } from "rollo/factories/observer";
 import { parent } from "rollo/factories/parent";
 import { properties } from "rollo/factories/properties";
-import { send } from "rollo/factories/send";
+import { events } from "rollo/factories/events";
 import { shadow } from "rollo/factories/shadow";
 import { text } from "rollo/factories/text";
 
@@ -15,7 +18,6 @@ import { uid } from "rollo/factories/uid";
 //import { sheet } from "rollo/factories/sheet";
 
 import { can_have_shadow } from "rollo/utils/can_have_shadow";
-
 
 /* Utility for authoring web components and instantiating elements. */
 export const Component = new (class {
@@ -80,16 +82,9 @@ export const Component = new (class {
       chain.push(cls);
     }
 
-
     /* Create __chain__ as instance prop that returns a frozen array of prototypes in mro.
     __chain__ represents the prototype chain as created here. */
     const __chain__ = Object.freeze(chain.reverse());
-
-
-
-
-
-
 
     Object.defineProperty(cls.prototype, "__chain__", {
       configurable: true,
@@ -112,11 +107,7 @@ export const Component = new (class {
 
   /* Creates an returns element from object. 
   Supports rich in-line configuration, incl. hooks. */
-  create_from_object = ({
-    tag = "div",
-    ...updates
-  } = {}) => {
-   
+  create_from_object = ({ tag = "div", ...updates } = {}) => {
     return this.create(tag, updates);
   };
 
@@ -125,21 +116,35 @@ export const Component = new (class {
   - Rich in-line configuration, incl. hooks.
   - Construction from objects.
   - On-demand authoring of non-autonomous web component. */
-  create = (arg, updates = {}, ..._hooks) => {
+  create = (arg, { parent, ...updates } = {}, ...args) => {
     if (typeof arg !== "string") {
       return this.create_from_object(arg);
     }
     const [tag, ...css_classes] = arg.split(".");
-    const element = new (this.get(tag))(updates, ..._hooks);
+    const element = new (this.get(tag))(updates, ...args);
     if (css_classes.length > 0) {
       element.classList.add(...css_classes);
     }
-
-    
-
-
     element.update && element.update(updates);
-    element.call && element.call(..._hooks)
+    element.created_callback && element.created_callback(...args);
+
+    /* Handle parent separately to ensure that any connectedCallbacks are 
+    always called AFTER any created_callbacks */
+    if (parent) {
+      if (typeof parent === "string") {
+        const selector = parent;
+        parent = document.querySelector(selector);
+        if (!parent) {
+          throw new Error(`Could not find parent from selector: ${selector}`);
+        }
+      } else {
+        if (!(parent instanceof HTMLElement)) {
+          throw new Error(`Invalid parent: ${parent}`);
+        }
+      }
+      parent.append(element);
+    }
+
     return element;
   };
 
@@ -165,7 +170,6 @@ export const Component = new (class {
 /* Short-hand */
 export const create = Component.create;
 
-
 /* Add factories */
 Component.factories.add(attribute);
 Component.factories.add(properties);
@@ -174,14 +178,10 @@ Component.factories.add(base);
 Component.factories.add(clear);
 Component.factories.add(connected);
 Component.factories.add(find);
+Component.factories.add(hooks);
 Component.factories.add(observer);
-
-
-
-
-
 Component.factories.add(parent);
-Component.factories.add(send);
+Component.factories.add(events);
 Component.factories.add(shadow, can_have_shadow);
 Component.factories.add(text, (tag) => {
   const element = document.createElement(tag);
@@ -190,7 +190,4 @@ Component.factories.add(text, (tag) => {
 
 Component.factories.add(uid);
 
-
-
 //Component.factories.add(sheet);
-

@@ -13,8 +13,14 @@ export const uid = (parent, config, ...factories) => {
     #uid;
     constructor(...args) {
       super(...args);
+      
+    }
+
+    created_callback(...args) {
+      super.created_callback && super.created_callback(...args);
       this.#uid = create_uid();
-      this.setAttribute("uid", this.#uid);
+      this.attribute.uid = this.#uid
+    
     }
 
     attributeChangedCallback(name, previous, current) {

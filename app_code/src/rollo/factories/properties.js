@@ -5,25 +5,17 @@ export const properties = (parent, config, ...factories) => {
       super(...args);
     }
 
-    /* Updates properties. Returns unhandled updates. */
+    /* Updates properties. */
     update(updates = {}) {
-      if (super.update) {
-        updates = super.update(updates);
-      }
+      super.update && super.update(updates);
 
       Object.entries(updates)
-        .filter(this.#update_filter)
+        .filter(
+          ([key, value]) =>
+            key in this || (key.startsWith("_") && !key.startsWith("__"))
+        )
         .forEach(([key, value]) => (this[key] = value));
-
-      return Object.fromEntries(Object.entries(updates).filter(
-        ([key, value]) => !this.#update_filter([key, value])
-      ))
-      
-      
-      
-      
     }
-    #update_filter = ([key, value]) => key in this || (key.startsWith("_") && !key.startsWith("__"))
   };
   return cls;
 };

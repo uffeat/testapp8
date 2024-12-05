@@ -16,7 +16,7 @@ import "rollo/components/reactive";
 // ... then tooltip
 // ... then scrollspy
 
-import { Sheet } from "rollo/components/sheet";
+//import { Sheet } from "rollo/components/sheet";
 
 const root = create("div", {
   id: "root",
@@ -46,7 +46,9 @@ const button = create("button", {
   on_click: (event) => {
     console.log("Clicked");
   },
-});
+},
+
+);
 
 /* Enable tests */
 if (import.meta.env.DEV) {

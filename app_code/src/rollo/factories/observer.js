@@ -1,5 +1,5 @@
 import { base } from "rollo/factories/base";
-import { send } from "rollo/factories/send";
+import { events } from "rollo/factories/events";
 
 
 /* Factory with MutationsObserver for observing element children  */
@@ -7,8 +7,8 @@ export const observer = (parent, config, ...factories) => {
   if (!factories.includes(base)) {
     throw new Error(`observer factory requires base factory`);
   }
-  if (!factories.includes(send)) {
-    throw new Error(`observer factory requires send factory`);
+  if (!factories.includes(events)) {
+    throw new Error(`observer factory requires events factory`);
   }
   
   const cls = class Observer extends parent {

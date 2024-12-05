@@ -31,9 +31,7 @@ export const reactive = (parent, config, ...factories) => {
         if (typeof value === "function") {
           value = value.call(target);
         }
-
         target.#state.update_data({ [key]: value });
-
         return true;
       },
     });
@@ -146,9 +144,7 @@ export const reactive = (parent, config, ...factories) => {
     Retuns unhandled updates.
     */
     update(updates = {}) {
-      if (super.update) {
-        updates = super.update(updates);
-      }
+      super.update && super.update(updates)
 
       this.#state.update_data(
         Object.fromEntries(
@@ -158,11 +154,7 @@ export const reactive = (parent, config, ...factories) => {
         )
       );
 
-      return Object.fromEntries(
-        Object.entries(updates).filter(
-          ([key, value]) => !key.startsWith(constants.STATE)
-        )
-      );
+      
     }
 
     /* Provides core functionality - without attention to API. */
