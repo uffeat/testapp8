@@ -1,15 +1,22 @@
 import { constants } from "rollo/constants";
 
-/* General factory for web components and other classes.
-Provides pub-sub-based reactive functionality with fine-grained control options. */
+/* Factory that provides pub-sub-based reactive functionality with 
+fine-grained control options. For any class - not only web components. */
 export const reactive = (parent, config, ...factories) => {
   const cls = class Reactive extends parent {
     /* Alternative constructor without 'new' */
     static create = (...args) => {
       return new Reactive(...args);
     };
-    constructor(...args) {
-      super(...args);
+    #name;
+    #owner;
+    constructor({ name, owner } = {}, state) {
+      super();
+      this.#name = name;
+      this.#owner = owner;
+      if (state) {
+        this.#state.update_data(state)
+      }
     }
 
     /* NOTE
@@ -77,7 +84,7 @@ export const reactive = (parent, config, ...factories) => {
       };
     })(this);
 
-    /* Returns controller for clearing and exposing underlying state data. */
+    /* Returns controller re underlying state data. */
     get data() {
       return this.#data;
     }
@@ -106,6 +113,14 @@ export const reactive = (parent, config, ...factories) => {
       };
     })(this);
 
+    get name() {
+      return this.#name;
+    }
+
+    get owner() {
+      return this.#owner;
+    }
+
     /* Returns controller for managing protection of keys. */
     get protected() {
       return this.#protected;
@@ -117,6 +132,14 @@ export const reactive = (parent, config, ...factories) => {
         this.#owner = owner;
       }
 
+      /* Returns (frozen) array of protected keys. */
+      get keys() {
+        return this.#owner.#state.get_protected_keys()
+      }
+
+
+      /* Add protected key. Optionally sets value. 
+      Returns function that can set value. */
       add = (key, value) => {
         return this.#owner.#state.protect(key, value);
       };
@@ -137,15 +160,10 @@ export const reactive = (parent, config, ...factories) => {
       };
     })(this);
 
-    /* Updates state from data (object). 
-    Overloadable/super-callable.
-    Convenient for updating multiple state items in one go.
-    Can reduce redundant effect calls. 
-    Retuns unhandled updates.
-    */
     update(updates = {}) {
-      super.update && super.update(updates)
-
+      super.update && super.update(updates);
+      /* Update multiple state items in one go
+      for convenience and effect-call efficiency */
       this.#state.update_data(
         Object.fromEntries(
           Object.entries(updates)
@@ -153,8 +171,7 @@ export const reactive = (parent, config, ...factories) => {
             .map(([key, value]) => [key.slice(constants.STATE.length), value])
         )
       );
-
-      
+      return this;
     }
 
     /* Provides core functionality - without attention to API. */
@@ -238,6 +255,10 @@ export const reactive = (parent, config, ...factories) => {
       clear_effects = () => {
         this.#effects_registry = new Map();
       };
+
+      get_protected_keys = () => {
+        return Object.freeze(Array.from(Object.keys(this.#protected_registry)))
+      }
 
       /* Tests, if effect is registered. */
       has_effect = (effect) => {

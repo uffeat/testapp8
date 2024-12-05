@@ -1,13 +1,9 @@
-/* Factory for all web components. */
+/* Factory for calling hooks. */
 export const hooks = (parent, config, ...factories) => {
   const cls = class Hooks extends parent {
-    constructor(...args) {
-      super(...args);
-    }
-
     created_callback(...args) {
       super.created_callback && super.created_callback(...args);
-      this.call(...args)
+      this.call(...args);
     }
 
     call(...args) {

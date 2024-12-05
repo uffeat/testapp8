@@ -1,12 +1,9 @@
 import { constants } from "rollo/constants";
 
-/* Factory for all web components. */
+/* Factory with enhanced featues for managing event handlers and for 
+dispatching events. */
 export const events = (parent, config, ...factories) => {
   const cls = class Events extends parent {
-    constructor(...args) {
-      super(...args);
-    }
-
     /* Syntactic sugar for event handler registration. */
     get on() {
       return this.#on;
@@ -31,8 +28,10 @@ export const events = (parent, config, ...factories) => {
       return detail;
     }
 
+    /* Updates component. Chainable. */
     update(updates = {}) {
       super.update && super.update(updates);
+      /* Register event handlers */
       Object.entries(updates)
         .filter(
           ([key, value]) =>
@@ -40,6 +39,7 @@ export const events = (parent, config, ...factories) => {
         )
         .map(([key, value]) => [key.slice(constants.HANDLER.length), value])
         .forEach(([key, value]) => (this.on[key] = value));
+      return this;
     }
   };
   return cls;

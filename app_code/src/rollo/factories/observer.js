@@ -1,19 +1,14 @@
-import { base } from "rollo/factories/base";
-import { events } from "rollo/factories/events";
+import { check_factories } from "rollo/utils/check_factories";
+import { base, events } from "rollo/factories/__factories__";
 
-
-/* Factory with MutationsObserver for observing element children  */
+/* Factory with MutationsObserver for observing element children. */
 export const observer = (parent, config, ...factories) => {
-  if (!factories.includes(base)) {
-    throw new Error(`observer factory requires base factory`);
-  }
-  if (!factories.includes(events)) {
-    throw new Error(`observer factory requires events factory`);
-  }
-  
+  /* Check factory dependencies */
+  check_factories([base, events], factories);
+
   const cls = class Observer extends parent {
-    constructor(...args) {
-      super(...args);
+    created_callback(...args) {
+      super.created_callback && super.created_callback(...args);
       this.observer.start();
     }
 
@@ -65,12 +60,9 @@ export const observer = (parent, config, ...factories) => {
               .forEach((node) => {
                 node.$.parent = this.#owner;
 
-
                 this.#owner.send("child_added", {
                   detail: { added_child: node },
                 });
-
-
               });
             [...mutation.removedNodes]
               .filter(
@@ -81,12 +73,9 @@ export const observer = (parent, config, ...factories) => {
               .forEach((node) => {
                 node.$.parent = null;
 
-
                 this.#owner.send("child_removed", {
                   detail: { removed_child: node },
                 });
-
-                
               });
           }
         });

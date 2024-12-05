@@ -1,6 +1,10 @@
 import { Component } from "rollo/component";
 import { camel_to_kebab } from "rollo/utils/case";
 
+
+/* TODO
+Rule items should be reactive */
+
 /* Non-visual web component for dynamic rules.
   
 */

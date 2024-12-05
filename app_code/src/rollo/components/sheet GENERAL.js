@@ -6,7 +6,7 @@ TODO
   should be driven from element, i.e., add rule on-demand.
 - scoping if placed in element with scope selector prop or if not placed in head
 
-- a sheet can be disabled (native prop)
+- a sheet can be disabled (native prop). Explore!
 */
 
 

@@ -1,20 +1,20 @@
-import { constants } from "rollo/constants";
+import {
+  attribute,
+  base,
+  connected,
+  css_classes,
+  css_var,
+  descendants,
+  hooks,
+  observer,
+  parent,
+  properties,
+  events,
+  shadow,
+  text,
+  uid,
+} from "rollo/factories/__factories__";
 
-import { attribute } from "rollo/factories/attribute";
-import { base } from "rollo/factories/base";
-import { clear } from "rollo/factories/clear";
-import { connected } from "rollo/factories/connected";
-import { css_classes } from "rollo/factories/css_classes";
-import { find } from "rollo/factories/find";
-import { hooks } from "rollo/factories/hooks";
-import { observer } from "rollo/factories/observer";
-import { parent } from "rollo/factories/parent";
-import { properties } from "rollo/factories/properties";
-import { events } from "rollo/factories/events";
-import { shadow } from "rollo/factories/shadow";
-import { text } from "rollo/factories/text";
-
-import { uid } from "rollo/factories/uid";
 //import { sheet } from "rollo/factories/sheet";
 
 import { can_have_shadow } from "rollo/utils/can_have_shadow";
@@ -105,29 +105,33 @@ export const Component = new (class {
     return this.registry.add(tag, cls);
   };
 
-  /* Creates an returns element from object. 
-  Supports rich in-line configuration, incl. hooks. */
-  create_from_object = ({ tag = "div", ...updates } = {}) => {
-    return this.create(tag, updates);
+  /* Creates an returns element from object. */
+  create_from_object = ({ args: [], tag = "div", ...updates } = {}) => {
+    return this.create(tag, updates, ...args);
   };
 
   /* Creates an element. 
   Supports:
-  - Rich in-line configuration, incl. hooks.
+  - Rich in-line configuration, incl. children and hooks.
   - Construction from objects.
   - On-demand authoring of non-autonomous web component. */
   create = (arg, { parent, ...updates } = {}, ...args) => {
     if (typeof arg !== "string") {
+      /* arg is an object */
       return this.create_from_object(arg);
     }
     const [tag, ...css_classes] = arg.split(".");
-    const element = new (this.get(tag))(updates, ...args);
+    const element = new (this.get(tag))({ parent, ...updates }, ...args);
     if (css_classes.length > 0) {
       element.classList.add(...css_classes);
     }
     element.update && element.update(updates);
+    if (element.isConnected) {
+      throw new Error(
+        `Element should not be connected to the live dom at this point.`
+      );
+    }
     element.created_callback && element.created_callback(...args);
-
     /* Handle parent separately to ensure that any connectedCallbacks are 
     always called AFTER any created_callbacks */
     if (parent) {
@@ -144,7 +148,6 @@ export const Component = new (class {
       }
       parent.append(element);
     }
-
     return element;
   };
 
@@ -172,22 +175,25 @@ export const create = Component.create;
 
 /* Add factories */
 Component.factories.add(attribute);
-Component.factories.add(properties);
-Component.factories.add(css_classes);
 Component.factories.add(base);
-Component.factories.add(clear);
+Component.factories.add(css_classes);
+Component.factories.add(css_var);
 Component.factories.add(connected);
-Component.factories.add(find);
+Component.factories.add(descendants);
+Component.factories.add(events);
 Component.factories.add(hooks);
+/* TODO
+Consider not using observer as a standard factory. currently not used.  */
 Component.factories.add(observer);
 Component.factories.add(parent);
-Component.factories.add(events);
+Component.factories.add(properties);
+/* TODO
+Consider not using shadow as a standard factory. currently not used.  */
 Component.factories.add(shadow, can_have_shadow);
 Component.factories.add(text, (tag) => {
   const element = document.createElement(tag);
   return "textContent" in element;
 });
-
 Component.factories.add(uid);
 
 //Component.factories.add(sheet);

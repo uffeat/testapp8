@@ -1,14 +1,14 @@
 import { constants } from "rollo/constants";
 import { camel_to_kebab } from "rollo/utils/case";
 
-/* Base factory for all web components. */
+/* Factory for enhanced attribute control. */
 export const attribute = (parent, config, ...factories) => {
   const cls = class Attribute extends parent {
-    constructor(...args) {
-      super(...args);
-    }
-
-    /* Getter/setter interface to attributes. */
+    /* Returns prop-like getter/setter interface to attribute. 
+    Supports:
+    - camel case
+    - hooks
+    - iife's (undefined values are ignored) */
     get attribute() {
       return this.#attribute;
     }
@@ -53,9 +53,10 @@ export const attribute = (parent, config, ...factories) => {
       },
     });
 
+    /* Updates component. Chainable. */
     update(updates = {}) {
       super.update && super.update(updates);
-      /* Update attributes. */
+      /* Update attributes */
       Object.entries(updates)
         .filter(([key, value]) => key.startsWith(constants.ATTRIBUTE))
         .forEach(

@@ -1,0 +1,15 @@
+/* Export aggregator for factories. */
+export { attribute } from "rollo/factories/attribute";
+export { base } from "rollo/factories/base";
+export { connected } from "rollo/factories/connected";
+export { css_classes } from "rollo/factories/css_classes";
+export { css_var } from "rollo/factories/css_var";
+export { descendants } from "rollo/factories/descendants";
+export { hooks } from "rollo/factories/hooks";
+export { observer } from "rollo/factories/observer";
+export { parent } from "rollo/factories/parent";
+export { properties } from "rollo/factories/properties";
+export { events } from "rollo/factories/events";
+export { shadow } from "rollo/factories/shadow";
+export { text } from "rollo/factories/text";
+export { uid } from "rollo/factories/uid";

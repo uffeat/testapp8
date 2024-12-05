@@ -1,4 +1,6 @@
+import { check_factories } from "rollo/utils/check_factories";
 import { create_observed_attributes } from "rollo/utils/create_observed_attributes";
+import { attribute } from "rollo/factories/__factories__";
 
 const create_uid = (() => {
   let count = 0;
@@ -7,20 +9,19 @@ const create_uid = (() => {
   };
 })();
 
+/* Factory assigning uid attribute/prop to components. */
 export const uid = (parent, config, ...factories) => {
+  /* Check factory dependencies */
+  check_factories([attribute], factories);
+
   const cls = class UId extends parent {
     static observedAttributes = create_observed_attributes(parent, "uid");
     #uid;
-    constructor(...args) {
-      super(...args);
-      
-    }
 
     created_callback(...args) {
       super.created_callback && super.created_callback(...args);
       this.#uid = create_uid();
-      this.attribute.uid = this.#uid
-    
+      this.attribute.uid = this.#uid;
     }
 
     attributeChangedCallback(name, previous, current) {
@@ -31,7 +32,7 @@ export const uid = (parent, config, ...factories) => {
           console.error(
             `'uid' cannot be changed. Reverting to original value.`
           );
-          this.setAttribute("uid", this.#uid);
+          this.attribute.uid = this.#uid;
         }
       }
     }

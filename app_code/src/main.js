@@ -16,7 +16,7 @@ import "rollo/components/reactive";
 // ... then tooltip
 // ... then scrollspy
 
-//import { Sheet } from "rollo/components/sheet";
+import { Sheet } from "rollo/components/sheet";
 
 const root = create("div", {
   id: "root",
@@ -28,7 +28,7 @@ const reactive = create("data-reactive", {
   name: "my_reactive",
   parent: root,
   $foo: 40,
-  attribute_bar: 'bar'
+  attribute_bar: "bar",
 });
 
 reactive.effects.add((data) => {
@@ -38,17 +38,27 @@ reactive.effects.add((data) => {
 reactive.$.foo = 42;
 reactive.$.foo = 43;
 
-const button = create("button", {
-  parent: root,
-  text: "Hello World",
-  attribute_foo: "FOO",
-  ".btn": true,
-  on_click: (event) => {
-    console.log("Clicked");
+const button = create(
+  "button",
+  {
+    parent: root,
+    $$text: "Hello World",
+    attribute_foo: "FOO",
+    ".btn": true,
+    on_click: (event) => {
+      console.log("Clicked");
+    },
   },
-},
-
+  function () {
+    this.effects.add((data) => {
+      console.log('$text:', this.$.$text)
+    }, '$text')
+  }
 );
+
+button.$.$text = 'Yo world'
+button.$['$.btn-primary'] = true
+
 
 /* Enable tests */
 if (import.meta.env.DEV) {

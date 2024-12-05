@@ -1,22 +1,22 @@
 import { constants } from "rollo/constants";
 import { camel_to_kebab_css } from "rollo/utils/case";
 
-/* Base factory for all web components. */
+/* Factory with enhanced features for controlling css classes. */
 export const css_classes = (parent, config, ...factories) => {
   const cls = class CssClasses extends parent {
-    constructor(...args) {
-      super(...args);
-    }
-
     created_callback(...args) {
       super.created_callback && super.created_callback(...args);
-
-      args.filter(
-        (arg) => typeof arg === "string" && arg.startsWith(constants.CSS_CLASS)
-      ).forEach((arg) => this.css_classes.add(arg))
+      /* Add css classes from CSS_CLASS-prefixed strings */
+      args
+        .filter(
+          (arg) =>
+            typeof arg === "string" && arg.startsWith(constants.CSS_CLASS)
+        )
+        .forEach((arg) => this.css_classes.add(arg));
     }
 
-    /* Getter/setter interface to css class. */
+    /* Returns prop-like getter/setter interface to css class. 
+    Supports camel case. */
     get css_class() {
       return this.#css_class;
     }
@@ -36,7 +36,8 @@ export const css_classes = (parent, config, ...factories) => {
       },
     });
 
-    /* */
+    /* Returns a classList controller that allows control of css classes 
+    from '.'-strings and function values. */
     get css_classes() {
       return this.#css_classes;
     }
@@ -90,22 +91,16 @@ export const css_classes = (parent, config, ...factories) => {
       };
     })(this);
 
-    /*
-    TODO
-    call
-    */
-
-    /* Updates css classes. */
+    /* Updates component. Chainable. */
     update(updates = {}) {
-      super.update && super.update(updates)
-
+      super.update && super.update(updates);
+      /* Update css classes */
       Object.entries(updates)
         .filter(([key, value]) => key.startsWith(constants.CSS_CLASS))
         .forEach(([key, value]) =>
           this.css_classes[value ? "add" : "remove"](key)
         );
-
-      
+      return this;
     }
   };
   return cls;

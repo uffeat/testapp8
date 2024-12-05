@@ -1,22 +1,17 @@
+import { check_factories } from "rollo/utils/check_factories";
 import { base } from "rollo/factories/base";
 
-/* Factory for all web components. */
+/* Factory that set connected state. */
 export const connected = (parent, config, ...factories) => {
-  if (!factories.includes(base)) {
-    throw new Error(`connected factory requires base factory`);
-  }
+  /* Check factory dependencies */
+  check_factories([base], factories);
 
   const cls = class Connected extends parent {
     #set_connected;
-    constructor(...args) {
-      super(...args);
-      
-    }
 
     created_callback(...args) {
       super.created_callback && super.created_callback(...args);
       this.#set_connected = this.reactive.protected.add("connected");
-     
     }
 
     connectedCallback() {
@@ -30,7 +25,7 @@ export const connected = (parent, config, ...factories) => {
     }
 
     get connected() {
-      return this.$.__connected__;
+      return this.$.connected;
     }
   };
   return cls;

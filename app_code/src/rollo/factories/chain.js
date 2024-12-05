@@ -1,11 +1,13 @@
-/* Base factory for all web components. */
+/* Factory with features for accessing classes in prototype chain. */
 export const chain = (parent, config, ...factories) => {
   const cls = class Chain extends parent {
-    constructor(...args) {
-      super(...args);
-    }
-
-    /* Access to prototype chain. */
+    /* Returns prop-like getter interface for access to classes in prototype 
+    chain. Useful, when super is not enough. 
+    NOTE
+    Before using this feature, consider if
+    - a super-based alternative could be conceived
+    - a composition-based solution could be used instead.
+    */
     get chain() {
       return this.#chain;
     }

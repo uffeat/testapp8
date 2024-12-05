@@ -1,17 +1,24 @@
-import { Reactive } from "rollo/factories/reactive";
 import { constants } from "rollo/constants";
+import { check_factories } from "rollo/utils/check_factories";
+import { Reactive } from "rollo/factories/reactive";
+import { attribute, css_classes } from "rollo/factories/__factories__";
 
-/* Base factory for all web components. */
+/* Factory that coordinates multipe other factories, adds reactive features
+ans exposes super for external access. also ensure super call in constructor. */
 export const base = (parent, config, ...factories) => {
+  /* Check factory dependencies */
+  check_factories([attribute, css_classes], factories);
+
   const cls = class Base extends parent {
-    constructor(...args) {
-      super(...args);
-      /* Identify as web component. */
-      this.setAttribute("web-component", "");
+    constructor() {
+      super();
     }
 
     created_callback(...args) {
       super.created_callback && super.created_callback(...args);
+
+      /* Identify as web component. */
+      this.attribute.webComponent = true;
 
       /* Append children */
       this.append(
@@ -70,28 +77,6 @@ export const base = (parent, config, ...factories) => {
       return this.#reactive.$;
     }
 
-    /* Getter/setter interface for component-scoped css vars. */
-    get __() {
-      return this.#__;
-    }
-    #__ = new Proxy(this, {
-      get(target, key) {
-        return getComputedStyle(target).getPropertyValue(`--${key}`).trim();
-      },
-      set(target, key, value) {
-        if (typeof value === "function") {
-          value = value.call(target);
-        }
-        if (value === undefined) return true;
-        if (value) {
-          target.style.setProperty(`--${key}`, value);
-        } else {
-          target.style.removeProperty(`--${key}`);
-        }
-        return true;
-      },
-    });
-
     /* Returns controller for managing effects. */
     get effects() {
       return this.#reactive.effects;
@@ -101,22 +86,18 @@ export const base = (parent, config, ...factories) => {
     get reactive() {
       return this.#reactive;
     }
-    #reactive = Reactive.create();
+    /* NOTE For a cleaner encapsulation, reactive features are provided by 
+    composition (rather than using the reactive factory). 
+    However, the '$' and 'effects' props are surfaced, and reactive.update is 
+    called inside 'update' to provide as dx as if the reactive factory has been used.
+    This offers an optimal mix of composition safety and inheritance-like direct access. */
+    #reactive = Reactive.create({ owner: this });
 
+    /* Updates component. Chainable. */
     update(updates = {}) {
       super.update && super.update(updates);
-
-      /* CSS vars */
-      Object.entries(updates)
-        .filter(([key, value]) => key.startsWith(constants.CSS_VAR))
-        .forEach(
-          ([key, value]) =>
-            (this.__[key.slice(constants.CSS_VAR.length)] = value)
-        );
-
-      /* Reactive state */
+      /* Update reactive state */
       this.reactive.update(updates);
-
       return this;
     }
   };
