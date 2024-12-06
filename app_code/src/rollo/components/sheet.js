@@ -11,12 +11,22 @@ import { camel_to_kebab } from "rollo/utils/case";
     - Media.
     - Keyframe.
   - Rules can be appended with standard object notation and a syntax that 
-    resembles native CSS with optional camel case keys.
+    resembles native CSS with optional camel case keys. Alternatively,
+    the sheet can be defined from text.
+  - Supports hooks and iifee's, when appending rules.
+  - The component is per se not intended for dynamic rule manipulation.
+    However, the API makes it relatively easy for other objects to do that.
+    Notably, the 'rules.create' and 'rules.update' methods are provided
+    for such purpose.
+
+
+  
 */
 export class Sheet extends HTMLElement {
   static create = (...args) => {
     return new Sheet(...args)
   };
+  static observedAttributes = ['disabled', 'name']
   #name;
   #sheet = new CSSStyleSheet();
   #target;
@@ -50,6 +60,11 @@ export class Sheet extends HTMLElement {
 
   set disabled(disabled) {
     this.#sheet.disabled = disabled;
+    if (disabled) {
+      this.setAttribute("disabled", '');
+    } else {
+      this.removeAttribute("disabled");
+    }
   }
 
   get name() {
@@ -78,6 +93,15 @@ export class Sheet extends HTMLElement {
     append = (...args) => {
       return this.#owner.#append_rules(...args);
     };
+
+    create = (selector) => {
+      return this.#owner.#create_and_append_rule(selector)
+    }
+
+    update = (rule, items) => {
+      this.#owner.#update_rule(rule, items)
+
+    }
   })(this);
 
   get sheet() {
