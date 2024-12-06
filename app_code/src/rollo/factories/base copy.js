@@ -1,12 +1,13 @@
 import { constants } from "rollo/constants";
 import { check_factories } from "rollo/utils/check_factories";
-import { attribute, css_classes, reactive } from "rollo/factories/__factories__";
+import { Reactive } from "rollo/factories/reactive";
+import { attribute, css_classes } from "rollo/factories/__factories__";
 
 /* Factory that coordinates multipe other factories, adds reactive features
 ans exposes super for external access. also ensure super call in constructor. */
 export const base = (parent, config, ...factories) => {
   /* Check factory dependencies */
-  check_factories([attribute, css_classes, reactive], factories);
+  check_factories([attribute, css_classes], factories);
 
   const cls = class Base extends parent {
     constructor() {
@@ -70,11 +71,35 @@ export const base = (parent, config, ...factories) => {
       },
     });
 
-    
+    /* Returns an object, from which single state items can be retrieved 
+    and set to trigger effects. */
+    get $() {
+      return this.#reactive.$;
+    }
 
-    
+    /* Returns controller for managing effects. */
+    get effects() {
+      return this.#reactive.effects;
+    }
 
-    
+    /* Exposes reactive instance for full access to Reactive features. */
+    get reactive() {
+      return this.#reactive;
+    }
+    /* NOTE For a cleaner encapsulation, reactive features are provided by 
+    composition (rather than using the reactive factory). 
+    However, the '$' and 'effects' props are surfaced, and reactive.update is 
+    called inside 'update' to provide as dx as if the reactive factory has been used.
+    This offers an optimal mix of composition safety and inheritance-like direct access. */
+    #reactive = Reactive.create({ owner: this });
+
+    /* Updates component. Chainable. */
+    update(updates = {}) {
+      super.update && super.update(updates);
+      /* Update reactive state */
+      this.reactive.update(updates);
+      return this;
+    }
   };
   return cls;
 };

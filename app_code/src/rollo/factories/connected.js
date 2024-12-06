@@ -1,17 +1,17 @@
 import { check_factories } from "rollo/utils/check_factories";
-import { base } from "rollo/factories/base";
+import { reactive } from "rollo/factories/__factories__";
 
 /* Factory that set connected state. */
 export const connected = (parent, config, ...factories) => {
   /* Check factory dependencies */
-  check_factories([base], factories);
+  check_factories([reactive], factories);
 
   const cls = class Connected extends parent {
     #set_connected;
 
     created_callback(...args) {
       super.created_callback && super.created_callback(...args);
-      this.#set_connected = this.reactive.protected.add("connected");
+      this.#set_connected = this.protected.add("connected");
     }
 
     connectedCallback() {

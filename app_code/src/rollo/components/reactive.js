@@ -1,6 +1,5 @@
 import { Component } from "rollo/component";
 import { attribute } from "rollo/factories/attribute";
-
 import { parent } from "rollo/factories/parent";
 import { properties } from "rollo/factories/properties";
 import { reactive } from "rollo/factories/reactive";

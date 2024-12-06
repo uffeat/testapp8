@@ -5,12 +5,11 @@ import {
   css_classes,
   css_var,
   descendants,
-  events,
   hooks,
   observer,
   parent,
   properties,
-  reactive,
+  events,
   shadow,
   text,
   uid,
@@ -188,7 +187,6 @@ Consider not using observer as a standard factory. currently not used.  */
 Component.factories.add(observer);
 Component.factories.add(parent);
 Component.factories.add(properties);
-Component.factories.add(reactive);
 /* TODO
 Consider not using shadow as a standard factory. currently not used.  */
 Component.factories.add(shadow, can_have_shadow);

@@ -10,6 +10,7 @@ export { observer } from "rollo/factories/observer";
 export { parent } from "rollo/factories/parent";
 export { properties } from "rollo/factories/properties";
 export { events } from "rollo/factories/events";
+export { reactive } from "rollo/factories/reactive";
 export { shadow } from "rollo/factories/shadow";
 export { text } from "rollo/factories/text";
 export { uid } from "rollo/factories/uid";
