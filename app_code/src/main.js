@@ -80,11 +80,25 @@ const my_rule = create("data-rule", {
   name: "my_rule",
   selector: 'h1',
   parent: my_sheet,
+  items: {
+    color: 'red',
+    border: '2px solid green'
+  }
+
 });
+
+/*
+my_rule.items = {
+  color: 'red',
+  border: '2px solid green'
+}
+*/
+
+
 
 ////my_rule.$.color = 'red'
 ////my_rule.$.border = '2px solid green'
-my_rule.update({$color: 'red', $border: '2px solid green'})
+//my_rule.update({$color: 'red', $border: '2px solid green'})
 
 
 

@@ -10,13 +10,11 @@ import {
   uid,
 } from "rollo/factories/__factories__";
 
-/* TODO
-Rule items should be reactive */
-
 /* Non-visual web component for dynamic rules. */
 const factory = (parent) => {
   const cls = class DataRule extends parent {
-    #name
+    #items;
+    #name;
     #rule;
     #selector;
     #sheet;
@@ -31,8 +29,20 @@ const factory = (parent) => {
       this.effects.add((data) => {
         if (this.$.connected) {
           this.#sheet = this.parent.sheet;
-          const index = this.#sheet.insertRule(`${this.selector} {}`, this.parent.size);
+          const index = this.#sheet.insertRule(
+            `${this.selector} {}`,
+            this.parent.size
+          );
           this.#rule = this.#sheet.cssRules[index];
+
+          if (this.#items) {
+            for (const [key, value] of Object.entries(this.#items)) {
+              if (!(key in this.style)) {
+                throw new Error(`Invalid key: ${key}`);
+              }
+              this.#rule.style.setProperty(camel_to_kebab(key), value);
+            }
+          }
         } else {
           this.#sheet = null;
 
@@ -53,32 +63,40 @@ const factory = (parent) => {
       });
 
       /* Add effect to change rule */
-      this.effects.add((data) => {
+      this.effects.add(
+        (data) => {
+          //console.log(data)////
+          // TODO handle important and css vars. Perhaps css vars in separate component
 
-        //console.log(data)////
-        // TODO handle important and css vars. Perhaps css vars in separate component
-
-        
-
-        for (const [key, { current, previous }] of Object.entries(data)) { 
-          this.#rule.style.setProperty(camel_to_kebab(key), current);
+          for (const [key, { current, previous }] of Object.entries(data)) {
+            this.#rule.style.setProperty(camel_to_kebab(key), current);
+          }
+        },
+        (data) => {
+          ////console.log(data)////
+          if (Object.keys(data).length > 0) {
+            const key = Object.keys(data)[0];
+            ////console.log('key:', key)////
+            return key in this.style;
+          }
         }
+      );
+    }
 
+    get items() {
+      return this.#items;
+    }
 
-      },
-      (data) => {
-        ////console.log(data)////
-        if (Object.keys(data).length > 0) {
-          const key = Object.keys(data)[0]
-          ////console.log('key:', key)////
-          return key in this.style
-
-          
+    set items(items) {
+      this.#items = items;
+      /*
+      for (const [key, value] of Object.entries(items)) {
+        if (!(key in this.style)) {
+          throw new Error(`Invalid key: ${key}`)
         }
+        this.#rule.style.setProperty(camel_to_kebab(key), value);
       }
-    
-    
-    )
+        */
     }
 
     get name() {
@@ -92,12 +110,15 @@ const factory = (parent) => {
     }
 
     get selector() {
-      return this.#selector
+      return this.#selector;
     }
 
-    /* Make selector write once */
     set selector(selector) {
-      this.#selector = selector
+      if (this.#selector) {
+        throw new Error(`'selector' is write-once.`);
+      }
+      this.#selector = selector;
+      this.attribute.selector = selector;
     }
   };
 
