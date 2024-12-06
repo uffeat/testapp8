@@ -1,38 +1,24 @@
 import { camel_to_kebab } from "rollo/utils/case";
 
-/*
-TODO
-- a sheet can be disabled (native prop). Explore!
-- use create. Expploit.
-- Rename to css-static
-- target should/could have a sheet controller to provide index of sheet in adopted -> refactor method for unadpot - perhaps flexible?
-*/
-
-/* Non-visual web component for managing static sheets dynamically applied.
+/* Non-visual web component for managing dynamically applied sheets.
   Notable features:
   - The sheet applies itself to its root node (document or a shadow root)
     dynamically as per the component's lifecycle (connect/disconnect).
-  - Rules are created with standard object notation.
-  */
+  - Supported rules:
+    - Standard.
+    - CSS var declarations.
+    - '!important'.
+    - Media.
+    - Keyframe.
+  - Rules can be appended with standard object notation and a syntax that 
+    resembles native CSS with optional camel case keys.
+*/
 export class Sheet extends HTMLElement {
   static create = (...args) => {
-    return new Sheet(...args);
+    return new Sheet(...args)
   };
-
-  /* Removes first occurrence of item from array (strict equality). */
-  /* TODO Move to  */
-  static #remove_item = (arr, item) => {
-    const index_to_remove = arr.indexOf(item);
-    if (index_to_remove !== -1) {
-      arr.splice(index_to_remove, 1);
-    }
-    return arr;
-  };
-
   #name;
-
   #sheet = new CSSStyleSheet();
-
   #target;
 
   constructor({ name } = {}, ...args) {
@@ -42,93 +28,11 @@ export class Sheet extends HTMLElement {
       this.#name = name;
       this.setAttribute("name", name);
     }
-
-    let text = "";
-    for (const arg of args) {
-      /* Ignore undefined to support iife's */
-      if (!arg) {
-        continue;
-      } else if (typeof arg === "function") {
-        /* arg is a hook. Useful, when dealing with conditional rules. */
-        arg.call(this);
-      } else {
-        /* arg can be assumed to be a single-item object */
-        const first_key = Object.keys(arg)[0];
-        const first_value = Object.values(arg)[0];
-
-        /*
-                  TODO
-                  - Dry
-                  - animation declarations
-                  */
-
-        if (first_key.startsWith("@")) {
-          const media = first_key;
-          const block = first_value;
-
-          const sheet = new CSSStyleSheet();
-          sheet.insertRule(`${media} {}`);
-          const media_rule = sheet.cssRules[0];
-
-          for (const [selector, items] of Object.entries(block)) {
-            if (items === undefined) {
-              continue;
-            }
-            media_rule.insertRule(`${selector} {}`);
-            const rule = media_rule.cssRules[0];
-            for (const [key, value] of Object.entries(items)) {
-              if (value === undefined) {
-                continue;
-              }
-              this.#validate(key);
-              if (value.endsWith("!important")) {
-                rule.style.setProperty(
-                  key,
-                  value.slice(0, -"!important".length).trim(),
-                  "important"
-                );
-              } else {
-                rule.style.setProperty(camel_to_kebab(key), value);
-              }
-            }
-          }
-          text += media_rule.cssText;
-        } else {
-          const selector = first_key;
-          const items = first_value;
-          const sheet = new CSSStyleSheet();
-          sheet.insertRule(`${selector} {}`);
-          const rule = sheet.cssRules[0];
-          for (const [key, value] of Object.entries(items)) {
-            if (value === undefined) {
-              continue;
-            }
-            this.#validate(key);
-            if (value.endsWith("!important")) {
-              rule.style.setProperty(
-                key,
-                value.slice(0, -"!important".length).trim(),
-                "important"
-              );
-            } else {
-              rule.style.setProperty(camel_to_kebab(key), value);
-            }
-          }
-          text += rule.cssText;
-        }
-      }
-    }
-    this.text = text;
+    this.rules.append(...args);
   }
 
   connectedCallback() {
     this.#target = this.getRootNode();
-
-    if (this.#target.sheets) {
-      // TODO
-    }
-
-
     this.#target.adoptedStyleSheets.push(this.#sheet);
   }
 
@@ -140,13 +44,44 @@ export class Sheet extends HTMLElement {
     this.#target = null;
   }
 
+  get disabled() {
+    return this.#sheet.disabled;
+  }
+
+  set disabled(disabled) {
+    this.#sheet.disabled = disabled;
+  }
+
   get name() {
     return this.#name;
   }
 
-  /* Returns the number of rules. */
-  get size() {
-    return this.#sheet.cssRules.length;
+  /* Returns rules controller. */
+  get rules() {
+    return this.#rules;
+  }
+  #rules = new (class {
+    #owner;
+    constructor(owner) {
+      this.#owner = owner;
+    }
+
+    get rules() {
+      return this.#owner.#sheet.cssRules;
+    }
+
+    /* Returns the number of rules. */
+    get size() {
+      return this.#owner.#sheet.cssRules.length;
+    }
+
+    append = (...args) => {
+      return this.#owner.#append_rules(...args);
+    };
+  })(this);
+
+  get sheet() {
+    return this.#sheet;
   }
 
   /* Return the target for the sheet. */
@@ -165,6 +100,94 @@ export class Sheet extends HTMLElement {
   set text(text) {
     this.#sheet.replaceSync(text);
   }
+
+  #append_rules = (...args) => {
+    for (let arg of args) {
+      /* Ignore undefined to support iife's */
+      if (!arg) {
+        continue;
+      }
+      if (typeof arg === "function") {
+        /* arg is a hook. Useful, when dealing with conditional rules. */
+        const result = arg.call(this);
+        if (result) {
+          arg = result;
+        } else {
+          continue;
+        }
+      }
+      /* arg can be assumed to be a single-item object */
+      const keys = Object.keys(arg);
+      if (keys.length > 1) {
+        throw new Error(`Argument should be a single item object.`);
+      }
+
+      const first_key = keys[0];
+      const first_value = Object.values(arg)[0];
+
+      if (first_key.startsWith("@media")) {
+        const media = first_key;
+        const block = first_value;
+        const media_rule = this.#create_and_append_rule(media);
+        for (const [selector, items] of Object.entries(block)) {
+          if (items === undefined) {
+            continue;
+          }
+          media_rule.insertRule(`${selector} {}`);
+          const rule = media_rule.cssRules[0];
+          this.#update_rule(rule, items);
+        }
+      } else if (first_key.startsWith("@keyframes")) {
+        const keyframe = first_key;
+        const block = first_value;
+        const keyframe_rule = this.#create_and_append_rule(keyframe);
+        for (const [key, items] of Object.entries(block)) {
+          if (items === undefined) {
+            continue;
+          }
+          const text = this.#create_rule_text(key, items);
+          keyframe_rule.appendRule(text);
+        }
+      } else {
+        const selector = first_key;
+        const items = first_value;
+        const rule = this.#create_and_append_rule(selector);
+        this.#update_rule(rule, items);
+      }
+    }
+    return this;
+  };
+
+  #create_and_append_rule = (selector) => {
+    const index = this.#sheet.insertRule(`${selector} {}`, this.size);
+    const rule = this.#sheet.cssRules[index];
+    return rule;
+  };
+
+  #create_rule_text = (key, items) => {
+    const text = `${key} { ${Object.entries(items)
+      .map(([key, value]) => `${camel_to_kebab(key)}: ${value};`)
+      .join(" ")} }`;
+    return text;
+  };
+
+  #update_rule = (rule, items) => {
+    for (const [key, value] of Object.entries(items)) {
+      if (value === undefined) {
+        continue;
+      }
+      this.#validate(key);
+      if (value.endsWith("!important")) {
+        rule.style.setProperty(
+          key,
+          value.slice(0, -"!important".length).trim(),
+          "important"
+        );
+      } else {
+        rule.style.setProperty(camel_to_kebab(key), value);
+      }
+    }
+  };
 
   /* Checks declaration key. */
   #validate = (key) => {
