@@ -120,7 +120,19 @@ const factory = (parent) => {
       this.#selector = selector;
       this.attribute.selector = selector;
     }
+
+    update(updates = {}) {
+      super.update && super.update(updates)
+
+      Object.entries(updates).filter(([key, value]) => {
+        return key in this.style
+      })
+
+      return this
+    }
   };
+
+  
 
   return cls;
 };
