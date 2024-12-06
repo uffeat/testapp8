@@ -1,9 +1,5 @@
 import { Component } from "rollo/component";
-import { attribute } from "rollo/factories/attribute";
-import { parent } from "rollo/factories/parent";
-import { properties } from "rollo/factories/properties";
-import { reactive } from "rollo/factories/reactive";
-import { uid } from "rollo/factories/uid";
+import { attribute, parent, properties, reactive, uid } from "rollo/factories/__factories__";
 
 /*
 TODO Consider (in a related component or util):

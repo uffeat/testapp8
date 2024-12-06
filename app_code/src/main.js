@@ -3,6 +3,7 @@ import "./main.css";
 import { create } from "rollo/component";
 import "rollo/components/reactive";
 import "rollo/components/sheet";
+import "rollo/components/rule";
 
 // TODO
 // ... then nav bar
@@ -69,9 +70,26 @@ const my_sheet = create("data-sheet", {
 
 my_sheet.text = `
 h1 {
-  color: pink;
+  background-color: pink;
 }
 `
+my_sheet.disabled = true
+my_sheet.disabled = false
+
+const my_rule = create("data-rule", {
+  name: "my_rule",
+  selector: 'h1',
+  parent: my_sheet,
+});
+
+////my_rule.$.color = 'red'
+////my_rule.$.border = '2px solid green'
+my_rule.update({$color: 'red', $border: '2px solid green'})
+
+
+
+
+
 
 
 

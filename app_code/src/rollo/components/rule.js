@@ -1,52 +1,84 @@
 import { Component } from "rollo/component";
 import { camel_to_kebab } from "rollo/utils/case";
-
+import { Reactive } from "rollo/factories/reactive";
+import {
+  attribute,
+  connected,
+  parent,
+  properties,
+  reactive,
+  uid,
+} from "rollo/factories/__factories__";
 
 /* TODO
 Rule items should be reactive */
 
-/* Non-visual web component for dynamic rules.
-  
-*/
+/* Non-visual web component for dynamic rules. */
 const factory = (parent) => {
-  const cls = class Rule extends parent {
-    static create = (...args) => {
-      return new Rule(...args);
-    };
-    #items = {};
-    #name;
-    #sheet;
-    #remove;
+  const cls = class DataRule extends parent {
+    #name
     #rule;
     #selector;
-    #style_element = document.createElement("style");
+    #sheet;
+    constructor(...args) {
+      super(...args);
+    }
 
-    constructor(selector, { name } = {}) {
-      super();
+    created_callback(...args) {
+      super.created_callback && super.created_callback(...args);
       this.style.display = "none";
-
-      /* Create helper display (for dev) */
-      this.attachShadow({ mode: "open" });
-      const template = document.createElement("template");
-      template.append(this.#style_element);
-      this.shadowRoot.append(template);
-
-      this.#selector = selector;
-      if (name) {
-        this.name = name;
-      }
 
       this.effects.add((data) => {
         if (this.$.connected) {
-          
-
-          this.sheet = this.parentElement;
+          this.#sheet = this.parent.sheet;
+          const index = this.#sheet.insertRule(`${this.selector} {}`, this.parent.size);
+          this.#rule = this.#sheet.cssRules[index];
         } else {
-          
+          this.#sheet = null;
 
-          this.sheet = null;
+          // TODO
         }
       }, "connected");
+
+      /* Show state as attribute */
+      this.effects.add((data) => {
+        for (let [key, { current, previous }] of Object.entries(data)) {
+          key = `state-${key}`;
+          if (["boolean", "number", "string"].includes(typeof current)) {
+            this.attribute[key] = current;
+          } else {
+            this.attribute[key] = null;
+          }
+        }
+      });
+
+      /* Add effect to change rule */
+      this.effects.add((data) => {
+
+        //console.log(data)////
+        // TODO handle important and css vars. Perhaps css vars in separate component
+
+        
+
+        for (const [key, { current, previous }] of Object.entries(data)) { 
+          this.#rule.style.setProperty(camel_to_kebab(key), current);
+        }
+
+
+      },
+      (data) => {
+        ////console.log(data)////
+        if (Object.keys(data).length > 0) {
+          const key = Object.keys(data)[0]
+          ////console.log('key:', key)////
+          return key in this.style
+
+          
+        }
+      }
+    
+    
+    )
     }
 
     get name() {
@@ -56,135 +88,31 @@ const factory = (parent) => {
     /* For dom identification */
     set name(name) {
       this.#name = name;
-      if (name) {
-        this.setAttribute("name", name);
-      } else {
-        this.removeAttribute("name");
-      }
-    }
-
-    /* Returns any parent sheet component*/
-    get sheet() {
-      return this.#sheet;
-    }
-
-    /* */
-    set sheet(sheet) {
-      if (sheet) {
-        if (sheet !== this.#sheet) {
-          if (sheet.tagName !== "SHEET-COMPONENT") {
-            throw new Error(
-              `Rule components should be children of a sheet component.`
-            );
-          }
-
-          const { remove, rule } = sheet.create_rule(this.#selector);
-          this.#remove = remove;
-          this.#rule = rule;
-
-          //
-          const parent_sheet = this.#rule.parentStyleSheet;
-          console.log(parent_sheet); ////
-          //
-        }
-      } else {
-        this.#items = {};
-        this.#remove = null;
-        this.#rule = null;
-      }
-
-      this.#sheet = sheet;
-    }
-
-    get rule() {
-      return this.#rule;
+      this.attribute.name = name;
     }
 
     get selector() {
-      if (!this.#selector) {
-        throw new Error(`'selector' not set.`);
-      }
-      return this.#selector;
+      return this.#selector
     }
 
-    /* Returns a text representation of the rule. */
-    get text() {
-      if (this.#rule) {
-        return this.#rule.cssText;
-      }
+    /* Make selector write once */
+    set selector(selector) {
+      this.#selector = selector
     }
-
-    /* Updates rule declarations. Chainable. */
-    update = (items) => {
-      if (!this.#rule) {
-        throw new Error(`'rule' not set.`);
-      }
-
-      /* Infer changed items */
-      const changes = Object.fromEntries(
-        Object.entries(items).filter(
-          ([key, value]) => this.#items[key] !== value
-        )
-      );
-      /* Update items */
-      Object.entries(changes)
-        .filter(([key, value]) => ![false, null, undefined].includes(value))
-        .forEach(([key, value]) => (this.#items[key] = value));
-
-      const var_declarations = Object.entries(changes).filter(([key]) =>
-        key.startsWith("--")
-      );
-
-      const standard_declarations = Object.entries(changes).filter(
-        ([key, value]) => !key.startsWith("--")
-      );
-
-      standard_declarations.forEach(([key, ..._]) => this.#validate(key));
-
-      const declarations = [...var_declarations, ...standard_declarations];
-
-      declarations
-        .map(([key, value]) => {
-          if (value && value.endsWith("!important")) {
-            return [key, value.slice(0, -"!important".length).trim(), true];
-          }
-          return [key, value];
-        })
-        .map(([key, ..._]) => [camel_to_kebab(key), ..._])
-        .forEach(([key, value, important]) => {
-          if ([false, null, undefined].includes(value)) {
-            this.#rule.style.removeProperty(key);
-          } else {
-            this.#rule.style.setProperty(
-              key,
-              value,
-              important ? "important" : ""
-            );
-          }
-        });
-
-      this.#update_display();
-      return this;
-    };
-
-    /* Shows content of sheet. Serves no other purpose */
-    #update_display = async () => {
-      this.#style_element.textContent = this.text;
-    };
-
-    /* Checks declaration key. */
-    #validate = (key) => {
-      if (!key.startsWith("--")) {
-        if (!(key in this.style)) {
-          throw new Error(`Invalid key: ${key}`);
-        }
-      }
-    };
   };
 
   return cls;
 };
 
-Component.author("rule-component", HTMLElement, factory);
-
-export const Rule = Component.registry.get("rule-component");
+Component.author(
+  "data-rule",
+  HTMLElement,
+  {},
+  attribute,
+  connected,
+  parent,
+  properties,
+  reactive,
+  uid,
+  factory
+);

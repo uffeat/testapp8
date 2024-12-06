@@ -1,6 +1,12 @@
 import { Component } from "rollo/component";
-import { attribute, connected, properties, reactive, uid } from "rollo/factories/__factories__";
-
+import {
+  attribute,
+  connected,
+  parent,
+  properties,
+  reactive,
+  uid,
+} from "rollo/factories/__factories__";
 
 /* Non-visual web component for managing dynamically applied sheets. */
 const factory = (parent) => {
@@ -16,6 +22,7 @@ const factory = (parent) => {
 
       this.style.display = "none";
 
+      /* adopt/unadopt as per connected/disconnected */
       this.effects.add((data) => {
         if (this.$.connected) {
           this.#target = this.getRootNode();
@@ -28,6 +35,18 @@ const factory = (parent) => {
           this.#target = null;
         }
       }, "connected");
+
+      /* Show state as attribute */
+      this.effects.add((data) => {
+        for (let [key, { current, previous }] of Object.entries(data)) {
+          key = `state-${key}`;
+          if (["boolean", "number", "string"].includes(typeof current)) {
+            this.attribute[key] = current;
+          } else {
+            this.attribute[key] = null;
+          }
+        }
+      });
     }
 
     get disabled() {
@@ -54,6 +73,10 @@ const factory = (parent) => {
     }
     #sheet = new CSSStyleSheet();
 
+    get size() {
+      return this.#sheet.cssRules.length
+    }
+
     /* Returns a text representation of the sheet. */
     get text() {
       return [...this.#sheet.cssRules]
@@ -76,6 +99,7 @@ Component.author(
   {},
   attribute,
   connected,
+  parent,
   properties,
   reactive,
   uid,
