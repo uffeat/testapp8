@@ -114,10 +114,12 @@ const sheet_1 = Sheet.create(
 
 root.append(sheet_1);
 
-sheet_1.sheet.disabled = true
-sheet_1.sheet.disabled = false
+sheet_1.disabled = true
+sheet_1.disabled = false
 
 console.log(sheet_1.text)
+
+
 
 
 /* Enable tests */

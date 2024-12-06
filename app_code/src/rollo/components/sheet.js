@@ -24,9 +24,9 @@ import { camel_to_kebab } from "rollo/utils/case";
 */
 export class Sheet extends HTMLElement {
   static create = (...args) => {
-    return new Sheet(...args)
+    return new Sheet(...args);
   };
-  static observedAttributes = ['disabled', 'name']
+  static observedAttributes = ["disabled", "name"];
   #name;
   #sheet = new CSSStyleSheet();
   #target;
@@ -42,16 +42,50 @@ export class Sheet extends HTMLElement {
   }
 
   connectedCallback() {
+    super.created_callback && super.created_callback(...args);
     this.#target = this.getRootNode();
     this.#target.adoptedStyleSheets.push(this.#sheet);
   }
 
   disconnectedCallback() {
+    super.disconnectedCallback && super.disconnectedCallback();
     const index = document.adoptedStyleSheets.indexOf(this.#sheet);
     if (index !== -1) {
       document.adoptedStyleSheets.splice(index, 1);
     }
     this.#target = null;
+  }
+
+  attributeChangedCallback(name, previous, current) {
+    super.attributeChangedCallback &&
+      super.attributeChangedCallback(name, previous, current);
+    if (name === "disabled") {
+      if (current === null) {
+        current = false;
+      } else if (current === "") {
+        current = true;
+      } else {
+        throw new Error(`Invalid value of 'disabled' attribute: ${current}`);
+      }
+      if (this.disabled !== current) {
+        console.error(
+          `'disabled' not in sync with the disabled state sheet. Reverting to synced value.`
+        );
+        this.#sync_disabled_attribute();
+      }
+    }
+    if (name === "name") {
+      if (this.name !== current) {
+        console.error(
+          `'name' not in sync with property. Reverting to synced value.`
+        );
+        this.setAttribute("name", this.name);
+
+        
+      }
+
+     }
+
   }
 
   get disabled() {
@@ -60,12 +94,15 @@ export class Sheet extends HTMLElement {
 
   set disabled(disabled) {
     this.#sheet.disabled = disabled;
-    if (disabled) {
-      this.setAttribute("disabled", '');
+    this.#sync_disabled_attribute();
+  }
+  #sync_disabled_attribute = () => {
+    if (this.#sheet.disabled) {
+      this.setAttribute("disabled", "");
     } else {
       this.removeAttribute("disabled");
     }
-  }
+  };
 
   get name() {
     return this.#name;
@@ -95,13 +132,12 @@ export class Sheet extends HTMLElement {
     };
 
     create = (selector) => {
-      return this.#owner.#create_and_append_rule(selector)
-    }
+      return this.#owner.#create_and_append_rule(selector);
+    };
 
     update = (rule, items) => {
-      this.#owner.#update_rule(rule, items)
-
-    }
+      this.#owner.#update_rule(rule, items);
+    };
   })(this);
 
   get sheet() {
