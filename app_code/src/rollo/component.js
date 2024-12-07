@@ -101,7 +101,7 @@ export const Component = new (class {
       },
     });
 
-    const __factories__ = Object.freeze(factories.reverse())
+    const __factories__ = Object.freeze(factories.reverse());
     Object.defineProperty(cls.prototype, "__factories__", {
       configurable: true,
       enumerable: false,
@@ -198,6 +198,8 @@ export const Component = new (class {
 /* Short-hand */
 export const create = Component.create;
 
+
+
 /* Add factories */
 Component.factories.add(attribute);
 Component.factories.add(chain);
@@ -223,3 +225,15 @@ Component.factories.add(text, (tag) => {
   return "textContent" in element;
 });
 Component.factories.add(uid);
+
+
+const web_component = (parent) => {
+  const cls = class WebComponent extends parent {
+    constructor() {
+      super();
+    }
+  };
+  return cls;
+};
+
+Component.author("web-component", HTMLElement, {}, web_component);

@@ -1,7 +1,7 @@
 import { constants } from "rollo/constants";
 
-/* Factory that provides pub-sub-based reactive functionality with 
-fine-grained control options. */
+/* Factory that provides fine-grained pub-sub-based reactive functionality for 
+flat object data with primitive values. */
 export const reactive = (parent, config, ...factories) => {
   const cls = class Reactive extends parent {
     /* NOTE

@@ -3,16 +3,16 @@ import {
   attribute,
   connected,
   name,
-  parent,
   properties,
   reactive,
+  rules,
   sheet,
   state_to_attribute,
   uid,
 } from "rollo/factories/__factories__";
 
 /* Non-visual web component for managing dynamically applied sheets. */
-const factory = (parent) => {
+const static_sheet = (parent) => {
   const cls = class DataStaticSheet extends parent {
     constructor() {
       super();
@@ -29,36 +29,6 @@ const factory = (parent) => {
       super.created_callback && super.created_callback();
       this.style.display = "none";
     }
-
-    get disabled() {
-      return this.#sheet.disabled;
-    }
-
-    set disabled(disabled) {
-      this.#sheet.disabled = disabled;
-      this.attribute.disabled = disabled;
-    }
-
-    get sheet() {
-      return this.#sheet;
-    }
-    #sheet = new CSSStyleSheet();
-
-    get size() {
-      return this.#sheet.cssRules.length;
-    }
-
-    /* Returns a text representation of the sheet. */
-    get text() {
-      return [...this.#sheet.cssRules]
-        .map((rule) => `${rule.cssText}`)
-        .join("\n");
-    }
-
-    /* Sets rules from text. */
-    set text(text) {
-      this.#sheet.replaceSync(text);
-    }
   };
 
   return cls;
@@ -70,12 +40,12 @@ Component.author(
   {},
   attribute,
   connected,
-  parent,
   name,
-  properties,
+  //properties,
   reactive,
+  rules,
   sheet,
   state_to_attribute,
   uid,
-  factory
+  static_sheet
 );

@@ -1,6 +1,7 @@
 import "./bootstrap.scss";
 import "./main.css";
 import { create } from "rollo/component";
+import "rollo/components/static_sheet";
 
 
 // TODO
@@ -48,6 +49,8 @@ button.$.$text = 'Yo world'
 
 create("h1", { parent: root }, "Hello World");
 create("h2", { parent: root }, "Also hello from here",  create('span', {text: "I'm injected"}),);
+
+const my_sheet = create("data-static-sheet", {parent: root, h1: {color: 'pink'}})
 
 
 

@@ -203,9 +203,7 @@ export class SheetComponent extends HTMLElement {
         const media = first_key;
         const block = first_value;
 
-        
         const media_rule = this.#create_and_append_rule(media);
-
 
         for (const [selector, items] of Object.entries(block)) {
           if (items === undefined) {
@@ -214,7 +212,6 @@ export class SheetComponent extends HTMLElement {
           media_rule.insertRule(`${selector} {}`);
           const rule = media_rule.cssRules[0];
           this.#update_rule(rule, items);
-
         }
       } else if (first_key.startsWith("@keyframes")) {
         const keyframe = first_key;
