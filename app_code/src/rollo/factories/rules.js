@@ -7,11 +7,11 @@ class DataCssValidator extends HTMLElement {
     super();
   }
 }
-
+//
 const is_valid_key = (() => {
   const web_component = document.createElement("web-component");
   return (key) => {
-    if (!key.startsWith("--")) {
+    if (!key.startsWith("--") && !key.startsWith("@media")) {  ////
       if (!(key in web_component.style)) {
         return false;
       }
@@ -93,6 +93,10 @@ class MediaRule extends Rule {
       TODO
       Consider if false should be a cue to delete declaration
       */
+
+
+      //
+      //
       new Rule(this.rule, selector, items);
     }
   }
@@ -133,12 +137,20 @@ export const rules = (parent, config, ...factories) => {
   const cls = class Rules extends parent {
     /*  */
     update(updates = {}) {
-      //super.update && super.update(updates);
 
-      console.log('updates:', updates)
+      ////super.update && super.update(updates);////
+
+      ////console.log('updates:', updates)////
 
       for (const [selector, items] of Object.entries(updates)) {
         if (selector.startsWith("@media")) {
+
+
+          ////console.log('items:', items)////
+
+
+
+
           new MediaRule(this.sheet, selector, items);
           continue;
         }

@@ -2,21 +2,16 @@ import { camel_to_kebab } from "rollo/utils/case";
 import { check_factories } from "rollo/utils/check_factories";
 import { sheet } from "rollo/factories/__factories__";
 
-
 class DataCssValidator extends HTMLElement {
   constructor() {
     super();
   }
 }
-
-
-
-
-
+//
 const is_valid_key = (() => {
   const web_component = document.createElement("web-component");
   return (key) => {
-    if (!key.startsWith("--")) {
+    if (!key.startsWith("--") && !key.startsWith("@media")) {  ////
       if (!(key in web_component.style)) {
         return false;
       }
@@ -136,37 +131,25 @@ export const rules = (parent, config, ...factories) => {
   check_factories([sheet], factories);
 
   const cls = class Rules extends parent {
-    /* Handles hooks. Chainable. 
-    Called during creation:
-    - after CSS classes
-    - after children
-    - after 'update' 
-    - before 'created_callback'
-    - before live DOM connection */
-    call(...hooks) {
-      /* TODO
-      Consider, if this should be done last?
-      */
-      super.call && super.call(...hooks);
+    /*  */
+    update(updates = {}) {
 
-      // Refactor to array methods
+      super.update && super.update(updates);////
 
-      /* Ignore undefined to support iife's */
-      hooks = hooks.filter((hook) => hook);
+      console.log('updates:', updates)////
 
-      for (const hook of hooks) {
-        for (const [selector, items] of Object.entries(hook)) {
-          if (selector.startsWith("@media")) {
-            new MediaRule(this.sheet, selector, items);
-            continue;
-          }
-          if (selector.startsWith("@keyframes")) {
-            new KeyframeRule(this.sheet, selector, items);
-            continue;
-          }
-          new Rule(this.sheet, selector, items);
+      for (const [selector, items] of Object.entries(updates)) {
+        if (selector.startsWith("@media")) {
+          new MediaRule(this.sheet, selector, items);
+          continue;
         }
+        if (selector.startsWith("@keyframes")) {
+          new KeyframeRule(this.sheet, selector, items);
+          continue;
+        }
+        new Rule(this.sheet, selector, items);
       }
+
       return this;
     }
   };
