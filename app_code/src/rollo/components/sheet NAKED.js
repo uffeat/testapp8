@@ -13,12 +13,12 @@ const factory = (parent) => {
   const cls = class DataSheet extends parent {
     #name;
     #target;
-    constructor(...args) {
-      super(...args);
+    constructor() {
+      super();
     }
 
-    created_callback(...args) {
-      super.created_callback && super.created_callback(...args);
+    created_callback() {
+      super.created_callback && super.created_callback();
 
       this.style.display = "none";
 
@@ -28,9 +28,9 @@ const factory = (parent) => {
           this.#target = this.getRootNode();
           this.#target.adoptedStyleSheets.push(this.#sheet);
         } else {
-          const index = document.adoptedStyleSheets.indexOf(this.#sheet);
+          const index = this.#target.adoptedStyleSheets.indexOf(this.#sheet);
           if (index !== -1) {
-            document.adoptedStyleSheets.splice(index, 1);
+            this.#target.adoptedStyleSheets.splice(index, 1);
           }
           this.#target = null;
         }

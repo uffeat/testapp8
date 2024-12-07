@@ -1,21 +1,19 @@
 import { check_factories } from "rollo/utils/check_factories";
-import { attribute, connected, reactive } from "rollo/factories/__factories__";
+import {
+  attribute,
+  connected,
+  reactive,
+  
+} from "rollo/factories/__factories__";
 
 /* . */
-export const sheet = (parent, config, ...factories) => {
+export const rules = (parent, config, ...factories) => {
   /* Check factory dependencies */
   check_factories([attribute, connected, reactive], factories);
 
-  const cls = class Sheet extends parent {
+  const cls = class Rules extends parent {
     #target;
 
-    /* Only available during creation. 
-    Called:
-    - after CSS classes
-    - after 'update' 
-    - after children
-    - after 'call'
-    - before live DOM connection */
     created_callback() {
       super.created_callback && super.created_callback();
       /* Adopt/unadopt as per connected/disconnected */
@@ -31,6 +29,18 @@ export const sheet = (parent, config, ...factories) => {
           this.#target = null;
         }
       }, "connected");
+
+      /* Show state as attribute */
+      this.effects.add((data) => {
+        for (let [key, { current, previous }] of Object.entries(data)) {
+          key = `state-${key}`;
+          if (["boolean", "number", "string"].includes(typeof current)) {
+            this.attribute[key] = current;
+          } else {
+            this.attribute[key] = null;
+          }
+        }
+      });
     }
 
     get disabled() {
@@ -51,8 +61,7 @@ export const sheet = (parent, config, ...factories) => {
       return this.#sheet.cssRules.length;
     }
 
-    /* Returns a text representation of the sheet.
-    Primarily as dev tool. */
+    /* Returns a text representation of the sheet. */
     get text() {
       return [...this.#sheet.cssRules]
         .map((rule) => `${rule.cssText}`)

@@ -4,15 +4,41 @@ import { camel_to_kebab_css } from "rollo/utils/case";
 /* Factory with enhanced features for controlling css classes. */
 export const css_classes = (parent, config, ...factories) => {
   const cls = class CssClasses extends parent {
-    created_callback(...args) {
-      super.created_callback && super.created_callback(...args);
+    /* Updates component. Chainable. 
+    Called during creation:
+    - after CSS classes
+    - after children
+    - before 'call'
+    - before 'created_callback'
+    - before live DOM connection */
+    update(updates = {}) {
+      super.update && super.update(updates);
+      /* Update css classes */
+      Object.entries(updates)
+        .filter(([key, value]) => key.startsWith(constants.CSS_CLASS))
+        .forEach(([key, value]) =>
+          this.css_classes[value ? "add" : "remove"](key)
+        );
+      return this;
+    }
+
+    /* Handles hooks. Chainable. 
+    Called during creation:
+    - after CSS classes
+    - after children
+    - after 'update' 
+    - before 'created_callback'
+    - before live DOM connection */
+    call(...hooks) {
+      super.call && super.call(...hooks);
       /* Add css classes from CSS_CLASS-prefixed strings */
-      args
+      hooks
         .filter(
-          (arg) =>
-            typeof arg === "string" && arg.startsWith(constants.CSS_CLASS)
+          (hook) =>
+            typeof hook === "string" && hook.startsWith(constants.CSS_CLASS)
         )
-        .forEach((arg) => this.css_classes.add(arg));
+        .forEach((hook) => this.css_classes.add(hook));
+      return this;
     }
 
     /* Returns prop-like getter/setter interface to css class. 
@@ -63,6 +89,9 @@ export const css_classes = (parent, config, ...factories) => {
         return this.#owner.classList.contains(css_class);
       };
 
+      is = (arg) =>
+        typeof arg === "string" && arg.startsWith(constants.CSS_CLASS);
+
       remove = (...args) => {
         this.#handle("remove", ...args);
         return this.#owner;
@@ -90,18 +119,6 @@ export const css_classes = (parent, config, ...factories) => {
         }
       };
     })(this);
-
-    /* Updates component. Chainable. */
-    update(updates = {}) {
-      super.update && super.update(updates);
-      /* Update css classes */
-      Object.entries(updates)
-        .filter(([key, value]) => key.startsWith(constants.CSS_CLASS))
-        .forEach(([key, value]) =>
-          this.css_classes[value ? "add" : "remove"](key)
-        );
-      return this;
-    }
   };
   return cls;
 };

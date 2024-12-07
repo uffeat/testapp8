@@ -1,16 +1,18 @@
-/* Factory for calling hooks. */
+/* Factory that invokes hook functions in 'call'. */
 export const hooks = (parent, config, ...factories) => {
   const cls = class Hooks extends parent {
-    created_callback(...args) {
-      super.created_callback && super.created_callback(...args);
-      this.call(...args);
-    }
-
-    call(...args) {
-      super.call && super.call(...args);
-
+    /* Handles hooks. Chainable. 
+    Called during creation:
+    - after CSS classes
+    - after children
+    - after 'update' 
+    - before 'created_callback'
+    - before live DOM connection */
+    call(...hooks) {
+      super.call && super.call(...hooks);
+      /* Handle functions */
       const deffered = [];
-      args
+      hooks
         .filter((arg) => typeof arg === "function")
         .forEach((hook) => {
           const result = hook.call(this);
@@ -21,6 +23,7 @@ export const hooks = (parent, config, ...factories) => {
       setTimeout(() => {
         deffered.forEach((hook) => hook.call(this));
       }, 0);
+      return this
     }
   };
   return cls;

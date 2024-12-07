@@ -7,8 +7,15 @@ export const observer = (parent, config, ...factories) => {
   check_factories([attribute, events], factories);
 
   const cls = class Observer extends parent {
-    created_callback(...args) {
-      super.created_callback && super.created_callback(...args);
+    /* Only available during creation. 
+    Called:
+    - after CSS classes
+    - after 'update' 
+    - after children
+    - after 'call'
+    - before live DOM connection */
+    created_callback() {
+      super.created_callback && super.created_callback();
       this.observer.start();
     }
 

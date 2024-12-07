@@ -1,6 +1,6 @@
 import {
   attribute,
-  base,
+  chain,
   connected,
   css_classes,
   css_var,
@@ -12,13 +12,13 @@ import {
   properties,
   reactive,
   shadow,
+  state_to_attribute,
+  state_to_native,
   text,
   uid,
 } from "rollo/factories/__factories__";
-
-//import { sheet } from "rollo/factories/sheet";
-
 import { can_have_shadow } from "rollo/utils/can_have_shadow";
+import { is_node } from "rollo/utils/is_node";
 
 /* Utility for authoring web components and instantiating elements. */
 export const Component = new (class {
@@ -83,10 +83,7 @@ export const Component = new (class {
       chain.push(cls);
     }
 
-    /* Create __chain__ as instance prop that returns a frozen array of prototypes in mro.
-    __chain__ represents the prototype chain as created here. */
     const __chain__ = Object.freeze(chain.reverse());
-
     Object.defineProperty(cls.prototype, "__chain__", {
       configurable: true,
       enumerable: false,
@@ -103,36 +100,63 @@ export const Component = new (class {
         return __config__;
       },
     });
+
+    const __factories__ = Object.freeze(factories.reverse())
+    Object.defineProperty(cls.prototype, "__factories__", {
+      configurable: true,
+      enumerable: false,
+      get: function () {
+        return __factories__;
+      },
+    });
+
     return this.registry.add(tag, cls);
   };
 
   /* Creates an returns element from object. */
-  create_from_object = ({ args: [], tag = "div", ...updates } = {}) => {
-    return this.create(tag, updates, ...args);
+  create_from_object = ({ hooks: [], tag = "div", ...updates } = {}) => {
+    return this.create(tag, updates, ...hooks);
   };
 
-  /* Creates an element. 
+  /* Returns instance of web component. 
   Supports:
   - Rich in-line configuration, incl. children and hooks.
   - Construction from objects.
-  - On-demand authoring of non-autonomous web component. */
-  create = (arg, { parent, ...updates } = {}, ...args) => {
+  - On-demand authoring of non-autonomous web components. */
+  create = (arg, { parent, ...updates } = {}, ...hooks) => {
     if (typeof arg !== "string") {
       /* arg is an object */
       return this.create_from_object(arg);
     }
     const [tag, ...css_classes] = arg.split(".");
-    const element = new (this.get(tag))({ parent, ...updates }, ...args);
+    const element = new (this.get(tag))();
     if (css_classes.length > 0) {
       element.classList.add(...css_classes);
     }
+    /* Identify non-autonomous components as web component */
+    if (!tag.includes("-")) {
+      element.setAttribute("web-component", "");
+    }
+    /* Add CSS classes from hooks */
+    if (element.__factories__ && element.__factories__.includes(css_classes)) {
+      element.css_classes.add(...hooks.filter(element.css_classes.is));
+      hooks = hooks.filter((hook) => !element.css_classes.is(hook));
+    }
+    /* Call the 'update' lifecycle method */
     element.update && element.update(updates);
+    /* Append children from hooks */
+    element.append(...hooks.filter(is_node));
+    /* Call the 'call' lifecycle method */
+    element.call && element.call(...hooks);
     if (element.isConnected) {
       throw new Error(
-        `Element should not be connected to the live dom at this point.`
+        `Element should not be connected to the live DOM at this point.`
       );
     }
-    element.created_callback && element.created_callback(...args);
+    /* Call the 'created_callback' lifecycle method */
+    element.created_callback && element.created_callback();
+    /* Prevent 'created_callback' from being used onwards */
+    element.created_callback = undefined;
     /* Handle parent separately to ensure that any connectedCallbacks are 
     always called AFTER any created_callbacks */
     if (parent) {
@@ -176,7 +200,7 @@ export const create = Component.create;
 
 /* Add factories */
 Component.factories.add(attribute);
-Component.factories.add(base);
+Component.factories.add(chain);
 Component.factories.add(css_classes);
 Component.factories.add(css_var);
 Component.factories.add(connected);
@@ -192,10 +216,10 @@ Component.factories.add(reactive);
 /* TODO
 Consider not using shadow as a standard factory. currently not used.  */
 Component.factories.add(shadow, can_have_shadow);
+Component.factories.add(state_to_attribute);
+Component.factories.add(state_to_native);
 Component.factories.add(text, (tag) => {
   const element = document.createElement(tag);
   return "textContent" in element;
 });
 Component.factories.add(uid);
-
-//Component.factories.add(sheet);

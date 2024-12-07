@@ -6,7 +6,6 @@ export const css_var = (parent, config, ...factories) => {
     /* Returns prop-like getter/setter interface to component-scoped css var.
     Supports:
     - '__'-syntax
-    - hooks
     - iife's (undefined values are ignored) */
     get __() {
       return this.#__;
@@ -29,7 +28,13 @@ export const css_var = (parent, config, ...factories) => {
       },
     });
 
-    /* Updates component. Chainable. */
+    /* Updates component. Chainable. 
+    Called during creation:
+    - after CSS classes
+    - after children
+    - before 'call'
+    - before 'created_callback'
+    - before live DOM connection */
     update(updates = {}) {
       super.update && super.update(updates);
       /* Update css vars */

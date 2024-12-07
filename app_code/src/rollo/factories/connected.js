@@ -9,8 +9,15 @@ export const connected = (parent, config, ...factories) => {
   const cls = class Connected extends parent {
     #set_connected;
 
-    created_callback(...args) {
-      super.created_callback && super.created_callback(...args);
+    /* Only available during creation. 
+    Called:
+    - after CSS classes
+    - after 'update' 
+    - after children
+    - after 'call'
+    - before live DOM connection */
+    created_callback() {
+      super.created_callback && super.created_callback();
       this.#set_connected = this.protected.add("connected");
     }
 

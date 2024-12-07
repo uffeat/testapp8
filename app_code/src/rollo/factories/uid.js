@@ -18,8 +18,15 @@ export const uid = (parent, config, ...factories) => {
     static observedAttributes = create_observed_attributes(parent, "uid");
     #uid;
 
-    created_callback(...args) {
-      super.created_callback && super.created_callback(...args);
+    /* Only available during creation. 
+    Called:
+    - after CSS classes
+    - after 'update' 
+    - after children
+    - after 'call'
+    - before live DOM connection */
+    created_callback() {
+      super.created_callback && super.created_callback();
       this.#uid = create_uid();
       this.attribute.uid = this.#uid;
     }

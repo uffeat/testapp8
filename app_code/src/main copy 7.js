@@ -15,7 +15,7 @@ import { create } from "rollo/component";
 // ... then tooltip
 // ... then scrollspy
 
-import { Sheet } from "rollo/components/sheet";
+import { Sheet } from "@/rollo/components/static_sheet";
 
 const root = create("div", {
   id: "root",

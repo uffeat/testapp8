@@ -1,7 +1,9 @@
 import "./bootstrap.scss";
 import "./main.css";
 import { create } from "rollo/component";
-
+import "rollo/components/reactive";
+import "@/rollo/components/static_sheet";
+import "rollo/components/rule";
 
 // TODO
 // ... then nav bar
@@ -22,7 +24,20 @@ const root = create("div", {
   parent: document.body,
 });
 
+////
+const reactive = create("data-reactive", {
+  name: "my_reactive",
+  parent: root,
+  $foo: 40,
+  attribute_bar: "bar",
+});
 
+reactive.effects.add((data) => {
+  console.log("foo:", reactive.$.foo);
+}, "foo");
+
+reactive.$.foo = 42;
+reactive.$.foo = 43;
 
 const button = create(
   "button",
@@ -35,7 +50,6 @@ const button = create(
       console.log("Clicked");
     },
   },
-  '.btn-primary',
   function () {
     this.effects.add((data) => {
       console.log('$text:', this.$.$text)
@@ -44,10 +58,52 @@ const button = create(
 );
 
 button.$.$text = 'Yo world'
-//button.$['$.btn-primary'] = true
+button.$['$.btn-primary'] = true
 
 create("h1", { parent: root }, "Hello World");
-create("h2", { parent: root }, "Also hello from here",  create('span', {text: "I'm injected"}),);
+create("h2", { parent: root }, "Also hello from here");
+
+const my_sheet = create("data-sheet", {
+  name: "my_sheet",
+  parent: root,
+});
+
+my_sheet.text = `
+h1 {
+  background-color: pink;
+}
+`
+my_sheet.disabled = true
+my_sheet.disabled = false
+
+const my_rule = create("data-rule", {
+  name: "my_rule",
+  selector: 'h1',
+  parent: my_sheet,
+  items: {
+    color: 'red',
+    border: '2px solid green'
+  }
+
+});
+
+/*
+my_rule.items = {
+  color: 'red',
+  border: '2px solid green'
+}
+*/
+
+
+
+////my_rule.$.color = 'red'
+////my_rule.$.border = '2px solid green'
+//my_rule.update({$color: 'red', $border: '2px solid green'})
+
+
+
+
+
 
 
 

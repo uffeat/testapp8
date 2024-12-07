@@ -1,24 +1,9 @@
 import { constants } from "rollo/constants";
 
 /* Factory that provides pub-sub-based reactive functionality with 
-fine-grained control options. For any class - not only web components. */
+fine-grained control options. */
 export const reactive = (parent, config, ...factories) => {
   const cls = class Reactive extends parent {
-    /* Alternative constructor without 'new' */
-    static create = (...args) => {
-      return new Reactive(...args);
-    };
-    #name;
-    #owner;
-    constructor({ name, owner } = {}, state) {
-      super();
-      this.#name = name;
-      this.#owner = owner;
-      if (state) {
-        this.#state.update_data(state)
-      }
-    }
-
     /* NOTE
     The actual functionality is provided by #state.
     The job of other class members is to provide an elegant API around #state.
@@ -113,14 +98,6 @@ export const reactive = (parent, config, ...factories) => {
       };
     })(this);
 
-    get name() {
-      return this.#name;
-    }
-
-    get owner() {
-      return this.#owner;
-    }
-
     /* Returns controller for managing protection of keys. */
     get protected() {
       return this.#protected;
@@ -134,9 +111,8 @@ export const reactive = (parent, config, ...factories) => {
 
       /* Returns (frozen) array of protected keys. */
       get keys() {
-        return this.#owner.#state.get_protected_keys()
+        return this.#owner.#state.get_protected_keys();
       }
-
 
       /* Add protected key. Optionally sets value. 
       Returns function that can set value. */
@@ -160,6 +136,13 @@ export const reactive = (parent, config, ...factories) => {
       };
     })(this);
 
+    /* Updates component. Chainable. 
+    Called during creation:
+    - after CSS classes
+    - after children
+    - before 'call'
+    - before 'created_callback'
+    - before live DOM connection */
     update(updates = {}) {
       super.update && super.update(updates);
       /* Update multiple state items in one go
@@ -257,8 +240,8 @@ export const reactive = (parent, config, ...factories) => {
       };
 
       get_protected_keys = () => {
-        return Object.freeze(Array.from(Object.keys(this.#protected_registry)))
-      }
+        return Object.freeze(Array.from(Object.keys(this.#protected_registry)));
+      };
 
       /* Tests, if effect is registered. */
       has_effect = (effect) => {
@@ -396,6 +379,3 @@ export const reactive = (parent, config, ...factories) => {
   };
   return cls;
 };
-
-/* Expose Reactive for use as stand-alone or in composition. */
-export const Reactive = reactive(class {});

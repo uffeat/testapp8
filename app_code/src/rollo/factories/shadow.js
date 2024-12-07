@@ -11,8 +11,15 @@ export const shadow = (parent, config, ...factories) => {
     #set_has_children;
     #set_has_content;
 
-    created_callback(...args) {
-      super.created_callback && super.created_callback(...args);
+    /* Only available during creation. 
+    Called:
+    - after CSS classes
+    - after 'update' 
+    - after children
+    - after 'call'
+    - before live DOM connection */
+    created_callback() {
+      super.created_callback && super.created_callback();
       /* Init shadow-dom-enabled protected state */
       this.#set_has_children = this.protected.add("has_children", false);
       this.#set_has_content = this.protected.add("has_content", false);
