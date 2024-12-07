@@ -2,16 +2,11 @@ import { camel_to_kebab } from "rollo/utils/case";
 import { check_factories } from "rollo/utils/check_factories";
 import { sheet } from "rollo/factories/__factories__";
 
-class DataCssValidator extends HTMLElement {
-  constructor() {
-    super();
-  }
-}
-//
 const is_valid_key = (() => {
   const web_component = document.createElement("web-component");
   return (key) => {
-    if (!key.startsWith("--") && !key.startsWith("@media")) {  ////
+    if (!key.startsWith("--") && !key.startsWith("@media")) {
+      ////
       if (!(key in web_component.style)) {
         return false;
       }
@@ -19,6 +14,20 @@ const is_valid_key = (() => {
     }
   };
 })();
+
+const is_css = (() => {
+  const web_component = document.createElement("web-component");
+  return (key) =>
+    typeof key === "string" &&
+    (key.startsWith("--") ||
+      key.startsWith("@media") ||
+      key.startsWith("@keyframes") ||
+
+      /* BUG */
+      key in web_component.style);
+})();
+
+console.log('h1 is css:', is_css('h1'))
 
 class Rule {
   static create = (...args) => {
@@ -94,7 +103,6 @@ class MediaRule extends Rule {
       Consider if false should be a cue to delete declaration
       */
 
-
       //
       //
       new Rule(this.rule, selector, items);
@@ -137,20 +145,19 @@ export const rules = (parent, config, ...factories) => {
   const cls = class Rules extends parent {
     /*  */
     update(updates = {}) {
-
       ////super.update && super.update(updates);////
 
-      ////console.log('updates:', updates)////
+      console.log('updates:', updates)////
 
-      for (const [selector, items] of Object.entries(updates)) {
+      const css_updates = Object.fromEntries(
+        Object.entries(updates).filter(([key, value]) => is_css(key))
+      );
+
+      console.log("css_updates:", css_updates); ////
+
+      for (const [selector, items] of Object.entries(css_updates)) {
         if (selector.startsWith("@media")) {
-
-
           ////console.log('items:', items)////
-
-
-
-
           new MediaRule(this.sheet, selector, items);
           continue;
         }

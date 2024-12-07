@@ -53,6 +53,7 @@ create(
 
 const my_sheet = create("data-static-sheet", {
   parent: root,
+  name: 'my_sheet',
   h1: {
     color: "pink",
     backgroundColor: "linen",
