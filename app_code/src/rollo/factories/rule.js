@@ -1,19 +1,33 @@
+/*
+TODO
+Reactive items
+*/
+
+
 import { camel_to_kebab } from "rollo/utils/case";
+import { check_factories } from "rollo/utils/check_factories";
+import {
+  attribute,
+  connected,
+  properties,
+  reactive,
+  state_to_attribute,
+} from "rollo/factories/__factories__";
 
 /* . */
 export const rule = (parent, config, ...factories) => {
+  /* Check factory dependencies */
+  check_factories(
+    [attribute, connected, properties, reactive, state_to_attribute],
+    factories
+  );
+
   const cls = class Rule extends parent {
     #rule;
-    #sheet;
     #selector;
-
-    constructor({ sheet, selector, ...updates }) {
+    #sheet;
+    constructor() {
       super();
-      this.#sheet = sheet;
-      this.#selector = selector;
-      const index = sheet.insertRule(`${selector} {}`, sheet.cssRules.length);
-      this.#rule = sheet.cssRules[index];
-      this.update(updates);
     }
 
     get rule() {
@@ -24,59 +38,102 @@ export const rule = (parent, config, ...factories) => {
       return this.#selector;
     }
 
+    set selector(selector) {
+      if (this.#selector) {
+        throw new Error(`'selector' cannot be changed.`);
+      }
+      this.#selector = selector;
+    }
+
     get sheet() {
       return this.#sheet;
     }
 
-    /*  */
-    update(updates = {}) {
+    set sheet(sheet) {
+      if (this.#sheet) {
+        throw new Error(`'sheet' cannot be changed.`);
+      }
+      if (!this.selector) {
+        throw new Error(`'selector' not specified.`);
+      }
+      this.#sheet = sheet;
+      const index = sheet.insertRule(
+        `${this.selector} {}`,
+        sheet.cssRules.length
+      );
+      this.#rule = sheet.cssRules[index];
+    }
+
+    /* Only available during creation. 
+    Called:
+    - after CSS classes
+    - after 'update' 
+    - after children
+    - after 'call'
+    - before live DOM connection */
+    created_callback() {
+      super.created_callback && super.created_callback();
+      this.style.display = "none";
+
+      /* Set/unset sheet on connect/disconnect */
+      this.effects.add((data) => {
+        if (this.$.connected) {
+          if (!this.parentElement.sheet) {
+            throw new Error(`Parent element does not have a sheet.`);
+          }
+          this.sheet = this.parentElement.sheet;
+          
+        } else {
+          this.#sheet = null;
+          /* 
+          TODO
+          - Perphas more clean-up? 
+          */
+        }
+      }, "connected");
+    }
+
+    update({ selector, sheet, ...updates } = {}) {
+      if (selector) {
+        this.selector = selector;
+      }
+      if (sheet) {
+        this.sheet = sheet;
+      }
+
       super.update && super.update(updates);
 
-      for (const [key, items] of Object.entries(updates)) {
-        if (items === undefined) {
-          continue;
-        }
+      for (const [key, value] of Object.entries(updates)) {
         if (key in this) {
           continue;
         }
-
+        if (value === undefined) {
+          continue;
+        }
         /*
-        if (key.startsWith("@media")) {
-          continue;
-        }
-        if (key.startsWith("@keyframes")) {
-          continue;
-        }
+        TODO
+        Consider if false should be a cue to delete declaration
         */
-        for (const [key, value] of Object.entries(items)) {
-          if (!this.#is_css(key)) {
-            throw new Error(`Invalid key: ${key}`);
-          }
-          /*
-          TODO
-          Consider, if false value should be a cue to delete declaration (item)
-          */
-          if (value.endsWith("!important")) {
-            this.rule.style.setProperty(
-              key,
-              value.slice(0, -"!important".length).trim(),
-              "important"
-            );
-          } else {
-            this.rule.style.setProperty(camel_to_kebab(key), value);
-          }
+        if (!this.#is_css(key)) {
+          throw new Error(`Invalid key: ${key}`);
+        }
+        if (value.endsWith("!important")) {
+          this.rule.style.setProperty(
+            key,
+            value.slice(0, -"!important".length).trim(),
+            "important"
+          );
+        } else {
+          this.rule.style.setProperty(camel_to_kebab(key), value);
         }
       }
       return this;
     }
 
     #is_css = (key) => {
-      return (key) =>
-        typeof key === "string" &&
-        (key.startsWith("--") ||
-          //key.startsWith("@media") ||
-          //key.startsWith("@keyframes") ||
-          key in this.style);
+      return (
+        typeof key === "string" && (key.startsWith("--") || key in this.style)
+      );
     };
   };
   return cls;

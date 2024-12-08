@@ -1,3 +1,12 @@
+/*
+TODO
+- Option to set target (useful when not used as web component)
+- Option for autoscoping to sheet name - and autoassignment of class/attr to  non-rule child  components
+
+*/
+
+
+
 import { Component, create } from "rollo/component";
 import {
   attribute,
@@ -10,10 +19,12 @@ import {
   uid,
 } from "rollo/factories/__factories__";
 import "rollo/components/data_rule";
+import "rollo/components/data_media_rule";
+import "rollo/components/data_keyframes_rule";
 
 /* Non-visual web component for managing dynamically applied sheets. */
-const static_sheet = (parent) => {
-  const cls = class DataStaticSheet extends parent {
+const data_sheet = (parent) => {
+  const cls = class DataSheet extends parent {
     constructor() {
       super();
     }
@@ -69,7 +80,7 @@ const static_sheet = (parent) => {
 };
 
 Component.author(
-  "data-static-sheet",
+  "data-sheet",
   HTMLElement,
   {},
   attribute,
@@ -80,5 +91,5 @@ Component.author(
   sheet,
   state_to_attribute,
   uid,
-  static_sheet
+  data_sheet
 );

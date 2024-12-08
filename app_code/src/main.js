@@ -1,7 +1,7 @@
 import "./bootstrap.scss";
 import "./main.css";
 import { create } from "rollo/component";
-import "rollo/components/static_sheet";
+import "@/rollo/components/data_sheet";
 //import "rollo/components/data_rule";
 //import "rollo/components/data_media_rule";
 import "rollo/components/data_rule";
@@ -54,7 +54,7 @@ create(
   create("span", { text: "I'm injected" })
 );
 
-const my_sheet = create("data-static-sheet", {
+const my_sheet = create("data-sheet", {
   parent: root,
   name: "my_sheet",
   h1: {

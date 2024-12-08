@@ -1,4 +1,5 @@
-import { Component, create } from "rollo/component";
+import { Component } from "rollo/component";
+import { camel_to_kebab } from "rollo/utils/case";
 import {
   attribute,
   connected,
@@ -8,11 +9,9 @@ import {
   rule,
   state_to_attribute,
 } from "rollo/factories/__factories__";
-import "rollo/components/data_rule";
 
-
-const data_media_rule = (parent, config, ...factories) => {
-  const cls = class DataMediaRule extends parent {
+const data_keyframes_rule = (parent, config, ...factories) => {
+  const cls = class DataKeyframesRule extends parent {
     constructor() {
       super();
     }
@@ -32,20 +31,21 @@ const data_media_rule = (parent, config, ...factories) => {
         if (items === undefined) {
           continue;
         }
-        create("data-rule", {
-          selector,
-          sheet: this.rule,
-          ...items,
-        });
+        //
+        //this.rule.style.removeProperty(selector);
+        //
+        const text = `${selector} { ${Object.entries(items)
+          .map(([selector, value]) => `${camel_to_kebab(selector)}: ${value};`)
+          .join(" ")} }`;
+        this.rule.appendRule(text);
       }
-      return this;
     }
   };
   return cls;
 };
 
 Component.author(
-  "data-media-rule",
+  "data-keyframes-rule",
   HTMLElement,
   {},
   attribute,
@@ -55,5 +55,5 @@ Component.author(
   reactive,
   rule,
   state_to_attribute,
-  data_media_rule
+  data_keyframes_rule
 );
