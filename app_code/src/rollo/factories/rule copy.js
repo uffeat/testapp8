@@ -3,6 +3,7 @@ TODO
 Reactive items
 */
 
+
 import { camel_to_kebab } from "rollo/utils/case";
 import { check_factories } from "rollo/utils/check_factories";
 import {
@@ -33,23 +34,6 @@ export const rule = (parent, config, ...factories) => {
       return this.#rule;
     }
 
-    #create_rule = () => {
-      if (this.#rule) {
-        throw new Error(`'rule' cannot be changed.`);
-      }
-      if (!this.selector) {
-        throw new Error(`'selector' not set.`);
-      }
-      if (!this.sheet) {
-        throw new Error(`'sheet' not set.`);
-      }
-      const index = this.sheet.insertRule(
-        `${this.selector} {}`,
-        this.sheet.cssRules.length
-      );
-      this.#rule = this.sheet.cssRules[index];
-    };
-
     get selector() {
       return this.#selector;
     }
@@ -59,9 +43,6 @@ export const rule = (parent, config, ...factories) => {
         throw new Error(`'selector' cannot be changed.`);
       }
       this.#selector = selector;
-      if (this.#selector && this.#sheet) {
-        this.#create_rule();
-      }
     }
 
     get sheet() {
@@ -72,17 +53,15 @@ export const rule = (parent, config, ...factories) => {
       if (this.#sheet) {
         throw new Error(`'sheet' cannot be changed.`);
       }
+      if (!this.selector) {
+        throw new Error(`'selector' not specified.`);
+      }
       this.#sheet = sheet;
-      if (this.#selector && this.#sheet) {
-        this.#create_rule();
-      }
-    }
-
-    get text() {
-      if (this.rule) {
-        return this.rule.cssText
-      }
-      
+      const index = sheet.insertRule(
+        `${this.selector} {}`,
+        sheet.cssRules.length
+      );
+      this.#rule = sheet.cssRules[index];
     }
 
     /* Only available during creation. 
@@ -102,8 +81,8 @@ export const rule = (parent, config, ...factories) => {
           if (!this.parentElement.sheet) {
             throw new Error(`Parent element does not have a sheet.`);
           }
-
           this.sheet = this.parentElement.sheet;
+          
         } else {
           this.#sheet = null;
           /* 
@@ -114,14 +93,14 @@ export const rule = (parent, config, ...factories) => {
       }, "connected");
     }
 
-    /* Updates component. Chainable. 
-    Called during creation:
-    - after CSS classes
-    - after children
-    - before 'call'
-    - before 'created_callback'
-    - before live DOM connection */
-    update(updates = {}) {
+    update({ selector, sheet, ...updates } = {}) {
+      if (selector) {
+        this.selector = selector;
+      }
+      if (sheet) {
+        this.sheet = sheet;
+      }
+
       super.update && super.update(updates);
 
       for (const [key, value] of Object.entries(updates)) {
@@ -132,11 +111,9 @@ export const rule = (parent, config, ...factories) => {
           continue;
         }
 
-        if (typeof value !== "string") {
-          /* Allow selector and items to be set in one go */
-          this.update({ selector: key, ...value });
-          continue;
-        }
+        
+
+
 
         /*
         TODO
@@ -146,9 +123,7 @@ export const rule = (parent, config, ...factories) => {
           throw new Error(`Invalid key: ${key}`);
         }
 
-        if (!this.rule) {
-          throw new Error(`'rule' not set.`);
-        }
+
 
         if (value.endsWith("!important")) {
           this.rule.style.setProperty(

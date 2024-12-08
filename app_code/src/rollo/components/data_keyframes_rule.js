@@ -3,7 +3,7 @@ import { camel_to_kebab } from "rollo/utils/case";
 import {
   attribute,
   connected,
-  name,
+  hooks,
   properties,
   reactive,
   rule,
@@ -16,6 +16,22 @@ const data_keyframes_rule = (parent, config, ...factories) => {
       super();
     }
 
+    get name() {
+      return this.attribute.name || undefined
+    }
+
+    set name(name) {
+      this.selector = `@keyframes ${name}`
+      this.attribute.name = name;
+    }
+
+    /* Updates component. Chainable. 
+    Called during creation:
+    - after CSS classes
+    - after children
+    - before 'call'
+    - before 'created_callback'
+    - before live DOM connection */
     update(updates = {}) {
       super.update(
         Object.fromEntries(
@@ -31,6 +47,16 @@ const data_keyframes_rule = (parent, config, ...factories) => {
         if (items === undefined) {
           continue;
         }
+        if (selector.startsWith("@keyframes")) {
+          /* Allow keyframes selector and items to be set in one go */
+          this.update({ selector, ...items });
+          continue;
+        }
+
+
+
+
+
         //
         //this.rule.style.removeProperty(selector);
         //
@@ -50,7 +76,7 @@ Component.author(
   {},
   attribute,
   connected,
-  name,
+  hooks,
   properties,
   reactive,
   rule,

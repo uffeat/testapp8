@@ -2,9 +2,9 @@ import "./bootstrap.scss";
 import "./main.css";
 import { create } from "rollo/component";
 import "@/rollo/components/data_sheet";
+//import "rollo/components/data_rule";
+//import "rollo/components/data_media_rule";
 import "rollo/components/data_rule";
-import "rollo/components/data_media_rule";
-import "rollo/components/data_keyframes_rule";
 
 // TODO
 // ... then nav bar
@@ -60,8 +60,9 @@ const my_sheet = create("data-sheet", {
   h1: {
     color: "pink",
     backgroundColor: "linen",
-    animationDuration: "3s",
-    animationName: "slide_in",
+    animationDuration: '3s',
+    animationName: 'slide_in',
+
   },
   "@media (width <= 600px)": {
     div: {
@@ -70,54 +71,30 @@ const my_sheet = create("data-sheet", {
   },
   "@keyframes slide_in": {
     from: {
-      translate: "150vw 0",
-      scale: "200% 1",
+      translate: '150vw 0',
+      scale: '200% 1',
     },
-
+  
     to: {
-      translate: "0 0",
-      scale: "100% 1",
+      translate: '0 0',
+      scale: '100% 1',
     },
+    
   },
 });
 
 const my_rule = create("data-rule", {
+  selector: "h1",
   sheet: my_sheet.sheet,
-  h1: { color: "green", margin: "4px" },
+  color: "green",
 });
-my_rule.update({ padding: "4px" });
-
-console.log(my_rule.text);
-console.dir(my_rule.rule);
 
 const my_media_rule = create("data-media-rule", {
   sheet: my_sheet.sheet,
-  "@media (width <= 600px)": { h1: { color: "blue" } },
+  selector: "@media (width <= 600px)",
+  h1: { color: "blue" },
 });
 
-my_media_rule.update({ h1: { border: "4px solid blue" }, h2: {
- 
-  animationDuration: "5s",
-  animationName: "do_stuff",
-}, });
-
-console.log(my_media_rule.text);
-console.dir(my_media_rule.rule);
-
-
-const my_keyframes_rule = create("data-keyframes-rule", {
-  sheet: my_sheet.sheet,
-  name: 'do_stuff',
-  from: {
-    translate: "150vw 0",
-    scale: "200% 1",
-  },
-
-  to: {
-    translate: "0 0",
-    scale: "100% 1",
-  },
-});
 
 /* Enable tests */
 if (import.meta.env.DEV) {

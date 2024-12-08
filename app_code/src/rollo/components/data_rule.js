@@ -2,6 +2,7 @@ import { Component } from "rollo/component";
 import {
   attribute,
   connected,
+  hooks,
   name,
   properties,
   reactive,
@@ -14,8 +15,13 @@ const data_rule = (parent, config, ...factories) => {
     constructor() {
       super();
     }
-  };
 
+    get size() {
+      if (this.rule) {
+        return this.rule.styleMap.size
+      }
+    }
+  };
   return cls;
 };
 
@@ -25,6 +31,7 @@ Component.author(
   {},
   attribute,
   connected,
+  hooks,
   name,
   properties,
   reactive,

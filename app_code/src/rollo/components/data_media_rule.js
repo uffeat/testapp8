@@ -2,6 +2,7 @@ import { Component, create } from "rollo/component";
 import {
   attribute,
   connected,
+  hooks,
   name,
   properties,
   reactive,
@@ -10,13 +11,34 @@ import {
 } from "rollo/factories/__factories__";
 import "rollo/components/data_rule";
 
-
 const data_media_rule = (parent, config, ...factories) => {
   const cls = class DataMediaRule extends parent {
     constructor() {
       super();
     }
 
+    /* Create alias for 'selector' */
+    get media() {
+      return this.selector;
+    }
+
+    set media(media) {
+      this.selector = media
+    }
+
+    get size() {
+      if (this.rule) {
+        return this.rule.cssRules.length
+      }
+    }
+
+    /* Updates component. Chainable. 
+    Called during creation:
+    - after CSS classes
+    - after children
+    - before 'call'
+    - before 'created_callback'
+    - before live DOM connection */
     update(updates = {}) {
       super.update(
         Object.fromEntries(
@@ -30,6 +52,11 @@ const data_media_rule = (parent, config, ...factories) => {
           continue;
         }
         if (items === undefined) {
+          continue;
+        }
+        if (selector.startsWith("@media")) {
+          /* Allow media selector and items to be set in one go */
+          this.update({ selector, ...items });
           continue;
         }
         create("data-rule", {
@@ -50,6 +77,7 @@ Component.author(
   {},
   attribute,
   connected,
+  hooks,
   name,
   properties,
   reactive,
