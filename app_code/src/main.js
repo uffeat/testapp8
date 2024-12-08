@@ -4,7 +4,7 @@ import { create } from "rollo/component";
 import "rollo/components/static_sheet";
 //import "rollo/components/data_rule";
 //import "rollo/components/data_media_rule";
-import { DataRule, DataMediaRule } from "rollo/components/data_rule";
+import "rollo/components/data_rule";
 
 // TODO
 // ... then nav bar
@@ -56,7 +56,7 @@ create(
 
 const my_sheet = create("data-static-sheet", {
   parent: root,
-  name: 'my_sheet',
+  name: "my_sheet",
   h1: {
     color: "pink",
     backgroundColor: "linen",
@@ -68,11 +68,20 @@ const my_sheet = create("data-static-sheet", {
   },
 });
 
-//const my_rule = create('data-rule', 'h1', my_sheet.sheet, {h1: {color: 'green'}})
-const my_rule = new DataRule(my_sheet.sheet,  'h1', {color: 'green'})
-const my_media_rule = new DataMediaRule(my_sheet.sheet,  '@media (width <= 600px)', {h1: {color: 'blue'}})
-//const my_media_rule = create('data-media-rule', {selector: '@media (width <= 600px)', sheet: my_sheet.sheet, h1: {color: 'blue'}})
+const my_rule = create("data-rule", {
+  selector: "h1",
+  sheet: my_sheet.sheet,
+  color: "green",
+});
 
+const my_media_rule = create("data-media-rule", {
+  sheet: my_sheet.sheet,
+  selector: "@media (width <= 600px)",
+  h1: { color: "blue" },
+});
+
+//const my_rule = create('data-rule', 'h1', my_sheet.sheet, {h1: {color: 'green'}})
+//const my_media_rule = create('data-media-rule', {selector: '@media (width <= 600px)', sheet: my_sheet.sheet, h1: {color: 'blue'}})
 
 /* Enable tests */
 if (import.meta.env.DEV) {
