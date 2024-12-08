@@ -5,12 +5,12 @@ import {
   name,
   properties,
   reactive,
-  
+  rules,
   sheet,
   state_to_attribute,
   uid,
 } from "rollo/factories/__factories__";
-import "rollo/components/data_rule";
+//import "rollo/components/data_rule";
 
 
 
@@ -32,50 +32,6 @@ const static_sheet = (parent) => {
       super.created_callback && super.created_callback();
       this.style.display = "none";
     }
-
-    update(updates = {}) {
-      super.update && super.update(updates); ////
-
-
-      const css = Object.fromEntries(
-        Object.entries(updates).filter(([key, value]) => !(key in this))
-      );
-
-      
-
-      for (const [selector, items] of Object.entries(css)) {
-        if (selector.startsWith("@media")) {
-          ////console.log('items:', items)////
-          //new MediaRule(this.sheet, selector, items);
-          create("data-media-rule", {
-            sheet: this.sheet,
-            selector,
-            ...items
-           
-          });
-          continue;
-        }
-        if (selector.startsWith("@keyframes")) {
-          // TODO
-          continue;
-        }
-        create("data-rule", {
-          selector,
-          sheet: this.sheet,
-          ...items
-        });
-      }
-
-      return this;
-    }
-
-
-
-
-
-
-
-
   };
 
   return cls;
@@ -90,7 +46,7 @@ Component.author(
   name,
   properties,
   reactive,
- 
+  rules,
   sheet,
   state_to_attribute,
   uid,

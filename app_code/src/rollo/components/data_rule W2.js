@@ -1,6 +1,5 @@
 import { Component, create } from "rollo/component";
 import { camel_to_kebab } from "rollo/utils/case";
-import { attribute, name } from "rollo/factories/__factories__";
 
 export const data_rule = (parent, config, ...factories) => {
   const cls = class DataRule extends parent {
@@ -23,33 +22,28 @@ export const data_rule = (parent, config, ...factories) => {
       return this.#sheet;
     }
 
-    init(selector, sheet) {
+    update({ selector, sheet, ...items } = {}) {
       if (this.#sheet) {
-        throw new Error(`Component has already been initialized.`);
-      }
-      if (!selector) {
-        throw new Error(`'selector' not specified.`);
-      }
-      if (!sheet) {
-        throw new Error(`'sheet' not specified.`);
-      }
-      this.#sheet = sheet;
-      this.#selector = selector;
-      const index = sheet.insertRule(`${selector} {}`, sheet.cssRules.length);
-      this.#rule = sheet.cssRules[index];
-    }
-
-    update({ selector, sheet, ...updates } = {}) {
-      if (selector || sheet) {
-        this.init(selector, sheet);
-      }
-      if (!this.#sheet) {
-        throw new Error(`Component not initialized.`);
+        if (selector) {
+          throw new Error(`'selector' already set.`);
+        }
+        if (sheet) {
+          throw new Error(`'sheet' already set.`);
+        }
+      } else {
+        if (!selector) {
+          throw new Error(`'selector' not specified.`);
+        }
+        if (!sheet) {
+          throw new Error(`'sheet' not specified.`);
+        }
+        this.#sheet = sheet;
+        this.#selector = selector;
+        const index = sheet.insertRule(`${selector} {}`, sheet.cssRules.length);
+        this.#rule = sheet.cssRules[index];
       }
 
-      super.update && super.update(updates);
-
-      for (const [key, value] of Object.entries(updates)) {
+      for (const [key, value] of Object.entries(items)) {
         if (key in this) {
           continue;
         }
@@ -76,16 +70,17 @@ export const data_rule = (parent, config, ...factories) => {
     }
 
     #is_css = (key) => {
-      return (
-        typeof key === "string" && (key.startsWith("--") || key in this.style)
-      );
+      return (key) =>
+        typeof key === "string" && (key.startsWith("--") || key in this.style);
     };
   };
 
   return cls;
 };
 
-Component.author("data-rule", HTMLElement, {}, attribute, name, data_rule);
+Component.author("data-rule", HTMLElement, {}, data_rule);
+
+export const DataRule = Component.get("data-rule");
 
 export const data_media_rule = (parent, config, ...factories) => {
   const cls = class DataMediaRule extends parent {
@@ -93,37 +88,29 @@ export const data_media_rule = (parent, config, ...factories) => {
       super();
     }
 
-    update(updates = {}) {
-      super.update(
-        Object.fromEntries(
-          Object.entries(updates).filter(([key, value]) => key in this)
-        )
-      );
+    update({ selector, sheet, ...block } = {}) {
+      super.update({ selector, sheet });
 
-      for (const [selector, items] of Object.entries(updates)) {
-        if (selector in this) {
-          continue;
-        }
+      for (const [selector, items] of Object.entries(block)) {
         if (items === undefined) {
           continue;
         }
+        
+
+        
         create("data-rule", {
           selector,
           sheet: this.rule,
-          ...items,
-        });
+          ...items
+        })
+          
       }
     }
   };
   return cls;
 };
 
-Component.author(
-  "data-media-rule",
-  HTMLElement,
-  {},
-  attribute,
-  name,
-  data_rule,
-  data_media_rule
-);
+Component.author("data-media-rule", DataRule, {}, data_media_rule);
+
+export const DataMediaRule = Component.get("data-media-rule");
+
