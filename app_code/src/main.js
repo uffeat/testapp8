@@ -60,11 +60,26 @@ const my_sheet = create("data-static-sheet", {
   h1: {
     color: "pink",
     backgroundColor: "linen",
+    animationDuration: '3s',
+    animationName: 'slide_in',
+
   },
   "@media (width <= 600px)": {
     div: {
       backgroundColor: "pink",
     },
+  },
+  "@keyframes slide_in": {
+    from: {
+      translate: '150vw 0',
+      scale: '200% 1',
+    },
+  
+    to: {
+      translate: '0 0',
+      scale: '100% 1',
+    },
+    
   },
 });
 
@@ -80,8 +95,6 @@ const my_media_rule = create("data-media-rule", {
   h1: { color: "blue" },
 });
 
-//const my_rule = create('data-rule', 'h1', my_sheet.sheet, {h1: {color: 'green'}})
-//const my_media_rule = create('data-media-rule', {selector: '@media (width <= 600px)', sheet: my_sheet.sheet, h1: {color: 'blue'}})
 
 /* Enable tests */
 if (import.meta.env.DEV) {

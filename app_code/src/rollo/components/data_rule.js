@@ -11,6 +11,18 @@ export const data_rule = (parent, config, ...factories) => {
       super();
     }
 
+    /* Only available during creation. 
+    Called:
+    - after CSS classes
+    - after 'update' 
+    - after children
+    - after 'call'
+    - before live DOM connection */
+    created_callback() {
+      super.created_callback && super.created_callback();
+      this.style.display = "none";
+    }
+
     get rule() {
       return this.#rule;
     }
@@ -43,6 +55,7 @@ export const data_rule = (parent, config, ...factories) => {
       if (selector || sheet) {
         this.init(selector, sheet);
       }
+
       if (!this.#sheet) {
         throw new Error(`Component not initialized.`);
       }
@@ -73,6 +86,7 @@ export const data_rule = (parent, config, ...factories) => {
           this.rule.style.setProperty(camel_to_kebab(key), value);
         }
       }
+      return this;
     }
 
     #is_css = (key) => {
@@ -113,6 +127,7 @@ export const data_media_rule = (parent, config, ...factories) => {
           ...items,
         });
       }
+      return this;
     }
   };
   return cls;
@@ -126,4 +141,47 @@ Component.author(
   name,
   data_rule,
   data_media_rule
+);
+
+export const data_keyframes_rule = (parent, config, ...factories) => {
+  const cls = class DataKeyframesRule extends parent {
+    constructor() {
+      super();
+    }
+
+    update(updates = {}) {
+      super.update(
+        Object.fromEntries(
+          Object.entries(updates).filter(([key, value]) => key in this)
+        )
+      );
+
+      for (const [selector, items] of Object.entries(updates)) {
+        if (selector in this) {
+          continue;
+        }
+        if (items === undefined) {
+          continue;
+        }
+        //
+        //this.rule.style.removeProperty(selector);
+        //
+        const text = `${selector} { ${Object.entries(items)
+          .map(([selector, value]) => `${camel_to_kebab(selector)}: ${value};`)
+          .join(" ")} }`;
+        this.rule.appendRule(text);
+      }
+    }
+  };
+  return cls;
+};
+
+Component.author(
+  "data-keyframes-rule",
+  HTMLElement,
+  {},
+  attribute,
+  name,
+  data_rule,
+  data_keyframes_rule
 );
