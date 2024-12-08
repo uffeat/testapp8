@@ -95,16 +95,34 @@ const my_media_rule = create("data-media-rule", {
   "@media (width <= 600px)": { h1: { color: "blue" } },
 });
 
-my_media_rule.update({ h1: { border: "4px solid blue" }, h2: {
- 
-  animationDuration: "5s",
-  animationName: "do_stuff",
-}, });
+my_media_rule.update({
+  h1: { border: "4px solid blue" },
+  h2: {
+    animationDuration: "5s",
+    animationName: "do_stuff",
+  },
+});
 
 console.log(my_media_rule.text);
 console.dir(my_media_rule.rule);
 
+my_sheet.append(
+  create("data-keyframes-rule", { name: "do_stuff" }, function () {
+    return function () {this.update({
+      from: {
+        translate: "150vw 0",
+        scale: "200% 1",
+      },
+      to: {
+        translate: "0 0",
+        scale: "100% 1",
+      },
+    });};
 
+    
+  })
+);
+/*
 const my_keyframes_rule = create("data-keyframes-rule", {
   sheet: my_sheet.sheet,
   name: 'do_stuff',
@@ -118,6 +136,7 @@ const my_keyframes_rule = create("data-keyframes-rule", {
     scale: "100% 1",
   },
 });
+*/
 
 /* Enable tests */
 if (import.meta.env.DEV) {

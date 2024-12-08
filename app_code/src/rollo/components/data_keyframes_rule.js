@@ -4,6 +4,7 @@ import {
   attribute,
   connected,
   hooks,
+  parent,
   properties,
   reactive,
   rule,
@@ -54,6 +55,11 @@ const data_keyframes_rule = (parent, config, ...factories) => {
         }
 
 
+        if (!this.rule) {
+          throw new Error(`'rule' not set.`);
+        }
+
+
 
 
 
@@ -77,6 +83,7 @@ Component.author(
   attribute,
   connected,
   hooks,
+  parent,
   properties,
   reactive,
   rule,
