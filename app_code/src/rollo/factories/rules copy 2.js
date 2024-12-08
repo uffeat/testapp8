@@ -143,7 +143,7 @@ export const rules = (parent, config, ...factories) => {
   const cls = class Rules extends parent {
     /*  */
     update(updates = {}) {
-      super.update && super.update(updates);////
+      ////super.update && super.update(updates);////
 
       console.log('updates:', updates)////
 

@@ -41,7 +41,7 @@ Component.author(
   attribute,
   connected,
   name,
-  //properties,
+  properties,
   reactive,
   rules,
   sheet,
