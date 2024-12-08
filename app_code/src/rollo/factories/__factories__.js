@@ -12,6 +12,7 @@ export { parent } from "rollo/factories/parent";
 export { properties } from "rollo/factories/properties";
 export { events } from "rollo/factories/events";
 export { reactive } from "rollo/factories/reactive";
+export { rule } from "rollo/factories/rule";
 export { rules } from "rollo/factories/rules";
 export { shadow } from "rollo/factories/shadow";
 export { sheet } from "rollo/factories/sheet";

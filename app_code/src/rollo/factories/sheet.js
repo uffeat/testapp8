@@ -24,6 +24,7 @@ export const sheet = (parent, config, ...factories) => {
           this.#target = this.getRootNode();
           this.#target.adoptedStyleSheets.push(this.#sheet);
         } else {
+          /* Perform in-place mutation of target's adoptedStyleSheets to minimize flickering */
           const index = this.#target.adoptedStyleSheets.indexOf(this.#sheet);
           if (index !== -1) {
             this.#target.adoptedStyleSheets.splice(index, 1);
@@ -52,7 +53,7 @@ export const sheet = (parent, config, ...factories) => {
     }
 
     /* Returns a text representation of the sheet.
-    Primarily as dev tool. */
+    Primarily as a dev tool to check the sheet content. */
     get text() {
       return [...this.#sheet.cssRules]
         .map((rule) => `${rule.cssText}`)

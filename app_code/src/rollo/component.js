@@ -129,7 +129,7 @@ export const Component = new (class {
       return this.create_from_object(arg);
     }
     const [tag, ...css_classes] = arg.split(".");
-    const element = new (this.get(tag))();
+    const element = new (this.get(tag))({ parent, ...updates }, ...hooks);
     if (css_classes.length > 0) {
       element.classList.add(...css_classes);
     }

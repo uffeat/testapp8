@@ -2,6 +2,9 @@ import "./bootstrap.scss";
 import "./main.css";
 import { create } from "rollo/component";
 import "rollo/components/static_sheet";
+//import "rollo/components/data_rule";
+//import "rollo/components/data_media_rule";
+import { DataRule, DataMediaRule } from "rollo/components/data_rule";
 
 // TODO
 // ... then nav bar
@@ -64,6 +67,12 @@ const my_sheet = create("data-static-sheet", {
     },
   },
 });
+
+//const my_rule = create('data-rule', 'h1', my_sheet.sheet, {h1: {color: 'green'}})
+const my_rule = new DataRule(my_sheet.sheet,  'h1', {color: 'green'})
+const my_media_rule = new DataMediaRule(my_sheet.sheet,  '@media (width <= 600px)', {h1: {color: 'blue'}})
+//const my_media_rule = create('data-media-rule', {selector: '@media (width <= 600px)', sheet: my_sheet.sheet, h1: {color: 'blue'}})
+
 
 /* Enable tests */
 if (import.meta.env.DEV) {

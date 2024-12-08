@@ -3,7 +3,7 @@ import "./main.css";
 import { create } from "rollo/component";
 import "rollo/components/reactive";
 import "@/rollo/components/static_sheet";
-import "rollo/components/rule";
+import "@/rollo/components/data_rule";
 
 // TODO
 // ... then nav bar
