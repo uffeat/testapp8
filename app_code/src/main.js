@@ -59,6 +59,10 @@ const my_rule = create("css-rule", {
   name: "my_rule",
   parent: my_sheet,
 });
+
+
+
+
 const my_items = create("css-items", {
   name: "my_items",
   parent: my_rule,
@@ -71,7 +75,13 @@ my_items.update({backgroundColor: 'yellow',})
 my_items.remove()
 my_rule.append(my_items)
 
-console.log(my_sheet.text)
+my_rule.remove()
+my_sheet.append(my_rule)
+
+console.log('css:', my_sheet.text)
+
+
+
 
 /* Enable tests */
 if (import.meta.env.DEV) {

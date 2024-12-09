@@ -2,6 +2,7 @@ import { Component } from "rollo/component";
 import {
   attribute,
   connected,
+  descendants,
   hooks,
   name,
   properties,
@@ -49,24 +50,19 @@ const css_rule = (parent) => {
           );
           this.#rule = this.#target.sheet.cssRules[index];
         } else {
-          /*
-          TODO
-          - Remove rule from target's sheet. Ideas:
-            - Loop over this.#target.sheet.cssRules to find index from this.selector;
-              then go this.#target.sheet.deleteRule(index).
-            - Let this.#target maintain a fast-lookup structure (perhaps a map) that 
-              continually keeps track of the index-rule or index-selector relationship 
-              (check if any native structures can help, e.g., item); then let this.#target
-              expose a delete_rule method that can be called from here.
-            - Use one of the above, but let this.#target do the work via an observer...
-            - Do not allow rules to me removed (or remove, but warn). Could be a good solution, 
-              if sheets are kept small and/or:
-              - dynamic behaviour is provided by:
-                - sheet.disable
-                - controlling the rule from its child item components
-          */
+          /**/
+          for (const [index, rule] of [
+            ...this.#target.sheet.cssRules,
+          ].entries()) {
+            if (rule === this.#rule) {
+              this.#target.sheet.deleteRule(index);
+              break;
+            }
+          }
           this.#rule = null;
           this.#target = null;
+
+          
         }
       }, "connected");
     }
@@ -107,6 +103,7 @@ Component.author(
   {},
   attribute,
   connected,
+  descendants,
   hooks,
   name,
   properties,
