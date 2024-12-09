@@ -8,6 +8,7 @@ import {
   properties,
   reactive,
   state_to_attribute,
+  state_to_native,
   uid,
 } from "rollo/factories/__factories__";
 
@@ -63,10 +64,10 @@ const css_items = (parent) => {
         } else {
           /* Remove items from rule */
           for (const key of Object.keys(this.#items)) {
+            /* NOTE If target has been disconnected, it has no rule; therefore check */
             if (this.#target.rule) {
               this.#target.rule.style.removeProperty(key);
             }
-           
           }
           /* Reset and make ready for next connection */
           this.#pending_items = { ...this.#items };
@@ -147,6 +148,7 @@ Component.author(
   properties,
   reactive,
   state_to_attribute,
+  state_to_native,
   uid,
   css_items
 );

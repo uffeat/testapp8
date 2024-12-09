@@ -78,6 +78,8 @@ my_rule.append(my_items)
 my_rule.remove()
 my_sheet.append(my_rule)
 
+my_items.$.$color = 'red'
+
 console.log('css:', my_sheet.text)
 
 

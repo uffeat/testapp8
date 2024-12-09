@@ -35,8 +35,7 @@ const css_rule = (parent) => {
       if (!this.selector) {
         throw new Error(`'selector' not set.`);
       }
-
-      /*  */
+      /* Add connect-effect to control rule in target sheet */
       this.effects.add((data) => {
         if (this.$.connected) {
           this.#target = this.parentElement;
@@ -50,7 +49,7 @@ const css_rule = (parent) => {
           );
           this.#rule = this.#target.sheet.cssRules[index];
         } else {
-          /**/
+          /* Find and delete rule in target sheet */
           for (const [index, rule] of [
             ...this.#target.sheet.cssRules,
           ].entries()) {
@@ -61,8 +60,6 @@ const css_rule = (parent) => {
           }
           this.#rule = null;
           this.#target = null;
-
-          
         }
       }, "connected");
     }
