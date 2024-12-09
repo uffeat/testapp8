@@ -1,5 +1,5 @@
 import { camel_to_kebab } from "rollo/utils/case";
-import { Component } from "rollo/component";
+import { Component, create } from "rollo/component";
 import {
   attribute,
   connected,
@@ -20,7 +20,25 @@ Ideas:
 - reactive
 */
 
-/* Non-visual web component for managing dynamically applied sheets. */
+/* Non-visual web component for controlling CSS declarations of parent component's rule.
+Notable features:
+- Adds/removes items (CSS declarations) as the component is connected/disconnected.
+- Shows items as attributes (can itself be used in other stylesheets!).
+- Supports kebab- as well as camel-case.
+- Supports CSS var declarations and standard declarations, incl. with `!important`.
+- Items can be updated with the standard update method, e.g., 
+    my_items.update({backgroundColor: 'yellow'})
+- Guards agains redundant updates.
+- Items can be made reactive with the '$'-syntax, e.g.,
+    my_items.$.$color = 'red'
+  not only set the color, but also enables effects to be set up, like:
+    my_items.effects.add((data) => {
+      console.log('The color is:', my_items.$.$color)
+    }, '$color')
+- `false` item value removes declaration.
+- 'clone' method for creating a component with a copy of items.
+- Support hooks and iife's.
+*/
 const css_items = (parent) => {
   const cls = class CssItems extends parent {
     #items = {};
@@ -38,6 +56,11 @@ const css_items = (parent) => {
       return this.#target;
     }
     #target;
+
+    /* Returns component with copy of items. */
+    clone() {
+      return create(this.tagName.toLowerCase(), this.items);
+    }
 
     /* Only available during creation. 
     Called:
@@ -88,6 +111,7 @@ const css_items = (parent) => {
       super.update && super.update(updates);
 
       for (let [key, value] of Object.entries(updates)) {
+        /* Ignore undefined values to support iifee's */
         if (value === undefined) {
           continue;
         }

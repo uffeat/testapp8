@@ -70,7 +70,7 @@ const my_items = create("css-items", {
   backgroundColor: 'linen',
 });
 
-my_items.update({backgroundColor: 'yellow',})
+my_items.update({backgroundColor: 'yellow'})
 
 my_items.remove()
 my_rule.append(my_items)
@@ -80,7 +80,17 @@ my_sheet.append(my_rule)
 
 my_items.$.$color = 'red'
 
+my_items.effects.add((data) => {
+  console.log('The color is:', my_items.$.$color)
+}, '$color')
+
 console.log('css:', my_sheet.text)
+
+my_items.$.$color = 'green'
+
+console.log(my_items.items)
+
+
 
 
 

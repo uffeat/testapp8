@@ -11,7 +11,7 @@ import {
   uid,
 } from "rollo/factories/__factories__";
 
-/* Non-visual web component for managing dynamically applied sheets. */
+/* Non-visual web component for . */
 const css_rule = (parent) => {
   const cls = class CssRule extends parent {
     #rule;
