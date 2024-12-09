@@ -1,10 +1,9 @@
 import "./bootstrap.scss";
 import "./main.css";
 import { create } from "rollo/component";
-import "@/rollo/components/data_sheet";
-import "rollo/components/data_rule";
-import "rollo/components/data_media_rule";
-import "rollo/components/data_keyframes_rule";
+import "rollo/components/css_sheet";
+import "rollo/components/css_rule";
+import "rollo/components/css_items";
 
 // TODO
 // ... then nav bar
@@ -54,89 +53,25 @@ create(
   create("span", { text: "I'm injected" })
 );
 
-const my_sheet = create("data-sheet", {
-  parent: root,
-  name: "my_sheet",
-  h1: {
-    color: "pink",
-    backgroundColor: "linen",
-    animationDuration: "3s",
-    animationName: "slide_in",
-  },
-  "@media (width <= 600px)": {
-    div: {
-      backgroundColor: "pink",
-    },
-  },
-  "@keyframes slide_in": {
-    from: {
-      translate: "150vw 0",
-      scale: "200% 1",
-    },
-
-    to: {
-      translate: "0 0",
-      scale: "100% 1",
-    },
-  },
+const my_sheet = create("css-sheet", { name: "my_sheet", parent: root });
+const my_rule = create("css-rule", {
+  selector: "h1",
+  name: "my_rule",
+  parent: my_sheet,
+});
+const my_items = create("css-items", {
+  name: "my_items",
+  parent: my_rule,
+  color: "pink",
+  backgroundColor: 'linen',
 });
 
-const my_rule = create("data-rule", {
-  sheet: my_sheet.sheet,
-  h1: { color: "green", margin: "4px" },
-});
-my_rule.update({ padding: "4px" });
+my_items.update({backgroundColor: 'yellow',})
 
-console.log(my_rule.text);
-console.dir(my_rule.rule);
+my_items.remove()
+my_rule.append(my_items)
 
-const my_media_rule = create("data-media-rule", {
-  sheet: my_sheet.sheet,
-  "@media (width <= 600px)": { h1: { color: "blue" } },
-});
-
-my_media_rule.update({
-  h1: { border: "4px solid blue" },
-  h2: {
-    animationDuration: "5s",
-    animationName: "do_stuff",
-  },
-});
-
-console.log(my_media_rule.text);
-console.dir(my_media_rule.rule);
-
-my_sheet.append(
-  create("data-keyframes-rule", { name: "do_stuff" }, function () {
-    return function () {this.update({
-      from: {
-        translate: "150vw 0",
-        scale: "200% 1",
-      },
-      to: {
-        translate: "0 0",
-        scale: "100% 1",
-      },
-    });};
-
-    
-  })
-);
-/*
-const my_keyframes_rule = create("data-keyframes-rule", {
-  sheet: my_sheet.sheet,
-  name: 'do_stuff',
-  from: {
-    translate: "150vw 0",
-    scale: "200% 1",
-  },
-
-  to: {
-    translate: "0 0",
-    scale: "100% 1",
-  },
-});
-*/
+console.log(my_sheet.text)
 
 /* Enable tests */
 if (import.meta.env.DEV) {

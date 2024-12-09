@@ -1,4 +1,4 @@
-/* Export aggregator for factories. */
+/* Export aggregator. */
 export { attribute } from "rollo/factories/attribute";
 export { chain } from "rollo/factories/chain";
 export { connected } from "rollo/factories/connected";

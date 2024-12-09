@@ -82,7 +82,6 @@ export const rule = (parent, config, ...factories) => {
       if (this.rule) {
         return this.rule.cssText
       }
-      
     }
 
     /* Only available during creation. 
