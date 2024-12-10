@@ -19,6 +19,9 @@ USE MEDIA PROP INSTAD OF FROM/TO (but still use appendMedium, isConnected etc) t
 
 
 - watch media, perhaps controlled by flag; perhaps via state (not event, but via event) 
+
+
+- compare to chec valid
 */
 
 /* Non-visual web component for controlling CSS media rules of parent component's sheet. */
@@ -52,8 +55,8 @@ const css_media = (parent) => {
           this.#rule = this.#target.rules.add(`@media {}`);
 
           if (this.media) {
-            //this.#rule.media.appendMedium(this.media);
-            this.#rule.media.mediaText = this.media
+            this.#rule.media.appendMedium(this.media);
+            //this.#rule.media.mediaText = this.media
 
           } else {
             console.warn(`'media' not set.`)
