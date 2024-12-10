@@ -15,7 +15,7 @@ import { Rules } from "rollo/components/utils/rules";
 /* TODO 
 
 
-USE MEDIA PROP INSTAD OF FROM/TO (but still use appendMedium, isConnected etc)
+USE MEDIA PROP INSTAD OF FROM/TO (but still use appendMedium, isConnected etc) this also makes it poosible to use any meda spec
 
 
 - watch media, perhaps controlled by flag; perhaps via state (not event, but via event) 
@@ -51,15 +51,13 @@ const css_media = (parent) => {
           /* Create an add rule without items */
           this.#rule = this.#target.rules.add(`@media {}`);
 
-          if (this.from) {
-            this.#rule.media.appendMedium(`(${this.from} <= width <= ${this.to})`);
+          if (this.media) {
+            //this.#rule.media.appendMedium(this.media);
+            this.#rule.media.mediaText = this.media
+
+          } else {
+            console.warn(`'media' not set.`)
           }
-          if (this.to) {
-            //this.#rule.media.appendMedium(`(width <= ${this.to})`);
-          }
-
-
-
           this.attribute.media = this.#rule.media.mediaText;
 
           
@@ -67,12 +65,10 @@ const css_media = (parent) => {
           this.#rules = Rules.create(this.#rule);
         } else {
           /* XXX Perhaps not necessary? */
-          if (this.from) {
-            this.#rule.media.deleteMedium(`(width <= ${this.from})`);
+          if (this.media) {
+            this.#rule.media.deleteMedium(this.media);
           }
-          if (this.to) {
-            this.#rule.media.deleteMedium(`(${this.to} <= width)`);
-          }
+          
 
           /* Delete rule in target */
           this.#target.rules.remove(this.#rule);
@@ -84,47 +80,38 @@ const css_media = (parent) => {
       }, "connected");
     }
 
-    get from() {
-      return this.#from;
+    get media() {
+      return this.#media;
     }
 
-    set from(from) {
-      if (this.#from === from) {
+    set media(media) {
+      if (media) {
+        if (!media.startsWith('(')) {
+          media = `(${media}`
+        }
+        if (!media.endsWith(')')) {
+          media = `${media})`
+        }
+        
+      }
+      if (this.#media === media) {
         return;
       }
       if (this.isConnected) {
-        if (this.#from) {
-          this.#rule.media.deleteMedium(`(width <= ${this.#from})`);
+        if (this.#media) {
+          this.#rule.media.deleteMedium(this.#media);
         }
-        if (from) {
-          this.#rule.media.appendMedium(`(width <= ${from})`);
-        }
-        this.attribute.media = this.#rule.media.mediaText;
-      }
-      this.#from = from;
-    }
-    #from;
-
-    get to() {
-      return this.#to;
-    }
-
-    set to(to) {
-      if (this.#to === to) {
-        return;
-      }
-      if (this.isConnected) {
-        if (this.#to) {
-          this.#rule.media.deleteMedium(`(${this.#to} <= width)`);
-        }
-        if (to) {
-          this.#rule.media.appendMedium(`(${to} <= width)`);
+        if (media) {
+          this.#rule.media.appendMedium(media);
         }
         this.attribute.media = this.#rule.media.mediaText;
       }
-      this.#to = to;
+      this.#media = media;
     }
-    #to;
+    #media;
+
+   
+   
 
     
 

@@ -56,13 +56,12 @@ create(
 
 const my_sheet = create("css-sheet", { name: "my_sheet", parent: root });
 const my_media = create("css-media", {
-  from: '600px',
-  to: '800px',
+  media: '600px <= width <= 800px',
   name: "my_rule",
   parent: my_sheet,
 });
 
-//my_media.from = '1200px'
+
 
 
 
