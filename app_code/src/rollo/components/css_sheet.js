@@ -48,11 +48,8 @@ const css_sheet = (parent) => {
     /* Returns a text representation of the sheet.
     Primarily as a dev tool to check the sheet content. */
     get text() {
-      return [...this.sheet.cssRules]
-        .map((rule) => `${rule.cssText}`)
-        .join("\n");
+      return this.rules.text
     }
-
     /* Sets rules from text. */
     set text(text) {
       this.descendants.clear();
@@ -74,9 +71,7 @@ Component.author(
   name,
   properties,
   reactive,
-
   sheet,
-
   state_to_attribute,
   state_to_native,
   uid,

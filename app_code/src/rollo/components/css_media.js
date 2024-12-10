@@ -39,7 +39,7 @@ const css_media = (parent) => {
             throw new Error(`Target does not have rules.`);
           }
           /* Create an add rule without items */
-          this.#rule = this.#target.rules.add(`@media {}`);
+          this.#rule = this.#target.rules.add(`@media`);
           /* Apply any media */
           if (this.media) {
             this.#rule.media.mediaText = this.media;

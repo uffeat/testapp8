@@ -51,6 +51,7 @@ button.$.$text = "Yo world";
 create("h1", { parent: root }, "Hello World");
 create("h2", { parent: root }, "Also hello from here");
 
+/* Build sheet */
 const my_sheet = create(
   "css-sheet",
   { name: "my_sheet", parent: root },
@@ -94,6 +95,7 @@ console.log('css:', my_sheet.text)
 my_sheet.append(my_media)
 console.log('css:', my_sheet.text)
 */
+console.log('css:', my_sheet.text)
 
 /* Enable tests */
 if (import.meta.env.DEV) {

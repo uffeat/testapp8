@@ -38,7 +38,7 @@ const css_rule = (parent) => {
           }
 
           /* Create an add rule without items */
-          this.#rule = this.#target.rules.add(`${this.selector} {}`);
+          this.#rule = this.#target.rules.add(`${this.selector}`);
         } else {
           /* Delete rule in target
           NOTE If target has been disconnected, it has no rules; therefore check */
