@@ -123,13 +123,13 @@ export const Component = new (class {
   - Rich in-line configuration, incl. children and hooks.
   - Construction from objects.
   - On-demand authoring of non-autonomous web components. */
-  create = (arg, { parent, ...updates } = {}, ...hooks) => {
+  create = (arg, { config, parent, ...updates } = {}, ...hooks) => {
     if (typeof arg !== "string") {
       /* arg is an object */
       return this.create_from_object(arg);
     }
     const [tag, ...css_classes] = arg.split(".");
-    const element = new (this.get(tag))({ parent, ...updates }, ...hooks);
+    const element = new (this.get(tag))({ config, parent, ...updates }, ...hooks);
     if (css_classes.length > 0) {
       element.classList.add(...css_classes);
     }
@@ -154,7 +154,7 @@ export const Component = new (class {
       );
     }
     /* Call the 'created_callback' lifecycle method */
-    element.created_callback && element.created_callback();
+    element.created_callback && element.created_callback(config);
     /* Prevent 'created_callback' from being used onwards */
     element.created_callback = undefined;
     /* Handle parent separately to ensure that any connectedCallbacks are 

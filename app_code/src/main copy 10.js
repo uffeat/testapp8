@@ -54,35 +54,35 @@ create(
   create("span", { text: "I'm injected" })
 );
 
-const my_sheet = create(
-  "css-sheet",
-  { name: "my_sheet", parent: root },
-  create(
-    "css-media",
-    {
-      media: "600px <= width <= 800px",
-      name: "my_rule",
-    },
-    create(
-      "css-rule",
-      {
-        selector: "h1",
-        name: "my_rule",
-      },
-      create("css-items", {
-        name: "my_items",
-        color: "pink",
-        backgroundColor: "linen",
-      })
-    )
-  )
-);
+const my_sheet = create("css-sheet", { name: "my_sheet", parent: root }, create("css-media", {
+  media: '600px <= width <= 800px',
+  name: "my_rule",
+}));
+const my_media = create("css-media", {
+  media: '600px <= width <= 800px',
+  name: "my_rule",
+  parent: my_sheet,
+});
 
-const my_media = my_sheet.querySelector("css-media");
-const my_rule = my_sheet.querySelector("css-rule");
-const my_items = my_sheet.querySelector("css-items");
-my_items.update({color: "green"})
 
+
+const my_rule = create("css-rule", {
+  selector: "h1",
+  name: "my_rule",
+  parent: my_media,
+});
+
+
+
+
+
+
+const my_items = create("css-items", {
+  name: "my_items",
+  parent: my_rule,
+  color: "pink",
+  backgroundColor: 'linen',
+});
 
 /*
 my_media.remove()
@@ -90,6 +90,10 @@ console.log('css:', my_sheet.text)
 my_sheet.append(my_media)
 console.log('css:', my_sheet.text)
 */
+
+
+
+
 
 /* Enable tests */
 if (import.meta.env.DEV) {

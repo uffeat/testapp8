@@ -19,8 +19,8 @@ export const state_to_native = (parent, config, ...factories) => {
     - after children
     - after 'call'
     - before live DOM connection */
-    created_callback() {
-      super.created_callback && super.created_callback();
+    created_callback(config) {
+      super.created_callback && super.created_callback(config);
       /* Set up automatic update from NATIVE-prefixed state */
       this.effects.add((data) => {
         const updates = {};

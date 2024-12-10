@@ -28,8 +28,8 @@ const css_rule = (parent) => {
     - after children
     - after 'call'
     - before live DOM connection */
-    created_callback() {
-      super.created_callback && super.created_callback();
+    created_callback(config) {
+      super.created_callback && super.created_callback(config);
       this.style.display = "none";
       /* */
       if (!this.selector) {
@@ -39,32 +39,19 @@ const css_rule = (parent) => {
       this.effects.add((data) => {
         if (this.$.connected) {
           this.#target = this.parentElement;
-
           if (!this.#target.rules) {
             throw new Error(`Target does not have rules.`);
           }
-
-
-
           /* Create an add rule without items */
           this.#rule = this.#target.rules.add(`${this.selector} {}`);
-
-
-
-
         } else {
-
-          /* Delete rule in target */
-          this.#target.rules.remove(this.#rule);
+          /* Delete rule in target
+          NOTE If target has been disconnected, it has no rule; therefore check */
+          if (this.#target.rules) {
+            this.#target.rules.remove(this.#rule);
+          }
           /* Reset */
-
-
-         
-
-
-
           this.#rule = null;
-          
           this.#target = null;
         }
       }, "connected");

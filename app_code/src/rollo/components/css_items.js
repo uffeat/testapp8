@@ -69,8 +69,8 @@ const css_items = (parent) => {
     - after children
     - after 'call'
     - before live DOM connection */
-    created_callback() {
-      super.created_callback && super.created_callback();
+    created_callback(config) {
+      super.created_callback && super.created_callback(config);
       this.style.display = "none";
       /* Add connect-effect to control rule in parent  */
       this.effects.add((data) => {
@@ -120,7 +120,7 @@ const css_items = (parent) => {
         if (!this.#is_css(key)) {
           continue;
         }
-        if (this.isConnected) {
+        if (this.#target) {
           /* Handle null value -> removal */
           if (key in this.#items && value === null) {
             this.#target.rule.style.removeProperty(key);

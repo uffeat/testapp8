@@ -16,8 +16,8 @@ export const connected = (parent, config, ...factories) => {
     - after children
     - after 'call'
     - before live DOM connection */
-    created_callback() {
-      super.created_callback && super.created_callback();
+    created_callback(config) {
+      super.created_callback && super.created_callback(config);
       this.#set_connected = this.protected.add("connected");
     }
 

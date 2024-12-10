@@ -14,7 +14,7 @@ import {
 } from "rollo/factories/__factories__";
 import { Rules } from "rollo/components/utils/rules";
 
-/* Non-visual web component for managing dynamically applied sheets. 
+/* Non-visual web component for managing... 
 
 
 TODO
@@ -22,8 +22,8 @@ Mention state_to_native re disabled
 
 
 */
-const css_sheet = (parent) => {
-  const cls = class CssSheet extends parent {
+const css_mono = (parent) => {
+  const cls = class CssMono extends parent {
     constructor() {
       super();
     }
@@ -64,7 +64,7 @@ const css_sheet = (parent) => {
 };
 
 Component.author(
-  "css-sheet",
+  "css-mono",
   HTMLElement,
   {},
   attribute,
@@ -80,5 +80,5 @@ Component.author(
   state_to_attribute,
   state_to_native,
   uid,
-  css_sheet
+  css_mono
 );

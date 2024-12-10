@@ -25,8 +25,8 @@ export const uid = (parent, config, ...factories) => {
     - after children
     - after 'call'
     - before live DOM connection */
-    created_callback() {
-      super.created_callback && super.created_callback();
+    created_callback(config) {
+      super.created_callback && super.created_callback(config);
       this.#uid = create_uid();
       this.attribute.uid = this.#uid;
     }

@@ -26,8 +26,8 @@ const data_reactive = (parent) => {
     - after children
     - after 'call'
     - before live DOM connection */
-    created_callback() {
-      super.created_callback && super.created_callback();
+    created_callback(config) {
+      super.created_callback && super.created_callback(config);
       this.style.display = "none";
     }
   };

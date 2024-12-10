@@ -15,7 +15,6 @@ import { Rules } from "rollo/components/utils/rules";
 /* TODO 
 
 
-USE MEDIA PROP INSTAD OF FROM/TO (but still use appendMedium, isConnected etc) this also makes it poosible to use any meda spec
 
 
 - watch media, perhaps controlled by flag; perhaps via 'active' state (not event, but via event) 
@@ -38,41 +37,32 @@ const css_media = (parent) => {
     - after children
     - after 'call'
     - before live DOM connection */
-    created_callback() {
-      super.created_callback && super.created_callback();
+    created_callback(config) {
+      super.created_callback && super.created_callback(config);
       this.style.display = "none";
-      /* */
+      
 
       /* Add connect-effect to control rule in target sheet */
       this.effects.add((data) => {
         if (this.$.connected) {
           this.#target = this.parentElement;
-
           if (!this.#target.rules) {
             throw new Error(`Target does not have rules.`);
           }
           /* Create an add rule without items */
           this.#rule = this.#target.rules.add(`@media {}`);
-
-          if (this.media) {
-            this.#rule.media.appendMedium(this.media);
-            //this.#rule.media.mediaText = this.media
-
+          /* Apply any media */
+          if (this.#pending_media) {
+            this.media = this.#pending_media;
           } else {
-            console.warn(`'media' not set.`)
+            console.warn(`'media' not set.`);
           }
-          this.attribute.media = this.#rule.media.mediaText;
-
-          
-
+          /* Create rules for children to engage with */
           this.#rules = Rules.create(this.#rule);
         } else {
-          /* XXX Perhaps not necessary? */
-          if (this.media) {
-            this.#rule.media.deleteMedium(this.media);
-          }
-          
-
+          /* Reset media and make ready for next connection */
+          this.#pending_media = this.#media;
+          this.media = null;
           /* Delete rule in target */
           this.#target.rules.remove(this.#rule);
           /* Reset */
@@ -88,35 +78,38 @@ const css_media = (parent) => {
     }
 
     set media(media) {
+      /* Allow media to be provided without enclosing '()' */
       if (media) {
-        if (!media.startsWith('(')) {
-          media = `(${media}`
+        if (!media.startsWith("(")) {
+          media = `(${media}`;
         }
-        if (!media.endsWith(')')) {
-          media = `${media})`
+        if (!media.endsWith(")")) {
+          media = `${media})`;
         }
-        
       }
-      if (this.#media === media) {
-        return;
-      }
-      if (this.isConnected) {
+      if (this.#rule) {
+        /* Abort, if no change */
+        if (this.#media === media) {
+          return;
+        }
+        /* Remove any previous */
         if (this.#media) {
           this.#rule.media.deleteMedium(this.#media);
         }
+        /* Add any new */
         if (media) {
           this.#rule.media.appendMedium(media);
         }
+        /* Sync to attribute */
         this.attribute.media = this.#rule.media.mediaText;
+        /* Update private */
+        this.#media = media;
+      } else {
+        this.#pending_media = media;
       }
-      this.#media = media;
     }
     #media;
-
-   
-   
-
-    
+    #pending_media;
 
     get rule() {
       return this.#rule;
@@ -159,11 +152,3 @@ Component.author(
   css_media
 );
 
-/* NOTE
-For additional control, use MediaList methods (when component is connected), e.g.,
-  my_media.rule.media.appendMedium('(height <= 600px)')
-  my_media.rule.media.deleteMedium('(height <= 600px)')
-If doing this, attributes do not reflect 
- 
-
- */

@@ -18,8 +18,8 @@ export const shadow = (parent, config, ...factories) => {
     - after children
     - after 'call'
     - before live DOM connection */
-    created_callback() {
-      super.created_callback && super.created_callback();
+    created_callback(config) {
+      super.created_callback && super.created_callback(config);
       /* Init shadow-dom-enabled protected state */
       this.#set_has_children = this.protected.add("has_children", false);
       this.#set_has_content = this.protected.add("has_content", false);
