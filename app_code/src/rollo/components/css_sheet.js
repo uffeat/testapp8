@@ -11,6 +11,7 @@ import {
   state_to_attribute,
   uid,
 } from "rollo/factories/__factories__";
+import { Rules } from "rollo/components/utils/rules";
 
 /* Non-visual web component for managing dynamically applied sheets. */
 const css_sheet = (parent) => {
@@ -30,6 +31,11 @@ const css_sheet = (parent) => {
       super.created_callback && super.created_callback();
       this.style.display = "none";
     }
+
+    get rules() {
+      return this.#rules;
+    }
+    #rules = Rules.create(this.sheet);
 
     /* Returns a text representation of the sheet.
     Primarily as a dev tool to check the sheet content. */
@@ -60,7 +66,9 @@ Component.author(
   name,
   properties,
   reactive,
+
   sheet,
+
   state_to_attribute,
   uid,
   css_sheet

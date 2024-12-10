@@ -43,21 +43,15 @@ export const sheet = (parent, config, ...factories) => {
       this.attribute.disabled = disabled;
     }
 
-    get rules() {
-      return this.#sheet.cssRules
-    }
-
     get sheet() {
       return this.#sheet;
     }
     #sheet = new CSSStyleSheet();
 
-    get size() {
-      return this.#sheet.cssRules.length;
-    }
+    
 
     get target() {
-      return this.#target
+      return this.#target;
     }
 
     /* Returns a text representation of the sheet.

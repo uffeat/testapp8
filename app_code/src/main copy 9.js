@@ -55,22 +55,13 @@ create(
 );
 
 const my_sheet = create("css-sheet", { name: "my_sheet", parent: root });
-const my_media = create("css-media", {
-  from: '600px',
-  to: '800px',
+const my_rule = create("css-rule", {
+  selector: "h1",
   name: "my_rule",
   parent: my_sheet,
 });
 
-//my_media.from = '1200px'
 
-
-
-const my_rule = create("css-rule", {
-  selector: "h1",
-  name: "my_rule",
-  parent: my_media,
-});
 
 
 const my_items = create("css-items", {
@@ -80,9 +71,27 @@ const my_items = create("css-items", {
   backgroundColor: 'linen',
 });
 
+my_items.update({backgroundColor: 'yellow'})
 
+my_items.remove()
+my_rule.append(my_items)
+
+my_rule.remove()
+my_sheet.append(my_rule)
+
+my_items.$.$color = 'red'
+
+my_items.effects.add((data) => {
+  console.log('The color is:', my_items.$.$color)
+}, '$color')
 
 console.log('css:', my_sheet.text)
+
+my_items.$.$color = 'green'
+
+console.log(my_items.items)
+
+
 
 
 

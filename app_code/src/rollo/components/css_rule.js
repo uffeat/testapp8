@@ -11,7 +11,7 @@ import {
   uid,
 } from "rollo/factories/__factories__";
 
-/* Non-visual web component for . */
+/* Non-visual web component for controlling CSS rules of parent component's sheet. */
 const css_rule = (parent) => {
   const cls = class CssRule extends parent {
     #rule;
@@ -39,26 +39,32 @@ const css_rule = (parent) => {
       this.effects.add((data) => {
         if (this.$.connected) {
           this.#target = this.parentElement;
-          if (!this.#target.sheet) {
-            throw new Error(`Target does not have a sheet.`);
+
+          if (!this.#target.rules) {
+            throw new Error(`Target does not have rules.`);
           }
+
+
+
           /* Create an add rule without items */
-          const index = this.#target.sheet.insertRule(
-            `${this.selector} {}`,
-            this.#target.sheet.cssRules.length
-          );
-          this.#rule = this.#target.sheet.cssRules[index];
+          this.#rule = this.#target.rules.add(`${this.selector} {}`);
+
+
+
+
         } else {
-          /* Find and delete rule in target sheet */
-          for (const [index, rule] of [
-            ...this.#target.sheet.cssRules,
-          ].entries()) {
-            if (rule === this.#rule) {
-              this.#target.sheet.deleteRule(index);
-              break;
-            }
-          }
+
+          /* Delete rule in target */
+          this.#target.rules.remove(this.#rule);
+          /* Reset */
+
+
+         
+
+
+
           this.#rule = null;
+          
           this.#target = null;
         }
       }, "connected");
