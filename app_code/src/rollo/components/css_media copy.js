@@ -12,7 +12,16 @@ import {
 } from "rollo/factories/__factories__";
 import { Rules } from "rollo/components/utils/rules";
 
+/* TODO 
 
+
+
+
+- watch media, perhaps controlled by flag; perhaps via 'active' state (not event, but via event) 
+
+
+- compare to chec valid
+*/
 
 /* Non-visual web component for controlling CSS media rules of parent component's sheet. */
 const css_media = (parent) => {
@@ -41,14 +50,17 @@ const css_media = (parent) => {
           /* Create an add rule without items */
           this.#rule = this.#target.rules.add(`@media {}`);
           /* Apply any media */
-          if (this.media) {
-            this.#rule.media.mediaText = this.media;
+          if (this.#pending_media) {
+            this.media = this.#pending_media;
           } else {
-            import.meta.env.DEV && console.warn(`'media' not set.`);
+            console.warn(`'media' not set.`);
           }
           /* Create rules for children to engage with */
           this.#rules = Rules.create(this.#rule);
         } else {
+          /* Reset media and make ready for next connection */
+          this.#pending_media = this.#media;
+          this.media = null;
           /* Delete rule in target */
           this.#target.rules.remove(this.#rule);
           /* Reset */
@@ -75,19 +87,29 @@ const css_media = (parent) => {
           media = `${media})`;
         }
       }
-      /* Abort, if no change */
-      if (this.#media === media) {
-        return;
-      }
-      /* Sync to attribute */
-      this.attribute.media = media;
-      /* Update private */
-      this.#media = media;
       if (this.rule) {
-        this.rule.media.mediaText = media;
+        /* Abort, if no change */
+        if (this.#media === media) {
+          return;
+        }
+        /* Remove any previous */
+        if (this.#media) {
+          this.rule.media.deleteMedium(this.#media);
+        }
+        /* Add any new */
+        if (media) {
+          this.rule.media.appendMedium(media);
+        }
+        /* Sync to attribute */
+        this.attribute.media = this.#rule.media.mediaText;
+        /* Update private */
+        this.#media = media;
+      } else {
+        this.#pending_media = media;
       }
     }
     #media;
+    #pending_media;
 
     get rule() {
       return this.#rule;
@@ -129,3 +151,4 @@ Component.author(
   uid,
   css_media
 );
+

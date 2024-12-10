@@ -41,7 +41,7 @@ export const css_classes = (parent, config, ...factories) => {
       return this;
     }
 
-    /* Returns prop-like getter/setter interface to css class. 
+    /* Provides getter/setter interface to css class. 
     Supports camel case. */
     get css_class() {
       return this.#css_class;

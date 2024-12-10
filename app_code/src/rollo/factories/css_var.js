@@ -3,7 +3,7 @@ import { constants } from "rollo/constants";
 /* Factory with enhanced features for managing component scoped css vars. */
 export const css_var = (parent, config, ...factories) => {
   const cls = class CssVar extends parent {
-    /* Returns prop-like getter/setter interface to component-scoped css var.
+    /* Provides getter/setter interface to component-scoped css var.
     Supports:
     - '__'-syntax
     - iife's (undefined values are ignored) */

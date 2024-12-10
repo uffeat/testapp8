@@ -31,12 +31,12 @@ export const Component = new (class {
     add = (tag, cls) => {
       if (tag.includes("-")) {
         customElements.define(tag, cls);
-        console.info(`Registered autonomous web component with tag '${tag}'.`);
+        import.meta.env.DEV && console.info(`Registered autonomous web component with tag '${tag}'.`);
       } else {
         customElements.define(`native-${tag}`, cls, {
           extends: tag,
         });
-        console.info(
+        import.meta.env.DEV && console.info(
           `Registered non-autonomous web component extended from '${tag}'.`
         );
       }

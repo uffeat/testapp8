@@ -41,9 +41,6 @@ Notable features:
 */
 const css_items = (parent) => {
   const cls = class CssItems extends parent {
-    #items = {};
-    #pending_items = {};
-
     constructor() {
       super();
     }
@@ -51,6 +48,22 @@ const css_items = (parent) => {
     get items() {
       return { ...this.#items };
     }
+    #items = {};
+    #pending_items = {};
+
+    /* Provides getter/setter interface to items. */
+    get style() {
+      return this.#style;
+    }
+    #style = new Proxy(this, {
+      get(target, key) {
+        return target.#items[key];
+      },
+      set(target, key, value) {
+        target.update({ [key]: value });
+        return true;
+      },
+    });
 
     get target() {
       return this.#target;
@@ -71,7 +84,7 @@ const css_items = (parent) => {
     - before live DOM connection */
     created_callback(config) {
       super.created_callback && super.created_callback(config);
-      this.style.display = "none";
+      super.style.display = "none";
       /* Add connect-effect to control rule in parent  */
       this.effects.add((data) => {
         if (this.$.connected) {
@@ -154,7 +167,7 @@ const css_items = (parent) => {
     }
 
     #is_css = (key) => {
-      return key.startsWith("--") || key in this.style;
+      return key.startsWith("--") || key in super.style;
     };
   };
 
