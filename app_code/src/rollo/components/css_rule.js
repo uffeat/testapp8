@@ -8,10 +8,19 @@ import {
   properties,
   reactive,
   state_to_attribute,
+  state_to_native,
   uid,
 } from "rollo/factories/__factories__";
 
-/* Non-visual web component for controlling CSS rules of parent component's sheet. */
+/* Non-visual web component for controlling CSS rules of parent component's sheet. 
+
+
+TODO
+Mention state_to_native re selector
+
+
+
+*/
 const css_rule = (parent) => {
   const cls = class CssRule extends parent {
     constructor() {
@@ -36,7 +45,6 @@ const css_rule = (parent) => {
           if (!this.#target.rules) {
             throw new Error(`Target does not have rules.`);
           }
-
           /* Create an add rule without items */
           this.#rule = this.#target.rules.add(`${this.selector}`);
         } else {
@@ -52,14 +60,17 @@ const css_rule = (parent) => {
       }, "connected");
     }
 
+    /* Returns rule. */
     get rule() {
       return this.#rule;
     }
     #rule;
 
+    /* Returns selector. */
     get selector() {
       return this.#selector;
     }
+    /* Sets selector. */
     set selector(selector) {
       /* Abort, if no change */
       if (this.#selector === selector) {
@@ -76,11 +87,13 @@ const css_rule = (parent) => {
     }
     #selector = "*";
 
+    /* Returns target. */
     get target() {
       return this.#target;
     }
     #target;
 
+    /* Returns text representation of rule. */
     get text() {
       if (this.rule) {
         return this.rule.cssText;
@@ -103,6 +116,7 @@ Component.author(
   properties,
   reactive,
   state_to_attribute,
+  state_to_native,
   uid,
   css_rule
 );

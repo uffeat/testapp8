@@ -1,4 +1,4 @@
-/* Wrapper for CSSRuleLists.
+/* Controller for CSSRuleLists.
 Use for composition in objects with access CSSGroupingRule or CSSStyleSheet. */
 export class Rules {
   static create = (...args) => {
@@ -39,7 +39,7 @@ export class Rules {
 
   /* Creates, appends and returns rule. */
   add(text) {
-    /* Expects text in the format: `<selector> {}` */
+    /* Expects text in the format: `<selector>` */
     if (!text.trim().endsWith("}")) {
       text = `${text} {}`;
     }

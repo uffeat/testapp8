@@ -8,13 +8,21 @@ import {
   properties,
   reactive,
   state_to_attribute,
+  state_to_native,
   uid,
 } from "rollo/factories/__factories__";
 import { Rules } from "rollo/components/utils/rules";
 
 
 
-/* Non-visual web component for controlling CSS media rules of parent component's sheet. */
+/* Non-visual web component for controlling CSS media rules of parent component's sheet.
+
+
+TODO
+Mention state_to_native re media
+
+
+*/
 const css_media = (parent) => {
   const cls = class CssMedia extends parent {
     constructor() {
@@ -63,7 +71,6 @@ const css_media = (parent) => {
     get media() {
       return this.#media;
     }
-
     /* Sets rule medium. */
     set media(media) {
       /* Allow media to be provided without enclosing '()' */
@@ -89,21 +96,25 @@ const css_media = (parent) => {
     }
     #media;
 
+    /* Returns rule. */
     get rule() {
       return this.#rule;
     }
     #rule;
 
+    /* Returns rules controller. */
     get rules() {
       return this.#rules;
     }
     #rules;
 
+    /* Returns target. */
     get target() {
       return this.#target;
     }
     #target;
 
+    /* Returns text representation of rule. */
     get text() {
       if (this.rule) {
         return this.rule.cssText;
@@ -126,6 +137,7 @@ Component.author(
   properties,
   reactive,
   state_to_attribute,
+  state_to_native,
   uid,
   css_media
 );
