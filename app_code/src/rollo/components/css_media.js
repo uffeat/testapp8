@@ -18,7 +18,7 @@ import { Rules } from "rollo/components/utils/rules";
 USE MEDIA PROP INSTAD OF FROM/TO (but still use appendMedium, isConnected etc) this also makes it poosible to use any meda spec
 
 
-- watch media, perhaps controlled by flag; perhaps via state (not event, but via event) 
+- watch media, perhaps controlled by flag; perhaps via 'active' state (not event, but via event) 
 
 
 - compare to chec valid

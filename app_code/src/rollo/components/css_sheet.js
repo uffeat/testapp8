@@ -9,11 +9,19 @@ import {
   reactive,
   sheet,
   state_to_attribute,
+  state_to_native,
   uid,
 } from "rollo/factories/__factories__";
 import { Rules } from "rollo/components/utils/rules";
 
-/* Non-visual web component for managing dynamically applied sheets. */
+/* Non-visual web component for managing dynamically applied sheets. 
+
+
+TODO
+Mention state_to_native re disabled
+
+
+*/
 const css_sheet = (parent) => {
   const cls = class CssSheet extends parent {
     constructor() {
@@ -70,6 +78,7 @@ Component.author(
   sheet,
 
   state_to_attribute,
+  state_to_native,
   uid,
   css_sheet
 );
