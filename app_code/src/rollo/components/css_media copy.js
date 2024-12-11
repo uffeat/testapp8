@@ -12,20 +12,18 @@ import {
   tags,
   uid,
 } from "rollo/factories/__factories__";
+import { Rules } from "rollo/components/utils/rules";
 
-/* Non-visual web component for controlling CSS rules of parent component's sheet. 
+/* Non-visual web component for controlling CSS media rules of parent component's sheet.
 
 
 TODO
-
-Mention use with/without dom connection
-Mention state_to_native re selector
-
+Mention state_to_native re media
 
 
 */
-const css_rule = (parent) => {
-  const cls = class CssRule extends parent {
+const css_media = (parent) => {
+  const cls = class CssMedia extends parent {
     constructor() {
       super();
     }
@@ -40,7 +38,7 @@ const css_rule = (parent) => {
     created_callback(config) {
       super.created_callback && super.created_callback(config);
       this.style.display = "none";
-      /* Add connect-effect to control rule in target */
+      /* Add connect-effect to control rule in target sheet */
       this.effects.add((data) => {
         if (this.$.connected) {
           this.target = this.parentElement;
@@ -50,38 +48,52 @@ const css_rule = (parent) => {
       }, "connected");
     }
 
+    /* Returns rule medium. */
+    get media() {
+      return this.#media;
+    }
+    /* Sets rule medium. */
+    set media(media) {
+      /* Allow media to be provided without enclosing '()' */
+      if (media) {
+        if (!media.startsWith("(")) {
+          media = `(${media}`;
+        }
+        if (!media.endsWith(")")) {
+          media = `${media})`;
+        }
+      }
+      /* Abort, if no change */
+      if (this.#media === media) {
+        return;
+      }
+      /* Sync to attribute */
+      this.attribute.media = media;
+      /* Update private */
+      this.#media = media;
+      if (this.rule) {
+        this.rule.media.mediaText = media;
+      }
+    }
+    #media;
+
     /* Returns rule. */
     get rule() {
       return this.#rule;
     }
     #rule;
-
-    /* Returns selector. */
-    get selector() {
-      return this.#selector;
+    
+    /* Returns rules controller. */
+    get rules() {
+      return this.#rules;
     }
-    /* Sets selector. */
-    set selector(selector) {
-      /* Abort, if no change */
-      if (this.#selector === selector) {
-        return;
-      }
-      /* Sync to attribute */
-      this.attribute.selector = selector;
-      /* Update private */
-      this.#selector = selector;
-      if (this.rule) {
-        /* Update rule */
-        this.rule.selectorText = selector;
-      }
-    }
-    #selector = "*";
+    #rules;
 
     /* Returns target. */
     get target() {
       return this.#target;
     }
-    /* Sets target and rule. */
+    /* Sets target, rule and rules. */
     set target(target) {
       /* Abort, if no change */
       if (this.#target === target) {
@@ -91,15 +103,23 @@ const css_rule = (parent) => {
       if (this.#target) {
         this.#target.rules && this.#target.rules.remove(this.rule);
       }
-      /* Reset rule */
-      this.#rule = null;
+      /* Reset rule and rules */
+      this.#rule = this.#rules = null;
       /* Handle new target */
       if (target) {
         if (!target.rules) {
           throw new Error(`Target does not have rules.`);
         }
-        /* Create and add rule without items */
-        this.#rule = target.rules.add(`${this.selector}`);
+        /* Create an add rule without items */
+        this.#rule = target.rules.add(`@media`);
+        /* Apply any media */
+        if (this.media) {
+          this.#rule.media.mediaText = this.media;
+          /* Create rules for children to engage with */
+          this.#rules = Rules.create(this.#rule);
+        } else {
+          import.meta.env.DEV && console.warn(`'media' not set.`);
+        }
       }
       this.#target = target;
     }
@@ -117,7 +137,7 @@ const css_rule = (parent) => {
 };
 
 Component.author(
-  "css-rule",
+  "css-media",
   HTMLElement,
   {},
   attribute,
@@ -131,5 +151,5 @@ Component.author(
   state_to_native,
   tags,
   uid,
-  css_rule
+  css_media
 );

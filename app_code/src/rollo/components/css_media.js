@@ -17,10 +17,6 @@ import { Rules } from "rollo/components/utils/rules";
 /* Non-visual web component for controlling CSS media rules of parent component's sheet.
 
 
-TODO
-Mention state_to_native re media
-
-
 */
 const css_media = (parent) => {
   const cls = class CssMedia extends parent {
@@ -38,7 +34,47 @@ const css_media = (parent) => {
     created_callback(config) {
       super.created_callback && super.created_callback(config);
       this.style.display = "none";
-      /* Add connect-effect to control rule in target sheet */
+
+      /* Effect to control media */
+      const media_effect = (data) => {
+        if (this.rule) {
+          this.rule.media.mediaText = this.media;
+        }
+        /* Sync to attribute */
+        this.attribute.media = this.media;
+      };
+
+      /* Add effect to handle target */
+      this.effects.add((data) => {
+        const current = data.target.current;
+        const previous = data.target.previous;
+        /* Disengage from any previous target */
+        if (previous) {
+          previous.rules && previous.rules.remove(this.rule);
+          /* Reset rule and rules */
+          this.#rule = this.#rules = null;
+          /* Remove effect to control media */
+          this.effects.remove(media_effect);
+        }
+        /* Engage with any current target */
+        if (current) {
+          if (!current.rules) {
+            throw new Error(`Target does not have rules.`);
+          }
+          /* Create an add rule without items */
+          this.#rule = current.rules.add(`@media`);
+          /* Create rules for children to engage with */
+          this.#rules = Rules.create(this.#rule);
+          /* Warn */
+          if (import.meta.env.DEV && !this.media) {
+            console.warn(`'media' not set.`);
+          }
+          /* Add effect to control media */
+          this.effects.add(media_effect, "media");
+        }
+      }, "target");
+
+      /* Add effect to set target from live DOM */
       this.effects.add((data) => {
         if (this.$.connected) {
           this.target = this.parentElement;
@@ -50,7 +86,7 @@ const css_media = (parent) => {
 
     /* Returns rule medium. */
     get media() {
-      return this.#media;
+      return this.$.media
     }
     /* Sets rule medium. */
     set media(media) {
@@ -63,67 +99,30 @@ const css_media = (parent) => {
           media = `${media})`;
         }
       }
-      /* Abort, if no change */
-      if (this.#media === media) {
-        return;
-      }
-      /* Sync to attribute */
-      this.attribute.media = media;
-      /* Update private */
-      this.#media = media;
-      if (this.rule) {
-        this.rule.media.mediaText = media;
-      }
+      this.$.media = media
     }
-    #media;
+   
 
     /* Returns rule. */
     get rule() {
       return this.#rule;
     }
     #rule;
-    
+
     /* Returns rules controller. */
     get rules() {
       return this.#rules;
     }
     #rules;
 
-    /* Returns target. */
+    /* Returns target state. */
     get target() {
-      return this.#target;
+      return this.$.target;
     }
-    /* Sets target, rule and rules. */
+    /* Sets target state. */
     set target(target) {
-      /* Abort, if no change */
-      if (this.#target === target) {
-        return;
-      }
-      /* Unravel from old target */
-      if (this.#target) {
-        this.#target.rules && this.#target.rules.remove(this.rule);
-      }
-      /* Reset rule and rules */
-      this.#rule = this.#rules = null;
-      /* Handle new target */
-      if (target) {
-        if (!target.rules) {
-          throw new Error(`Target does not have rules.`);
-        }
-        /* Create an add rule without items */
-        this.#rule = target.rules.add(`@media`);
-        /* Apply any media */
-        if (this.media) {
-          this.#rule.media.mediaText = this.media;
-          /* Create rules for children to engage with */
-          this.#rules = Rules.create(this.#rule);
-        } else {
-          import.meta.env.DEV && console.warn(`'media' not set.`);
-        }
-      }
-      this.#target = target;
+      this.$.target = target;
     }
-    #target;
 
     /* Returns text representation of rule. */
     get text() {

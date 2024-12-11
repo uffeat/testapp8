@@ -21,7 +21,7 @@ Notable features:
   - explicitly setting 'target', or
   - implicitly setting 'target' from DOM parent 
     (dynamically managed according to component lifecycle)
-- Shows selector items as attributes (can itself be used in other stylesheets!).
+- Shows selector items as attributes.
 - Selector and items are reactive.
 - Supports kebab- as well as camel-case.
 - Supports CSS var declarations and standard declarations, incl. with `!important`.
@@ -48,11 +48,10 @@ Notable features:
 - `false` item values removes declaration.
 - 'clone' method for creating a component with a copy of items.
 - Support hooks and iife's.
-
-
-
-
-
+Advantages of in-DOM use:
+- Provides 'visual' composition of sheets 
+  (can itself be used in other stylesheets!).
+- Rule can be retrived by DOM methods and used by other components.
 */
 const css_rule = (parent) => {
   const cls = class CssRule extends parent {
