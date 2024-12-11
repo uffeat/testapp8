@@ -81,20 +81,32 @@ const my_media = my_sheet.querySelector("css-media");
 const my_rule = my_sheet.querySelector("css-rule");
 
 
-console.log('my_rule.rule:', my_rule.rule)
+//
+my_rule.remove()
+my_rule.selector = 'h2'
+my_rule.update({color: "green"})
+my_media.append(my_rule)
+
+my_rule.$.$color = "blue";
+my_rule.update({$$color: "gray"})
+
+
+
+console.log('css:', my_sheet.text)
+
 
 
 
 
 
 /*
-my_rule.selector = 'h2'
-my_rule.remove()
+
+
 my_media.append(my_rule)
 */
-//my_rule.$.$color = "green";
+//
 //my_rule.style.color = "green";
-//my_rule.update({color: "green"})
+//
 
 
 /*

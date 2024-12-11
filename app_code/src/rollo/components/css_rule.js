@@ -43,6 +43,16 @@ const css_rule = (parent) => {
       super.style.display = "none";
 
       /* */
+      const selector_effect = (data) => {
+        if (this.rule) {
+          /* Update rule */
+        this.rule.selectorText = this.selector;
+        }
+        /* Sync to attribute */
+        this.attribute.selector = this.selector;
+      };
+
+      /* */
       const items_effect = (data) => {
         const style = this.rule.style;
         for (const [key, { current }] of Object.entries(data)) {
@@ -59,19 +69,9 @@ const css_rule = (parent) => {
               style.setProperty(key, current);
             }
           }
-          this.attribute[key] = current
+          this.attribute[key] = current;
         }
       };
-
-      /* Add effect to control selector */
-      this.effects.add((data) => {
-        if (this.rule) {
-          /* Update rule */
-          this.rule.selectorText = this.selector;
-        }
-        /* Sync to attribute */
-        this.attribute.selector = this.selector;
-      }, "selector");
 
       /* Add effect to handle target */
       this.effects.add((data) => {
@@ -80,6 +80,9 @@ const css_rule = (parent) => {
         if (previous) {
           previous.rules && previous.rules.remove(this.rule);
           this.#rule = null;
+          /* remove effect to control selector */
+          this.effects.add(selector_effect);
+
           /* Remove effect to control declarations */
           this.#items.effects.remove(items_effect);
         }
@@ -89,11 +92,12 @@ const css_rule = (parent) => {
           }
           /* Create and add rule without items */
           this.#rule = current.rules.add(`${this.selector}`);
+          /* Add effect to control selector */
+          this.effects.add(selector_effect, "selector");
           /* Add effect to control declarations */
           this.#items.effects.add(items_effect);
         }
       }, "target");
-
       /* Add effect to set target from live DOM */
       this.effects.add((data) => {
         if (this.$.connected) {
@@ -195,8 +199,16 @@ const css_rule = (parent) => {
     - before live DOM connection */
     update(updates = {}) {
       super.update && super.update(updates);
-      /* Update items */
 
+      /* 
+      TODO
+      object value -> sets selector AND items
+      */
+
+
+
+
+      /* Update items */
       this.#items.update(updates);
 
       return this;
