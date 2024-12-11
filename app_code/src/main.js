@@ -2,10 +2,11 @@ import "./bootstrap.scss";
 import "./main.css";
 import { create } from "rollo/component";
 
-
 await import("rollo/components/css_media");
 await import("rollo/components/css_rule");
 await import("rollo/components/css_sheet");
+await import("rollo/components/css_keyframes");
+await import("rollo/components/css_keyframe");
 
 // TODO
 // ... then nav bar
@@ -63,23 +64,65 @@ const my_sheet = create(
     },
     create("css-rule", {
       name: "my_rule",
-      //selector: "h1",
-      //color: "pink",
-      //backgroundColor: "linen",
-      //padding: "8px",
-      //border: "4px solid red",
       h1: {
         color: "pink",
         backgroundColor: "linen",
         padding: "8px",
         border: "4px solid red",
+        animationDuration: "3s",
+        animationName: "slide_in",
       },
     })
+  ),
+  create(
+    "css-keyframes",
+    {
+      name: "slide_in",
+
+      from: {
+        translate: "150vw 0",
+        scale: "200% 1",
+      },
+
+      to: {
+        translate: "0 0",
+        scale: "100% 1",
+      },
+    },
+    create("css-keyframe", { frame: 0, translate: "150vw 0", scale: "200% 1" }),
+    create("css-keyframe", { frame: 100, translate: "0 0", scale: "100% 1" })
   )
 );
 
 const my_media = my_sheet.querySelector("css-media");
 const my_rule = my_sheet.querySelector("css-rule");
+const slide_in = my_sheet.querySelector("css-keyframes");
+const css_keyframe_0 = my_sheet.querySelector('css-keyframe[state-frame="0"]');
+
+console.log("css_keyframe_0.items:", css_keyframe_0.items);////
+console.log("css_keyframe_0.frame:", css_keyframe_0.frame);////
+console.log("css_keyframe_0.text:", css_keyframe_0.text);////
+
+
+
+
+////console.log("slide_in:", slide_in.rule);////
+
+
+/*
+slide_in.rule.appendRule(`
+  from {
+      translate: 150vw 0;
+      scale: 200% 1;
+  }
+`);
+slide_in.rule.appendRule(`
+  to {
+    translate: 0 0;
+    scale: 100% 1;
+  }
+`);
+*/
 
 //
 //my_rule.remove()
@@ -96,21 +139,10 @@ my_rule.$.$color = "blue";
 
 console.log("css:", my_sheet.text);
 
-/*
-
-
-my_media.append(my_rule)
-*/
-//
-//
-//
-
-/*
-my_media.remove()
-console.log('css:', my_sheet.text)
-my_sheet.append(my_media)
-console.log('css:', my_sheet.text)
-*/
+//my_media.remove()
+//console.log('css:', my_sheet.text)
+//my_sheet.append(my_media)
+//console.log('css:', my_sheet.text)
 
 /* Enable tests */
 if (import.meta.env.DEV) {

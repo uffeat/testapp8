@@ -12,14 +12,55 @@ import {
   tags,
   uid,
 } from "rollo/factories/__factories__";
-import { Rules } from "rollo/components/utils/rules";
+
+/* Controller for CSSRuleLists.
+Use for composition in objects with access CSSKeyframesRule. */
+export class Rules {
+  static create = (...args) => {
+    return new Rules(...args);
+  };
+  #owner;
+
+  constructor(owner) {
+    if (!(owner instanceof CSSKeyframesRule)) {
+      throw new Error(`Invalid owner: ${owner}`);
+    }
+    this.#owner = owner;
+  }
+
+  /* Returns owner. */
+  get owner() {
+    return this.#owner;
+  }
+
+  /* Returns css rules list as an arry. */
+  get rules() {
+    return [...this.owner.cssRules];
+  }
+
+  /* Returns length of css rules list. */
+  get size() {
+    return this.owner.cssRules.length;
+  }
+
+  /* Creates, appends and returns rule. */
+  add(text) {
+    this.owner.appendRule(text);
+    return this.owner.findRule(text);
+  }
+
+  /* Deletes rule. */
+  remove(text) {
+    this.owner.deleteRule(text);
+  }
+}
 
 /* Non-visual web component for controlling CSS media rules of parent component's sheet.
 
 
 */
-const css_media = (parent) => {
-  const cls = class CssMedia extends parent {
+const css_keyframes = (parent) => {
+  const cls = class CssKeyframes extends parent {
     constructor() {
       super();
     }
@@ -34,14 +75,7 @@ const css_media = (parent) => {
     created_callback(config) {
       super.created_callback && super.created_callback(config);
       this.style.display = "none";
-      /* Effect to control media */
-      const media_effect = (data) => {
-        if (this.rule) {
-          this.rule.media.mediaText = this.media;
-        }
-        /* Sync to attribute */
-        this.attribute.media = this.media;
-      };
+
       /* Add effect to handle target */
       this.effects.add((data) => {
         const current = data.target.current;
@@ -51,8 +85,10 @@ const css_media = (parent) => {
           previous.rules && previous.rules.remove(this.rule);
           /* Reset rule and rules */
           this.#rule = this.#rules = null;
-          /* Remove effect to control media */
-          this.effects.remove(media_effect);
+          /* Remove effects */
+          /*
+          TODO
+          */
         }
         /* Engage with any current target */
         if (current) {
@@ -60,15 +96,13 @@ const css_media = (parent) => {
             throw new Error(`Target does not have rules.`);
           }
           /* Create an add rule without items */
-          this.#rule = current.rules.add(`@media`);
+          this.#rule = current.rules.add(`@keyframes ${this.name}`);
           /* Create rules for children to engage with */
           this.#rules = Rules.create(this.#rule);
-          /* Warn */
-          if (import.meta.env.DEV && !this.media) {
-            console.warn(`'media' not set.`);
-          }
-          /* Add effect to control media */
-          this.effects.add(media_effect, "media");
+          /* Add effects */
+          /*
+          TODO
+          */
         }
       }, "target");
       /* Add effect to set target from live DOM */
@@ -81,31 +115,12 @@ const css_media = (parent) => {
       }, "connected");
     }
 
-    /* Returns rule medium state. */
-    get media() {
-      return this.$.media
-    }
-    /* Sets rule medium state. */
-    set media(media) {
-      /* Allow media to be provided without enclosing '()' */
-      if (media) {
-        if (!media.startsWith("(")) {
-          media = `(${media}`;
-        }
-        if (!media.endsWith(")")) {
-          media = `${media})`;
-        }
-      }
-      this.$.media = media
-    }
-   
     /* Returns CSS rule. */
     get rule() {
       return this.#rule;
     }
     #rule;
-    
-    /* Returns rules controller, if target. */
+
     get rules() {
       return this.#rules;
     }
@@ -132,7 +147,7 @@ const css_media = (parent) => {
 };
 
 Component.author(
-  "css-media",
+  "css-keyframes",
   HTMLElement,
   {},
   attribute,
@@ -146,5 +161,5 @@ Component.author(
   state_to_native,
   tags,
   uid,
-  css_media
+  css_keyframes
 );

@@ -45,7 +45,7 @@ export class Rules {
     }
     const index = this.owner.insertRule(text, this.size);
     return this.owner.cssRules[index];
-  };
+  }
 
   /* Returns index of rule; undefined if not found. */
   find(rule) {
@@ -54,7 +54,7 @@ export class Rules {
         return index;
       }
     }
-  };
+  }
 
   /* Deletes rule. */
   remove(rule) {
@@ -62,5 +62,5 @@ export class Rules {
     if (index !== undefined) {
       this.owner.deleteRule(index);
     }
-  };
+  }
 }
