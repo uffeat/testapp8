@@ -2,7 +2,7 @@ import "./bootstrap.scss";
 import "./main.css";
 import { create } from "rollo/component";
 
-await import("rollo/components/css_items");
+
 await import("rollo/components/css_media");
 await import("rollo/components/css_rule");
 await import("rollo/components/css_sheet");
@@ -90,7 +90,8 @@ const my_rule = my_sheet.querySelector("css-rule");
 //my_rule.update({$$color: "gray"})
 my_rule.style.color = "green";
 
-my_rule.items = {color: 'brown'}
+//my_rule.items = {color: 'brown'}
+//my_rule.rule = {h2: {color: 'brown'}}
 
 console.log("css:", my_sheet.text);
 

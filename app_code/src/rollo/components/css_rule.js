@@ -14,7 +14,7 @@ import {
   uid,
 } from "rollo/factories/__factories__";
 
-/* Non-visual web component for controlling CSS rules of parent component's sheet. 
+/* Non-visual web component for controlling CSS rule. 
 
 
 TODO
@@ -111,20 +111,13 @@ const css_rule = (parent) => {
     get items() {
       return this.#items.data.current;
     }
+    /* Resets items from object. */
     set items(items) {
       /* Reset all items */
-      this.#items.update(
-        Object.fromEntries(
-          Object.entries(this.#items.data.current).map(([key, value]) => [
-            key,
-            false,
-          ])
-        )
-      );
+      this.#items.clear();
       /* Add new items */
       this.#items.update(items);
     }
-
     #items = new (class Items extends reactive(class {}) {
       constructor(owner) {
         super();
@@ -135,6 +128,17 @@ const css_rule = (parent) => {
         return this.#owner;
       }
       #owner;
+
+      clear() {
+        this.update(
+          Object.fromEntries(
+            Object.entries(this.data.current).map(([key, value]) => [
+              key,
+              false,
+            ])
+          )
+        );
+      }
 
       update(updates = {}) {
         super.update(
@@ -149,7 +153,6 @@ const css_rule = (parent) => {
               ])
           )
         );
-        return this.owner;
       }
     })(this);
 
@@ -157,11 +160,19 @@ const css_rule = (parent) => {
     get rule() {
       return this.#rule;
     }
+    /* Resets selector and items from object. */
+    set rule(rule) {
+      /* Reset all items */
+      this.#items.clear();
+      /* Update selector and items */
+      this.update(rule)
+      
+    }
     #rule;
 
     /* Returns selector. */
     get selector() {
-      return this.$.selector;
+      return this.$.selector || "*";
     }
     /* Sets selector. */
     set selector(selector) {
@@ -199,9 +210,9 @@ const css_rule = (parent) => {
       }
     }
 
-    /* Returns component with copy of items. */
+    /* Returns component with copy of selector and items. */
     clone() {
-      return create(this.tagName.toLowerCase(), this.items);
+      return create(this.tagName.toLowerCase(), {selector: this.selector, ...this.items});
     }
 
     /* Updates component. Chainable. 
@@ -214,7 +225,7 @@ const css_rule = (parent) => {
     update(updates = {}) {
       super.update && super.update(updates);
       /* Allow setting selector and items in one go */
-      const foo = Object.entries(updates)
+      Object.entries(updates)
         .filter(([key, value]) => !(key in this) && typeof value === "object")
         .map(([key, value]) => ({ selector: key, items: value }))
         .forEach(({ selector, items }) => {
