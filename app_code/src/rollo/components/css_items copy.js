@@ -9,9 +9,16 @@ import {
   reactive,
   state_to_attribute,
   state_to_native,
-  tags,
   uid,
 } from "rollo/factories/__factories__";
+
+/*
+TODO
+Ideas:
+- item proxy
+- items composition class
+- reactive
+*/
 
 /* Non-visual web component for controlling CSS declarations of parent component's rule.
 Notable features:
@@ -39,24 +46,10 @@ const css_items = (parent) => {
     }
 
     get items() {
-      return this.#items.data.current;
+      return { ...this.#items };
     }
-    #items = new (class Items extends reactive(class {}) {
-      constructor(owner) {
-        super();
-        this.#owner = owner;
-      }
-
-      get owner() {
-        return this.#owner;
-      }
-      #owner;
-
-      update(updates = {}) {
-        super.update && super.update(updates);
-        return this.owner;
-      }
-    })(this);
+    #items = {};
+    #pending_items = {};
 
     /* Provides getter/setter interface to items. */
     get style() {
@@ -64,7 +57,7 @@ const css_items = (parent) => {
     }
     #style = new Proxy(this, {
       get(target, key) {
-        return target.items[key];
+        return target.#items[key];
       },
       set(target, key, value) {
         target.update({ [key]: value });
@@ -72,14 +65,10 @@ const css_items = (parent) => {
       },
     });
 
-    /* Returns target. */
     get target() {
-      return this.$.target;
+      return this.#target;
     }
-    /* Sets target and applies/unapplies items. */
-    set target(target) {
-      this.$.target = target;
-    }
+    #target;
 
     /* Returns component with copy of items. */
     clone() {
@@ -96,57 +85,30 @@ const css_items = (parent) => {
     created_callback(config) {
       super.created_callback && super.created_callback(config);
       super.style.display = "none";
-      /* Bindable effect to add items to rule */
-      const add_items_effect = function (data) {
-        const style = this.rule.style;
-        for (const [key, { current }] of Object.entries(data)) {
-          if (current === false) {
-            style.removeProperty(key);
-          } else {
-            if (current.endsWith("!important")) {
-              style.setProperty(
-                key,
-                value.slice(0, -"!important".length),
-                "important"
-              );
-            } else {
-              style.setProperty(key, current);
-            }
-          }
-        }
-      };
-      /* Add effect to handle target */
-      this.effects.add((data) => {
-        const current = data.target.current;
-        const previous = data.target.previous;
-        /* Remove items from any previous target */
-        if (previous) {
-          if (previous.rule) {
-            for (const key of Object.keys(this.items)) {
-              previous.rule.style.removeProperty(key);
-            }
-          }
-          /* Remove effect */
-          if (previous.tags.add_items_effect) {
-            this.#items.effects.remove(previous.tags.add_items_effect);
-          }
-        }
-        /* Add items to any previous target */
-        if (current) {
-          if (!current.rule) {
-            throw new Error(`Target does not have a rule.`);
-          }
-          /* Bind, tag and add effect */
-          current.tags.add_items_effect = add_items_effect.bind(current);
-          this.#items.effects.add(current.tags.add_items_effect);
-        }
-      }, "target");
-      /* Add connect-effect to control target  */
+      /* Add connect-effect to control rule in parent  */
       this.effects.add((data) => {
         if (this.$.connected) {
-          this.target = this.parentElement;
+          this.#target = this.parentElement;
+          /* Check parent */
+          if (!this.#target.rule) {
+            throw new Error(`Target does not have a rule.`);
+          }
+          /* Add items to rule */
+          this.update(this.#pending_items);
+          /* Reset */
+          this.#pending_items = {};
         } else {
-          this.target = null;
+          /* Remove items from rule */
+          for (const key of Object.keys(this.#items)) {
+            /* NOTE If target has been disconnected, it has no rule; therefore check */
+            if (this.#target.rule) {
+              this.#target.rule.style.removeProperty(key);
+            }
+          }
+          /* Reset and make ready for next connection */
+          this.#pending_items = { ...this.#items };
+          this.#items = {};
+          this.#target = null;
         }
       }, "connected");
     }
@@ -160,15 +122,47 @@ const css_items = (parent) => {
     - before live DOM connection */
     update(updates = {}) {
       super.update && super.update(updates);
-      /* Update items */
-      this.#items.update(Object.fromEntries(
-        Object.entries(updates)
-          .filter(([key, value]) => this.#is_css(key) && value !== undefined)
-          .map(([key, value]) => [
-            camel_to_kebab(key.trim()),
-            typeof value === "string" ? value.trim() : value,
-          ])
-      ));
+
+      for (let [key, value] of Object.entries(updates)) {
+        /* Ignore undefined values to support iifee's */
+        if (value === undefined) {
+          continue;
+        }
+        /* Normalize key */
+        key = camel_to_kebab(key.trim());
+        if (!this.#is_css(key)) {
+          continue;
+        }
+        if (this.#target) {
+          /* Handle null value -> removal */
+          if (key in this.#items && value === null) {
+            this.#target.rule.style.removeProperty(key);
+            delete this.#items[key];
+            this.attribute[key] = value;
+            continue;
+          }
+          /* Normalize string value */
+          value = value.trim();
+          /* Ignore, if no change */
+          if (this.#items[key] === value) {
+            continue;
+          }
+          /* Update style */
+          if (value.endsWith("!important")) {
+            this.#target.rule.style.setProperty(
+              key,
+              value.slice(0, -"!important".length),
+              "important"
+            );
+          } else {
+            this.#target.rule.style.setProperty(key, value);
+          }
+          this.#items[key] = value;
+          this.attribute[key] = value;
+        } else {
+          this.#pending_items[key] = value;
+        }
+      }
       return this;
     }
 
@@ -192,7 +186,6 @@ Component.author(
   reactive,
   state_to_attribute,
   state_to_native,
-  tags,
   uid,
   css_items
 );

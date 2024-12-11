@@ -9,6 +9,7 @@ import {
   reactive,
   state_to_attribute,
   state_to_native,
+  tags,
   uid,
 } from "rollo/factories/__factories__";
 
@@ -48,6 +49,7 @@ Component.author(
   reactive,
   state_to_attribute,
   state_to_native,
+  tags,
   uid,
   data_reactive
 );

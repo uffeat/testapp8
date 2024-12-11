@@ -9,6 +9,7 @@ import {
   reactive,
   state_to_attribute,
   state_to_native,
+  tags,
   uid,
 } from "rollo/factories/__factories__";
 
@@ -16,6 +17,8 @@ import {
 
 
 TODO
+
+Mention use with/without dom connection
 Mention state_to_native re selector
 
 
@@ -37,25 +40,12 @@ const css_rule = (parent) => {
     created_callback(config) {
       super.created_callback && super.created_callback(config);
       this.style.display = "none";
-
-      /* Add connect-effect to control rule in target sheet */
+      /* Add connect-effect to control rule in target */
       this.effects.add((data) => {
         if (this.$.connected) {
-          this.#target = this.parentElement;
-          if (!this.#target.rules) {
-            throw new Error(`Target does not have rules.`);
-          }
-          /* Create an add rule without items */
-          this.#rule = this.#target.rules.add(`${this.selector}`);
+          this.target = this.parentElement;
         } else {
-          /* Delete rule in target
-          NOTE If target has been disconnected, it has no rules; therefore check */
-          if (this.#target.rules) {
-            this.#target.rules.remove(this.#rule);
-          }
-          /* Reset */
-          this.#rule = null;
-          this.#target = null;
+          this.target = null;
         }
       }, "connected");
     }
@@ -91,6 +81,28 @@ const css_rule = (parent) => {
     get target() {
       return this.#target;
     }
+    /* Sets target and rule. */
+    set target(target) {
+      /* Abort, if no change */
+      if (this.#target === target) {
+        return;
+      }
+      /* Unravel from old target */
+      if (this.#target) {
+        this.#target.rules && this.#target.rules.remove(this.rule);
+      }
+      /* Reset rule */
+      this.#rule = null;
+      /* Handle new target */
+      if (target) {
+        if (!target.rules) {
+          throw new Error(`Target does not have rules.`);
+        }
+        /* Create and add rule without items */
+        this.#rule = target.rules.add(`${this.selector}`);
+      }
+      this.#target = target;
+    }
     #target;
 
     /* Returns text representation of rule. */
@@ -117,6 +129,7 @@ Component.author(
   reactive,
   state_to_attribute,
   state_to_native,
+  tags,
   uid,
   css_rule
 );

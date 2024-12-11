@@ -8,15 +8,15 @@ export const name = (parent, config, ...factories) => {
   /* Check factory dependencies */
   check_factories([attribute], factories);
   const cls = class Name extends parent {
-    #name
+   
     get name() {
       return this.#name;
     }
-
     set name(name) {
       this.#name = name;
       this.attribute.name = name;
     }
+    #name
   };
   return cls;
 };

@@ -20,6 +20,8 @@ await import("rollo/components/css_sheet");
 // ... then tooltip
 // ... then scrollspy
 
+
+
 const root = create("div", {
   id: "root",
   parent: document.body,
@@ -80,14 +82,26 @@ const my_media = my_sheet.querySelector("css-media");
 const my_rule = my_sheet.querySelector("css-rule");
 const my_items = my_sheet.querySelector("css-items");
 
+
+/*
+my_items.remove()
+console.log('css:', my_sheet.text)
+//my_rule.append(my_items)
+my_items.target = my_rule
+my_items.target = null
+console.log('css:', my_sheet.text)
+*/
+
+
 /*
 my_rule.selector = 'h2'
 my_rule.remove()
 my_media.append(my_rule)
 */
-my_items.$.$color = "green";
+//my_items.$.$color = "green";
 //my_items.style.color = "green";
 //my_items.update({color: "green"})
+
 
 /*
 my_media.remove()
@@ -95,7 +109,8 @@ console.log('css:', my_sheet.text)
 my_sheet.append(my_media)
 console.log('css:', my_sheet.text)
 */
-console.log('css:', my_sheet.text)
+
+
 
 /* Enable tests */
 if (import.meta.env.DEV) {

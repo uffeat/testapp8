@@ -3,27 +3,22 @@ import { constants } from "rollo/constants";
 /* Factory that provides fine-grained pub-sub-based reactive functionality for 
 flat object data with primitive values. */
 export const reactive = (parent, config, ...factories) => {
+  
   const cls = class Reactive extends parent {
-    #update_state;
-    constructor() {
-      super();
-      if (this instanceof HTMLElement) {
-        this.#update_state = (updates = {}) => {
-          this.data.update(
-            Object.fromEntries(
-              Object.entries(updates)
-                .filter(([key, value]) => key.startsWith(constants.STATE))
-                .map(([key, value]) => [
-                  key.slice(constants.STATE.length),
-                  value,
-                ])
-            )
-          );
-        };
-      } else {
-        this.#update_state = this.data.update
+    #update
+    
 
-      }
+    /* Only available during creation. 
+    Called:
+    - after CSS classes
+    - after 'update' 
+    - after children
+    - after 'call'
+    - before live DOM connection */
+    created_callback(config) {
+      super.created_callback && super.created_callback(config);
+      
+     
     }
 
     /* Returns an object, from which individual state items can be retrieved and 
@@ -167,8 +162,25 @@ export const reactive = (parent, config, ...factories) => {
     - before live DOM connection */
     update(updates = {}) {
       super.update && super.update(updates);
-      /* Update state */
-      this.#update_state(updates)
+      /* Update multiple state items in one go
+      for convenience and effect-call efficiency */
+      if (this instanceof HTMLElement) {
+        this.#state.update_data(
+          Object.fromEntries(
+            Object.entries(updates)
+              .filter(([key, value]) => key.startsWith(constants.STATE))
+              .map(([key, value]) => [key.slice(constants.STATE.length), value])
+          )
+        );
+        
+      } else {
+
+        
+      }
+
+
+
+      
       return this;
     }
 
@@ -394,3 +406,5 @@ export const reactive = (parent, config, ...factories) => {
   };
   return cls;
 };
+
+

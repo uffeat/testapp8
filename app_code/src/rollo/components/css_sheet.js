@@ -10,6 +10,7 @@ import {
   sheet,
   state_to_attribute,
   state_to_native,
+  tags,
   uid,
 } from "rollo/factories/__factories__";
 import { Rules } from "rollo/components/utils/rules";
@@ -74,6 +75,7 @@ Component.author(
   sheet,
   state_to_attribute,
   state_to_native,
+  tags,
   uid,
   css_sheet
 );

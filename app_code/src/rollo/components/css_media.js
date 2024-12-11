@@ -9,11 +9,10 @@ import {
   reactive,
   state_to_attribute,
   state_to_native,
+  tags,
   uid,
 } from "rollo/factories/__factories__";
 import { Rules } from "rollo/components/utils/rules";
-
-
 
 /* Non-visual web component for controlling CSS media rules of parent component's sheet.
 
@@ -42,27 +41,9 @@ const css_media = (parent) => {
       /* Add connect-effect to control rule in target sheet */
       this.effects.add((data) => {
         if (this.$.connected) {
-          this.#target = this.parentElement;
-          if (!this.#target.rules) {
-            throw new Error(`Target does not have rules.`);
-          }
-          /* Create an add rule without items */
-          this.#rule = this.#target.rules.add(`@media`);
-          /* Apply any media */
-          if (this.media) {
-            this.#rule.media.mediaText = this.media;
-          } else {
-            import.meta.env.DEV && console.warn(`'media' not set.`);
-          }
-          /* Create rules for children to engage with */
-          this.#rules = Rules.create(this.#rule);
+          this.target = this.parentElement;
         } else {
-          /* Delete rule in target */
-          this.#target.rules.remove(this.#rule);
-          /* Reset */
-          this.#rule = null;
-          this.#rules = null;
-          this.#target = null;
+          this.target = null;
         }
       }, "connected");
     }
@@ -101,7 +82,7 @@ const css_media = (parent) => {
       return this.#rule;
     }
     #rule;
-
+    
     /* Returns rules controller. */
     get rules() {
       return this.#rules;
@@ -111,6 +92,36 @@ const css_media = (parent) => {
     /* Returns target. */
     get target() {
       return this.#target;
+    }
+    /* Sets target, rule and rules. */
+    set target(target) {
+      /* Abort, if no change */
+      if (this.#target === target) {
+        return;
+      }
+      /* Unravel from old target */
+      if (this.#target) {
+        this.#target.rules && this.#target.rules.remove(this.rule);
+      }
+      /* Reset rule and rules */
+      this.#rule = this.#rules = null;
+      /* Handle new target */
+      if (target) {
+        if (!target.rules) {
+          throw new Error(`Target does not have rules.`);
+        }
+        /* Create an add rule without items */
+        this.#rule = target.rules.add(`@media`);
+        /* Apply any media */
+        if (this.media) {
+          this.#rule.media.mediaText = this.media;
+          /* Create rules for children to engage with */
+          this.#rules = Rules.create(this.#rule);
+        } else {
+          import.meta.env.DEV && console.warn(`'media' not set.`);
+        }
+      }
+      this.#target = target;
     }
     #target;
 
@@ -138,6 +149,7 @@ Component.author(
   reactive,
   state_to_attribute,
   state_to_native,
+  tags,
   uid,
   css_media
 );

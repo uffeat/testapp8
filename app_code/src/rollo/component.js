@@ -14,6 +14,7 @@ import {
   shadow,
   state_to_attribute,
   state_to_native,
+  tags,
   text,
   uid,
 } from "rollo/factories/__factories__";
@@ -220,6 +221,7 @@ Consider not using shadow as a standard factory. currently not used.  */
 Component.factories.add(shadow, can_have_shadow);
 Component.factories.add(state_to_attribute);
 Component.factories.add(state_to_native);
+Component.factories.add(tags);
 Component.factories.add(text, (tag) => {
   const element = document.createElement(tag);
   return "textContent" in element;

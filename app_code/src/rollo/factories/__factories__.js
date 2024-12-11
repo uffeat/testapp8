@@ -17,5 +17,6 @@ export { shadow } from "rollo/factories/shadow";
 export { sheet } from "rollo/factories/sheet";
 export { state_to_attribute } from "rollo/factories/state_to_attribute";
 export { state_to_native } from "rollo/factories/state_to_native";
+export { tags } from "rollo/factories/tags";
 export { text } from "rollo/factories/text";
 export { uid } from "rollo/factories/uid";
