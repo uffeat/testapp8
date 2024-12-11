@@ -20,8 +20,6 @@ await import("rollo/components/css_sheet");
 // ... then tooltip
 // ... then scrollspy
 
-
-
 const root = create("div", {
   id: "root",
   parent: document.body,
@@ -63,41 +61,38 @@ const my_sheet = create(
       media: "600px <= width <= 800px",
       name: "my_rule",
     },
-    create(
-      "css-rule",
-      {
-        selector: "h1",
-        name: "my_rule",
+    create("css-rule", {
+      //selector: "h1",
+      name: "my_rule",
+      //color: "pink",
+      //backgroundColor: "linen",
+      //padding: "8px",
+      //border: "4px solid red",
+      h1: {
         color: "pink",
         backgroundColor: "linen",
-        padding: '8px',
-        border: '4px solid red',
-      }
-    )
+        padding: "8px",
+        border: "4px solid red",
+      },
+    })
   )
 );
 
 const my_media = my_sheet.querySelector("css-media");
 const my_rule = my_sheet.querySelector("css-rule");
 
-
 //
-my_rule.remove()
-my_rule.selector = 'h2'
-my_rule.update({color: "green"})
-my_media.append(my_rule)
+//my_rule.remove()
+//my_rule.selector = 'h2'
+//my_rule.update({color: "green"})
+//my_media.append(my_rule)
+//my_rule.$.$color = "blue";
+//my_rule.update({$$color: "gray"})
+my_rule.style.color = "green";
 
-my_rule.$.$color = "blue";
-my_rule.update({$$color: "gray"})
+my_rule.items = {color: 'brown'}
 
-
-
-console.log('css:', my_sheet.text)
-
-
-
-
-
+console.log("css:", my_sheet.text);
 
 /*
 
@@ -105,9 +100,8 @@ console.log('css:', my_sheet.text)
 my_media.append(my_rule)
 */
 //
-//my_rule.style.color = "green";
 //
-
+//
 
 /*
 my_media.remove()
@@ -115,8 +109,6 @@ console.log('css:', my_sheet.text)
 my_sheet.append(my_media)
 console.log('css:', my_sheet.text)
 */
-
-
 
 /* Enable tests */
 if (import.meta.env.DEV) {
