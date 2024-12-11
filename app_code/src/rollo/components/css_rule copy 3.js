@@ -1,5 +1,4 @@
-import { camel_to_kebab } from "rollo/utils/case";
-import { Component, create } from "rollo/component";
+import { Component } from "rollo/component";
 import {
   attribute,
   connected,
@@ -42,27 +41,6 @@ const css_rule = (parent) => {
       super.created_callback && super.created_callback(config);
       super.style.display = "none";
 
-      /* */
-      const items_effect = (data) => {
-        const style = this.rule.style;
-        for (const [key, { current }] of Object.entries(data)) {
-          if (current === false) {
-            style.removeProperty(key);
-          } else {
-            if (current.endsWith("!important")) {
-              style.setProperty(
-                key,
-                value.slice(0, -"!important".length),
-                "important"
-              );
-            } else {
-              style.setProperty(key, current);
-            }
-          }
-          this.attribute[key] = current
-        }
-      };
-
       /* Add effect to control selector */
       this.effects.add((data) => {
         if (this.rule) {
@@ -80,8 +58,6 @@ const css_rule = (parent) => {
         if (previous) {
           previous.rules && previous.rules.remove(this.rule);
           this.#rule = null;
-          /* Remove effect to control declarations */
-          this.#items.effects.remove(items_effect);
         }
         if (current) {
           if (!current.rules) {
@@ -89,8 +65,6 @@ const css_rule = (parent) => {
           }
           /* Create and add rule without items */
           this.#rule = current.rules.add(`${this.selector}`);
-          /* Add effect to control declarations */
-          this.#items.effects.add(items_effect);
         }
       }, "target");
 
@@ -103,37 +77,6 @@ const css_rule = (parent) => {
         }
       }, "connected");
     }
-
-    get items() {
-      return this.#items.data.current;
-    }
-    #items = new (class Items extends reactive(class {}) {
-      constructor(owner) {
-        super();
-        this.#owner = owner;
-      }
-
-      get owner() {
-        return this.#owner;
-      }
-      #owner;
-
-      update(updates = {}) {
-        super.update(
-          Object.fromEntries(
-            Object.entries(updates)
-              .filter(
-                ([key, value]) => this.owner.#is_css(key) && value !== undefined
-              )
-              .map(([key, value]) => [
-                camel_to_kebab(key.trim()),
-                typeof value === "string" ? value.trim() : value,
-              ])
-          )
-        );
-        return this.owner;
-      }
-    })(this);
 
     /* Returns rule. */
     get rule() {
@@ -151,20 +94,6 @@ const css_rule = (parent) => {
       this.$.selector = selector;
     }
 
-    /* Provides getter/setter interface to items. */
-    get style() {
-      return this.#style;
-    }
-    #style = new Proxy(this, {
-      get(target, key) {
-        return target.items[key];
-      },
-      set(target, key, value) {
-        target.update({ [key]: value });
-        return true;
-      },
-    });
-
     /* Returns target. */
     get target() {
       return this.$.target;
@@ -181,30 +110,9 @@ const css_rule = (parent) => {
       }
     }
 
-    /* Returns component with copy of items. */
-    clone() {
-      return create(this.tagName.toLowerCase(), this.items);
+    clear_items(...keys) {
+
     }
-
-    /* Updates component. Chainable. 
-    Called during creation:
-    - after CSS classes
-    - after children
-    - before 'call'
-    - before 'created_callback'
-    - before live DOM connection */
-    update(updates = {}) {
-      super.update && super.update(updates);
-      /* Update items */
-
-      this.#items.update(updates);
-
-      return this;
-    }
-
-    #is_css = (key) => {
-      return key.startsWith("--") || key in super.style;
-    };
   };
 
   return cls;

@@ -68,23 +68,33 @@ const my_sheet = create(
       {
         selector: "h1",
         name: "my_rule",
-        color: "pink",
-        backgroundColor: "linen",
         padding: '8px',
         border: '4px solid red',
-      }
+      },
+      create("css-items", {
+        name: "my_items",
+        color: "pink",
+        backgroundColor: "linen",
+      })
     )
   )
 );
 
 const my_media = my_sheet.querySelector("css-media");
 const my_rule = my_sheet.querySelector("css-rule");
-
+const my_items = my_sheet.querySelector("css-items");
 
 console.log('my_rule.rule:', my_rule.rule)
 
 
-
+/*
+my_items.remove()
+console.log('css:', my_sheet.text)
+//my_rule.append(my_items)
+my_items.target = my_rule
+my_items.target = null
+console.log('css:', my_sheet.text)
+*/
 
 
 /*
@@ -92,9 +102,9 @@ my_rule.selector = 'h2'
 my_rule.remove()
 my_media.append(my_rule)
 */
-//my_rule.$.$color = "green";
-//my_rule.style.color = "green";
-//my_rule.update({color: "green"})
+//my_items.$.$color = "green";
+//my_items.style.color = "green";
+//my_items.update({color: "green"})
 
 
 /*
