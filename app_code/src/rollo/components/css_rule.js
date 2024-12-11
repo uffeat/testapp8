@@ -14,13 +14,42 @@ import {
   uid,
 } from "rollo/factories/__factories__";
 
-/* Non-visual web component for controlling CSS rule. 
+/* Non-visual web component for controlling CSS rule.
+Can be used in- or off-DOM.
+Notable features:
+- Injects itself into target (sheet or media rule) by
+  - explicitly setting 'target', or
+  - implicitly setting 'target' from DOM parent 
+    (dynamically managed according to component lifecycle)
+- Shows selector items as attributes (can itself be used in other stylesheets!).
+- Selector and items are reactive.
+- Supports kebab- as well as camel-case.
+- Supports CSS var declarations and standard declarations, incl. with `!important`.
+- Selector and/or items can be changed via
+  - standard 'update' method:
+      update({
+        h1: {
+          color: "pink",
+          backgroundColor: "linen",
+        }
+      })
+    OR:
+      update({
+        selector: 'h1',
+        color: "pink",
+        backgroundColor: "linen",
+      })
+  - the 'rule' setter (resets selector and items)
+- Selector can also be set directly via the 'selector' getter.
+- Items can also be changed via
+  - state, e.g., `my_rule.$.$color = "blue";`
+  - the 'style' setter (individual items)
+  - the 'items' setter (resets items)
+- `false` item values removes declaration.
+- 'clone' method for creating a component with a copy of items.
+- Support hooks and iife's.
 
 
-TODO
-
-Mention use with/without dom connection
-Mention state_to_native re selector
 
 
 
@@ -42,7 +71,7 @@ const css_rule = (parent) => {
       super.created_callback && super.created_callback(config);
       super.style.display = "none";
 
-      /* */
+      /* Effect to control selector. */
       const selector_effect = (data) => {
         if (this.rule) {
           /* Update rule */
@@ -52,13 +81,15 @@ const css_rule = (parent) => {
         this.attribute.selector = this.selector;
       };
 
-      /* */
+      /* Effect to control items. */
       const items_effect = (data) => {
         const style = this.rule.style;
         for (const [key, { current }] of Object.entries(data)) {
           if (current === false) {
+            /* false is a cue to remove */
             style.removeProperty(key);
           } else {
+            /* Update rule */
             if (current.endsWith("!important")) {
               style.setProperty(
                 key,
@@ -69,6 +100,7 @@ const css_rule = (parent) => {
               style.setProperty(key, current);
             }
           }
+          /* Sync to attribute */
           this.attribute[key] = current;
         }
       };
@@ -77,15 +109,16 @@ const css_rule = (parent) => {
       this.effects.add((data) => {
         const current = data.target.current;
         const previous = data.target.previous;
+        /* Disengage from any previous target */
         if (previous) {
           previous.rules && previous.rules.remove(this.rule);
           this.#rule = null;
-          /* remove effect to control selector */
+          /* Remove effect to control selector */
           this.effects.add(selector_effect);
-
-          /* Remove effect to control declarations */
+          /* Remove effect to control items */
           this.#items.effects.remove(items_effect);
         }
+        /* Engage with any current target */
         if (current) {
           if (!current.rules) {
             throw new Error(`Target does not have rules.`);
@@ -94,7 +127,7 @@ const css_rule = (parent) => {
           this.#rule = current.rules.add(`${this.selector}`);
           /* Add effect to control selector */
           this.effects.add(selector_effect, "selector");
-          /* Add effect to control declarations */
+          /* Add effect to control items */
           this.#items.effects.add(items_effect);
         }
       }, "target");
@@ -108,6 +141,7 @@ const css_rule = (parent) => {
       }, "connected");
     }
 
+    /* Returns current items. */
     get items() {
       return this.#items.data.current;
     }
@@ -118,17 +152,18 @@ const css_rule = (parent) => {
       /* Add new items */
       this.#items.update(items);
     }
+    /* Composition class to reactively control items. */
     #items = new (class Items extends reactive(class {}) {
       constructor(owner) {
         super();
         this.#owner = owner;
       }
-
+      /* Returns owner (the component). */
       get owner() {
         return this.#owner;
       }
       #owner;
-
+      /* Set all items to false values */
       clear() {
         this.update(
           Object.fromEntries(
@@ -139,7 +174,7 @@ const css_rule = (parent) => {
           )
         );
       }
-
+      /* Updates items. */
       update(updates = {}) {
         super.update(
           Object.fromEntries(
@@ -156,7 +191,7 @@ const css_rule = (parent) => {
       }
     })(this);
 
-    /* Returns rule. */
+    /* Returns CSS rule. */
     get rule() {
       return this.#rule;
     }
@@ -170,17 +205,17 @@ const css_rule = (parent) => {
     }
     #rule;
 
-    /* Returns selector. */
+    /* Returns selector state. */
     get selector() {
       return this.$.selector || "*";
     }
-    /* Sets selector. */
+    /* Sets selector state. */
     set selector(selector) {
       selector = selector || "*";
       this.$.selector = selector;
     }
 
-    /* Provides getter/setter interface to items. */
+    /* Provides getter/setter interface to single items. */
     get style() {
       return this.#style;
     }
@@ -194,16 +229,17 @@ const css_rule = (parent) => {
       },
     });
 
-    /* Returns target. */
+    /* Returns target state. */
     get target() {
       return this.$.target;
     }
-    /* Sets target and rule. */
+    /* Sets target state. */
     set target(target) {
       this.$.target = target;
     }
 
-    /* Returns text representation of rule. */
+    /* Returns text representation of rule.
+    NOTE Primarily for dev. */
     get text() {
       if (this.rule) {
         return this.rule.cssText;
@@ -238,6 +274,7 @@ const css_rule = (parent) => {
       return this;
     }
 
+    /* Checks if key is a valid CSS key. */
     #is_css = (key) => {
       return key.startsWith("--") || key in super.style;
     };

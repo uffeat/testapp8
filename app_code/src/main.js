@@ -62,8 +62,8 @@ const my_sheet = create(
       name: "my_rule",
     },
     create("css-rule", {
-      //selector: "h1",
       name: "my_rule",
+      //selector: "h1",
       //color: "pink",
       //backgroundColor: "linen",
       //padding: "8px",
@@ -86,9 +86,10 @@ const my_rule = my_sheet.querySelector("css-rule");
 //my_rule.selector = 'h2'
 //my_rule.update({color: "green"})
 //my_media.append(my_rule)
-//my_rule.$.$color = "blue";
+my_rule.$.$color = "blue";
+
 //my_rule.update({$$color: "gray"})
-my_rule.style.color = "green";
+//my_rule.style.color = "green";
 
 //my_rule.items = {color: 'brown'}
 //my_rule.rule = {h2: {color: 'brown'}}
