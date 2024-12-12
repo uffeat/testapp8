@@ -9,12 +9,12 @@ export const connected = (parent, config, ...factories) => {
   const cls = class Connected extends parent {
     connectedCallback() {
       super.connectedCallback && super.connectedCallback();
-      this.items.$.connected = true;
+      this.$.connected = true;
     }
 
     disconnectedCallback() {
       super.disconnectedCallback && super.disconnectedCallback();
-      this.items.$.connected = true;
+      this.$.connected = false;
     }
 
     get connected() {

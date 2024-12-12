@@ -1,4 +1,3 @@
-import { constants } from "rollo/constants";
 import { check_factories } from "rollo/utils/check_factories";
 import { attribute, items } from "rollo/factories/__factories__";
 
@@ -8,9 +7,7 @@ export const item_to_attribute = (parent, config, ...factories) => {
   check_factories([attribute, items], factories);
 
   const cls = class ItemToAttribute extends parent {
-    constructor() {
-      super();
-    }
+    static PREFIX = '$'
 
     /* Only available during creation. 
     Called:
@@ -21,19 +18,20 @@ export const item_to_attribute = (parent, config, ...factories) => {
     - before live DOM connection */
     created_callback(config) {
       super.created_callback && super.created_callback(config);
+      
+
       /* Show state as attribute */
-      this.items.effects.add((changes) => {
-        for (let [key, value] of Object.entries(changes)) {
-          if (typeof key === 'string' && key.startsWith(constants.NATIVE)) {
-            continue;
-          }
-          key = `state-${key}`;
+      this.effects.add((changes) => {
+        Object.entries(changes).filter(
+          ([key, value]) =>
+            !(typeof key === "string" && key.startsWith(ItemToAttribute.PREFIX))
+        ).forEach(([key, value]) => {
           if (["boolean", "number", "string"].includes(typeof value)) {
             this.attribute[key] = value;
           } else {
             this.attribute[key] = null;
           }
-        }
+        })
       });
     }
   };

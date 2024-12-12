@@ -32,14 +32,18 @@ export const Component = new (class {
     add = (tag, cls) => {
       if (tag.includes("-")) {
         customElements.define(tag, cls);
-        import.meta.env.DEV && console.info(`Registered autonomous web component with tag '${tag}'.`);
+        import.meta.env.DEV &&
+          console.info(
+            `Registered autonomous web component with tag '${tag}'.`
+          );
       } else {
         customElements.define(`native-${tag}`, cls, {
           extends: tag,
         });
-        import.meta.env.DEV && console.info(
-          `Registered non-autonomous web component extended from '${tag}'.`
-        );
+        import.meta.env.DEV &&
+          console.info(
+            `Registered non-autonomous web component extended from '${tag}'.`
+          );
       }
       this.#registry[tag] = cls;
       return cls;
@@ -130,18 +134,16 @@ export const Component = new (class {
       return this.create_from_object(arg);
     }
     const [tag, ...css_classes] = arg.split(".");
-    const element = new (this.get(tag))({ config, parent, ...updates }, ...hooks);
+    const element = new (this.get(tag))(
+      { config, parent, ...updates },
+      ...hooks
+    );
     if (css_classes.length > 0) {
       element.classList.add(...css_classes);
     }
     /* Identify non-autonomous components as web component */
     if (!tag.includes("-")) {
       element.setAttribute("web-component", "");
-    }
-    /* Add CSS classes from hooks */
-    if (element.__factories__ && element.__factories__.includes(css_classes)) {
-      element.css_classes.add(...hooks.filter(element.css_classes.is));
-      hooks = hooks.filter((hook) => !element.css_classes.is(hook));
     }
     /* Call the 'update' lifecycle method */
     element.update && element.update(updates);
@@ -199,8 +201,6 @@ export const Component = new (class {
 /* Short-hand */
 export const create = Component.create;
 
-
-
 /* Add factories */
 Component.factories.add(attribute);
 Component.factories.add(chain);
@@ -227,5 +227,3 @@ Component.factories.add(text, (tag) => {
   return "textContent" in element;
 });
 Component.factories.add(uid);
-
-

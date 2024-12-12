@@ -73,7 +73,6 @@ const css_rule = (parent) => {
         /* Sync to attribute */
         this.attribute.selector = this.selector;
       };
-
       /* Effect complex to control items. */
       const items = new (class {
         #owner;
@@ -86,7 +85,7 @@ const css_rule = (parent) => {
               .filter(
                 ([key, value]) =>
                   this.#owner.#is_css(key) && value !== undefined
-              ) ////
+              )
               .map(([key, value]) => [
                 camel_to_kebab(key.trim()),
                 typeof value === "string" ? value.trim() : value,
@@ -119,8 +118,22 @@ const css_rule = (parent) => {
 
       /* Add effect to handle target */
       this.effects.add((changes, previous) => {
+
+        console.log('changes:', changes)
+        console.log('previous:', previous)
+
+
+
         const current = changes.target;
         previous = previous.target;
+
+        
+
+
+        console.log('previous target:', previous)
+
+
+
         /* Disengage from any previous target */
         if (previous) {
           /* Remove rule from previous target */
@@ -147,9 +160,16 @@ const css_rule = (parent) => {
       }, "target");
       /* Add effect to set target from live DOM */
       this.effects.add((changes) => {
-        if (this.$.connected) {
+        if (this.connected) {
           this.target = this.parentElement;
         } else {
+
+
+          console.log('HERE')////
+
+
+
+
           this.target = null;
         }
       }, "connected");
@@ -158,6 +178,18 @@ const css_rule = (parent) => {
     /* Returns CSS rule. */
     get rule() {
       return this.#rule;
+    }
+    /* Resets items and optionally selector from object. */
+    set rule(rule) {
+      /* Reset all items */
+      this.items.update(Object.fromEntries(
+        Object.entries(this.items.current).filter(([key, value]) => this.#is_css(key) ).map(([key, value]) => [
+          key,
+          false,
+        ])
+      ))
+      /* Update items and optionally selector */
+      this.update(rule)
     }
     #rule;
 

@@ -200,7 +200,6 @@ const css_rule = (parent) => {
       this.#items.clear();
       /* Update selector and items */
       this.update(rule)
-      
     }
     #rule;
 

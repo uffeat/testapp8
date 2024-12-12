@@ -1,9 +1,10 @@
-import { constants } from "rollo/constants";
 import { camel_to_kebab } from "rollo/utils/case";
 
 /* Factory for enhanced attribute control. */
 export const attribute = (parent, config, ...factories) => {
   const cls = class Attribute extends parent {
+    static PREFIX = 'attribute_'
+
     /* Returns prop-like getter/setter interface to attribute. 
     Supports:
     - camel case
@@ -58,10 +59,10 @@ export const attribute = (parent, config, ...factories) => {
       super.update && super.update(updates);
       /* Update attributes */
       Object.entries(updates)
-        .filter(([key, value]) => typeof key === 'string' && key.startsWith(constants.ATTRIBUTE))
+        .filter(([key, value]) => typeof key === 'string' && key.startsWith(Attribute.PREFIX))
         .forEach(
           ([key, value]) =>
-            (this.attribute[key.slice(constants.ATTRIBUTE.length)] = value)
+            (this.attribute[key.slice(Attribute.PREFIX.length)] = value)
         );
       return this;
     }

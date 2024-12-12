@@ -1,9 +1,9 @@
-import { constants } from "rollo/constants";
 import { camel_to_kebab_css } from "rollo/utils/case";
 
 /* Factory with enhanced features for controlling css classes. */
 export const css_classes = (parent, config, ...factories) => {
   const cls = class CssClasses extends parent {
+    static PREFIX = '.'
     /* Updates component. Chainable. 
     Called during creation:
     - after CSS classes
@@ -15,7 +15,7 @@ export const css_classes = (parent, config, ...factories) => {
       super.update && super.update(updates);
       /* Update css classes */
       Object.entries(updates)
-        .filter(([key, value]) => key.startsWith(constants.CSS_CLASS))
+        .filter(([key, value]) => key.startsWith(CssClasses.PREFIX))
         .forEach(([key, value]) =>
           this.css_classes[value ? "add" : "remove"](key)
         );
@@ -31,11 +31,11 @@ export const css_classes = (parent, config, ...factories) => {
     - before live DOM connection */
     call(...hooks) {
       super.call && super.call(...hooks);
-      /* Add css classes from CSS_CLASS-prefixed strings */
+      /* Add css classes from CssClasses.PREFIX-prefixed strings */
       hooks
         .filter(
           (hook) =>
-            typeof hook === "string" && hook.startsWith(constants.CSS_CLASS)
+            typeof hook === "string" && hook.startsWith(CssClasses.PREFIX)
         )
         .forEach((hook) => this.css_classes.add(hook));
       return this;
@@ -68,6 +68,17 @@ export const css_classes = (parent, config, ...factories) => {
       return this.#css_classes;
     }
     #css_classes = new (class {
+      
+     
+      constructor(owner) {
+        this.#owner = owner;
+      }
+
+      get owner() {
+        return this.#owner
+      }
+      #owner;
+
       /* Adds one or more css classes.  
       args can be:
       - Individual css class names
@@ -75,32 +86,27 @@ export const css_classes = (parent, config, ...factories) => {
       - String(s) with multiple css class names separated by '.'
       undefined values are ignored to support iife's. 
       Chainable. */
-      #owner;
-      constructor(owner) {
-        this.#owner = owner;
-      }
-
       add = (...args) => {
         this.#handle("add", ...args);
-        return this.#owner;
+        return this.owner;
       };
 
       has = (css_class) => {
-        return this.#owner.classList.contains(css_class);
+        return this.owner.classList.contains(css_class);
       };
 
       is = (arg) =>
-        typeof arg === "string" && arg.startsWith(constants.CSS_CLASS);
+        typeof arg === "string" && arg.startsWith(CssClasses.PREFIX);
 
       remove = (...args) => {
         this.#handle("remove", ...args);
-        return this.#owner;
+        return this.owner;
       };
 
       #handle = (action, ...args) => {
         for (let arg of args) {
           if (typeof arg === "function") {
-            arg = arg.call(this.#owner);
+            arg = arg.call(this.owner);
           }
           if (arg === undefined) {
             continue;
@@ -112,10 +118,10 @@ export const css_classes = (parent, config, ...factories) => {
             continue;
           }
 
-          if (arg.startsWith(constants.CSS_CLASS)) {
-            arg = arg.slice(constants.CSS_CLASS.length);
+          if (arg.startsWith(CssClasses.PREFIX)) {
+            arg = arg.slice(CssClasses.PREFIX.length);
           }
-          this.#owner.classList[action](...arg.split("."));
+          this.owner.classList[action](...arg.split("."));
         }
       };
     })(this);

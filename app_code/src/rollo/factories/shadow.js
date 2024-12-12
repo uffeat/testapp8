@@ -22,8 +22,8 @@ export const shadow = (parent, config, ...factories) => {
       this.shadowRoot.append(this.slot);
 
       this.slot.addEventListener("slotchange", (event) => {
-        this.items.$.has_children = this.children.length > 0;
-        this.items.$.has_content = this.childNodes.length > 0;
+        this.$.has_children = this.children.length > 0;
+        this.$.has_content = this.childNodes.length > 0;
       });
     }
 

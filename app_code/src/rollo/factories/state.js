@@ -115,17 +115,16 @@ class Effects {
     return this.#registry.size;
   }
 
-  /* Adds and returns effect.
+  /* Registers, calls and returns effect.
   NOTE 
-  - Effects are stored as keys with condition as value. */
+  - Effects are stored as keys with condition as values. */
   add = (effect, condition) => {
     if (condition !== undefined && typeof condition !== "function") {
       condition = interpret_condition(condition);
     }
-
     /* Register effect */
     this.#registry.set(effect, condition);
-    /* call effect conditionally with full data */
+    /* Call effect conditionally with full data */
     call_effect(
       effect,
       condition,
@@ -150,7 +149,7 @@ class Effects {
     }
   };
 
-  /* Removes effect. Chainable with respect to reactive. */
+  /* Removes effect. Chainable with respect to owner. */
   remove = (effect) => {
     this.#registry.delete(effect);
     return this.owner;

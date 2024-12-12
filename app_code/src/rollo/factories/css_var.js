@@ -1,8 +1,7 @@
-import { constants } from "rollo/constants";
-
 /* Factory with enhanced features for managing component scoped css vars. */
 export const css_var = (parent, config, ...factories) => {
   const cls = class CssVar extends parent {
+    static PREFIX = '__'
     /* Provides getter/setter interface to component-scoped css var.
     Supports:
     - '__'-syntax
@@ -39,10 +38,10 @@ export const css_var = (parent, config, ...factories) => {
       super.update && super.update(updates);
       /* Update css vars */
       Object.entries(updates)
-        .filter(([key, value]) => typeof key === 'string' && key.startsWith(constants.CSS_VAR))
+        .filter(([key, value]) => typeof key === 'string' && key.startsWith(CssVar.PREFIX))
         .forEach(
           ([key, value]) =>
-            (this.__[key.slice(constants.CSS_VAR.length)] = value)
+            (this.__[key.slice(CssVar.PREFIX.length)] = value)
         );
       return this;
     }

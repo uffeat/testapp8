@@ -1,11 +1,17 @@
-import { constants } from "rollo/constants";
 import { state } from "rollo/factories/state";
 
 /* Factory with reactive items composition. */
 export const items = (parent, config, ...factories) => {
   const cls = class Items extends parent {
-    
+    static PREFIX = '$'
 
+    /* NOTE
+    While it can be OK to access state directly outside the component, 
+    it's often cleaner to let outside-code access state via specific
+    props that mirror given state items.
+    */
+    
+    /* Provives API for getting/setting single state items. */
     get $() {
       return this.#items.$;
     }
@@ -34,9 +40,9 @@ export const items = (parent, config, ...factories) => {
           Object.entries(updates)
             .filter(
               ([key, value]) =>
-                typeof key === "string" && key.startsWith(constants.STATE)
+                typeof key === "string" && key.startsWith(Items.PREFIX)
             )
-            .map(([key, value]) => [key.slice(constants.STATE.length), value])
+            .map(([key, value]) => [key.slice(Items.PREFIX.length), value])
         )
       );
       return this;

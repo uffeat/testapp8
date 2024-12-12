@@ -27,21 +27,26 @@ export const observer = (parent, config, ...factories) => {
         childList: true,
         subtree: false,
       };
-      #owner;
+      
 
       constructor(owner) {
         this.#owner = owner;
       }
+
+      get owner() {
+        return this.#owner
+      }
+      #owner;
 
       /* Activates observer */
       start = () => {
         if (this.#observes) {
           return;
         }
-        this.#mutation_observer.observe(this.#owner, this.#config);
+        this.#mutation_observer.observe(this.owner, this.#config);
         this.#observes = true;
 
-        this.#owner.attribute.observes = true;
+        this.owner.attribute.observes = true;
       };
 
       /* Dectivates observer */
@@ -52,7 +57,7 @@ export const observer = (parent, config, ...factories) => {
         this.#mutation_observer.disconnect();
         this.#observes = false;
 
-        this.#owner.attribute.observes = false;
+        this.owner.attribute.observes = false;
       };
 
       #handler = (mutations) => {
@@ -65,9 +70,9 @@ export const observer = (parent, config, ...factories) => {
                 ('items' in node)
               )
               .forEach((node) => {
-                node.items.$.parent = this.#owner;
+                node.items.$.parent = this.owner;
 
-                this.#owner.send("child_added", {
+                this.owner.send("child_added", {
                   detail: { added_child: node },
                 });
               });
