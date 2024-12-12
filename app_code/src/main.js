@@ -2,6 +2,10 @@ import "./bootstrap.scss";
 import "./main.css";
 import { create } from "rollo/component";
 
+
+await import("rollo/components/css_keyframes");
+await import("rollo/components/css_keyframe");
+await import("rollo/components/css_media");
 await import("rollo/components/css_rule");
 await import("rollo/components/css_sheet");
 
@@ -29,6 +33,8 @@ const button = create(
   }
 );
 
+console.log(button.__chain__)
+
 /* Create elements to test css on */
 create("h1", { parent: root }, "Hello World");
 create("h2", { parent: root }, "Also hello from here");
@@ -42,11 +48,48 @@ const my_sheet = create(
       color: "pink",
       backgroundColor: "linen",
       padding: "8px",
-      border: "4px solid red",
       animationDuration: "3s",
       animationName: "slide_in",
     },
-  })
+  }),
+  create(
+    "css-media",
+    {
+      media: "600px <= width <= 800px",
+      name: "my_rule",
+    },
+    create("css-rule", {
+      name: "my_rule",
+      h1: {
+        backgroundColor: "yellow !important",
+        border: "4px solid red",
+        
+      },
+    })
+  ),
+  create(
+    "css-keyframes",
+    {
+      name: "slide_in",
+
+      /*
+      from: {
+        translate: "150vw 0",
+        scale: "200% 1",
+      },
+
+      to: {
+        translate: "0 0",
+        scale: "100% 1",
+      },
+      */
+    },
+
+    /* TODO FIX!!! */
+    //create("css-keyframe", { 0: {translate: "150vw 0", scale: "200% 1"} }),
+    create("css-keyframe", {frame: 0, translate: "150vw 0", scale: "200% 1"}),
+    create("css-keyframe", { frame: 100, translate: "0 0", scale: "100% 1" }),
+  )
 );
 
 const my_rule = my_sheet.querySelector("css-rule");

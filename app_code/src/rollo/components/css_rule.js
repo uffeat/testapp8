@@ -79,6 +79,9 @@ const css_rule = (parent) => {
         constructor(owner) {
           this.#owner = owner;
         }
+        get owner() {
+          return this.#owner
+        }
         condition = (changes) => {
           return Object.fromEntries(
             Object.entries(changes)
@@ -93,7 +96,7 @@ const css_rule = (parent) => {
           );
         };
         effect = (changes) => {
-          const style = this.#owner.rule.style;
+          const style = this.owner.rule.style;
           for (const [key, value] of Object.entries(changes)) {
             if (value === false) {
               /* false is a cue to remove */
@@ -111,33 +114,16 @@ const css_rule = (parent) => {
               }
             }
             /* Sync to attribute */
-            this.#owner.attribute[key] = value;
+            this.owner.attribute[key] = value;
           }
         };
       })(this);
-
       /* Add effect to handle target */
       this.effects.add((changes, previous) => {
-
-        console.log('changes:', changes)
-        console.log('previous:', previous)
-
-
-
-        const current = changes.target;
-        previous = previous.target;
-
-        
-
-
-        console.log('previous target:', previous)
-
-
-
         /* Disengage from any previous target */
-        if (previous) {
+        if (previous.target) {
           /* Remove rule from previous target */
-          previous.rules && previous.rules.remove(this.rule);
+          previous.target.rules && previous.target.rules.remove(this.rule);
           /* Reset rule */
           this.#rule = null;
           /* Remove effect to control selector */
@@ -146,12 +132,12 @@ const css_rule = (parent) => {
           this.effects.remove(items.effect);
         }
         /* Engage with any current target */
-        if (current) {
-          if (!current.rules) {
+        if (this.target) {
+          if (!this.target.rules) {
             throw new Error(`Target does not have rules.`);
           }
           /* Create and add rule without items */
-          this.#rule = current.rules.add(`${this.selector}`);
+          this.#rule = this.target.rules.add(`${this.selector}`);
           /* Add effect to control selector */
           this.effects.add(selector_effect, "selector");
           /* Add effect to control items */
@@ -163,13 +149,6 @@ const css_rule = (parent) => {
         if (this.connected) {
           this.target = this.parentElement;
         } else {
-
-
-          console.log('HERE')////
-
-
-
-
           this.target = null;
         }
       }, "connected");
@@ -182,14 +161,15 @@ const css_rule = (parent) => {
     /* Resets items and optionally selector from object. */
     set rule(rule) {
       /* Reset all items */
-      this.items.update(Object.fromEntries(
-        Object.entries(this.items.current).filter(([key, value]) => this.#is_css(key) ).map(([key, value]) => [
-          key,
-          false,
-        ])
-      ))
+      this.items.update(
+        Object.fromEntries(
+          Object.entries(this.items.current)
+            .filter(([key, value]) => this.#is_css(key))
+            .map(([key, value]) => [key, false])
+        )
+      );
       /* Update items and optionally selector */
-      this.update(rule)
+      this.update(rule);
     }
     #rule;
 

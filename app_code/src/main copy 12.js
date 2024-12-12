@@ -91,10 +91,8 @@ const my_sheet = create(
       },
       */
     },
-    
     create("css-keyframe", { 0: {translate: "150vw 0", scale: "200% 1"} }),
     create("css-keyframe", { frame: 100, translate: "0 0", scale: "100% 1" }),
-    
   )
 );
 

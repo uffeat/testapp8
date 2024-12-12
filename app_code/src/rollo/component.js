@@ -20,6 +20,7 @@ import {
 } from "rollo/factories/__factories__";
 import { can_have_shadow } from "rollo/utils/can_have_shadow";
 import { is_node } from "rollo/utils/is_node";
+import { assign } from "rollo/utils/assign";
 
 /* Utility for authoring web components and instantiating elements. */
 export const Component = new (class {
@@ -88,32 +89,20 @@ export const Component = new (class {
       chain.push(cls);
     }
 
-    const __chain__ = Object.freeze(chain.reverse());
-    Object.defineProperty(cls.prototype, "__chain__", {
-      configurable: true,
-      enumerable: false,
-      get: function () {
-        return __chain__;
-      },
-    });
-
-    const __config__ = Object.freeze(config || {});
-    Object.defineProperty(cls.prototype, "__config__", {
-      configurable: true,
-      enumerable: false,
-      get: function () {
-        return __config__;
-      },
-    });
-
-    const __factories__ = Object.freeze(factories.reverse());
-    Object.defineProperty(cls.prototype, "__factories__", {
-      configurable: true,
-      enumerable: false,
-      get: function () {
-        return __factories__;
-      },
-    });
+    assign(cls.prototype, (class Meta {
+      static __chain__ = Object.freeze(chain.reverse());
+      static __config__ = Object.freeze(config || {});
+      static __factories__ = Object.freeze(factories.reverse());
+      get __chain__() {
+        return Meta.__chain__
+      }
+      get __config__() {
+        return Meta.__config__
+      }
+      get __factories__() {
+        return Meta.__factories__
+      }
+    }).prototype)
 
     return this.registry.add(tag, cls);
   };

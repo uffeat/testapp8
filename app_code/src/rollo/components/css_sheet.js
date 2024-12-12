@@ -15,9 +15,6 @@ import { Rules } from "rollo/components/utils/rules";
 /* Non-visual web component for managing dynamically applied sheets. 
 
 
-TODO
-Mention state_to_native re disabled
-
 
 */
 const css_sheet = (parent) => {

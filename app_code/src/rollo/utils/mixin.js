@@ -1,4 +1,4 @@
-/* Assigns members from prototype of source to target.
+/* Assigns members from source to target.
 Useful for adding props to a component instance/element. */
 export const mixin = (target, source) => {
   for (const [name, descriptor] of Object.entries(

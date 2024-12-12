@@ -7,13 +7,13 @@ import {
   descendants,
   events,
   hooks,
+  item_to_attribute,
+  item_to_native,
+  items,
   observer,
   parent,
   properties,
-  reactive,
   shadow,
-  state_to_attribute,
-  state_to_native,
   tags,
   text,
   uid,
@@ -32,14 +32,18 @@ export const Component = new (class {
     add = (tag, cls) => {
       if (tag.includes("-")) {
         customElements.define(tag, cls);
-        import.meta.env.DEV && console.info(`Registered autonomous web component with tag '${tag}'.`);
+        import.meta.env.DEV &&
+          console.info(
+            `Registered autonomous web component with tag '${tag}'.`
+          );
       } else {
         customElements.define(`native-${tag}`, cls, {
           extends: tag,
         });
-        import.meta.env.DEV && console.info(
-          `Registered non-autonomous web component extended from '${tag}'.`
-        );
+        import.meta.env.DEV &&
+          console.info(
+            `Registered non-autonomous web component extended from '${tag}'.`
+          );
       }
       this.#registry[tag] = cls;
       return cls;
@@ -83,6 +87,11 @@ export const Component = new (class {
       names.push(cls.name);
       chain.push(cls);
     }
+
+    /*
+    TODO
+    - Use custom assign
+    */
 
     const __chain__ = Object.freeze(chain.reverse());
     Object.defineProperty(cls.prototype, "__chain__", {
@@ -130,18 +139,16 @@ export const Component = new (class {
       return this.create_from_object(arg);
     }
     const [tag, ...css_classes] = arg.split(".");
-    const element = new (this.get(tag))({ config, parent, ...updates }, ...hooks);
+    const element = new (this.get(tag))(
+      { config, parent, ...updates },
+      ...hooks
+    );
     if (css_classes.length > 0) {
       element.classList.add(...css_classes);
     }
     /* Identify non-autonomous components as web component */
     if (!tag.includes("-")) {
       element.setAttribute("web-component", "");
-    }
-    /* Add CSS classes from hooks */
-    if (element.__factories__ && element.__factories__.includes(css_classes)) {
-      element.css_classes.add(...hooks.filter(element.css_classes.is));
-      hooks = hooks.filter((hook) => !element.css_classes.is(hook));
     }
     /* Call the 'update' lifecycle method */
     element.update && element.update(updates);
@@ -199,8 +206,6 @@ export const Component = new (class {
 /* Short-hand */
 export const create = Component.create;
 
-
-
 /* Add factories */
 Component.factories.add(attribute);
 Component.factories.add(chain);
@@ -210,32 +215,20 @@ Component.factories.add(connected);
 Component.factories.add(descendants);
 Component.factories.add(events);
 Component.factories.add(hooks);
+Component.factories.add(item_to_attribute);
+Component.factories.add(item_to_native);
+Component.factories.add(items);
 /* TODO
 Consider not using observer as a standard factory. currently not used.  */
 Component.factories.add(observer);
 Component.factories.add(parent);
 Component.factories.add(properties);
-Component.factories.add(reactive);
 /* TODO
 Consider not using shadow as a standard factory. currently not used.  */
 Component.factories.add(shadow, can_have_shadow);
-Component.factories.add(state_to_attribute);
-Component.factories.add(state_to_native);
 Component.factories.add(tags);
 Component.factories.add(text, (tag) => {
   const element = document.createElement(tag);
   return "textContent" in element;
 });
 Component.factories.add(uid);
-
-
-const web_component = (parent) => {
-  const cls = class WebComponent extends parent {
-    constructor() {
-      super();
-    }
-  };
-  return cls;
-};
-
-Component.author("web-component", HTMLElement, {}, web_component);
