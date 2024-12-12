@@ -2,14 +2,12 @@ import { Component } from "rollo/component";
 import {
   attribute,
   connected,
-  descendants,
   hooks,
   name,
   properties,
   reactive,
   state_to_attribute,
   state_to_native,
-  tags,
   uid,
 } from "rollo/factories/__factories__";
 import { Rules } from "rollo/components/utils/rules";
@@ -137,14 +135,12 @@ Component.author(
   {},
   attribute,
   connected,
-  descendants,
   hooks,
   name,
   properties,
   reactive,
   state_to_attribute,
   state_to_native,
-  tags,
   uid,
   css_media
 );

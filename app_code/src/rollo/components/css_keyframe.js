@@ -3,14 +3,10 @@ import { Component } from "rollo/component";
 import {
   attribute,
   connected,
-  descendants,
   hooks,
-  name,
   properties,
   reactive,
-  state_to_attribute,
   state_to_native,
-  tags,
   uid,
 } from "rollo/factories/__factories__";
 
@@ -32,21 +28,72 @@ const css_keyframe = (parent) => {
       super.created_callback && super.created_callback(config);
       this.style.display = "none";
 
+      /* Effect to control items. */
+      const items_effect = (data) => {
+        const style = this.rule.style;
+        for (const [key, { current }] of Object.entries(data)) {
+          if (current === false) {
+            /* false is a cue to remove */
+            style.removeProperty(key);
+          } else {
+            /* Update rule */
+            if (current.endsWith("!important")) {
+              style.setProperty(
+                key,
+                value.slice(0, -"!important".length),
+                "important"
+              );
+            } else {
+              style.setProperty(key, current);
+            }
+          }
+          /* Sync to attribute */
+          this.attribute[key] = current;
+        }
+      };
+
+      /* Effect to control frame */
+      const frame_effect = (data) => {
+        this.rule.keyText = `${this.frame}%`;
+        /* Sync to attribute */
+        this.attribute.frame = this.frame;
+      };
+
       /* Add effect to handle target */
       this.effects.add((data) => {
         const current = data.target.current;
         const previous = data.target.previous;
         /* Disengage from any previous target */
         if (previous) {
-          ////previous.rules && previous.rules.remove(this.rule);
+          /* Remove rule from previous target */
+          previous.rules && previous.rules.remove(this.rule);
+          /* Reset rule */
+          this.#rule = null;
+          /* Remove effects */
+          this.effects.remove(frame_effect);
+          this.#items.effects.remove(items_effect);
         }
         /* Engage with any current target */
         if (current) {
           if (!current.rules) {
             throw new Error(`Target does not have rules.`);
           }
-          /* Create an add rule without items */
-          this.#rule = current.rules.add(this.text);
+          //
+          /* Create an add rule without items??????? Perhaps it really should be empty??? */
+          /*
+          TODO
+          Do this from effect?? */
+          //
+          //
+          //
+          ////this.#rule = current.rules.add({frame: this.frame, items: this.items,});
+          this.#rule = current.rules.add(this.frame);
+          //
+          //
+          //
+          /* Add effects */
+          this.effects.add(frame_effect, "frame");
+          this.#items.effects.add(items_effect);
         }
       }, "target");
       /* Add effect to set target from live DOM */
@@ -65,6 +112,21 @@ const css_keyframe = (parent) => {
     }
     /* Sets frame state. */
     set frame(frame) {
+      if (frame === "from") {
+        frame = 0;
+      } else if (frame === "to") {
+        frame = 100;
+      }
+      if (typeof frame !== "number") {
+        throw new Error(`'frame' should be a number. Got: ${frame}`);
+      }
+      if (frame < 0) {
+        throw new Error(`'frame' cannot be negative. Got: ${frame}`);
+      } else if (frame > 100) {
+        throw new Error(
+          `'frame' should be less than or equal to 100. Got: ${frame}`
+        );
+      }
       this.$.frame = frame;
     }
 
@@ -135,7 +197,10 @@ const css_keyframe = (parent) => {
 
     /* Returns text representation of rule. */
     get text() {
-      if (![null, undefined].includes(this.frame) && Object.keys(this.items).length > 0) {
+      if (
+        ![null, undefined].includes(this.frame) &&
+        Object.keys(this.items).length > 0
+      ) {
         return `${this.frame}% { ${Object.entries(this.items)
           .map(([key, value]) => `${camel_to_kebab(key)}: ${value};`)
           .join(" ")} }`;
@@ -145,9 +210,13 @@ const css_keyframe = (parent) => {
     update(updates = {}) {
       super.update && super.update(updates);
 
+      /*
+      TODO
+      Allow block declaration (frame and items in one go)
+      */
+
       /* Update items */
       this.#items.update(updates);
-      
 
       return this;
     }
@@ -167,14 +236,14 @@ Component.author(
   {},
   attribute,
   connected,
-  
+
   hooks,
-  
+
   properties,
   reactive,
-  state_to_attribute,
+
   state_to_native,
- 
+
   uid,
   css_keyframe
 );

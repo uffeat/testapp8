@@ -79,6 +79,7 @@ const my_sheet = create(
     {
       name: "slide_in",
 
+      /*
       from: {
         translate: "150vw 0",
         scale: "200% 1",
@@ -88,26 +89,40 @@ const my_sheet = create(
         translate: "0 0",
         scale: "100% 1",
       },
+      */
     },
     create("css-keyframe", { frame: 0, translate: "150vw 0", scale: "200% 1" }),
-    create("css-keyframe", { frame: 100, translate: "0 0", scale: "100% 1" })
+    create("css-keyframe", { frame: 100, translate: "0 0", scale: "100% 1" }),
+    
   )
 );
 
 const my_media = my_sheet.querySelector("css-media");
 const my_rule = my_sheet.querySelector("css-rule");
 const slide_in = my_sheet.querySelector("css-keyframes");
-const css_keyframe_0 = my_sheet.querySelector('css-keyframe[state-frame="0"]');
+const css_keyframe_0 = my_sheet.querySelector('css-keyframe[frame="0"]');
+const css_keyframe_100 = my_sheet.querySelector(
+  'css-keyframe[frame="100"]'
+);
 
-console.log("css_keyframe_0.items:", css_keyframe_0.items);////
-console.log("css_keyframe_0.frame:", css_keyframe_0.frame);////
-console.log("css_keyframe_0.text:", css_keyframe_0.text);////
+css_keyframe_100.update({scale: "10% 1"})
 
+
+////console.dir(css_keyframe_0.rule.style); ////
+
+
+//css_keyframe_0.frame = 50
+
+////console.log("css_keyframe_0.rule:", css_keyframe_0.rule);////
+//slide_in.rules.remove(css_keyframe_0.rule)
 
 
 
 ////console.log("slide_in:", slide_in.rule);////
 
+//console.dir(slide_in.rule)////
+
+//console.log('Found rule', slide_in.rule.findRule('0%'))
 
 /*
 slide_in.rule.appendRule(`

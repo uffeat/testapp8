@@ -1,15 +1,14 @@
+import { camel_to_kebab } from "rollo/utils/case";
 import { Component } from "rollo/component";
 import {
   attribute,
   connected,
-  descendants,
   hooks,
   name,
   properties,
   reactive,
   state_to_attribute,
   state_to_native,
-  tags,
   uid,
 } from "rollo/factories/__factories__";
 
@@ -33,7 +32,7 @@ export class Rules {
     return this.#owner;
   }
 
-  /* Returns css rules list as an arry. */
+  /* Returns css rules list as an array. */
   get rules() {
     return [...this.owner.cssRules];
   }
@@ -44,14 +43,47 @@ export class Rules {
   }
 
   /* Creates, appends and returns rule. */
-  add(text) {
+  XXXadd({ frame, items }) {
+    const text = `${frame}% { ${Object.entries(items)
+      .map(([key, value]) => `${camel_to_kebab(key)}: ${value};`)
+      .join(" ")} }`;
     this.owner.appendRule(text);
-    return this.owner.findRule(text);
+    return this.owner.findRule(`${frame}%`);
+  }
+
+  /* Creates, appends and returns rule. */
+  add(frame) {
+    
+    this.owner.appendRule(`${frame}% {}`);
+    return this.owner.findRule(`${frame}%`);
+  }
+
+  /* Returns rule from frame. */
+  find(frame) {
+    frame = `${frame}%`
+    for (const rule of this.owner.cssRules) {
+      if (rule.keyText === frame) {
+        return rule;
+      }
+    }
   }
 
   /* Deletes rule. */
-  remove(text) {
-    this.owner.deleteRule(text);
+  remove(rule) {
+    const key_text = rule.keyText
+    for (const rule of this.rules) {
+      if (rule.keyText === key_text) {
+        this.owner.deleteRule(key_text);
+      }
+      
+    }
+
+    
+  }
+
+  /* Deletes rule. */
+  XXXremove(frame) {
+    this.owner.deleteRule(`${frame}%`);
   }
 }
 
@@ -152,14 +184,12 @@ Component.author(
   {},
   attribute,
   connected,
-  descendants,
   hooks,
   name,
   properties,
   reactive,
   state_to_attribute,
   state_to_native,
-  tags,
   uid,
   css_keyframes
 );

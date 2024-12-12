@@ -3,14 +3,12 @@ import { Component, create } from "rollo/component";
 import {
   attribute,
   connected,
-  descendants,
   hooks,
   name,
   properties,
   reactive,
   state_to_attribute,
   state_to_native,
-  tags,
   uid,
 } from "rollo/factories/__factories__";
 
@@ -110,7 +108,9 @@ const css_rule = (parent) => {
         const previous = data.target.previous;
         /* Disengage from any previous target */
         if (previous) {
+          /* Remove rule from previous target */
           previous.rules && previous.rules.remove(this.rule);
+          /* Reset rule */
           this.#rule = null;
           /* Remove effect to control selector */
           this.effects.add(selector_effect);
@@ -288,14 +288,12 @@ Component.author(
   {},
   attribute,
   connected,
-  descendants,
   hooks,
   name,
   properties,
   reactive,
   state_to_attribute,
   state_to_native,
-  tags,
   uid,
   css_rule
 );

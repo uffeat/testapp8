@@ -21,7 +21,7 @@ export class Rules {
     return this.#owner;
   }
 
-  /* Returns css rules list as an arry. */
+  /* Returns css rules list as an array. */
   get rules() {
     return [...this.owner.cssRules];
   }
