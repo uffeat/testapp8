@@ -25,7 +25,7 @@ export const state_to_attribute = (parent, config, ...factories) => {
       /* Show state as attribute */
       this.effects.add((data) => {
         for (let [key, { current, previous }] of Object.entries(data)) {
-          if (key.startsWith(constants.NATIVE)) {
+          if (typeof key === 'string' && key.startsWith(constants.NATIVE)) {
             continue;
           }
           key = `state-${key}`;

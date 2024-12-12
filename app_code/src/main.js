@@ -91,11 +91,14 @@ const my_sheet = create(
       },
       */
     },
-    create("css-keyframe", { frame: 0, translate: "150vw 0", scale: "200% 1" }),
+    
+    create("css-keyframe", { 0: {translate: "150vw 0", scale: "200% 1"} }),
     create("css-keyframe", { frame: 100, translate: "0 0", scale: "100% 1" }),
     
   )
 );
+
+
 
 const my_media = my_sheet.querySelector("css-media");
 const my_rule = my_sheet.querySelector("css-rule");
@@ -108,7 +111,7 @@ const css_keyframe_100 = my_sheet.querySelector(
 css_keyframe_100.update({scale: "10% 1"})
 
 
-////console.dir(css_keyframe_0.rule.style); ////
+//console.log("css_keyframe_0.text:", css_keyframe_0.text);////
 
 
 //css_keyframe_0.frame = 50

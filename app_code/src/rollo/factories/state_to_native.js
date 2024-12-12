@@ -25,7 +25,7 @@ export const state_to_native = (parent, config, ...factories) => {
       this.effects.add((data) => {
         const updates = {};
         for (const [key, { current, previous }] of Object.entries(data)) {
-          if (key && key.startsWith(constants.NATIVE)) {
+          if (typeof key === 'string' && key.startsWith(constants.NATIVE)) {
             updates[key.slice(constants.NATIVE.length)] = current;
           }
         }

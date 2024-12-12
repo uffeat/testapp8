@@ -30,6 +30,8 @@ const css_keyframe = (parent) => {
 
       /* Effect to control items. */
       const items_effect = (data) => {
+        
+
         const style = this.rule.style;
         for (const [key, { current }] of Object.entries(data)) {
           if (current === false) {
@@ -54,6 +56,7 @@ const css_keyframe = (parent) => {
 
       /* Effect to control frame */
       const frame_effect = (data) => {
+        
         this.rule.keyText = `${this.frame}%`;
         /* Sync to attribute */
         this.attribute.frame = this.frame;
@@ -78,19 +81,8 @@ const css_keyframe = (parent) => {
           if (!current.rules) {
             throw new Error(`Target does not have rules.`);
           }
-          //
-          /* Create an add rule without items??????? Perhaps it really should be empty??? */
-          /*
-          TODO
-          Do this from effect?? */
-          //
-          //
-          //
-          ////this.#rule = current.rules.add({frame: this.frame, items: this.items,});
+          /* Create an add rule without items? */
           this.#rule = current.rules.add(this.frame);
-          //
-          //
-          //
           /* Add effects */
           this.effects.add(frame_effect, "frame");
           this.#items.effects.add(items_effect);
@@ -117,7 +109,10 @@ const css_keyframe = (parent) => {
       } else if (frame === "to") {
         frame = 100;
       }
-      if (typeof frame !== "number") {
+      if (typeof frame === "string") {
+        frame = Number(frame);
+      }
+      if (typeof frame !== "number" || frame !== frame) {
         throw new Error(`'frame' should be a number. Got: ${frame}`);
       }
       if (frame < 0) {
@@ -197,6 +192,9 @@ const css_keyframe = (parent) => {
 
     /* Returns text representation of rule. */
     get text() {
+      if (this.rule) {
+        return this.rule.cssText;
+      }
       if (
         ![null, undefined].includes(this.frame) &&
         Object.keys(this.items).length > 0
@@ -210,10 +208,28 @@ const css_keyframe = (parent) => {
     update(updates = {}) {
       super.update && super.update(updates);
 
-      /*
-      TODO
-      Allow block declaration (frame and items in one go)
-      */
+      //
+      //
+      //
+      /* Allow setting frame and items in one go */
+      Object.entries(updates)
+        .filter(
+          ([key, value]) => !(key in this) && typeof value === "object"
+        )
+        .map(([key, value]) => ({ frame: key, items: value }))
+        .forEach(({ frame, items }) => {
+
+          
+         
+
+
+
+          this.frame = frame;
+          this.#items.update(items);
+        });
+      //
+      //
+      //
 
       /* Update items */
       this.#items.update(updates);

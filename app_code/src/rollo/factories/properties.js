@@ -12,7 +12,7 @@ export const properties = (parent, config, ...factories) => {
       super.update && super.update(updates);
       /* Updates properties */
       Object.entries(updates)
-        .filter(([key, value]) => key in this || key.startsWith("_"))
+        .filter(([key, value]) => key in this || typeof key === 'string' && key.startsWith("_"))
         .forEach(([key, value]) => (this[key] = value));
       return this;
     }

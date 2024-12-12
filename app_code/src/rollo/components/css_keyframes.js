@@ -42,49 +42,27 @@ export class Rules {
     return this.owner.cssRules.length;
   }
 
-  /* Creates, appends and returns rule. */
-  XXXadd({ frame, items }) {
-    const text = `${frame}% { ${Object.entries(items)
-      .map(([key, value]) => `${camel_to_kebab(key)}: ${value};`)
-      .join(" ")} }`;
-    this.owner.appendRule(text);
-    return this.owner.findRule(`${frame}%`);
-  }
 
-  /* Creates, appends and returns rule. */
+
+  /* Creates, appends and returns rule without items. */
   add(frame) {
-    
     this.owner.appendRule(`${frame}% {}`);
     return this.owner.findRule(`${frame}%`);
   }
 
-  /* Returns rule from frame. */
-  find(frame) {
-    frame = `${frame}%`
-    for (const rule of this.owner.cssRules) {
-      if (rule.keyText === frame) {
-        return rule;
-      }
-    }
-  }
+  
 
   /* Deletes rule. */
   remove(rule) {
-    const key_text = rule.keyText
+    const key_text = rule.keyText;
     for (const rule of this.rules) {
       if (rule.keyText === key_text) {
         this.owner.deleteRule(key_text);
       }
-      
     }
-
-    
   }
 
-  /* Deletes rule. */
-  XXXremove(frame) {
-    this.owner.deleteRule(`${frame}%`);
-  }
+  
 }
 
 /* Non-visual web component for controlling CSS media rules of parent component's sheet.
@@ -117,10 +95,7 @@ const css_keyframes = (parent) => {
           previous.rules && previous.rules.remove(this.rule);
           /* Reset rule and rules */
           this.#rule = this.#rules = null;
-          /* Remove effects */
-          /*
-          TODO
-          */
+          
         }
         /* Engage with any current target */
         if (current) {
@@ -131,10 +106,7 @@ const css_keyframes = (parent) => {
           this.#rule = current.rules.add(`@keyframes ${this.name}`);
           /* Create rules for children to engage with */
           this.#rules = Rules.create(this.#rule);
-          /* Add effects */
-          /*
-          TODO
-          */
+          
         }
       }, "target");
       /* Add effect to set target from live DOM */

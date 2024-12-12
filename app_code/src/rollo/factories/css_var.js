@@ -39,7 +39,7 @@ export const css_var = (parent, config, ...factories) => {
       super.update && super.update(updates);
       /* Update css vars */
       Object.entries(updates)
-        .filter(([key, value]) => key.startsWith(constants.CSS_VAR))
+        .filter(([key, value]) => typeof key === 'string' && key.startsWith(constants.CSS_VAR))
         .forEach(
           ([key, value]) =>
             (this.__[key.slice(constants.CSS_VAR.length)] = value)

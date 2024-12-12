@@ -58,7 +58,7 @@ export const attribute = (parent, config, ...factories) => {
       super.update && super.update(updates);
       /* Update attributes */
       Object.entries(updates)
-        .filter(([key, value]) => key.startsWith(constants.ATTRIBUTE))
+        .filter(([key, value]) => typeof key === 'string' && key.startsWith(constants.ATTRIBUTE))
         .forEach(
           ([key, value]) =>
             (this.attribute[key.slice(constants.ATTRIBUTE.length)] = value)
