@@ -7,13 +7,13 @@ import {
   descendants,
   events,
   hooks,
+  item_to_attribute,
+  item_to_native,
+  items,
   observer,
   parent,
   properties,
-  reactive,
   shadow,
-  state_to_attribute,
-  state_to_native,
   tags,
   text,
   uid,
@@ -210,17 +210,17 @@ Component.factories.add(connected);
 Component.factories.add(descendants);
 Component.factories.add(events);
 Component.factories.add(hooks);
+Component.factories.add(item_to_attribute);
+Component.factories.add(item_to_native);
+Component.factories.add(items);
 /* TODO
 Consider not using observer as a standard factory. currently not used.  */
 Component.factories.add(observer);
 Component.factories.add(parent);
 Component.factories.add(properties);
-Component.factories.add(reactive);
 /* TODO
 Consider not using shadow as a standard factory. currently not used.  */
 Component.factories.add(shadow, can_have_shadow);
-Component.factories.add(state_to_attribute);
-Component.factories.add(state_to_native);
 Component.factories.add(tags);
 Component.factories.add(text, (tag) => {
   const element = document.createElement(tag);
@@ -229,13 +229,3 @@ Component.factories.add(text, (tag) => {
 Component.factories.add(uid);
 
 
-const web_component = (parent) => {
-  const cls = class WebComponent extends parent {
-    constructor() {
-      super();
-    }
-  };
-  return cls;
-};
-
-Component.author("web-component", HTMLElement, {}, web_component);

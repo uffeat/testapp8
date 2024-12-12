@@ -4,10 +4,13 @@ import {
   connected,
   descendants,
   hooks,
-  items,
   name,
   properties,
+  reactive,
   sheet,
+  state_to_attribute,
+  state_to_native,
+  tags,
   uid,
 } from "rollo/factories/__factories__";
 import { Rules } from "rollo/components/utils/rules";
@@ -66,10 +69,13 @@ Component.author(
   connected,
   descendants,
   hooks,
-  items,
   name,
   properties,
+  reactive,
   sheet,
+  state_to_attribute,
+  state_to_native,
+  tags,
   uid,
   css_sheet
 );

@@ -1,10 +1,10 @@
 import { check_factories } from "rollo/utils/check_factories";
-import { attribute, events } from "rollo/factories/__factories__";
+import { attribute, events, items } from "rollo/factories/__factories__";
 
 /* Factory with MutationsObserver for observing element children. */
 export const observer = (parent, config, ...factories) => {
   /* Check factory dependencies */
-  check_factories([attribute, events], factories);
+  check_factories([attribute, events, items], factories);
 
   const cls = class Observer extends parent {
     /* Only available during creation. 
@@ -62,10 +62,10 @@ export const observer = (parent, config, ...factories) => {
               .filter(
                 (node) =>
                   node instanceof HTMLElement &&
-                  node.hasAttribute("web-component")
+                ('items' in node)
               )
               .forEach((node) => {
-                node.$.parent = this.#owner;
+                node.items.$.parent = this.#owner;
 
                 this.#owner.send("child_added", {
                   detail: { added_child: node },
@@ -75,10 +75,10 @@ export const observer = (parent, config, ...factories) => {
               .filter(
                 (node) =>
                   node instanceof HTMLElement &&
-                  node.hasAttribute("web-component")
+                  ('items' in node)
               )
               .forEach((node) => {
-                node.$.parent = null;
+                node.items.$.parent = null;
 
                 this.#owner.send("child_removed", {
                   detail: { removed_child: node },

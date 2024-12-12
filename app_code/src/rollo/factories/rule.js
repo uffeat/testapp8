@@ -9,15 +9,15 @@ import {
   attribute,
   connected,
   properties,
-  reactive,
-  state_to_attribute,
+  items,
+  item_to_attribute,
 } from "rollo/factories/__factories__";
 
 /* . */
 export const rule = (parent, config, ...factories) => {
   /* Check factory dependencies */
   check_factories(
-    [attribute, connected, properties, reactive, state_to_attribute],
+    [attribute, connected, items, properties, item_to_attribute],
     factories
   );
 
@@ -96,12 +96,11 @@ export const rule = (parent, config, ...factories) => {
       this.style.display = "none";
 
       /* Set/unset sheet on connect/disconnect */
-      this.effects.add((data) => {
-        if (this.$.connected) {
+      this.items.effects.add((data) => {
+        if (this.items.$.connected) {
           if (!this.parentElement.sheet) {
             throw new Error(`Parent element does not have a sheet.`);
           }
-
           this.sheet = this.parentElement.sheet;
         } else {
           this.#sheet = null;

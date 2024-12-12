@@ -40,7 +40,6 @@ my_rule.effects.add((changes, previous) => {
 
 
 my_rule.update({color: 'green'})
-my_rule.$.color = 'brown'
 
 
 /* Enable tests */
