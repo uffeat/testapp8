@@ -1,14 +1,10 @@
 import { check_factories } from "rollo/utils/check_factories";
-import { attribute, connected, items } from "rollo/factories/__factories__";
+import { sheet } from "rollo/components/css/factories/sheet";
 
-/* Factory that wraps a constructed sheet.
-Responsibilities:
-- Adoption to/unadoption from a single target.
-- Control sheet's 'disabled' state.
-NOT concerned with sheet content. */
-export const sheet = (parent, config, ...factories) => {
+/* . */
+export const static_sheet = (parent, config, ...factories) => {
   /* Check factory dependencies */
-  check_factories([attribute, connected, items], factories);
+  check_factories([sheet], factories);
 
   const cls = class Sheet extends parent {
     /* Only available during creation. 
@@ -20,6 +16,12 @@ export const sheet = (parent, config, ...factories) => {
     - before live DOM connection */
     created_callback(config) {
       super.created_callback && super.created_callback(config);
+      if (config) {
+        /* TODO
+        Use config to create static sheet from config object
+        */
+        
+      }
       
     }
 
