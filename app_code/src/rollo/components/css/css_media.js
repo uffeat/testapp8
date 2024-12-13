@@ -8,7 +8,10 @@ import {
   properties,
   uid,
 } from "rollo/factories/__factories__";
-import { Rules } from "rollo/components/utils/rules";
+import { Rules } from "rollo/components/css/utils/rules";
+import { rule } from "rollo/components/css/factories/rule";
+import { target } from "rollo/components/css/factories/target";
+import { text } from "rollo/components/css/factories/text";
 
 /* Non-visual web component for controlling CSS media rules of parent component's sheet.
 
@@ -33,46 +36,34 @@ const css_media = (parent) => {
       /* Effect to control media */
       const media_effect = () => {
         if (this.rule) {
+          /* Warn */
+          if (import.meta.env.DEV && !this.media) {
+            console.warn(`'media' not set.`);
+          }
           this.rule.media.mediaText = this.media;
         }
         /* Sync to attribute */
         this.attribute.media = this.media;
       };
-      /* Add effect to handle target */
+
+      /* Add effect to control media_effect */
       this.effects.add((changes, previous) => {
-        /* Disengage from any previous target */
-        if (previous.target) {
-          previous.target.rules && previous.target.rules.remove(this.rule);
-          /* Reset rule and rules */
-          this.#rule = this.#rules = null;
-          /* Remove effect to control media */
+        if (this.rule) {
+          this.effects.add(media_effect, "media");
+        } else {
           this.effects.remove(media_effect);
         }
-        /* Engage with any current target */
-        if (this.target) {
-          if (!this.target.rules) {
-            throw new Error(`Target does not have rules.`);
-          }
-          /* Create an add rule without items */
-          this.#rule = this.target.rules.add(`@media`);
+      }, "rule");
+
+      /* Add effect to control rules */
+      this.effects.add((changes, previous) => {
+        if (this.rule) {
           /* Create rules for children to engage with */
-          this.#rules = Rules.create(this.#rule);
-          /* Warn */
-          if (import.meta.env.DEV && !this.media) {
-            console.warn(`'media' not set.`);
-          }
-          /* Add effect to control media */
-          this.effects.add(media_effect, "media");
-        }
-      }, "target");
-      /* Add effect to set target from live DOM */
-      this.effects.add(() => {
-        if (this.connected) {
-          this.target = this.parentElement;
+          this.$.rules = Rules.create(this.rule);
         } else {
-          this.target = null;
+          this.$.rules = null;
         }
-      }, "connected");
+      }, "rule");
     }
 
     /* Returns rule medium state. */
@@ -93,32 +84,9 @@ const css_media = (parent) => {
       this.$.media = media;
     }
 
-    /* Returns CSS rule. */
-    get rule() {
-      return this.#rule;
-    }
-    #rule;
-
     /* Returns rules controller, if target. */
     get rules() {
-      return this.#rules;
-    }
-    #rules;
-
-    /* Returns target state. */
-    get target() {
-      return this.$.target;
-    }
-    /* Sets target state. */
-    set target(target) {
-      this.$.target = target;
-    }
-
-    /* Returns text representation of rule. */
-    get text() {
-      if (this.rule) {
-        return this.rule.cssText;
-      }
+      return this.$.rules;
     }
   };
 
@@ -135,6 +103,9 @@ Component.author(
   items,
   name,
   properties,
+  rule,
+  target,
+  text,
   uid,
   css_media
 );

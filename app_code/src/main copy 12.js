@@ -2,11 +2,11 @@ import "./bootstrap.scss";
 import "./main.css";
 import { create } from "rollo/component";
 
-await import("rollo/components/css_media");
-await import("rollo/components/css_rule");
-await import("rollo/components/css_sheet");
-await import("rollo/components/css_keyframes");
-await import("rollo/components/css_keyframe");
+await import("@/rollo/components/css/css_media");
+await import("@/rollo/components/css/css_rule");
+await import("@/rollo/components/css/css_sheet");
+await import("@/rollo/components/css/css_keyframes");
+await import("@/rollo/components/css/css_keyframe");
 
 // TODO
 // ... then nav bar

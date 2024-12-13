@@ -1,4 +1,3 @@
-import { camel_to_kebab } from "rollo/utils/case";
 import { Component } from "rollo/component";
 import {
   attribute,
@@ -11,8 +10,9 @@ import {
   properties,
   uid,
 } from "rollo/factories/__factories__";
-
-
+import { rule } from "rollo/components/css/factories/rule";
+import { target } from "rollo/components/css/factories/target";
+import { text } from "rollo/components/css/factories/text";
 
 /* Non-visual web component for controlling CSS media rules of parent component's sheet.
 
@@ -34,62 +34,28 @@ const css_keyframes = (parent) => {
     created_callback(config) {
       super.created_callback && super.created_callback(config);
       this.style.display = "none";
-      /* Add effect to handle target */
+
+      /* Add effect to control rules */
       this.effects.add((changes, previous) => {
-        /* Disengage from any previous target */
-        if (previous.target) {
-          previous.target.rules && previous.target.rules.remove(this.rule);
-          /* Reset rule and rules */
-          this.#rule = this.#rules = null;
-        }
-        /* Engage with any current target */
-        if (this.target) {
-          if (!this.target.rules) {
-            throw new Error(`Target does not have rules.`);
-          }
-          /* Create an add rule without items */
-          this.#rule = this.target.rules.add(`@keyframes ${this.name}`);
+        if (this.rule) {
           /* Create rules for children to engage with */
-          this.#rules = Rules.create(this.#rule);
-        }
-      }, "target");
-      /* Add effect to set target from live DOM */
-      this.effects.add(() => {
-        if (this.connected) {
-          this.target = this.parentElement;
+          this.$.rules = Rules.create(this.rule);
         } else {
-          this.target = null;
+          this.$.rules = null;
         }
-      }, "connected");
+      }, "rule");
+
+      
     }
 
-    /* Returns CSS rule. */
-    get rule() {
-      return this.#rule;
-    }
-    #rule;
+    
 
     /* Return rules controller. */
     get rules() {
-      return this.#rules;
-    }
-    #rules;
-
-    /* Returns target state. */
-    get target() {
-      return this.$.target;
-    }
-    /* Sets target state. */
-    set target(target) {
-      this.$.target = target;
+      return this.$.rules;
     }
 
-    /* Returns text representation of rule. */
-    get text() {
-      if (this.rule) {
-        return this.rule.cssText;
-      }
-    }
+    
   };
 
   return cls;
@@ -107,6 +73,9 @@ Component.author(
   items,
   name,
   properties,
+  rule,
+  target,
+  text,
   uid,
   css_keyframes
 );

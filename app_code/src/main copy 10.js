@@ -1,10 +1,10 @@
 import "./bootstrap.scss";
 import "./main.css";
 import { create } from "rollo/component";
-import "rollo/components/css_sheet";
-import "rollo/components/css_rule";
+import "@/rollo/components/css/css_sheet";
+import "@/rollo/components/css/css_rule";
 import "rollo/components/css_items";
-import "rollo/components/css_media";
+import "@/rollo/components/css/css_media";
 
 // TODO
 // ... then nav bar

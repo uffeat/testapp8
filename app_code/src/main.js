@@ -3,11 +3,11 @@ import "./main.css";
 import { create } from "rollo/component";
 
 
-await import("rollo/components/css_keyframes");
-await import("rollo/components/css_keyframe");
-await import("rollo/components/css_media");
-await import("rollo/components/css_rule");
-await import("rollo/components/css_sheet");
+await import("@/rollo/components/css/css_keyframes");
+await import("@/rollo/components/css/css_keyframe");
+await import("@/rollo/components/css/css_media");
+await import("@/rollo/components/css/css_rule");
+await import("@/rollo/components/css/css_sheet");
 
 const root = create("div", {
   id: "root",
@@ -33,7 +33,7 @@ const button = create(
   }
 );
 
-console.log(button.__chain__)
+////console.log(button.__chain__)
 
 /* Create elements to test css on */
 create("h1", { parent: root }, "Hello World");
@@ -86,8 +86,8 @@ const my_sheet = create(
     },
 
     /* TODO FIX!!! */
-    //create("css-keyframe", { 0: {translate: "150vw 0", scale: "200% 1"} }),
-    create("css-keyframe", {frame: 0, translate: "150vw 0", scale: "200% 1"}),
+    create("css-keyframe", { 0: {translate: "150vw 0", scale: "200% 1"} }),
+    //create("css-keyframe", {frame: 0, translate: "150vw 0", scale: "200% 1"}),
     create("css-keyframe", { frame: 100, translate: "0 0", scale: "100% 1" }),
   )
 );

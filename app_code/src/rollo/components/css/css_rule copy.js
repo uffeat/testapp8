@@ -9,6 +9,8 @@ import {
   properties,
   uid,
 } from "rollo/factories/__factories__";
+import { target } from "rollo/components/css/factories/target";
+import { text } from "rollo/components/css/factories/text";
 
 /* Non-visual web component for controlling CSS rule.
 Can be used in- or off-DOM.
@@ -73,6 +75,7 @@ const css_rule = (parent) => {
         /* Sync to attribute */
         this.attribute.selector = this.selector;
       };
+
       /* Effect complex to control items. */
       const items = new (class {
         #owner;
@@ -80,14 +83,15 @@ const css_rule = (parent) => {
           this.#owner = owner;
         }
         get owner() {
-          return this.#owner
+          return this.#owner;
         }
         condition = (changes) => {
           return Object.fromEntries(
             Object.entries(changes)
               .filter(
                 ([key, value]) =>
-                  this.#owner.#is_css(key) && value !== undefined
+                  this.owner.is_css(key) &&
+                  (typeof value === "string" || value === false)
               )
               .map(([key, value]) => [
                 camel_to_kebab(key.trim()),
@@ -118,6 +122,7 @@ const css_rule = (parent) => {
           }
         };
       })(this);
+
       /* Add effect to handle target */
       this.effects.add((changes, previous) => {
         /* Disengage from any previous target */
@@ -133,9 +138,6 @@ const css_rule = (parent) => {
         }
         /* Engage with any current target */
         if (this.target) {
-          if (!this.target.rules) {
-            throw new Error(`Target does not have rules.`);
-          }
           /* Create and add rule without items */
           this.#rule = this.target.rules.add(`${this.selector}`);
           /* Add effect to control selector */
@@ -144,14 +146,9 @@ const css_rule = (parent) => {
           this.effects.add(items.effect, items.condition);
         }
       }, "target");
-      /* Add effect to set target from live DOM */
-      this.effects.add((changes) => {
-        if (this.connected) {
-          this.target = this.parentElement;
-        } else {
-          this.target = null;
-        }
-      }, "connected");
+
+
+      
     }
 
     /* Returns CSS rule. */
@@ -164,7 +161,7 @@ const css_rule = (parent) => {
       this.items.update(
         Object.fromEntries(
           Object.entries(this.items.current)
-            .filter(([key, value]) => this.#is_css(key))
+            .filter(([key, value]) => this.is_css(key))
             .map(([key, value]) => [key, false])
         )
       );
@@ -197,22 +194,9 @@ const css_rule = (parent) => {
       },
     });
 
-    /* Returns target state. */
-    get target() {
-      return this.$.target;
-    }
-    /* Sets target state. */
-    set target(target) {
-      this.$.target = target;
-    }
+    
 
-    /* Returns text representation of rule.
-    NOTE Primarily for dev. */
-    get text() {
-      if (this.rule) {
-        return this.rule.cssText;
-      }
-    }
+    
 
     /* Returns component with copy of selector and items. */
     clone() {
@@ -247,11 +231,11 @@ const css_rule = (parent) => {
     }
 
     /* Checks if key is a valid CSS key. */
-    #is_css = (key) => {
+    is_css(key) {
       return (
         typeof key === "string" && (key.startsWith("--") || key in super.style)
       );
-    };
+    }
   };
 
   return cls;
@@ -267,6 +251,8 @@ Component.author(
   items,
   name,
   properties,
+  target,
+  text,
   uid,
   css_rule
 );

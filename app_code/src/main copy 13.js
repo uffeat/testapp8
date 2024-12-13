@@ -2,8 +2,8 @@ import "./bootstrap.scss";
 import "./main.css";
 import { create } from "rollo/component";
 
-await import("rollo/components/css_rule");
-await import("rollo/components/css_sheet");
+await import("@/rollo/components/css/css_rule");
+await import("@/rollo/components/css/css_sheet");
 
 const root = create("div", {
   id: "root",
