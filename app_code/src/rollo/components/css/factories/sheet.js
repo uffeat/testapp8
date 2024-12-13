@@ -1,5 +1,5 @@
 import { check_factories } from "rollo/utils/check_factories";
-import { attribute, connected } from "rollo/factories/__factories__";
+import { attribute, connected, items } from "rollo/factories/__factories__";
 
 /* Factory that wraps a constructed sheet.
 Responsibilities:
@@ -8,7 +8,7 @@ Responsibilities:
 NOT concerned with sheet content. */
 export const sheet = (parent, config, ...factories) => {
   /* Check factory dependencies */
-  check_factories([attribute, connected], factories);
+  check_factories([attribute, connected, items], factories);
 
   const cls = class Sheet extends parent {
     /* Only available during creation. 
@@ -20,7 +20,7 @@ export const sheet = (parent, config, ...factories) => {
     - before live DOM connection */
     created_callback(config) {
       super.created_callback && super.created_callback(config);
-      /* Create effect to update target */
+      /* Add effect to update target */
       this.effects.add(() => {
         if (this.connected) {
           this.target = this.getRootNode();
@@ -28,7 +28,6 @@ export const sheet = (parent, config, ...factories) => {
           this.target = null;
         }
       }, "connected");
-
       /* Add effect to unadopt from/adopt to target */
       this.effects.add((changes, previous) => {
         /* Unadopt from any previous */
@@ -44,17 +43,21 @@ export const sheet = (parent, config, ...factories) => {
           this.target.adoptedStyleSheets.push(this.sheet);
         }
       }, "target");
+      /* Add effect to control disabled */
+      this.effects.add(() => {
+        this.sheet.disabled = this.disabled;
+        /* Create one-way prop->attr reflection */
+        this.attribute.disabled = this.disabled;
+      }, "disabled");
     }
 
     /* Returns sheet's disabled state. */
     get disabled() {
-      return this.sheet.disabled;
+      return this.$.disabled;
     }
     /* Sets sheet's disabled state. */
     set disabled(disabled) {
-      this.sheet.disabled = disabled;
-      /* Create one-way prop->attr reflection */
-      this.attribute.disabled = disabled;
+      this.$.disabled = disabled;
     }
 
     /* Returns sheet. */
@@ -70,11 +73,10 @@ export const sheet = (parent, config, ...factories) => {
     /* Sets target state. */
     set target(target) {
       if (target && !target.adoptedStyleSheets) {
-        throw new Error(`Invalid target: ${target}`)
+        throw new Error(`Invalid target: ${target}`);
       }
-      this.$.target = target
+      this.$.target = target;
     }
-   
   };
   return cls;
 };

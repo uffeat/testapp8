@@ -85,12 +85,15 @@ const my_sheet = create(
       */
     },
 
-    /* TODO FIX!!! */
+   
     create("css-keyframe", { 0: {translate: "150vw 0", scale: "200% 1"} }),
     //create("css-keyframe", {frame: 0, translate: "150vw 0", scale: "200% 1"}),
     create("css-keyframe", { frame: 100, translate: "0 0", scale: "100% 1" }),
   )
 );
+
+my_sheet.disabled = true
+my_sheet.disabled = false
 
 const my_rule = my_sheet.querySelector("css-rule");
 
