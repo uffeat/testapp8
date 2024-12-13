@@ -21,13 +21,29 @@ export const sheet = (parent, config, ...factories) => {
     created_callback(config) {
       super.created_callback && super.created_callback(config);
       /* Create effect to update target */
-      this.effects.add((data) => {
-        if (this.$.connected) {
+      this.effects.add(() => {
+        if (this.connected) {
           this.target = this.getRootNode();
         } else {
           this.target = null;
         }
       }, "connected");
+
+      /* Add effect to unadopt from/adopt to target */
+      this.effects.add((changes, previous) => {
+        /* Unadopt from any previous */
+        if (previous.target) {
+          /* Perform in-place mutation to minimize flickering */
+          const index = previous.target.adoptedStyleSheets.indexOf(this.sheet);
+          if (index !== -1) {
+            previous.target.adoptedStyleSheets.splice(index, 1);
+          }
+        }
+        /* Adopt to any new */
+        if (this.target) {
+          this.target.adoptedStyleSheets.push(this.sheet);
+        }
+      }, "target");
     }
 
     /* Returns sheet's disabled state. */
@@ -47,36 +63,18 @@ export const sheet = (parent, config, ...factories) => {
     }
     #sheet = new CSSStyleSheet();
 
-    /* Returns target. */
+    /* Returns target state. */
     get target() {
-      return this.#target;
+      return this.$.target;
     }
-    /* Unadopts sheet from any previous target and adopts sheet to any new 
-    target. 
-    NOTE
-    Setting target directly is useful, if the component is not connected 
-    to the live DOM. */
+    /* Sets target state. */
     set target(target) {
-      /* Abort, if no change */
-      if (this.#target === target) {
-        return;
+      if (target && !target.adoptedStyleSheets) {
+        throw new Error(`Invalid target: ${target}`)
       }
-      /* Unadopt from any previous */
-      if (this.#target) {
-        /* Perform in-place mutation to minimize flickering */
-        const index = this.#target.adoptedStyleSheets.indexOf(this.sheet);
-        if (index !== -1) {
-          this.#target.adoptedStyleSheets.splice(index, 1);
-        }
-      }
-      /* Adopt to any new */
-      if (target) {
-        target.adoptedStyleSheets.push(this.sheet);
-      }
-      /* Update private */
-      this.#target = target;
+      this.$.target = target
     }
-    #target;
+   
   };
   return cls;
 };

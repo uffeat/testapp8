@@ -16,7 +16,7 @@ export const target = (parent, config, ...factories) => {
     created_callback(config) {
       super.created_callback && super.created_callback(config);
       /* Add effect to set target from live DOM */
-      this.effects.add((data) => {
+      this.effects.add(() => {
         if (this.connected) {
           this.target = this.parentElement;
         } else {

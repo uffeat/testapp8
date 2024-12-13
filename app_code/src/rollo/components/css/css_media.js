@@ -8,8 +8,8 @@ import {
   properties,
   uid,
 } from "rollo/factories/__factories__";
-import { Rules } from "rollo/components/css/utils/rules";
 import { rule } from "rollo/components/css/factories/rule";
+import { rules } from "rollo/components/css/factories/rules";
 import { target } from "rollo/components/css/factories/target";
 import { text } from "rollo/components/css/factories/text";
 
@@ -45,23 +45,12 @@ const css_media = (parent) => {
         /* Sync to attribute */
         this.attribute.media = this.media;
       };
-
       /* Add effect to control media_effect */
       this.effects.add((changes, previous) => {
         if (this.rule) {
           this.effects.add(media_effect, "media");
         } else {
           this.effects.remove(media_effect);
-        }
-      }, "rule");
-
-      /* Add effect to control rules */
-      this.effects.add((changes, previous) => {
-        if (this.rule) {
-          /* Create rules for children to engage with */
-          this.$.rules = Rules.create(this.rule);
-        } else {
-          this.$.rules = null;
         }
       }, "rule");
     }
@@ -83,11 +72,6 @@ const css_media = (parent) => {
       }
       this.$.media = media;
     }
-
-    /* Returns rules controller, if target. */
-    get rules() {
-      return this.$.rules;
-    }
   };
 
   return cls;
@@ -104,6 +88,7 @@ Component.author(
   name,
   properties,
   rule,
+  rules,
   target,
   text,
   uid,

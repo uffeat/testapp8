@@ -30,18 +30,12 @@ const css_keyframe = (parent) => {
     created_callback(config) {
       super.created_callback && super.created_callback(config);
       this.style.display = "none";
-
-      
-
-
-
       /* Effect to control frame */
       const frame_effect = () => {
         this.rule.keyText = `${this.frame}%`;
         /* Sync to attribute */
         this.attribute.frame = this.frame;
       };
-
       /* Add effect to control frame effect */
       this.effects.add((changes, previous) => {
         if (this.rule) {
@@ -50,8 +44,6 @@ const css_keyframe = (parent) => {
           this.effects.remove(frame_effect);
         }
       }, "rule");
-
-      
     }
 
     /* Returns frame state. */
@@ -80,8 +72,6 @@ const css_keyframe = (parent) => {
       }
       this.$.frame = frame;
     }
-
-    
 
     /* Returns text representation of rule. */
     get text() {
@@ -115,11 +105,9 @@ const css_keyframe = (parent) => {
           this.frame = frame;
           this.items.update(items);
         });
-      
+
       return this;
     }
-
-    
   };
 
   return cls;

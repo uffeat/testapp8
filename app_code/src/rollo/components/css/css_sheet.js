@@ -10,7 +10,7 @@ import {
   sheet,
   uid,
 } from "rollo/factories/__factories__";
-import { Rules } from "rollo/components/css/utils/rules";
+import { RulesController } from "rollo/components/css/utils/rules";
 
 /* Non-visual web component for managing dynamically applied sheets. 
 
@@ -38,12 +38,14 @@ const css_sheet = (parent) => {
     get rules() {
       return this.#rules;
     }
-    #rules = Rules.create(this.sheet);
+    #rules = new RulesController(this.sheet);
 
     /* Returns a text representation of the sheet.
     Primarily as a dev tool to check the sheet content. */
     get text() {
-      return this.rules.text
+      return [...this.sheet.cssRules]
+        .map((rule) => `${rule.cssText}`)
+        .join("\n");
     }
     /* Sets rules from text. */
     set text(text) {

@@ -56,7 +56,7 @@ const css_rule = (parent) => {
     constructor() {
       super();
     }
-
+    
     /* Only available during creation. 
     Called:
     - after CSS classes
@@ -153,11 +153,9 @@ const css_rule = (parent) => {
           this.selector = selector;
           this.items.update(items);
         });
-        
+
       return this;
     }
-
-    
   };
 
   return cls;

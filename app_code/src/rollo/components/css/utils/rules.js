@@ -1,18 +1,6 @@
-/* Controller for CSSRuleLists.
-Use for composition in objects with access CSSGroupingRule or CSSStyleSheet. */
-export class Rules {
-  static create = (...args) => {
-    return new Rules(...args);
-  };
-  #owner;
-
+/* Base controller for CSSRuleLists. */
+class BaseRulesController {
   constructor(owner) {
-    if (
-      !(owner instanceof CSSGroupingRule) &&
-      !(owner instanceof CSSStyleSheet)
-    ) {
-      throw new Error(`Invalid owner: ${owner}`);
-    }
     this.#owner = owner;
   }
 
@@ -20,6 +8,7 @@ export class Rules {
   get owner() {
     return this.#owner;
   }
+  #owner;
 
   /* Returns css rules list as an array. */
   get rules() {
@@ -30,11 +19,12 @@ export class Rules {
   get size() {
     return this.owner.cssRules.length;
   }
+}
 
-  /* Returns a text representation of css rules list.
-  Primarily intended as a dev tool. */
-  get text() {
-    return this.rules.map((rule) => `${rule.cssText}`).join("\n");
+/* CSSRuleLists controller for CSSGroupingRules or CSSStyleSheets. */
+export class RulesController extends BaseRulesController {
+  constructor(owner) {
+    super(owner);
   }
 
   /* Creates, appends and returns rule. */
@@ -61,6 +51,29 @@ export class Rules {
     const index = this.find(rule);
     if (index !== undefined) {
       this.owner.deleteRule(index);
+    }
+  }
+}
+
+/* CSSRuleLists controller for CSSKeyframesRules. */
+export class FrameRulesController extends BaseRulesController {
+  constructor(owner) {
+    super(owner);
+  }
+
+  /* Creates, appends and returns rule without items. */
+  add(frame) {
+    this.owner.appendRule(`${frame}% {}`);
+    return this.owner.findRule(`${frame}%`);
+  }
+
+  /* Deletes rule. */
+  remove(rule) {
+    const key_text = rule.keyText;
+    for (const rule of this.rules) {
+      if (rule.keyText === key_text) {
+        this.owner.deleteRule(key_text);
+      }
     }
   }
 }

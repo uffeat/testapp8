@@ -16,7 +16,7 @@ export { properties } from "rollo/factories/properties";
 export { events } from "rollo/factories/events";
 export { rule } from "rollo/factories/rule";
 export { shadow } from "rollo/factories/shadow";
-export { sheet } from "rollo/factories/sheet";
+export { sheet } from "@/rollo/components/css/factories/sheet";
 export { state } from "rollo/factories/state";
 export { tags } from "rollo/factories/tags";
 export { text } from "rollo/factories/text";
