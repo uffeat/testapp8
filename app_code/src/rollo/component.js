@@ -89,20 +89,23 @@ export const Component = new (class {
       chain.push(cls);
     }
 
-    assign(cls.prototype, (class Meta {
-      static __chain__ = Object.freeze(chain.reverse());
-      static __config__ = Object.freeze(config || {});
-      static __factories__ = Object.freeze(factories.reverse());
-      get __chain__() {
-        return Meta.__chain__
-      }
-      get __config__() {
-        return Meta.__config__
-      }
-      get __factories__() {
-        return Meta.__factories__
-      }
-    }).prototype)
+    assign(
+      cls.prototype,
+      class Meta {
+        static __chain__ = Object.freeze(chain.reverse());
+        static __config__ = Object.freeze(config || {});
+        static __factories__ = Object.freeze(factories.reverse());
+        get __chain__() {
+          return Meta.__chain__;
+        }
+        get __config__() {
+          return Meta.__config__;
+        }
+        get __factories__() {
+          return Meta.__factories__;
+        }
+      }.prototype
+    );
 
     return this.registry.add(tag, cls);
   };
@@ -117,27 +120,35 @@ export const Component = new (class {
   - Rich in-line configuration, incl. children and hooks.
   - Construction from objects.
   - On-demand authoring of non-autonomous web components. */
-  create = (arg, { config, parent, ...updates } = {}, ...hooks) => {
+  create = (arg, { config = {}, parent, ...updates } = {}, ...hooks) => {
     if (typeof arg !== "string") {
       /* arg is an object */
       return this.create_from_object(arg);
     }
     const [tag, ...css_classes] = arg.split(".");
-    const element = new (this.get(tag))(
-      { config, parent, ...updates },
-      ...hooks
-    );
+    let element = new (this.get(tag))();
+    /* Call the 'constructed_callback' lifecycle method */
+    if (element.constructed_callback) {
+      const result = element.constructed_callback(config)
+      /* Allow truthy result to replace element */
+      if (result) {
+        element = result
+      }
+      /* Prevent 'created_callback' from being used onwards */
+      element.constructed_callback = undefined
+    }
+    /* Add CSS classes */
     if (css_classes.length > 0) {
       element.classList.add(...css_classes);
     }
-    /* Identify non-autonomous components as web component */
-    if (!tag.includes("-")) {
+    /* Identify non-autonomous as web component */
+    if (!element.tagName.includes("-")) {
       element.setAttribute("web-component", "");
     }
     /* Call the 'update' lifecycle method */
     element.update && element.update(updates);
     /* Append children from hooks */
-    element.append(...hooks.filter(is_node));
+    element.append && element.append(...hooks.filter(is_node));
     /* Call the 'call' lifecycle method */
     element.call && element.call(...hooks);
     if (element.isConnected) {
@@ -146,9 +157,11 @@ export const Component = new (class {
       );
     }
     /* Call the 'created_callback' lifecycle method */
-    element.created_callback && element.created_callback(config);
-    /* Prevent 'created_callback' from being used onwards */
-    element.created_callback = undefined;
+    if (element.created_callback) {
+      element.created_callback && element.created_callback();
+      /* Prevent 'created_callback' from being used onwards */
+      element.created_callback = undefined;
+    }
     /* Handle parent separately to ensure that any connectedCallbacks are 
     always called AFTER any created_callbacks */
     if (parent) {
@@ -204,12 +217,12 @@ Component.factories.add(item_to_native);
 Component.factories.add(items);
 /* TODO
 Consider not using observer as a standard factory. currently not used.  */
-Component.factories.add(observer);
+//Component.factories.add(observer);
 Component.factories.add(parent);
 Component.factories.add(properties);
 /* TODO
 Consider not using shadow as a standard factory. currently not used.  */
-Component.factories.add(shadow, can_have_shadow);
+//Component.factories.add(shadow, can_have_shadow);
 Component.factories.add(tags);
 Component.factories.add(text, (tag) => {
   const element = document.createElement(tag);

@@ -16,8 +16,8 @@ export const item_to_attribute = (parent, config, ...factories) => {
     - after children
     - after 'call'
     - before live DOM connection */
-    created_callback(config) {
-      super.created_callback && super.created_callback(config);
+    created_callback() {
+      super.created_callback && super.created_callback();
       
 
       /* Show state as attribute */

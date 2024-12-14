@@ -16,8 +16,8 @@ export const item_to_native = (parent, config, ...factories) => {
     - after children
     - after 'call'
     - before live DOM connection */
-    created_callback(config) {
-      super.created_callback && super.created_callback(config);
+    created_callback() {
+      super.created_callback && super.created_callback();
       /* Set up automatic update from ItemToNative.PREFIX-prefixed state */
       this.effects.add((changes) =>
         this.update(

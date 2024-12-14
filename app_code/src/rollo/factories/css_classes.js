@@ -3,7 +3,7 @@ import { camel_to_kebab_css } from "rollo/utils/case";
 /* Factory with enhanced features for controlling css classes. */
 export const css_classes = (parent, config, ...factories) => {
   const cls = class CssClasses extends parent {
-    static PREFIX = '.'
+    static PREFIX = ".";
     /* Updates component. Chainable. 
     Called during creation:
     - after CSS classes
@@ -68,14 +68,12 @@ export const css_classes = (parent, config, ...factories) => {
       return this.#css_classes;
     }
     #css_classes = new (class {
-      
-     
       constructor(owner) {
         this.#owner = owner;
       }
 
       get owner() {
-        return this.#owner
+        return this.#owner;
       }
       #owner;
 

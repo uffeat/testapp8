@@ -14,14 +14,9 @@ export const static_sheet = (parent, config, ...factories) => {
     - after children
     - after 'call'
     - before live DOM connection */
-    created_callback(config) {
-      super.created_callback && super.created_callback(config);
-      if (config) {
-        /* TODO
-        Use config to create static sheet from config object
-        */
-        
-      }
+    created_callback() {
+      super.created_callback && super.created_callback();
+      
       
     }
 

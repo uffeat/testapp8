@@ -14,8 +14,8 @@ export const items_to_rules = (parent, config, ...factories) => {
     - after children
     - after 'call'
     - before live DOM connection */
-    created_callback(config) {
-      super.created_callback && super.created_callback(config);
+    created_callback() {
+      super.created_callback && super.created_callback();
       /* Effect complex to control items. */
       const items = new (class {
         #owner;

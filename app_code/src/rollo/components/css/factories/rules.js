@@ -15,8 +15,8 @@ export const rules = (parent, config, ...factories) => {
     - after children
     - after 'call'
     - before live DOM connection */
-    created_callback(config) {
-      super.created_callback && super.created_callback(config);
+    created_callback() {
+      super.created_callback && super.created_callback();
       /* Add effect to control rules */
       this.effects.add(() => {
         if (this.rule) {

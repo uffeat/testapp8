@@ -18,8 +18,8 @@ export const sheet = (parent, config, ...factories) => {
     - after children
     - after 'call'
     - before live DOM connection */
-    created_callback(config) {
-      super.created_callback && super.created_callback(config);
+    created_callback() {
+      super.created_callback && super.created_callback();
       /* Add effect to update target */
       this.effects.add(() => {
         if (this.connected) {

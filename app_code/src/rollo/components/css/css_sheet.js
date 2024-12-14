@@ -7,17 +7,17 @@ import {
   items,
   name,
   properties,
-  sheet,
   uid,
 } from "rollo/factories/__factories__";
 import { RulesController } from "rollo/components/css/utils/rules";
+import { sheet } from "rollo/components/css/factories/sheet";
 
 /* Non-visual web component for managing dynamically applied sheets. 
 
 
 
 */
-const css_sheet = (parent) => {
+const css_sheet = (parent, config, ...factories) => {
   const cls = class CssSheet extends parent {
     constructor() {
       super();
@@ -30,8 +30,8 @@ const css_sheet = (parent) => {
     - after children
     - after 'call'
     - before live DOM connection */
-    created_callback(config) {
-      super.created_callback && super.created_callback(config);
+    created_callback() {
+      super.created_callback && super.created_callback();
       this.style.display = "none";
     }
 

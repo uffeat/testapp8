@@ -6,6 +6,7 @@ import {
   hooks,
   item_to_native,
   items,
+  name,
   properties,
   uid,
 } from "rollo/factories/__factories__";
@@ -14,8 +15,8 @@ import { rule } from "rollo/components/css/factories/rule";
 import { target } from "rollo/components/css/factories/target";
 
 /* Non-visual web component for ...*/
-const css_keyframe = (parent) => {
-  const cls = class CssKeyframe extends parent {
+const css_frame = (parent, config, ...factories) => {
+  const cls = class CssFrame extends parent {
     constructor() {
       super();
     }
@@ -27,8 +28,8 @@ const css_keyframe = (parent) => {
     - after children
     - after 'call'
     - before live DOM connection */
-    created_callback(config) {
-      super.created_callback && super.created_callback(config);
+    created_callback() {
+      super.created_callback && super.created_callback();
       this.style.display = "none";
       /* Effect to control frame */
       const frame_effect = () => {
@@ -73,20 +74,32 @@ const css_keyframe = (parent) => {
       this.$.frame = frame;
     }
 
+    /* TODO
+    - 'rule' as in css_rule???
+    */
+
     /* Returns text representation of rule. */
     get text() {
       if (this.rule) {
         return this.rule.cssText;
       }
+      /* NOTE For dev -> performance not critical. */
       if (
         ![null, undefined].includes(this.frame) &&
-        Object.keys(this.items).length > 0
+        Object.keys(this.items.current).length
       ) {
-        return `${this.frame}% { ${Object.entries(this.items)
-          .map(([key, value]) => `${camel_to_kebab(key)}: ${value};`)
+        return `${this.frame}% { ${Object.entries(this.items.current)
+          .filter(([key, value]) => this.is_css(key))
+          .map(([key, value]) => `${key}: ${value};`)
           .join(" ")} }`;
       }
     }
+
+    /* TODO
+    - 'clone' as in css_rule???
+    */
+
+   
 
     /* Updates component. Chainable. 
     Called during creation:
@@ -114,7 +127,7 @@ const css_keyframe = (parent) => {
 };
 
 Component.author(
-  "css-keyframe",
+  "css-frame",
   HTMLElement,
   {},
   attribute,
@@ -123,9 +136,10 @@ Component.author(
   item_to_native,
   items,
   items_to_rules,
+  name,
   properties,
   rule,
   target,
   uid,
-  css_keyframe
+  css_frame
 );

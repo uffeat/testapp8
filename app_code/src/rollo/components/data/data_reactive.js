@@ -7,20 +7,15 @@ import {
   item_to_native,
   items,
   name,
+  parent,
   properties,
+  tags,
   uid,
 } from "rollo/factories/__factories__";
-import { rule } from "rollo/components/css/factories/rule";
-import { rules } from "rollo/components/css/factories/rules";
-import { target } from "rollo/components/css/factories/target";
-import { text } from "rollo/components/css/factories/text";
 
-/* Non-visual web component for controlling CSS media rules of parent component's sheet.
-
-
-*/
-const css_keyframes = (parent) => {
-  const cls = class CssKeyframes extends parent {
+/* Non-visual web component for reactive data. */
+const data_reactive = (parent) => {
+  const cls = class DataReactive extends parent {
     constructor() {
       super();
     }
@@ -32,8 +27,8 @@ const css_keyframes = (parent) => {
     - after children
     - after 'call'
     - before live DOM connection */
-    created_callback(config) {
-      super.created_callback && super.created_callback(config);
+    created_callback() {
+      super.created_callback && super.created_callback();
       this.style.display = "none";
     }
   };
@@ -42,7 +37,7 @@ const css_keyframes = (parent) => {
 };
 
 Component.author(
-  "css-keyframes",
+  "data-reactive",
   HTMLElement,
   {},
   attribute,
@@ -52,11 +47,9 @@ Component.author(
   item_to_native,
   items,
   name,
+  parent,
   properties,
-  rule,
-  rules,
-  target,
-  text,
+  tags,
   uid,
-  css_keyframes
+  data_reactive
 );

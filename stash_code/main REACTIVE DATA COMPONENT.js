@@ -1,7 +1,7 @@
 import "./bootstrap.scss";
 import "./main.css";
 import { create } from "rollo/component";
-import "@/rollo/components/data_reactive";
+import "@/rollo/components/data/data_reactive";
 import "@/rollo/components/data_sheet";
 import "@/rollo/components/data_rule";
 

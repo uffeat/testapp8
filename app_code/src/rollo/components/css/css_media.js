@@ -17,7 +17,7 @@ import { text } from "rollo/components/css/factories/text";
 
 
 */
-const css_media = (parent) => {
+const css_media = (parent, config, ...factories) => {
   const cls = class CssMedia extends parent {
     constructor() {
       super();
@@ -30,8 +30,8 @@ const css_media = (parent) => {
     - after children
     - after 'call'
     - before live DOM connection */
-    created_callback(config) {
-      super.created_callback && super.created_callback(config);
+    created_callback() {
+      super.created_callback && super.created_callback();
       this.style.display = "none";
       /* Effect to control media */
       const media_effect = () => {

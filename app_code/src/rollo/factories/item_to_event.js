@@ -18,8 +18,8 @@ export const item_to_event = (parent, config, ...factories) => {
     - after children
     - after 'call'
     - before live DOM connection */
-    created_callback(config) {
-      super.created_callback && super.created_callback(config);
+    created_callback() {
+      super.created_callback && super.created_callback();
       /* Send event on state change */
       this.effects.add((changes, previous) => {
         this.send("state_change", {

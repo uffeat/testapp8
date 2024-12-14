@@ -39,10 +39,14 @@ Notable features:
         color: "pink",
         backgroundColor: "linen",
       })
+  - 'rule' setter (resets):
+      my_rule.rule = { h2: { color: "orange" } };
 - Selector can also be set directly via the 'selector' getter.
 - Items can also be changed via
-  - state, e.g., `my_rule.$.color = "blue";`
-  - the 'style' setter (individual items)
+  - '$' setter:
+    my_rule.$.color = "blue";
+  - 'rule' setter (resets):
+      my_rule.rule = {color: 'orange'};
 - `false` item values removes declaration.
 - 'clone' method for creating a component with a copy of items.
 - Support hooks and iife's.
@@ -51,12 +55,12 @@ Advantages of in-DOM use:
   (can itself be used in other stylesheets!).
 - Rule can be retrived by DOM methods and used by other components.
 */
-const css_rule = (parent) => {
+const css_rule = (parent, config, ...factories) => {
   const cls = class CssRule extends parent {
     constructor() {
       super();
     }
-    
+
     /* Only available during creation. 
     Called:
     - after CSS classes
@@ -64,8 +68,8 @@ const css_rule = (parent) => {
     - after children
     - after 'call'
     - before live DOM connection */
-    created_callback(config) {
-      super.created_callback && super.created_callback(config);
+    created_callback() {
+      super.created_callback && super.created_callback();
       super.style.display = "none";
       /* Effect to control selector. */
       const selector_effect = (changes) => {
@@ -114,19 +118,22 @@ const css_rule = (parent) => {
       this.$.selector = selector;
     }
 
-    /* Provides getter/setter interface to single items. */
-    get style() {
-      return this.#style;
+   /* Returns text representation of rule. */
+   get text() {
+    if (this.rule) {
+      return this.rule.cssText;
     }
-    #style = new Proxy(this, {
-      get(target, key) {
-        return target.items[key];
-      },
-      set(target, key, value) {
-        target.update({ [key]: value });
-        return true;
-      },
-    });
+    /* NOTE For dev -> performance not critical. */
+    if (
+      this.selector &&
+      Object.keys(this.items.current).length
+    ) {
+      return `${this.selector} { ${Object.entries(this.items.current)
+        .filter(([key, value]) => this.is_css(key))
+        .map(([key, value]) => `${key}: ${value};`)
+        .join(" ")} }`;
+    }
+  }
 
     /* Returns component with copy of selector and items. */
     clone() {

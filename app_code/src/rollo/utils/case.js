@@ -16,8 +16,6 @@ export function camel_to_kebab_css(camel) {
     .toLowerCase();
 }
 
-
-
 export function camel_to_snake(camel) {
   const kebab = this.camel_to_kebab(camel);
   const snake = kebab.replace("-", "_");
@@ -40,8 +38,6 @@ export function kebab_to_camel(kebab) {
     return capture.toUpperCase();
   });
 }
-
-
 
 export function pascal_to_camel(pascal) {
   if (pascal.length === 0) return pascal;

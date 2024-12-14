@@ -14,8 +14,8 @@ export const rule = (parent, config, ...factories) => {
     - after children
     - after 'call'
     - before live DOM connection */
-    created_callback(config) {
-      super.created_callback && super.created_callback(config);
+    created_callback() {
+      super.created_callback && super.created_callback();
 
       /* Add effect to control rule */
       this.effects.add((changes, previous) => {
@@ -30,9 +30,9 @@ export const rule = (parent, config, ...factories) => {
         if (this.target) {
           /* Create and add rule without items */
           const tag = this.tagName.toLowerCase();
-          if (tag === "css-keyframe") {
+          if (tag === "css-frame") {
             this.$.rule = this.target.rules.add(this.frame);
-          } else if (tag === "css-keyframes") {
+          } else if (tag === "css-frames") {
             this.$.rule = this.target.rules.add(`@keyframes ${this.name}`);
           } else if (tag === "css-media") {
             this.$.rule = this.target.rules.add(`@media`);
