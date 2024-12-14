@@ -77,6 +77,23 @@ const css_frame = (parent, config, ...factories) => {
     /* TODO
     - 'rule' as in css_rule???
     */
+    /* Returns CSS rule state. */
+    get rule() {
+      return this.$.rule;
+    }
+    /* Resets items and optionally frame from object. */
+    set rule(rule) {
+      /* Reset all items */
+      this.items.update(
+        Object.fromEntries(
+          Object.entries(this.items.current)
+            .filter(([key, value]) => this.is_css(key))
+            .map(([key, value]) => [key, false])
+        )
+      );
+      /* Update items and optionally frame */
+      this.update(rule);
+    }
 
     /* Returns text representation of rule. */
     get text() {
@@ -98,8 +115,6 @@ const css_frame = (parent, config, ...factories) => {
     /* TODO
     - 'clone' as in css_rule???
     */
-
-   
 
     /* Updates component. Chainable. 
     Called during creation:

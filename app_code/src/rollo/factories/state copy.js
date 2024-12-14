@@ -1,5 +1,3 @@
-import { Data } from "rollo/utils/data";
-
 /* Factory for light-weight and flexible conditional pub-sub-based reactivity 
 based on flat object data.
 Can also be used stand-alone. */
@@ -30,7 +28,7 @@ export const state = (parent, config, ...factories) => {
     get current() {
       return this.#current;
     }
-    #current = Data.create()
+    #current = {};
 
     /* Returns controller for managing effects. */
     get effects() {
@@ -50,24 +48,24 @@ export const state = (parent, config, ...factories) => {
     get previous() {
       return this.#previous;
     }
-    #previous = Data.create()
+    #previous = {};
 
     /* Updates state data and notifies effects if changes. Chainable. */
     update(updates = {}) {
       super.update && super.update(updates);
       /* Infer changed items */
-      const changes = Data.create(
+      const changes = Object.fromEntries(
         Object.entries(updates)
           .map(([k, v]) => [k, typeof v === "function" ? v.call(this) : v])
           .filter(([k, v]) => v !== undefined && this.#current[k] !== v)
       );
       /* Infer changed items as they were before change */
-      const previous = Data.create(
-        changes.map(([k, v]) => [k, this.#current[k]])
+      const previous = Object.fromEntries(
+        Object.entries(changes).map(([k, v]) => [k, this.#current[k]])
       );
       /* Update storage */
-      this.#previous = Data.create(this.#current);
-      changes.for_each(([k, v]) => {
+      this.#previous = { ...this.#current };
+      Object.entries(changes).forEach(([k, v]) => {
         /* NOTE null value deletes */
         if (v === null) {
           delete this.#current[k];
@@ -76,7 +74,7 @@ export const state = (parent, config, ...factories) => {
         }
       });
       /* Notify effects */
-      if (changes.size) {
+      if (Object.keys(changes).length) {
         this.effects.notify(changes, previous);
       }
 

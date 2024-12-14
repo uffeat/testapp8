@@ -124,8 +124,8 @@ const css_rule = (parent, config, ...factories) => {
         return this.rule.cssText;
       }
       /* NOTE For dev -> performance not critical. */
-      if (this.selector && this.items.current.size) {
-        return `${this.selector} { ${this.items.current.entries
+      if (this.selector && Object.keys(this.items.current).length) {
+        return `${this.selector} { ${Object.entries(this.items.current)
           .filter(([key, value]) => this.is_css(key))
           .map(([key, value]) => `${key}: ${value};`)
           .join(" ")} }`;
@@ -136,7 +136,7 @@ const css_rule = (parent, config, ...factories) => {
     clone() {
       return create(this.tagName.toLowerCase(), {
         selector: this.selector,
-        ...this.items.current.filter(([key, value]) => this.is_css(key)),
+        ...this.items.filter((k) => this.is_css(k)),
       });
     }
 
