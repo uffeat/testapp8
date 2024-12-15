@@ -133,7 +133,6 @@ const css_frame = (parent, config, ...factories) => {
           this.frame = frame;
           this.items.update(items);
         });
-
       return this;
     }
   };

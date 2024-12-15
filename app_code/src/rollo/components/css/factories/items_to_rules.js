@@ -1,4 +1,5 @@
 import { camel_to_kebab } from "rollo/utils/case";
+import { Data } from "rollo/utils/data";
 import { check_factories } from "rollo/utils/check_factories";
 import { attribute, items } from "rollo/factories/__factories__";
 import { rule } from "rollo/components/css/factories/rule";
@@ -16,32 +17,41 @@ export const items_to_rules = (parent, config, ...factories) => {
     - before live DOM connection */
     created_callback() {
       super.created_callback && super.created_callback();
-      /* Effect complex to control items. */
-      const items = new (class {
+      /* Effect complex to let items control rules. */
+      new (class {
         #owner;
         constructor(owner) {
           this.#owner = owner;
+          /* Add effect to control items effect */
+          owner.effects.add(() => {
+            if (owner.rule) {
+              owner.effects.add(this.effect, this.condition);
+            } else {
+              owner.effects.remove(this.effect);
+            }
+          }, "rule");
         }
         get owner() {
           return this.#owner;
         }
         condition = (changes) => {
-          return Object.fromEntries(
-            Object.entries(changes)
-              .filter(
-                ([key, value]) =>
-                  this.owner.is_css(key) &&
-                  (typeof value === "string" || value === false)
-              )
-              .map(([key, value]) => [
-                camel_to_kebab(key.trim()),
-                typeof value === "string" ? value.trim() : value,
-              ])
-          );
+          if (!(changes instanceof Data)) {
+            changes = Data.create(changes)
+          }
+          return changes
+            .filter(
+              ([key, value]) =>
+                this.owner.is_css(key) &&
+                (typeof value === "string" || value === false)
+            )
+            .map(([key, value]) => [
+              camel_to_kebab(key.trim()),
+              typeof value === "string" ? value.trim() : value,
+            ]);
         };
         effect = (changes) => {
           const style = this.owner.rule.style;
-          for (const [key, value] of Object.entries(changes)) {
+          for (const [key, value] of changes.entries) {
             if (value === false) {
               /* false is a cue to remove */
               style.removeProperty(key);
@@ -62,14 +72,6 @@ export const items_to_rules = (parent, config, ...factories) => {
           }
         };
       })(this);
-      /* Add effect to control items effect */
-      this.effects.add((changes, previous) => {
-        if (this.rule) {
-          this.effects.add(items.effect, items.condition);
-        } else {
-          this.effects.remove(items.effect);
-        }
-      }, "rule");
     }
 
     /* Updates component. Chainable. 
@@ -83,14 +85,13 @@ export const items_to_rules = (parent, config, ...factories) => {
       super.update && super.update(updates);
       /* Allow updating items without the '$'-syntax */
       this.items.update(updates);
-
       return this;
     }
 
     /* Checks if key is a valid CSS key. */
     is_css(key) {
       return (
-        typeof key === "string" && (key.startsWith("--") || key in super.style)
+        typeof key === "string" && (key.startsWith("--") || key in this.style)
       );
     }
   };

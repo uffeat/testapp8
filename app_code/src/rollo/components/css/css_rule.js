@@ -1,4 +1,4 @@
-import { camel_to_kebab } from "rollo/utils/case";
+import { Data } from "rollo/utils/data";
 import { Component, create } from "rollo/component";
 import {
   attribute,
@@ -98,11 +98,10 @@ const css_rule = (parent, config, ...factories) => {
     set rule(rule) {
       /* Reset all items */
       this.items.update(
-        Object.fromEntries(
-          Object.entries(this.items.current)
-            .filter(([key, value]) => this.is_css(key))
-            .map(([key, value]) => [key, false])
-        )
+        this.items.current
+          .clone()
+          .filter(([key, value]) => this.is_css(key))
+          .reset(false)
       );
       /* Update items and optionally selector */
       this.update(rule);

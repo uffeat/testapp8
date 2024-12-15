@@ -2,7 +2,7 @@ import { check_factories } from "rollo/utils/check_factories";
 import { items } from "rollo/factories/__factories__";
 import { target } from "rollo/components/css/factories/target";
 
-/* Factory for rule prop. */
+/* Factory with rule state. */
 export const rule = (parent, config, ...factories) => {
   /* Check factory dependencies */
   check_factories([items, target], factories);
