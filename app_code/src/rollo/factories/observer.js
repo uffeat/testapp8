@@ -1,10 +1,10 @@
 import { check_factories } from "rollo/utils/check_factories";
-import { attribute, events, items } from "rollo/factories/__factories__";
+import { attribute, items } from "rollo/factories/__factories__";
 
 /* Factory with MutationsObserver for observing element children. */
 export const observer = (parent, config, ...factories) => {
   /* Check factory dependencies */
-  check_factories([attribute, events, items], factories);
+  check_factories([attribute, items], factories);
 
   const cls = class Observer extends parent {
     /* Only available during creation. 
@@ -27,14 +27,25 @@ export const observer = (parent, config, ...factories) => {
         childList: true,
         subtree: false,
       };
-      
 
       constructor(owner) {
         this.#owner = owner;
+        if (
+          ["child_added_callback", "child_removed_callback"].every(
+            (method) => typeof owner[method] !== "function"
+          )
+        ) {
+          /* Warn */
+          if (import.meta.env.DEV) {
+            console.warn(
+              `component does not have a 'child_added_callback' method, nor a 'child_removed_callback'. The 'observer' factory therefore has no effect.`
+            );
+          }
+        }
       }
 
       get owner() {
-        return this.#owner
+        return this.#owner;
       }
       #owner;
 
@@ -56,39 +67,23 @@ export const observer = (parent, config, ...factories) => {
         }
         this.#mutation_observer.disconnect();
         this.#observes = false;
-
         this.owner.attribute.observes = false;
       };
 
       #handler = (mutations) => {
         mutations.forEach((mutation) => {
           if (mutation.type === "childList") {
-            [...mutation.addedNodes]
-              .filter(
-                (node) =>
-                  node instanceof HTMLElement &&
-                ('items' in node)
-              )
-              .forEach((node) => {
-                node.items.$.parent = this.owner;
+            [...mutation.addedNodes].forEach((node) => {
+              if (this.owner.child_added_callback) {
+                this.owner.child_added_callback(node);
+              }
+            });
 
-                this.owner.send("child_added", {
-                  detail: { added_child: node },
-                });
-              });
-            [...mutation.removedNodes]
-              .filter(
-                (node) =>
-                  node instanceof HTMLElement &&
-                  ('items' in node)
-              )
-              .forEach((node) => {
-                node.items.$.parent = null;
-
-                this.#owner.send("child_removed", {
-                  detail: { removed_child: node },
-                });
-              });
+            [...mutation.removedNodes].forEach((node) => {
+              if (this.owner.child_removed_callback) {
+                this.owner.child_removed_callback(node);
+              }
+            });
           }
         });
       };

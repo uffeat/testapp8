@@ -1,14 +1,5 @@
 import { Component } from "rollo/component";
-import {
-  attribute,
-  connected,
-  descendants,
-  hooks,
-  items,
-  name,
-  properties,
-  uid,
-} from "rollo/factories/__factories__";
+import { attribute, name, uid } from "rollo/factories/__factories__";
 
 /* Non-visual web component for ... */
 const css_sheets = (parent, config, ...factories) => {

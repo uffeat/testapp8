@@ -10,15 +10,12 @@ import {
   item_to_attribute,
   item_to_native,
   items,
-  observer,
   parent,
   properties,
-  shadow,
   tags,
   text,
   uid,
 } from "rollo/factories/__factories__";
-import { can_have_shadow } from "rollo/utils/can_have_shadow";
 import { is_node } from "rollo/utils/is_node";
 import { assign } from "rollo/utils/assign";
 
@@ -95,6 +92,7 @@ export const Component = new (class {
         static __chain__ = Object.freeze(chain.reverse());
         static __config__ = Object.freeze(config || {});
         static __factories__ = Object.freeze(factories.reverse());
+        static tag = tag;
         get __chain__() {
           return Meta.__chain__;
         }
@@ -103,6 +101,9 @@ export const Component = new (class {
         }
         get __factories__() {
           return Meta.__factories__;
+        }
+        get tag() {
+          return Meta.tag;
         }
       }.prototype
     );
@@ -129,13 +130,13 @@ export const Component = new (class {
     let element = new (this.get(tag))();
     /* Call the 'constructed_callback' lifecycle method */
     if (element.constructed_callback) {
-      const result = element.constructed_callback(config)
+      const result = element.constructed_callback(config);
       /* Allow truthy result to replace element */
       if (result) {
-        element = result
+        element = result;
       }
       /* Prevent 'created_callback' from being used onwards */
-      element.constructed_callback = undefined
+      element.constructed_callback = undefined;
     }
     /* Add CSS classes */
     if (css_classes.length > 0) {
@@ -215,14 +216,8 @@ Component.factories.add(hooks);
 Component.factories.add(item_to_attribute);
 Component.factories.add(item_to_native);
 Component.factories.add(items);
-/* TODO
-Consider not using observer as a standard factory. currently not used.  */
-//Component.factories.add(observer);
 Component.factories.add(parent);
 Component.factories.add(properties);
-/* TODO
-Consider not using shadow as a standard factory. currently not used.  */
-//Component.factories.add(shadow, can_have_shadow);
 Component.factories.add(tags);
 Component.factories.add(text, (tag) => {
   const element = document.createElement(tag);

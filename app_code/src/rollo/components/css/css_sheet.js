@@ -6,6 +6,7 @@ import {
   hooks,
   items,
   name,
+  observer,
   properties,
   uid,
 } from "rollo/factories/__factories__";
@@ -31,6 +32,31 @@ const css_sheet = (parent, config, ...factories) => {
       this.style.display = "none";
     }
 
+    child_added_callback(node) {
+      /* Warn */
+      if (import.meta.env.DEV) {
+        if (this.querySelector("css-static") && this.children.length > 1) {
+          console.warn(
+            `'css-sheet' components with a 'css-static' child should generally not have any other children.`
+          );
+        }
+      }
+    }
+
+    child_removed_callback(node) {
+      /* Warn */
+      if (import.meta.env.DEV) {
+        if (
+          node instanceof HTMLElement &&
+          node.tag === "css-static"
+        ) {
+          console.warn(
+            `'css-static' components inside 'css-sheet' components should generally not be removed. Consider disabling (or removing) the 'css-sheet' component instead.`
+          );
+        }
+      }
+    }
+
     get rules() {
       return this.#rules;
     }
@@ -42,11 +68,6 @@ const css_sheet = (parent, config, ...factories) => {
       return [...this.sheet.cssRules]
         .map((rule) => `${rule.cssText}`)
         .join("\n");
-    }
-    /* Sets rules from text. */
-    set text(text) {
-      this.descendants.clear();
-      this.sheet.replaceSync(text);
     }
   };
 
@@ -63,6 +84,7 @@ Component.author(
   hooks,
   items,
   name,
+  observer,
   properties,
   sheet,
   uid,

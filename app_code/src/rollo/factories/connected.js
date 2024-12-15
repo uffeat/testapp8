@@ -1,7 +1,7 @@
 import { check_factories } from "rollo/utils/check_factories";
 import { items } from "rollo/factories/__factories__";
 
-/* Factory that set connected state. */
+/* Factory that sets connected and parent state. */
 export const connected = (parent, config, ...factories) => {
   /* Check factory dependencies */
   check_factories([items], factories);
@@ -10,15 +10,17 @@ export const connected = (parent, config, ...factories) => {
     connectedCallback() {
       super.connectedCallback && super.connectedCallback();
       this.$.connected = true;
+      this.$.parent = this.parentElement;
     }
 
     disconnectedCallback() {
       super.disconnectedCallback && super.disconnectedCallback();
       this.$.connected = false;
+      this.$.parent = null
     }
 
     get connected() {
-      return this.items.$.connected;
+      return this.$.connected;
     }
   };
   return cls;

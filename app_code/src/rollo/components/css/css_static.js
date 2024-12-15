@@ -1,66 +1,66 @@
 import { Data } from "rollo/utils/data";
 import { camel_to_kebab } from "rollo/utils/case";
 import { is_number_text } from "rollo/utils/is_number_text";
-import { Component } from "rollo/component";
+import { Component, create } from "rollo/component";
 import {
   attribute,
   connected,
   hooks,
   items,
   name,
+  observer,
   properties,
+  shadow,
   uid,
 } from "rollo/factories/__factories__";
 import { is_css } from "rollo/components/css/factories/is_css";
-import { sheet } from "rollo/components/css/factories/sheet";
 
-/* Non-visual web component for managing dynamically applied static sheets. */
+/* Non-visual web component for generating static css text from JS.
+Notable features:
+  - Generates style component in shadow with generated CSS.
+  - Supports:
+    - Standard rules and CSS var declarations with/without '!important'.
+    - Media queries.
+    - Keyframes.
+  - Fairly extensive validation.
+Usage:
+- As child to 'css-sheet' component -> sets sheet to generated CSS.
+- 'clone' method -> returns style component with generated CSS.
+- 'text' prop -> returns generated CSS.
+ */
 const css_static = (parent, config, ...factories) => {
   const cls = class CssStatic extends parent {
     constructor() {
       super();
     }
 
+    #style_element = create("style");
+
+    /* Returns CSS text. */
+    get text() {
+      return this.#text;
+    }
+    #text;
+
     /* Only available during creation. 
     Called:
-    - after CSS classes
-    - after 'update' 
-    - after children
-    - after 'call'
-    - before live DOM connection */
-    created_callback() {
-      super.created_callback && super.created_callback();
-      this.style.display = "none";
-    }
-
-    /* Returns a text representation of the sheet. */
-    get text() {
-      /* NOTE For dev -> performance not critical. */
-      return [...this.sheet.cssRules]
-        .map((rule) => `${rule.cssText}`)
-        .join("\n");
-    }
-    /* Sets rules from text. */
-    set text(text) {
-      this.sheet.replaceSync(text);
-    }
-
-    /* Updates component. Chainable. 
-    Called during creation:
-    - after CSS classes
-    - after children
+    - after constructor
+    - before CSS classes
+    - before 'update' 
+    - before children
     - before 'call'
     - before 'created_callback'
-    - before live DOM connection */
-    update(updates = {}) {
-      super.update && super.update(updates);
-
+    - before live DOM connection 
+    NOTE Any (non-undefined) return value replaces component!
+    */
+    constructed_callback(config) {
+      super.constructed_callback && super.constructed_callback(config);
+      /* Build CSS text */
       let text = "";
-      const css_updates = Data.create(updates).filter(([k, v]) => !(k in this));
+      const css_updates = Data.create(config).filter(([k, v]) => !(k in this));
       const rule_updates = Data.create();
       const media_updates = Data.create();
       const frames_updates = Data.create();
-
       /* Parse css_updates */
       for (const [key, items] of css_updates.entries) {
         if (key.startsWith("@media")) {
@@ -73,7 +73,6 @@ const css_static = (parent, config, ...factories) => {
         }
         rule_updates.update({ [key]: items });
       }
-
       /* Validate declaration keys */
       rule_updates.for_each(([_, items]) => {
         this.#validate_declaration_keys(items);
@@ -96,21 +95,23 @@ const css_static = (parent, config, ...factories) => {
 
       /* Validate frames */
       frames_updates.for_each(([_, block]) => {
+        /* NOTE Missing keyframes names are caught by the browser. */
         Data.create(block).for_each(([frame, _]) => {
           if (typeof frame !== "string") {
             throw new Error(`'frame' should be a string. Got: ${frame}`);
           }
-          if (!frame.endsWith("%")) {
-            throw new Error(`'frame' should end with '%'. Got: ${frame}`);
-          }
-          if (!is_number_text(frame.slice(0, -1))) {
-            throw new Error(
-              `'frame' should be a %-number string. Got: ${frame}`
-            );
+          if (!["from", "to"].includes(frame)) {
+            if (!frame.endsWith("%")) {
+              throw new Error(`'frame' should end with '%'. Got: ${frame}`);
+            }
+            if (!is_number_text(frame.slice(0, -1))) {
+              throw new Error(
+                `'frame' should be a %-number string. Got: ${frame}`
+              );
+            }
           }
         });
       });
-
       /* Convert rule_updates to text */
       for (const [selector, items] of rule_updates.entries) {
         const sheet = new CSSStyleSheet();
@@ -119,7 +120,6 @@ const css_static = (parent, config, ...factories) => {
         update_rule(rule, items);
         text += rule.cssText;
       }
-
       /* Convert media_updates to text */
       for (const [media, block] of media_updates.entries) {
         const sheet = new CSSStyleSheet();
@@ -132,7 +132,6 @@ const css_static = (parent, config, ...factories) => {
           text += media_rule.cssText;
         }
       }
-
       /* Convert frames_updates to text */
       for (const [frames, block] of frames_updates.entries) {
         const sheet = new CSSStyleSheet();
@@ -144,15 +143,48 @@ const css_static = (parent, config, ...factories) => {
             .join(" ")} }`;
           frames_rule.appendRule(text);
         }
-
         text += frames_rule.cssText;
       }
+      this.#text = text;
+      this.#style_element.textContent = text;
+    }
 
-      console.log("text:", text);
+    /* Only available during creation. 
+    Called:
+    - after CSS classes
+    - after 'update' 
+    - after children
+    - after 'call'
+    - before live DOM connection */
+    created_callback() {
+      super.created_callback && super.created_callback();
+      this.style.display = "none";
+      this.shadowRoot.append(this.#style_element);
+      /* Add effect to handle parent */
+      this.effects.add((current, previous) => {
+        const previous_parent = previous.parent;
+        const current_parent = current.parent;
+        if (previous_parent) {
+          if (previous_parent.tag === "css-sheet") {
+            
+            previous_parent.sheet.replaceSync("");
+          }
+        }
+        if (current_parent) {
+          if (current_parent.tag === "css-sheet") {
+            current_parent.sheet.replaceSync(this.text);
+          }
+        }
+      }, "parent");
+    }
 
-      this.text = text;
+    child_added_callback(node) {
+      throw new Error(`'css-static' components do not accept children.`);
+    }
 
-      return this;
+    /* Creates and returns style component with generated CSS. */
+    clone() {
+      return create("style", { text: this.text });
     }
 
     #validate_declaration_keys(items) {
@@ -177,8 +209,9 @@ Component.author(
   items,
   is_css,
   name,
+  observer,
   properties,
-  sheet,
+  shadow,
   uid,
   css_static
 );

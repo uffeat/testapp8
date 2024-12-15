@@ -15,6 +15,7 @@ export { parent } from "rollo/factories/parent";
 export { properties } from "rollo/factories/properties";
 export { events } from "rollo/factories/events";
 export { shadow } from "rollo/factories/shadow";
+export { slot } from "rollo/factories/slot";
 export { state } from "rollo/factories/state";
 export { tags } from "rollo/factories/tags";
 export { text } from "rollo/factories/text";

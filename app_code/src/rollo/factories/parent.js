@@ -10,9 +10,16 @@ export const parent = (parent, config, ...factories) => {
         parent = parent.call(this);
       }
       if (parent === undefined) return;
+      if (parent === this.parentElement) {
+        return;
+      }
+
       if (parent === null) {
         this.remove();
-      } else if (this.parentElement !== parent) {
+      } else {
+        if (!(parent instanceof HTMLElement)) {
+          throw new Error(`Invalid parent: ${parent}`);
+        }
         parent.append(this);
       }
     }

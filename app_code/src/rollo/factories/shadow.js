@@ -1,36 +1,34 @@
-import { check_factories } from "rollo/utils/check_factories";
-import { items } from "rollo/factories/__factories__";
 
-/* Factory that controls childnode-related state. 
-For components that support shadow dom */
+
+/* Factory that provides a shadow dom with single slot. 
+Call any 'slot_change_callback' on slot change. */
 export const shadow = (parent, config, ...factories) => {
-  /* Check factory dependencies */
-  check_factories([items], factories);
+ 
 
   const cls = class Shadow extends parent {
+
     /* Only available during creation. 
     Called:
-    - after CSS classes
-    - after 'update' 
-    - after children
-    - after 'call'
-    - before live DOM connection */
-    created_callback(config) {
-      super.created_callback && super.created_callback(config);
-
+    - after constructor
+    - before CSS classes
+    - before 'update' 
+    - before children
+    - before 'call'
+    - before 'created_callback'
+    - before live DOM connection 
+    NOTE Any (non-undefined) return value replaces component!
+    */
+    constructed_callback(config) {
+      super.constructed_callback && super.constructed_callback(config);
       this.attachShadow({ mode: "open" });
       this.shadowRoot.append(this.slot);
-
-      this.slot.addEventListener("slotchange", (event) => {
-        this.$.has_children = this.children.length > 0;
-        this.$.has_content = this.childNodes.length > 0;
-      });
+      
     }
 
-    get slot() {
-      return this.#slot;
-    }
-    #slot = document.createElement("slot");
+
+    
+
+    
   };
   return cls;
 };
