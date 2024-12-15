@@ -1,8 +1,7 @@
-import { Component } from "rollo/component";
+import { Component, create } from "rollo/component";
 import {
   attribute,
   connected,
-  descendants,
   hooks,
   items,
   name,
@@ -12,8 +11,8 @@ import {
 import { RulesController } from "rollo/components/css/utils/rules";
 import { sheet } from "rollo/components/css/factories/sheet";
 
-/* Non-visual web component for managing dynamically applied dynamic sheets. */
-const css_sheet = (parent, config, ...factories) => {
+/* Non-visual web component for creating a style element and setting its text from JS. */
+const css_style = (parent, config, ...factories) => {
   const cls = class CssSheet extends parent {
     constructor() {
       super();
@@ -28,43 +27,25 @@ const css_sheet = (parent, config, ...factories) => {
     - before live DOM connection */
     created_callback() {
       super.created_callback && super.created_callback();
-      this.style.display = "none";
+      ////this.style.display = "none";////
     }
 
-    get rules() {
-      return this.#rules;
-    }
-    #rules = new RulesController(this.sheet);
-
-    /* Returns a text representation of the sheet. */
-    get text() {
-      /* NOTE For dev -> performance not critical. */
-      return [...this.sheet.cssRules]
-        .map((rule) => `${rule.cssText}`)
-        .join("\n");
-    }
-    /* Sets rules from text. */
-    set text(text) {
-      this.descendants.clear();
-      this.sheet.replaceSync(text);
-    }
+    
   };
 
   return cls;
 };
 
 Component.author(
-  "css-sheet",
+  "css-style",
   HTMLElement,
   {},
   attribute,
   connected,
-  descendants,
   hooks,
   items,
   name,
   properties,
-  sheet,
   uid,
-  css_sheet
+  css_style
 );

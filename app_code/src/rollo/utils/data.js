@@ -47,7 +47,13 @@ export class Data extends Object {
 
   /* Executes provided function with items successively passed in. Chainable. */
   for_each(f) {
-    Object.entries(this).forEach(f);
+    /* NOTE use:
+      this.entries
+    rather than:
+      Object.entries(this)
+    so that 'for_each' can be used to safely mutate object.
+     */
+    this.entries.forEach(f);
     return this;
   }
 
@@ -71,6 +77,10 @@ export class Data extends Object {
   /* Updates items from provided object. Items with undefined values are deleted. 
   Chainable. */
   update(updates = {}) {
+    /* Allow updates as function */
+    if (typeof updates === 'function') {
+      updates = updates.call(this) || {}
+    }
     /* Allow updates as entries array */
     if (Array.isArray(updates)) {
       updates = Object.fromEntries(updates);

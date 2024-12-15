@@ -32,9 +32,9 @@ const css_static = (parent, config, ...factories) => {
       this.style.display = "none";
     }
 
-    /* Returns a text representation of the sheet.
-    Primarily as a dev tool to check the sheet content. */
+    /* Returns a text representation of the sheet. */
     get text() {
+      /* NOTE For dev -> performance not critical. */
       return [...this.sheet.cssRules]
         .map((rule) => `${rule.cssText}`)
         .join("\n");
@@ -54,52 +54,67 @@ const css_static = (parent, config, ...factories) => {
     update(updates = {}) {
       super.update && super.update(updates);
 
-      let text = ''
+      let text = "";
       const css_updates = Data.create(updates).filter(([k, v]) => !(k in this));
       const rule_updates = Data.create();
+      const media_updates = Data.create();
+      const frames_updates = Data.create();
 
+      /* TODO validate items keys with is_css */
+
+      /* Parse css_updates */
       for (const [key, items] of css_updates.entries) {
         if (key.startsWith("@media")) {
-          // TODO
+          media_updates.update({ [key]: items });
           continue;
         }
         if (key.startsWith("@keyframes")) {
-          // TODO
+          frames_updates.update({ [key]: items });
           continue;
         }
-        rule_updates.update({[key]: items});
+        rule_updates.update({ [key]: items });
       }
 
+      /* Convert rule_updates to text */
       for (const [selector, items] of rule_updates.entries) {
-        /*
-        TODO
-        - experiment with simpler, more direct conversion to string; JSON? Perhaps keep as-is???
-        */
-      
         const sheet = new CSSStyleSheet();
         sheet.insertRule(`${selector} {}`);
         const rule = sheet.cssRules[0];
-        for (const [key, value] of Data.create(items).entries) {
-          /*
-          TODO
-          This part could dried?
-          */
-          if (value.endsWith("!important")) {
-            rule.style.setProperty(
-              key,
-              value.slice(0, -"!important".length).trim(),
-              "important"
-            );
-          } else {
-            rule.style.setProperty(camel_to_kebab(key), value);
-          }
-        }
+        update_rule(rule, items);
         text += rule.cssText;
       }
 
-      console.log('text:', text)
+      /* Convert media_updates to text */
+      for (const [media, block] of media_updates.entries) {
+        const sheet = new CSSStyleSheet();
+        sheet.insertRule(`${media} {}`);
+        const media_rule = sheet.cssRules[0];
+        for (const [selector, items] of Data.create(block).entries) {
+          media_rule.insertRule(`${selector} {}`);
+          const rule = media_rule.cssRules[0];
+          update_rule(rule, items);
+          text += media_rule.cssText;
+        }
+      }
 
-      this.text = text
+      /* Convert frames_updates to text */
+      for (const [frames, block] of frames_updates.entries) {
+        const sheet = new CSSStyleSheet();
+        sheet.insertRule(`${frames} {}`);
+        const frames_rule = sheet.cssRules[0];
+
+        for (const [frame, items] of Data.create(block).entries) {
+          const text = `${frame} { ${Object.entries(items)
+            .map(([k, v]) => `${camel_to_kebab(k)}: ${v};`)
+            .join(" ")} }`;
+          frames_rule.appendRule(text);
+        }
+        text += frames_rule.cssText;
+      }
+
+      console.log("text:", text);
+
+      this.text = text;
 
       return this;
     }
@@ -123,3 +138,17 @@ Component.author(
   uid,
   css_static
 );
+
+function update_rule(rule, items) {
+  for (const [key, value] of Data.create(items).entries) {
+    if (value.endsWith("!important")) {
+      rule.style.setProperty(
+        camel_to_kebab(key),
+        value.slice(0, -"!important".length).trim(),
+        "important"
+      );
+    } else {
+      rule.style.setProperty(camel_to_kebab(key), value);
+    }
+  }
+}
