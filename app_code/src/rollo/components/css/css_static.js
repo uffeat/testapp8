@@ -74,16 +74,16 @@ const css_static = (parent, config, ...factories) => {
         rule_updates.update({ [key]: items });
       }
       /* Validate declaration keys */
-      rule_updates.for_each(([_, items]) => {
+      rule_updates.forEach(([_, items]) => {
         this.#validate_declaration_keys(items);
       });
-      media_updates.for_each(([_, block]) => {
-        Data.create(block).for_each(([_, items]) => {
+      media_updates.forEach(([_, block]) => {
+        Data.create(block).forEach(([_, items]) => {
           this.#validate_declaration_keys(items);
         });
       });
-      frames_updates.for_each(([_, block]) => {
-        Data.create(block).for_each(([_, items]) => {
+      frames_updates.forEach(([_, block]) => {
+        Data.create(block).forEach(([_, items]) => {
           this.#validate_declaration_keys(items);
         });
       });
@@ -94,9 +94,9 @@ const css_static = (parent, config, ...factories) => {
       but further validation is not worthwhile. */
 
       /* Validate frames */
-      frames_updates.for_each(([_, block]) => {
+      frames_updates.forEach(([_, block]) => {
         /* NOTE Missing keyframes names are caught by the browser. */
-        Data.create(block).for_each(([frame, _]) => {
+        Data.create(block).forEach(([frame, _]) => {
           if (typeof frame !== "string") {
             throw new Error(`'frame' should be a string. Got: ${frame}`);
           }
@@ -166,7 +166,6 @@ const css_static = (parent, config, ...factories) => {
         const current_parent = current.parent;
         if (previous_parent) {
           if (previous_parent.tag === "css-sheet") {
-            
             previous_parent.sheet.replaceSync("");
           }
         }
@@ -188,7 +187,7 @@ const css_static = (parent, config, ...factories) => {
     }
 
     #validate_declaration_keys(items) {
-      Data.create(items).for_each(([k, v]) => {
+      Data.create(items).forEach(([k, v]) => {
         if (!this.is_css(k)) {
           throw new Error(`Invalid key: ${k}`);
         }

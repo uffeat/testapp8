@@ -1,3 +1,4 @@
+import { Data } from "rollo/utils/data";
 import { check_factories } from "rollo/utils/check_factories";
 import { items } from "rollo/factories/__factories__";
 
@@ -7,7 +8,7 @@ export const item_to_native = (parent, config, ...factories) => {
   check_factories([items], factories);
 
   const cls = class ItemToNative extends parent {
-    static PREFIX = '$'
+    static PREFIX = "$";
 
     /* Only available during creation. 
     Called:
@@ -21,17 +22,12 @@ export const item_to_native = (parent, config, ...factories) => {
       /* Set up automatic update from ItemToNative.PREFIX-prefixed state */
       this.effects.add((changes) =>
         this.update(
-          Object.fromEntries(
-            Object.entries(changes)
-              .filter(
-                ([key, value]) =>
-                  typeof key === "string" && key.startsWith(ItemToNative.PREFIX)
-              )
-              .map(([key, value]) => [
-                key.slice(ItemToNative.PREFIX.length),
-                value,
-              ])
-          )
+          Data.create(changes)
+            .filter(
+              ([k, v]) =>
+                typeof k === "string" && k.startsWith(ItemToNative.PREFIX)
+            )
+            .map(([k, v]) => [k.slice(ItemToNative.PREFIX.length), v])
         )
       );
     }

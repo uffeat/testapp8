@@ -18,18 +18,16 @@ export const item_to_attribute = (parent, config, ...factories) => {
     - before live DOM connection */
     created_callback() {
       super.created_callback && super.created_callback();
-      
-
       /* Show state as attribute */
       this.effects.add((changes) => {
         Object.entries(changes).filter(
-          ([key, value]) =>
-            !(typeof key === "string" && key.startsWith(ItemToAttribute.PREFIX))
-        ).forEach(([key, value]) => {
-          if (["boolean", "number", "string"].includes(typeof value)) {
-            this.attribute[key] = value;
+          ([k, v]) =>
+            !(typeof k === "string" && k.startsWith(ItemToAttribute.PREFIX))
+        ).forEach(([k, v]) => {
+          if (["boolean", "number", "string"].includes(typeof v)) {
+            this.attribute[k] = v;
           } else {
-            this.attribute[key] = null;
+            this.attribute[k] = null;
           }
         })
       });

@@ -1,12 +1,7 @@
-
-
 /* Factory that provides a shadow dom with single slot. 
 Call any 'slot_change_callback' on slot change. */
 export const shadow = (parent, config, ...factories) => {
- 
-
   const cls = class Shadow extends parent {
-
     /* Only available during creation. 
     Called:
     - after constructor
@@ -22,13 +17,7 @@ export const shadow = (parent, config, ...factories) => {
       super.constructed_callback && super.constructed_callback(config);
       this.attachShadow({ mode: "open" });
       this.shadowRoot.append(this.slot);
-      
     }
-
-
-    
-
-    
   };
   return cls;
 };

@@ -12,6 +12,7 @@ import {
   items,
   parent,
   properties,
+  styles,
   tags,
   text,
   uid,
@@ -218,6 +219,7 @@ Component.factories.add(item_to_native);
 Component.factories.add(items);
 Component.factories.add(parent);
 Component.factories.add(properties);
+Component.factories.add(styles);
 Component.factories.add(tags);
 Component.factories.add(text, (tag) => {
   const element = document.createElement(tag);

@@ -67,7 +67,7 @@ export const state = (parent, config, ...factories) => {
       );
       /* Update storage */
       this.#previous = Data.create(this.#current);
-      changes.for_each(([k, v]) => {
+      changes.forEach(([k, v]) => {
         /* NOTE null value deletes */
         if (v === null) {
           delete this.#current[k];

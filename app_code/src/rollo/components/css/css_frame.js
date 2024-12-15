@@ -1,4 +1,3 @@
-import { camel_to_kebab } from "rollo/utils/case";
 import { Component } from "rollo/component";
 import {
   attribute,
@@ -10,6 +9,7 @@ import {
   properties,
   uid,
 } from "rollo/factories/__factories__";
+import { is_css } from "rollo/components/css/factories/is_css";
 import { items_to_rules } from "rollo/components/css/factories/items_to_rules";
 import { rule } from "rollo/components/css/factories/rule";
 import { target } from "rollo/components/css/factories/target";
@@ -144,6 +144,7 @@ Component.author(
   attribute,
   connected,
   hooks,
+  is_css,
   item_to_native,
   items,
   items_to_rules,

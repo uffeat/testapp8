@@ -1,3 +1,4 @@
+import { Data } from "rollo/utils/data";
 import { camel_to_kebab } from "rollo/utils/case";
 
 /* Factory for enhanced attribute control. */
@@ -58,12 +59,14 @@ export const attribute = (parent, config, ...factories) => {
     update(updates = {}) {
       super.update && super.update(updates);
       /* Update attributes */
-      Object.entries(updates)
-        .filter(([key, value]) => typeof key === 'string' && key.startsWith(Attribute.PREFIX))
-        .forEach(
-          ([key, value]) =>
-            (this.attribute[key.slice(Attribute.PREFIX.length)] = value)
-        );
+      Data.create(updates)
+      .filter(([k, v]) => typeof k === 'string' && k.startsWith(Attribute.PREFIX))
+      .map(([k, v]) =>  [k, this.attribute[k.slice(Attribute.PREFIX.length)]])
+      .forEach(([k, v]) => this.attribute[k] = v);
+
+
+
+      
       return this;
     }
   };

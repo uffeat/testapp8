@@ -15,9 +15,9 @@ export const css_classes = (parent, config, ...factories) => {
       super.update && super.update(updates);
       /* Update css classes */
       Object.entries(updates)
-        .filter(([key, value]) => key.startsWith(CssClasses.PREFIX))
-        .forEach(([key, value]) =>
-          this.css_classes[value ? "add" : "remove"](key)
+        .filter(([k, v]) => k.startsWith(CssClasses.PREFIX))
+        .forEach(([k, v]) =>
+          this.css_classes[v ? "add" : "remove"](k)
         );
       return this;
     }
@@ -115,7 +115,6 @@ export const css_classes = (parent, config, ...factories) => {
           if (arg.length === 0) {
             continue;
           }
-
           if (arg.startsWith(CssClasses.PREFIX)) {
             arg = arg.slice(CssClasses.PREFIX.length);
           }

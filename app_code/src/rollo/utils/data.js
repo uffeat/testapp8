@@ -46,7 +46,7 @@ export class Data extends Object {
   }
 
   /* Executes provided function with items successively passed in. Chainable. */
-  for_each(f) {
+  forEach(f) {
     /* NOTE use:
       this.entries
     rather than:

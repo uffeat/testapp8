@@ -1,4 +1,3 @@
-import { Data } from "rollo/utils/data";
 import { Component, create } from "rollo/component";
 import {
   attribute,
@@ -9,6 +8,7 @@ import {
   properties,
   uid,
 } from "rollo/factories/__factories__";
+import { is_css } from "rollo/components/css/factories/is_css";
 import { items_to_rules } from "rollo/components/css/factories/items_to_rules";
 import { rule } from "rollo/components/css/factories/rule";
 import { target } from "rollo/components/css/factories/target";
@@ -100,7 +100,7 @@ const css_rule = (parent, config, ...factories) => {
       this.items.update(
         this.items.current
           .clone()
-          .filter(([key, value]) => this.is_css(key))
+          .filter(([k, v]) => this.is_css(k))
           .reset(false)
       );
       /* Update items and optionally selector */
@@ -125,17 +125,17 @@ const css_rule = (parent, config, ...factories) => {
       /* NOTE For dev -> performance not critical. */
       if (this.selector && this.items.current.size) {
         return `${this.selector} { ${this.items.current.entries
-          .filter(([key, value]) => this.is_css(key))
-          .map(([key, value]) => `${key}: ${value};`)
+          .filter(([k, v]) => this.is_css(k))
+          .map(([k, v]) => `${k}: ${v};`)
           .join(" ")} }`;
       }
     }
 
     /* Returns component with copy of selector and items. */
     clone() {
-      return create(this.tagName.toLowerCase(), {
+      return create(this.tag, {
         selector: this.selector,
-        ...this.items.current.filter(([key, value]) => this.is_css(key)),
+        ...this.items.current.filter(([k, v]) => this.is_css(k)),
       });
     }
 
@@ -150,8 +150,8 @@ const css_rule = (parent, config, ...factories) => {
       super.update && super.update(updates);
       /* Allow setting selector and items in one go */
       Object.entries(updates)
-        .filter(([key, value]) => !(key in this) && typeof value === "object")
-        .map(([key, value]) => ({ selector: key, items: value }))
+        .filter(([k, v]) => !(k in this) && typeof v === "object")
+        .map(([k, v]) => ({ selector: k, items: v }))
         .forEach(({ selector, items }) => {
           this.selector = selector;
           this.items.update(items);
@@ -171,6 +171,7 @@ Component.author(
   attribute,
   connected,
   hooks,
+  is_css,
   items,
   items_to_rules,
   name,

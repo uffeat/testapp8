@@ -2,11 +2,12 @@ import { camel_to_kebab } from "rollo/utils/case";
 import { Data } from "rollo/utils/data";
 import { check_factories } from "rollo/utils/check_factories";
 import { attribute, items } from "rollo/factories/__factories__";
+import { is_css } from "rollo/components/css/factories/is_css";
 import { rule } from "rollo/components/css/factories/rule";
 
 /* . */
 export const items_to_rules = (parent, config, ...factories) => {
-  check_factories([attribute, items, rule], factories);
+  check_factories([attribute, is_css, items, rule], factories);
   const cls = class ItemsToRules extends parent {
     /* Only available during creation. 
     Called:
@@ -35,18 +36,15 @@ export const items_to_rules = (parent, config, ...factories) => {
           return this.#owner;
         }
         condition = (changes) => {
-          if (!(changes instanceof Data)) {
-            changes = Data.create(changes)
-          }
-          return changes
+          return Data.create(changes)
             .filter(
-              ([key, value]) =>
-                this.owner.is_css(key) &&
-                (typeof value === "string" || value === false)
+              ([k, v]) =>
+                this.owner.is_css(k) &&
+                (typeof v === "string" || v === false)
             )
-            .map(([key, value]) => [
-              camel_to_kebab(key.trim()),
-              typeof value === "string" ? value.trim() : value,
+            .map(([k, v]) => [
+              camel_to_kebab(k.trim()),
+              typeof v === "string" ? v.trim() : v,
             ]);
         };
         effect = (changes) => {
@@ -87,13 +85,7 @@ export const items_to_rules = (parent, config, ...factories) => {
       this.items.update(updates);
       return this;
     }
-
-    /* Checks if key is a valid CSS key. */
-    is_css(key) {
-      return (
-        typeof key === "string" && (key.startsWith("--") || key in this.style)
-      );
-    }
+    
   };
 
   return cls;

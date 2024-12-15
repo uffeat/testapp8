@@ -1,3 +1,5 @@
+import { Data } from "rollo/utils/data";
+
 /* Factory with batch update of properties. */
 export const properties = (parent, config, ...factories) => {
   const cls = class Properties extends parent {
@@ -11,9 +13,12 @@ export const properties = (parent, config, ...factories) => {
     update(updates = {}) {
       super.update && super.update(updates);
       /* Updates properties */
-      Object.entries(updates)
-        .filter(([key, value]) => key in this || typeof key === 'string' && key.startsWith("_"))
-        .forEach(([key, value]) => (this[key] = value));
+      Data.create(updates)
+        /* Allow update of non-standard for keys with'_'-prefix. */
+        .filter(
+          ([k, v]) => k in this || (typeof k === "string" && k.startsWith("_"))
+        )
+        .forEach(([k, v]) => (this[k] = v));
       return this;
     }
   };

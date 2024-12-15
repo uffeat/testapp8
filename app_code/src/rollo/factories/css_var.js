@@ -38,10 +38,10 @@ export const css_var = (parent, config, ...factories) => {
       super.update && super.update(updates);
       /* Update css vars */
       Object.entries(updates)
-        .filter(([key, value]) => typeof key === 'string' && key.startsWith(CssVar.PREFIX))
+        .filter(([k, v]) => typeof k === 'string' && k.startsWith(CssVar.PREFIX))
         .forEach(
-          ([key, value]) =>
-            (this.__[key.slice(CssVar.PREFIX.length)] = value)
+          ([k, v]) =>
+            (this.__[k.slice(CssVar.PREFIX.length)] = v)
         );
       return this;
     }

@@ -1,10 +1,10 @@
 import { check_factories } from "rollo/utils/check_factories";
-import { attribute, items } from "rollo/factories/__factories__";
+import { attribute } from "rollo/factories/__factories__";
 
 /* Factory with MutationsObserver for observing element children. */
 export const observer = (parent, config, ...factories) => {
   /* Check factory dependencies */
-  check_factories([attribute, items], factories);
+  check_factories([attribute], factories);
 
   const cls = class Observer extends parent {
     /* Only available during creation. 

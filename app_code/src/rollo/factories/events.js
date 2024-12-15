@@ -2,7 +2,7 @@
 dispatching events. */
 export const events = (parent, config, ...factories) => {
   const cls = class Events extends parent {
-    static PREFIX = '__'
+    static PREFIX = "on_";
 
     /* Syntactic sugar for event handler registration. */
     get on() {
@@ -18,6 +18,18 @@ export const events = (parent, config, ...factories) => {
         return true;
       },
     });
+
+    /* Register and returns event handler. Option to run handler immediately.
+    Useful, when 
+    - handler is a fe and is needed for future dereg, and/or
+    - immediate handler call is handy. */
+    add_event_handler(type, handler, run = false) {
+      this.addEventListener(type, handler);
+      if (run) {
+        handler(null)
+      }
+      return handler
+    }
 
     /* Dispatches custom event and returns detail. */
     send(type, { detail, ...options } = {}) {
@@ -40,11 +52,13 @@ export const events = (parent, config, ...factories) => {
       /* Register event handlers */
       Object.entries(updates)
         .filter(
-          ([key, value]) =>
-            value !== undefined && key.startsWith(Events.PREFIX)
+          ([k, v]) =>
+            v !== undefined &&
+            typeof k === "string" &&
+            k.startsWith(Events.PREFIX)
         )
-        .map(([key, value]) => [key.slice(Events.PREFIX.length), value])
-        .forEach(([key, value]) => (this.on[key] = value));
+        .map(([k, v]) => [k.slice(Events.PREFIX.length), v])
+        .forEach(([k, v]) => (this.on[k] = v));
       return this;
     }
   };
