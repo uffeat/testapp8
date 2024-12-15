@@ -70,19 +70,20 @@ const css_static = (parent, config, ...factories) => {
         rule_updates.update({[key]: items});
       }
 
-      for (let [selector, items] of rule_updates.entries) {
+      for (const [selector, items] of rule_updates.entries) {
         /*
         TODO
-        - experiment with simpler, more direct conversion to string; JSON?
+        - experiment with simpler, more direct conversion to string; JSON? Perhaps keep as-is???
         */
-       items = Data.create(items)
+      
         const sheet = new CSSStyleSheet();
         sheet.insertRule(`${selector} {}`);
         const rule = sheet.cssRules[0];
-        for (const [key, value] of items.entries) {
-          if (value === undefined) {
-            continue;
-          }
+        for (const [key, value] of Data.create(items).entries) {
+          /*
+          TODO
+          This part could dried?
+          */
           if (value.endsWith("!important")) {
             rule.style.setProperty(
               key,

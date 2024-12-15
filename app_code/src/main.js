@@ -9,10 +9,6 @@ await import("rollo/components/css/css_rule");
 await import("rollo/components/css/css_sheet");
 await import("rollo/components/css/css_static");
 
-
-
-
-
 const root = create("div", {
   id: "root",
   parent: document.body,
@@ -37,13 +33,16 @@ const button = create(
   }
 );
 
-
-
 /* Create elements to test css on */
 create("h1", { parent: root }, "Hello World");
 create("h2", { parent: root }, "Also hello from here");
 
-const my_static = create('css-static', {name: 'my_static', parent: root, h2: {color: 'blue'}})
+const my_static = create("css-static", {
+  name: "my_static",
+  parent: root,
+  h2: { color: "blue" },
+  "@media max-width: 300px": { h2: { color: "red" } },
+});
 
 const my_sheet = create(
   "css-sheet",
@@ -96,20 +95,14 @@ const my_frame = my_sheet.querySelector(`css-frame[name="my_frame"]`);
 //my_rule.remove()////
 //console.log('my_rule.text:', my_rule.text)
 
-
 //const my_rule_clone = my_rule.clone()
 //my_rule.remove()////
 //my_sheet.append(my_rule_clone)
-
-
-
-
 
 //my_rule.update({ color: "green" });
 //my_rule.$.color = 'brown'
 //my_rule.rule = { h2: { color: "orange" } };
 //my_rule.rule = {color: 'orange'};
-
 
 //console.log("css:", my_sheet.text);
 //my_rule.remove();
@@ -117,18 +110,13 @@ const my_frame = my_sheet.querySelector(`css-frame[name="my_frame"]`);
 
 //console.log("css:", my_sheet.text);
 
-
 //my_frame.update({ color: "green" });
 //my_frame.rule = {color: 'green', translate: "150vw 0", scale: "200% 1"};
 //my_frame.rule = { 50: {color: 'green', translate: "150vw 0", scale: "200% 1"}}
 
-
-
-
-
-my_frame.remove()
-slide_in.append(my_frame)
-console.log('my_frame.text:', my_frame.text)
+my_frame.remove();
+slide_in.append(my_frame);
+console.log("my_frame.text:", my_frame.text);
 
 /* Enable tests */
 if (import.meta.env.DEV) {
