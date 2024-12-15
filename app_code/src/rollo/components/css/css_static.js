@@ -1,5 +1,6 @@
 import { Data } from "rollo/utils/data";
 import { camel_to_kebab } from "rollo/utils/case";
+import { is_number_text } from "rollo/utils/is_number_text";
 import { Component } from "rollo/component";
 import {
   attribute,
@@ -60,8 +61,6 @@ const css_static = (parent, config, ...factories) => {
       const media_updates = Data.create();
       const frames_updates = Data.create();
 
-      /* TODO validate items keys with is_css */
-
       /* Parse css_updates */
       for (const [key, items] of css_updates.entries) {
         if (key.startsWith("@media")) {
@@ -74,6 +73,43 @@ const css_static = (parent, config, ...factories) => {
         }
         rule_updates.update({ [key]: items });
       }
+
+      /* Validate declaration keys */
+      rule_updates.for_each(([_, items]) => {
+        this.#validate_declaration_keys(items);
+      });
+      media_updates.for_each(([_, block]) => {
+        Data.create(block).for_each(([_, items]) => {
+          this.#validate_declaration_keys(items);
+        });
+      });
+      frames_updates.for_each(([_, block]) => {
+        Data.create(block).for_each(([_, items]) => {
+          this.#validate_declaration_keys(items);
+        });
+      });
+
+      /* NOTE Media declarations are not explicitly validated. 
+      The browser raises an exception, if a media rule cannot be parsed. 
+      This, however, does not catch all incorrectly formatted declarations,
+      but further validation is not worthwhile. */
+
+      /* Validate frames */
+      frames_updates.for_each(([_, block]) => {
+        Data.create(block).for_each(([frame, _]) => {
+          if (typeof frame !== "string") {
+            throw new Error(`'frame' should be a string. Got: ${frame}`);
+          }
+          if (!frame.endsWith("%")) {
+            throw new Error(`'frame' should end with '%'. Got: ${frame}`);
+          }
+          if (!is_number_text(frame.slice(0, -1))) {
+            throw new Error(
+              `'frame' should be a %-number string. Got: ${frame}`
+            );
+          }
+        });
+      });
 
       /* Convert rule_updates to text */
       for (const [selector, items] of rule_updates.entries) {
@@ -102,13 +138,13 @@ const css_static = (parent, config, ...factories) => {
         const sheet = new CSSStyleSheet();
         sheet.insertRule(`${frames} {}`);
         const frames_rule = sheet.cssRules[0];
-
         for (const [frame, items] of Data.create(block).entries) {
           const text = `${frame} { ${Object.entries(items)
             .map(([k, v]) => `${camel_to_kebab(k)}: ${v};`)
             .join(" ")} }`;
           frames_rule.appendRule(text);
         }
+
         text += frames_rule.cssText;
       }
 
@@ -117,6 +153,14 @@ const css_static = (parent, config, ...factories) => {
       this.text = text;
 
       return this;
+    }
+
+    #validate_declaration_keys(items) {
+      Data.create(items).for_each(([k, v]) => {
+        if (!this.is_css(k)) {
+          throw new Error(`Invalid key: ${k}`);
+        }
+      });
     }
   };
 
