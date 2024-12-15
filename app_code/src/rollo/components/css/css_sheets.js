@@ -1,7 +1,8 @@
 import { Component } from "rollo/component";
-import { attribute, name, uid } from "rollo/factories/__factories__";
+import { attribute, name, observer, uid } from "rollo/factories/__factories__";
 
-/* Non-visual web component for ... */
+/* Non-visual web component for with no other function than to create a 
+centralized wrapper for 'css-sheet' components */
 const css_sheets = (parent, config, ...factories) => {
   const cls = class CssSheet extends parent {
     constructor() {
@@ -19,6 +20,17 @@ const css_sheets = (parent, config, ...factories) => {
       super.created_callback && super.created_callback();
       this.style.display = "none";
     }
+
+    child_added_callback(node) {
+      if (
+        !(node instanceof HTMLElement) ||
+        node.tag !== "css-sheet"
+      ) {
+        throw new Error(
+          `'css-sheets' components only accepts 'css-sheet' child nodes.`
+        );
+      }
+    }
   };
 
   return cls;
@@ -30,6 +42,7 @@ Component.author(
   {},
   attribute,
   name,
+  observer,
   uid,
   css_sheets
 );

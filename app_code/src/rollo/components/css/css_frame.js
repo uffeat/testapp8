@@ -74,9 +74,6 @@ const css_frame = (parent, config, ...factories) => {
       this.$.frame = frame;
     }
 
-    /* TODO
-    - 'rule' as in css_rule???
-    */
     /* Returns CSS rule state. */
     get rule() {
       return this.$.rule;
