@@ -77,7 +77,7 @@ export const state = (parent, config, ...factories) => {
       });
       /* Notify effects */
       if (changes.size) {
-        this.effects.notify(changes, previous);
+        this.effects.notify(changes, previous, this.owner || this);
       }
 
       return this.owner || this;
@@ -128,7 +128,8 @@ class Effects {
       effect,
       condition,
       { ...this.owner.current },
-      { ...this.owner.previous }
+      { ...this.owner.previous },
+      this.owner.owner || this.owner
     );
     /* Return effect to enable later removal */
     return effect;
