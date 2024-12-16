@@ -1,6 +1,6 @@
 import { create } from "rollo/component";
-import { mirror } from "@/rolloui/utils/mirror";
-import { mixin } from "@/rolloui/utils/mixin";
+import { mirror } from "rolloui/utils/mirror";
+import { mixin } from "rolloui/utils/mixin";
 import { base } from "rolloui/form/input/base";
 import { InvalidFeedback } from "rolloui/form/InvalidFeedback";
 import { create_id } from "rolloui/form/utils/create_id";
@@ -12,16 +12,25 @@ export function Check(updates = {}, ...hooks) {
     attribute_constructorName: "Check",
     type: "checkbox",
   });
-  /* Protect value state */
-  const set_value = self.reactive.protected.add("value");
   /* Handler to update value state */
   self.on.change = (event) => {
-    set_value(self.checked ? true : null);
+    self.$.value = self.checked ? true : null;
+
+    const value = self.checked ? true : null;////
+    console.log("value:", value); /////
+    console.log("value:", self.$.value); /////
+
+
+    
+    ////console.log("self:", self); /////
+    
   };
   /* Effect: Value state -> checked */
-  self.effects.add((data) => {
+  self.effects.add(() => {
     self.checked = self.$.value ? true : false;
   }, "value");
+
+
   /* Mixin for external API */
   mixin(
     self,
@@ -30,7 +39,7 @@ export function Check(updates = {}, ...hooks) {
         return this.$.value;
       }
       set value(value) {
-        set_value(value ? true : false);
+        self.$.value = value ? true : false;
         self.checked = self.$.value;
       }
     }
@@ -45,15 +54,7 @@ export function Check(updates = {}, ...hooks) {
 /* Returns checkbox-type input element with reactive type-aligned value prop.
 Options for switch (toggle), label and invalid feedback (via required). */
 export function CheckInput(
-  {
-    id,
-    name,
-    label,
-    required = false,
-    toggle = false,
-    value,
-    ...updates
-  } = {},
+  { id, name, label, required = false, toggle = false, value, ...updates } = {},
   ...hooks
 ) {
   /* Prepare tree */

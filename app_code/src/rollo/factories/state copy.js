@@ -52,17 +52,17 @@ export const state = (parent, config, ...factories) => {
     }
     #previous = Data.create();
 
-    /* Filters state reactively as per provided function. Chainable. */
+    /* */
     filter(f) {
       return this.update(this.#current.filter(f));
     }
 
-    /* Resets all items reactively to provided value. Chainable. */
+    /* */
     reset(value) {
       return this.update(this.#current.map(([k, v]) => [k, value]));
     }
 
-    /* Transforms all items reactively as per provided function. Chainable. */
+    /* */
     transform(f) {
       return this.update(this.#current.map(f));
     }
@@ -70,20 +70,34 @@ export const state = (parent, config, ...factories) => {
     /* Updates state data and notifies effects if changes. Chainable. */
     update(updates) {
       super.update && super.update(updates);
-      updates = Data.create(updates);
-      /* Infer changed items */
-      const changes = updates.filter(([k, v]) => this.#current[k] !== v)
-      /* Infer changed items as they were before change */
-      const previous = changes.map(([k, v]) => [k, this.#current[k]])
-      /* Update storage */
-      changes.forEach(([k, v]) => {
-        this.#previous[k] = this.#current[k];
-        this.#current[k] = v;
-      });
-      /* Notify effects */
-      if (changes.size) {
-        this.effects.notify(changes, previous, this.owner || this);
+      if (updates) {
+        /* Allow updates as entries array */
+        if (Array.isArray(updates)) {
+          updates = Object.fromEntries(updates);
+        }
+        /* Infer changed items */
+        const changes = Data.create(
+          Object.entries(updates).filter(([k, v]) => this.#current[k] !== v)
+        );
+        /* Infer changed items as they were before change */
+        const previous = Data.create(
+          changes.map(([k, v]) => [k, this.#current[k]])
+        );
+        /* Update storage */
+        changes.forEach(([k, v]) => {
+          this.#previous[k] = this.#current[k];
+          if (v === undefined) {
+            delete this.#current[k];
+          } else {
+            this.#current[k] = v;
+          }
+        });
+        /* Notify effects */
+        if (changes.size) {
+          this.effects.notify(changes, previous, this.owner || this);
+        }
       }
+
       return this.owner || this;
     }
   };
@@ -131,8 +145,8 @@ class Effects {
     call_effect(
       effect,
       condition,
-      Data.create(this.owner.current),
-      Data.create(this.owner.previous),
+      { ...this.owner.current },
+      { ...this.owner.previous },
       this.owner.owner || this.owner
     );
     /* Return effect to enable later removal */

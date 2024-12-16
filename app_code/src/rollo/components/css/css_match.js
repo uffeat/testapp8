@@ -18,6 +18,7 @@ const css_match = (parent, config, ...factories) => {
       super();
     }
 
+    /* Returns match state */
     get match() {
       return this.$.match;
     }
@@ -34,7 +35,7 @@ const css_match = (parent, config, ...factories) => {
       this.style.display = "none";
 
       /* Establish effect complex so that changes in any parent's 'media' and 
-      changes to the viewport updates the 'match' item */
+      changes to the viewport updates the 'match' state */
       new (class {
         constructor(owner) {
           this.#owner = owner;

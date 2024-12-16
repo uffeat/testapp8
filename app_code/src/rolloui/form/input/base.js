@@ -48,29 +48,23 @@ export function base(
     },
     ...hooks
   );
-  /* Protect error and visited states */
-  const set_error = self.reactive.protected.add("error");
-  const set_visited = self.reactive.protected.add("visited");
   /* Effect: Error & visited states -> "is-invalid" css class */
-  self.effects.add(
-    (data) => {
-      self.css_class.isInvalid = self.$.error && self.$.visited;
-    },
-    ["error", "visited"]
-  );
+  self.effects.add(() => {
+    self.css_class.isInvalid = self.$.error && self.$.visited;
+  }, ["error", "visited"]);
   /* Effect: Error state -> custom validity */
-  self.effects.add((data) => {
+  self.effects.add(() => {
     self.setCustomValidity(self.$.error ? " " : "");
   }, "error");
   /* Effect: Value state -> error state re required */
-  self.effects.add((data) => {
+  self.effects.add(() => {
     if (self.required) {
-      set_error(self.$.value === null ? "Required" : null);
+      self.$.error = self.$.value === null ? "Required" : null;
     }
   }, "value");
   /* Effect: Validation result (other than required) -> error state */
   if (validations) {
-    self.effects.add((data) => {
+    self.effects.add(() => {
       /* Abort, if required and value state is null */
       if (self.required && self.$.value === null) return;
       /* Run validations in order. 
@@ -78,9 +72,8 @@ export function base(
       Validation aborts, once a truthy validation result (the error message)
       is received. */
       for (const validation of validations) {
-        const message = validation.call(self, self.$.value);
-        set_error(message);
-        if (message) {
+        self.$.message = validation.call(self, self.$.value);
+        if (self.$.message) {
           break;
         }
       }
@@ -88,7 +81,7 @@ export function base(
   }
   /* One-time handler: Set visited state */
   const onblur = (event) => {
-    set_visited(true);
+    self.$.visited = true;
     self.removeEventListener("blur", onblur);
   };
   self.on.blur = onblur;

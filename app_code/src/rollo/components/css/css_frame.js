@@ -47,6 +47,56 @@ const css_frame = (parent, config, ...factories) => {
       }, "rule");
     }
 
+    /* Returns CSS rule state. */
+    get rule() {
+      return this.$.rule;
+    }
+    /* Resets items and optionally frame from object. */
+    set rule(rule) {
+      /* Reset all items */
+      this.items.update(
+        this.items.current
+          .clone()
+          .filter(([k, v]) => this.is_css(k))
+          .reset(false)
+      );
+      /* Alternative way to reset items:
+      this.items.current.forEach(([k, v]) => {
+        if (this.is_css(k)) {
+          this.$[k] = false;
+        }
+      }); 
+      */
+      /* Update items and optionally frame */
+      this.update(rule);
+    }
+
+    /* Returns text representation of rule. */
+    get text() {
+      if (this.rule) {
+        return this.rule.cssText;
+      }
+      /* NOTE For dev -> performance not critical. */
+      /*
+      TODO
+      - Refactor to align with css_rule
+      */
+      if (![null, undefined].includes(this.frame) && this.items.current.size) {
+        return `${this.frame}% { ${this.items.current.entries
+          .filter(([key, value]) => this.is_css(key))
+          .map(([key, value]) => `${key}: ${value};`)
+          .join(" ")} }`;
+      }
+    }
+
+    /* Returns new component with copy of frame and items. */
+    clone() {
+      return Component.create(this.tag, {
+        frame: this.frame,
+        ...this.items.current.filter(([k, v]) => this.is_css(k)),
+      });
+    }
+
     /* Returns frame state. */
     get frame() {
       return this.$.frame;
@@ -74,45 +124,6 @@ const css_frame = (parent, config, ...factories) => {
       this.$.frame = frame;
     }
 
-    /* Returns CSS rule state. */
-    get rule() {
-      return this.$.rule;
-    }
-    /* Resets items and optionally frame from object. */
-    set rule(rule) {
-      /* Reset all items */
-      this.items.update(
-        Object.fromEntries(
-          Object.entries(this.items.current)
-            .filter(([key, value]) => this.is_css(key))
-            .map(([key, value]) => [key, false])
-        )
-      );
-      /* Update items and optionally frame */
-      this.update(rule);
-    }
-
-    /* Returns text representation of rule. */
-    get text() {
-      if (this.rule) {
-        return this.rule.cssText;
-      }
-      /* NOTE For dev -> performance not critical. */
-      if (
-        ![null, undefined].includes(this.frame) &&
-        Object.keys(this.items.current).length
-      ) {
-        return `${this.frame}% { ${Object.entries(this.items.current)
-          .filter(([key, value]) => this.is_css(key))
-          .map(([key, value]) => `${key}: ${value};`)
-          .join(" ")} }`;
-      }
-    }
-
-    /* TODO
-    - 'clone' as in css_rule???
-    */
-
     /* Updates component. Chainable. 
     Called during creation:
     - after CSS classes
@@ -120,7 +131,7 @@ const css_frame = (parent, config, ...factories) => {
     - before 'call'
     - before 'created_callback'
     - before live DOM connection */
-    update(updates = {}) {
+    update(updates) {
       super.update && super.update(updates);
       /* Allow setting frame and items in one go */
       Object.entries(updates)

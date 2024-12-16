@@ -1,5 +1,5 @@
 import { create } from "rollo/component";
-import { mixin } from "@/rolloui/utils/mixin";
+import { mixin } from "rolloui/utils/mixin";
 import { create_id } from "rolloui/form/utils/create_id";
 
 /* Returns non-container label component for use with form control. */

@@ -5,6 +5,11 @@ await (async () => {
   const { create } = await import("rollo/component");
   const { CheckInput } = await import("rolloui/form/input/CheckInput");
 
+  create("div", {
+    id: "root",
+    parent: document.body,
+  });
+
   const form = create(
     "form.d-flex.flex-column.row-gap-3.p-3",
     { parent: root, noValidate: true },

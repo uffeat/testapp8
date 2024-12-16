@@ -1,4 +1,4 @@
-// css_components
+// css_frames
 
 await (async () => {
   const { create } = await import("rollo/component");
@@ -35,25 +35,32 @@ await (async () => {
           animationName: "slide_in",
         },
       }),
-      create(
-        "css-media",
-        { name: "my_media", media: "600px <= width <= 800px" },
-        create("css-rule", {
-          name: "my_media_rule",
-          h1: {
-            border: "4px solid red",
-          },
-        })
-      ),
+
       create(
         "css-frames",
         {
           name: "slide_in",
         },
-        create("css-frame", {
-          name: "my_frame_0",
-          0: { translate: "150vw 0", scale: "200% 1" },
-        }),
+        create(
+          "css-frame",
+          {
+            name: "my_frame_0",
+            0: { translate: "150vw 0", scale: "200% 1" },
+          },
+          function () {
+            this.effects.add((current, previous) => {
+              console.log("Frame was:", previous.frame);
+              console.log("Frame is:", current.frame);
+            }, "frame");
+          },
+          function () {
+            this.effects.add((current, previous) => {
+              console.log("scale was:", previous.scale);
+              console.log("scale is:", current.scale);
+            }, "scale");
+          }
+        ),
+        /* NOTE Alternative (less compact) way of specifying frame */
         create("css-frame", {
           name: "my_frame_1",
           frame: 100,
@@ -63,11 +70,13 @@ await (async () => {
       )
     )
   );
-  const my_sheet = document.querySelector(`css-sheet[name="my_sheet"]`);
   const my_rule = document.querySelector(`css-rule[name="my_rule"]`);
-  const my_media = document.querySelector(`css-media[name="my_media"]`);
-  const my_media_rule = document.querySelector(
-    `css-rule[name="my_media_rule"]`
-  );
+  //my_rule.$.animationDuration = '1s'
+  const slide_in = document.querySelector(`css-frames[name="slide_in"]`);
   const my_frame_0 = document.querySelector(`css-frame[name="my_frame_0"]`);
+  const my_frame_0_clone = my_frame_0.clone();
+  //my_frame_0.update({scale: "400% 1"})
+  //my_frame_0.remove()
+  //slide_in.append(my_frame_0_clone)
+  my_frame_0.rule = { 50: { translate: "150vw 0", scale: "400% 1" } };
 })();

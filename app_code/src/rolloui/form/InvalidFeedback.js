@@ -1,5 +1,5 @@
 import { create } from "rollo/component";
-import { mixin } from "@/rolloui/utils/mixin";
+import { mixin } from "rolloui/utils/mixin";
 
 /* Returns invalid feedback component for use with form control. */
 export function InvalidFeedback(updates = {}, ...hooks) {
@@ -24,14 +24,14 @@ export function InvalidFeedback(updates = {}, ...hooks) {
         }
         /* Effects: Error state -> feedback text */
         form_control.effects.add(
-          (data) => {
+          () => {
             this.text = form_control.$.error;
           },
           ["error"]
         );
         /* Effect: Visited & value state -> feedback style */
         form_control.effects.add(
-          (data) => {
+          () => {
             this.invisible =
               !form_control.$.visited &&
               !(form_control.required && !form_control.$.value);

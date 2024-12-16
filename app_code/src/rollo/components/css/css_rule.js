@@ -109,6 +109,13 @@ const css_rule = (parent, config, ...factories) => {
           .filter(([k, v]) => this.is_css(k))
           .reset(false)
       );
+      /* Alternative way to reset items:
+      this.items.current.forEach(([k, v]) => {
+        if (this.is_css(k)) {
+          this.$[k] = false;
+        }
+      }); 
+      */
       /* Update items and optionally selector */
       this.update(rule);
     }
@@ -137,7 +144,7 @@ const css_rule = (parent, config, ...factories) => {
       }
     }
 
-    /* Returns component with copy of selector and items. */
+    /* Returns new component with copy of selector and items. */
     clone() {
       return Component.create(this.tag, {
         selector: this.selector,
