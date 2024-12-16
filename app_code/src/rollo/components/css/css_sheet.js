@@ -13,7 +13,8 @@ import {
 import { RulesController } from "rollo/components/css/utils/rules";
 import { sheet } from "rollo/components/css/factories/sheet";
 
-/* Non-visual web component for managing dynamically applied dynamic sheets. */
+/* Non-visual web component for managing dynamically applied dynamic or static 
+single sheets. */
 const css_sheet = (parent, config, ...factories) => {
   const cls = class CssSheet extends parent {
     constructor() {

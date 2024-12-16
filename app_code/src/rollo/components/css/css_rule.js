@@ -1,4 +1,4 @@
-import { Component, create } from "rollo/component";
+import { Component } from "rollo/component";
 import {
   attribute,
   connected,
@@ -139,7 +139,7 @@ const css_rule = (parent, config, ...factories) => {
 
     /* Returns component with copy of selector and items. */
     clone() {
-      return create(this.tag, {
+      return Component.create(this.tag, {
         selector: this.selector,
         ...this.items.current.filter(([k, v]) => this.is_css(k)),
       });

@@ -1,6 +1,6 @@
-import { Data } from "@/rollo/types/data";
+import { Data } from "rollo/types/data";
 import { camel_to_kebab } from "rollo/utils/case";
-import { Component, create } from "rollo/component";
+import { Component } from "rollo/component";
 import {
   attribute,
   connected,
@@ -26,6 +26,7 @@ Usage:
 - As child to 'css-sheet' component -> sets sheet to generated CSS.
 - 'clone' method -> returns style component with generated CSS.
 - 'text' prop -> returns generated CSS.
+If dynamic rules are required, use the other css-family components instead.
  */
 const css_static = (parent, config, ...factories) => {
   const cls = class CssStatic extends parent {
@@ -33,7 +34,7 @@ const css_static = (parent, config, ...factories) => {
       super();
     }
 
-    #style_element = create("style");
+    #style_element = Component.create("style");
 
     /* Returns CSS text. */
     get text() {
@@ -183,7 +184,7 @@ const css_static = (parent, config, ...factories) => {
     /* Creates and returns style component with generated CSS.
     NOTE Does NOT return a component clone! */
     clone() {
-      return create("style", { text: this.text });
+      return Component.create("style", { text: this.text });
     }
 
     #validate_declaration_keys(items) {

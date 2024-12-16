@@ -1,4 +1,4 @@
-import { Data } from "@/rollo/types/data";
+import { Data } from "rollo/types/data";
 import { State } from "rollo/factories/state";
 
 /* Factory with reactive items composition. */

@@ -1,4 +1,4 @@
-import { Data } from "@/rollo/types/data";
+import { Data } from "rollo/types/data";
 import { Component } from "rollo/component";
 import { items } from "rollo/factories/__factories__";
 

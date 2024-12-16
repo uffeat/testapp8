@@ -4,6 +4,7 @@ await (async () => {
   const { create } = await import("rollo/component");
   await import("rollo/components/css/css_frames");
   await import("rollo/components/css/css_frame");
+  await import("rollo/components/css/css_match");
   await import("rollo/components/css/css_media");
   await import("rollo/components/css/css_rule");
   await import("rollo/components/css/css_sheet");
@@ -25,49 +26,52 @@ await (async () => {
     create(
       "css-sheet",
       { name: "my_sheet" },
-      create("css-rule", {
-        name: "my_rule",
-        h1: {
-          color: "pink",
-          backgroundColor: "linen",
-          padding: "8px",
-          animationDuration: "3s",
-          animationName: "slide_in",
-        },
-      }),
       create(
         "css-media",
         { name: "my_media", media: "600px <= width <= 800px" },
-        create("css-rule", {
-          name: "my_media_rule",
-          h1: {
-            border: "4px solid red",
+        create(
+          "css-rule",
+          {
+            name: "my_media_rule",
+            h1: {
+              color: "pink",
+              backgroundColor: "linen",
+              padding: "8px",
+            },
           },
-        })
-      ),
-      create(
-        "css-frames",
-        {
-          name: "slide_in",
+          function () {
+            this.effects.add((current, previous) => {
+              if (previous.color) {
+                console.log("Color was:", previous.color);
+              }
+              if (current.color) {
+                console.log("Color is:", current.color);
+              }
+            }, "color");
+          }
+        ),
+        function () {
+          this.effects.add((current, previous) => {
+            if (previous.media) {
+              console.log("Media was:", previous.media);
+            }
+            if (current.media) {
+              console.log("Media is:", current.media);
+            }
+          }, "media");
         },
-        create("css-frame", {
-          name: "my_frame_0",
-          0: { translate: "150vw 0", scale: "200% 1" },
-        }),
-        create("css-frame", {
-          name: "my_frame_1",
-          frame: 100,
-          translate: "0 0",
-          scale: "100% 1",
+        create("css-match", { name: "my_match" }, function () {
+          this.effects.add((current, previous) => {
+            console.log("Previous match was:", previous.match);
+            console.log("Current match is:", current.match);
+          }, "match");
         })
       )
     )
   );
-  const my_sheet = document.querySelector(`css-sheet[name="my_sheet"]`);
-  const my_rule = document.querySelector(`css-rule[name="my_rule"]`);
   const my_media = document.querySelector(`css-media[name="my_media"]`);
-  const my_media_rule = document.querySelector(
-    `css-rule[name="my_media_rule"]`
-  );
-  const my_frame_0 = document.querySelector(`css-frame[name="my_frame_0"]`);
+
+  my_media.media = "width <= 800px";
+  /* NOTE This not only changes the media rule, but also affects any 
+  "css-media"-components' "match"-effects! */
 })();

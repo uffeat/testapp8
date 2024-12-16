@@ -1,4 +1,4 @@
-import { Data } from "@/rollo/types/data";
+import { Data } from "rollo/types/data";
 
 /* Factory with batch update of style items. */
 export const styles = (parent, config, ...factories) => {

@@ -1,6 +1,6 @@
 import { camel_to_kebab } from "rollo/utils/case";
 import { Component } from "rollo/component";
-import { Data } from "@/rollo/types/data";
+import { Data } from "rollo/types/data";
 import { attribute, items } from "rollo/factories/__factories__";
 import { is_css } from "rollo/components/css/factories/is_css";
 import { rule } from "rollo/components/css/factories/rule";

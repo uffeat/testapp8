@@ -1,10 +1,10 @@
 import { Component } from "rollo/component";
-import { attribute, name, observer, uid } from "rollo/factories/__factories__";
+import { attribute, hooks, name, observer, uid } from "rollo/factories/__factories__";
 
 /* Non-visual web component for with no other function than to create a 
 centralized wrapper for 'css-sheet' components */
 const css_sheets = (parent, config, ...factories) => {
-  const cls = class CssSheet extends parent {
+  const cls = class CssSheets extends parent {
     constructor() {
       super();
     }
@@ -41,6 +41,7 @@ Component.author(
   HTMLElement,
   {},
   attribute,
+  hooks,
   name,
   observer,
   uid,
