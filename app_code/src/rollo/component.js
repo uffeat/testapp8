@@ -17,7 +17,6 @@ import {
   text,
   uid,
 } from "rollo/factories/__factories__";
-import { is_node } from "rollo/utils/is_node";
 import { assign } from "rollo/utils/assign";
 
 /* Utility for authoring web components and instantiating elements. */
@@ -25,7 +24,7 @@ export const Component = new (class {
   get registry() {
     return this.#registry;
   }
-  #registry = new (class Registry {
+  #registry = new (class {
     #registry = {};
     /*  */
     add = (tag, cls) => {
@@ -56,17 +55,36 @@ export const Component = new (class {
   get factories() {
     return this.#factories;
   }
-  #factories = new (class Factories {
+  #factories = new (class {
     #registry = [];
     /* Registers conditional web component class factory */
     add = (factory, condition) => {
       this.#registry.push([factory, condition]);
+    };
+    /* Check for missing factories. For use inside factories. */
+    check = (required, factories) => {
+      const missing = new Set(required).difference(new Set(factories));
+      if (missing.size > 0) {
+        const names = Array.from(missing).map((factory) => factory.name);
+        throw new Error(`Missing factories: ${names}`);
+      }
     };
     /* Returns factories relevant for a given tag */
     get = (tag) => {
       return this.#registry
         .filter(([factory, condition]) => !condition || condition(tag))
         .map(([factory, condition]) => factory);
+    };
+  })();
+
+  get tools() {
+    return this.#tools;
+  }
+  #tools = new (class {
+    create_observed_attributes = (parent, ...observedAttributes) => {
+      return Array.from(
+        new Set([...observedAttributes, ...(parent.observedAttributes || [])])
+      );
     };
   })();
 
@@ -150,7 +168,13 @@ export const Component = new (class {
     /* Call the 'update' lifecycle method */
     element.update && element.update(updates);
     /* Append children from hooks */
-    element.append && element.append(...hooks.filter(is_node));
+    element.append &&
+      element.append(
+        ...hooks.filter(
+          (v) =>
+            v instanceof HTMLElement || ["number", "string"].includes(typeof v)
+        )
+      );
     /* Call the 'call' lifecycle method */
     element.call && element.call(...hooks);
     if (element.isConnected) {
@@ -185,7 +209,7 @@ export const Component = new (class {
 
   /* Returns web component class defined on-demand, if native. */
   get = (tag) => {
-    let cls = this.registry.get(tag);
+    const cls = this.registry.get(tag);
     if (cls) {
       return cls;
     }

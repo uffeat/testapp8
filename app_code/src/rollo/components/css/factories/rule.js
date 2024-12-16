@@ -1,11 +1,11 @@
-import { check_factories } from "rollo/utils/check_factories";
+import { Component } from "rollo/component";
 import { items } from "rollo/factories/__factories__";
 import { target } from "rollo/components/css/factories/target";
 
 /* Factory with rule state. */
 export const rule = (parent, config, ...factories) => {
   /* Check factory dependencies */
-  check_factories([items, target], factories);
+  Component.factories.check([items, target], factories);
   const cls = class Rule extends parent {
     /* Only available during creation. 
     Called:

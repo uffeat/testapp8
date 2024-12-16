@@ -1,5 +1,4 @@
-import "./bootstrap.scss";
-import "./main.css";
+// css_media
 
 await (async () => {
   const { create } = await import("rollo/component");
@@ -26,38 +25,49 @@ await (async () => {
     create(
       "css-sheet",
       { name: "my_sheet" },
-      
+      create("css-rule", {
+        name: "my_rule",
+        h1: {
+          color: "pink",
+          backgroundColor: "linen",
+          padding: "8px",
+          animationDuration: "3s",
+          animationName: "slide_in",
+        },
+      }),
       create(
         "css-media",
         { name: "my_media", media: "600px <= width <= 800px" },
         create("css-rule", {
           name: "my_media_rule",
           h1: {
-            color: "pink",
-            backgroundColor: "linen",
-            padding: "8px",
-            
+            border: "4px solid red",
           },
-        }),
+        })
       ),
-      
+      create(
+        "css-frames",
+        {
+          name: "slide_in",
+        },
+        create("css-frame", {
+          name: "my_frame_0",
+          0: { translate: "150vw 0", scale: "200% 1" },
+        }),
+        create("css-frame", {
+          name: "my_frame_1",
+          frame: 100,
+          translate: "0 0",
+          scale: "100% 1",
+        })
+      )
     )
   );
   const my_sheet = document.querySelector(`css-sheet[name="my_sheet"]`);
+  const my_rule = document.querySelector(`css-rule[name="my_rule"]`);
   const my_media = document.querySelector(`css-media[name="my_media"]`);
   const my_media_rule = document.querySelector(
     `css-rule[name="my_media_rule"]`
   );
-
+  const my_frame_0 = document.querySelector(`css-frame[name="my_frame_0"]`);
 })();
-
-/* Enable tests */
-if (import.meta.env.DEV) {
-  let path = "";
-  window.addEventListener("keydown", async (event) => {
-    if (event.code === "KeyT" && event.shiftKey) {
-      path = prompt("Path:", path);
-      await import(`./tests/${path}.js`);
-    }
-  });
-}

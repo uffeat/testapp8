@@ -1,6 +1,5 @@
-import { Data } from "rollo/utils/data";
+import { Data } from "@/rollo/types/data";
 import { camel_to_kebab } from "rollo/utils/case";
-import { is_number_text } from "rollo/utils/is_number_text";
 import { Component, create } from "rollo/component";
 import {
   attribute,
@@ -229,3 +228,16 @@ function update_rule(rule, items) {
     }
   }
 }
+
+/* Tests, if 'text' can be converted to number.
+undefined return, if 'text' is not a string. */
+function is_number_text(text) {
+  if (typeof text === "string") {
+    const number = Number(text);
+    if (typeof number === "number" && number === number) {
+      return true;
+    }
+    return false
+  }
+}
+

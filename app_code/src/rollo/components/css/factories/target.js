@@ -1,10 +1,10 @@
-import { check_factories } from "rollo/utils/check_factories";
+import { Component } from "rollo/component";
 import { connected, items } from "rollo/factories/__factories__";
 
 /* Factory for target prop. */
 export const target = (parent, config, ...factories) => {
   /* Check factory dependencies */
-  check_factories([connected, items], factories);
+  Component.factories.check([connected, items], factories);
   const cls = class Target extends parent {
     /* Only available during creation. 
     Called:

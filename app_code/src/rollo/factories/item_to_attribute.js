@@ -1,10 +1,10 @@
-import { check_factories } from "rollo/utils/check_factories";
+import { Component } from "rollo/component";
 import { attribute, items } from "rollo/factories/__factories__";
 
 /* Factory that shows state as attribute. */
 export const item_to_attribute = (parent, config, ...factories) => {
   /* Check factory dependencies */
-  check_factories([attribute, items], factories);
+  Component.factories.check([attribute, items], factories);
 
   const cls = class ItemToAttribute extends parent {
     static PREFIX = '$'

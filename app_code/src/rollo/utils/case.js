@@ -1,36 +1,13 @@
-/* Returns kebab-interpretation of camel.
-Digits are treated as lower-case characters, 
-i.e., p10 -> p10. */
 export function camel_to_kebab(camel) {
+  /* NOTE Digits are treated as lower-case characters, 
+  i.e., p10 -> p10. */
   return camel.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
-}
-
-/* Returns kebab-interpretation of camel.
-First digit in digit sequences are treated as upper-case characters,
-i.e., p10 -> p-10. This often (but not always) the desired behaviour, 
-when dealing with css classes. */
-export function camel_to_kebab_css(camel) {
-  return camel
-    .replace(/([a-z])([A-Z0-9])/g, "$1-$2")
-    .replace(/([0-9])([a-zA-Z])/g, "$1-$2")
-    .toLowerCase();
 }
 
 export function camel_to_snake(camel) {
   const kebab = this.camel_to_kebab(camel);
-  const snake = kebab.replace("-", "_");
+  const snake = kebab.replaceAll("-", "_");
   return snake;
-}
-
-export function capitalize(text) {
-  if (text.length > 0) {
-    text = text[0].toUpperCase() + text.slice(1);
-  }
-  return text;
-}
-
-export function has_upper(text) {
-  return text !== text.toLowerCase();
 }
 
 export function kebab_to_camel(kebab) {
@@ -52,8 +29,15 @@ export function pascal_to_kebab(pascal) {
 }
 
 export function snake_to_camel(snake) {
-  const kebab = snake.replace("_", "-");
+  const kebab = snake.replaceAll("_", "-");
   return this.kebab_to_camel(kebab);
+}
+
+export function capitalize(text) {
+  if (text.length > 0) {
+    text = text[0].toUpperCase() + text.slice(1);
+  }
+  return text;
 }
 
 export function starts_with_upper(text) {

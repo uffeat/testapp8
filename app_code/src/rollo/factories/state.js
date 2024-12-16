@@ -1,4 +1,4 @@
-import { Data } from "rollo/utils/data";
+import { Data } from "rollo/types/data";
 
 /* Factory for light-weight and flexible conditional pub-sub-based reactivity 
 based on flat object data.

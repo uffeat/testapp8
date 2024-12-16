@@ -1,4 +1,4 @@
-import { check_factories } from "rollo/utils/check_factories";
+import { Component } from "rollo/component";
 import {
   attribute,
 } from "rollo/factories/__factories__";
@@ -6,7 +6,7 @@ import {
 /* Factory for name prop with one-way prop->attr reflection. */
 export const name = (parent, config, ...factories) => {
   /* Check factory dependencies */
-  check_factories([attribute], factories);
+  Component.factories.check([attribute], factories);
   const cls = class Name extends parent {
    
     get name() {

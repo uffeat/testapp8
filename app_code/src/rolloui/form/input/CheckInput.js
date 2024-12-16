@@ -1,6 +1,6 @@
 import { create } from "rollo/component";
-import { mirror } from "rollo/utils/mirror";
-import { mixin } from "rollo/utils/mixin";
+import { mirror } from "@/rolloui/utils/mirror";
+import { mixin } from "@/rolloui/utils/mixin";
 import { base } from "rolloui/form/input/base";
 import { InvalidFeedback } from "rolloui/form/InvalidFeedback";
 import { create_id } from "rolloui/form/utils/create_id";

@@ -1,11 +1,11 @@
-import { Data } from "rollo/utils/data";
-import { check_factories } from "rollo/utils/check_factories";
+import { Data } from "@/rollo/types/data";
+import { Component } from "rollo/component";
 import { items } from "rollo/factories/__factories__";
 
 /* Factory that updates natives from NATIVE-prefixed state. */
 export const item_to_native = (parent, config, ...factories) => {
   /* Check factory dependencies */
-  check_factories([items], factories);
+  Component.factories.check([items], factories);
 
   const cls = class ItemToNative extends parent {
     static PREFIX = "$";

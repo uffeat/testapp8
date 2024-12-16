@@ -1,4 +1,4 @@
-import { Data } from "rollo/utils/data";
+import { Data } from "rollo/types/data";
 import { camel_to_kebab } from "rollo/utils/case";
 
 /* Factory for enhanced attribute control. */

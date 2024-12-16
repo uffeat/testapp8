@@ -1,5 +1,4 @@
-import { check_factories } from "rollo/utils/check_factories";
-import { ListController } from "rollo/utils/list_controller";
+import { Component } from "rollo/component";
 import { attribute, connected, items } from "rollo/factories/__factories__";
 
 /* Factory that wraps a constructed sheet.
@@ -9,7 +8,7 @@ Responsibilities:
 NOT concerned with sheet content. */
 export const sheet = (parent, config, ...factories) => {
   /* Check factory dependencies */
-  check_factories([attribute, connected, items], factories);
+  Component.factories.check([attribute, connected, items], factories);
 
   const cls = class Sheet extends parent {
     /* Only available during creation. 
@@ -31,9 +30,7 @@ export const sheet = (parent, config, ...factories) => {
         /* Unadopt from any previous */
         if (previous.target) {
           /* Perform in-place mutation to minimize flickering */
-          ListController.create(previous.target.adoptedStyleSheets).remove(
-            this.sheet
-          );
+          unadopt(previous.target.adoptedStyleSheets, this.sheet);
         }
         /* Adopt to any new */
         if (this.target) {
@@ -79,3 +76,10 @@ export const sheet = (parent, config, ...factories) => {
   };
   return cls;
 };
+
+function unadopt(adopted, sheet) {
+  const index = adopted.indexOf(sheet);
+  if (index !== -1) {
+    adopted.splice(index, 1);
+  }
+}

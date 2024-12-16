@@ -7,7 +7,7 @@ export function pipe(value, ...funcs) {
   return value;
 }
 /* Alternative version (not tested):
-export function pipe(arg, ...pipe) {
-  return pipe.reduce((acc, func) => func(acc), arg);
+export function pipe(value, ...funcs) {
+  return funcs.reduce((acc, func) => func(acc), value);
 }
 */

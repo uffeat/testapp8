@@ -1,5 +1,5 @@
 import { create } from "rollo/component";
-import { mixin } from "rollo/utils/mixin";
+import { mixin } from "@/rolloui/utils/mixin";
 
 /* Returns invalid feedback component for use with form control. */
 export function InvalidFeedback(updates = {}, ...hooks) {

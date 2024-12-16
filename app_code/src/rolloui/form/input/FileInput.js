@@ -1,7 +1,7 @@
 import "rolloui/form/form.css";
 import { create } from "rollo/component";
-import { mirror } from "rollo/utils/mirror";
-import { mixin } from "rollo/utils/mixin";
+import { mirror } from "@/rolloui/utils/mirror";
+import { mixin } from "@/rolloui/utils/mixin";
 import { Cancel as CancelIcon } from "rolloui/icons/Cancel";
 import { Upload as SelectIcon } from "rolloui/icons/Upload";
 import { Floating } from "rolloui/form/Floating";

@@ -1,5 +1,5 @@
 import { create } from "rollo/component";
-import { mixin } from "rollo/utils/mixin";
+import { mixin } from "@/rolloui/utils/mixin";
 import { base } from "rolloui/form/input/base";
 
 /* Returns select component. */

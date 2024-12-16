@@ -1,5 +1,4 @@
 import { Component, create } from "rollo/component";
-import { Data } from "rollo/utils/data";
 import {
   attribute,
   connected,

@@ -1,10 +1,10 @@
-import { check_factories } from "rollo/utils/check_factories";
+import { Component } from "rollo/component";
 import { events, items } from "rollo/factories/__factories__";
 
 /* Factory that updates natives from NATIVE-prefixed state. */
 export const item_to_event = (parent, config, ...factories) => {
   /* Check factory dependencies */
-  check_factories([events, items], factories);
+  Component.factories.check([events, items], factories);
 
   const cls = class ItemToEvent extends parent {
     constructor() {

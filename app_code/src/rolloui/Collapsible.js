@@ -1,6 +1,6 @@
 import { Collapse } from "bootstrap";
 import { create } from "rollo/component";
-import { mixin } from "rollo/utils/mixin";
+import { mixin } from "@/rolloui/utils/mixin";
 
 
 export function Collapsible({ open = false, ...updates } = {}, ...hooks) {

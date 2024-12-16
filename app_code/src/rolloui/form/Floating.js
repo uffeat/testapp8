@@ -1,5 +1,5 @@
 import { create } from "rollo/component";
-import { mirror } from "rollo/utils/mirror";
+import { mirror } from "@/rolloui/utils/mirror";
 import { Label } from "rolloui/form/Label";
 import { create_id } from "rolloui/form/utils/create_id";
 

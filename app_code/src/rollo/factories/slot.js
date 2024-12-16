@@ -1,11 +1,11 @@
-import { check_factories } from "rollo/utils/check_factories";
+import { Component } from "rollo/component";
 import { shadow } from "rollo/factories/__factories__";
 
 /* Factory that adds a single slot to the shadow dom. 
 Fires 'slotchange' event and calls any 'slot_change_callback' on slot change. */
 export const slot = (parent, config, ...factories) => {
   /* Check factory dependencies */
-  check_factories([shadow], factories);
+  Component.factories.check([shadow], factories);
 
   const cls = class Slot extends parent {
     /* Only available during creation. 

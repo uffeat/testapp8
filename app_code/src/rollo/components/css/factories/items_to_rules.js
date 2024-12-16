@@ -1,13 +1,13 @@
 import { camel_to_kebab } from "rollo/utils/case";
-import { Data } from "rollo/utils/data";
-import { check_factories } from "rollo/utils/check_factories";
+import { Component } from "rollo/component";
+import { Data } from "@/rollo/types/data";
 import { attribute, items } from "rollo/factories/__factories__";
 import { is_css } from "rollo/components/css/factories/is_css";
 import { rule } from "rollo/components/css/factories/rule";
 
 /* . */
 export const items_to_rules = (parent, config, ...factories) => {
-  check_factories([attribute, is_css, items, rule], factories);
+  Component.factories.check([attribute, is_css, items, rule], factories);
   const cls = class ItemsToRules extends parent {
     /* Only available during creation. 
     Called:

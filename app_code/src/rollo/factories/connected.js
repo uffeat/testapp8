@@ -1,10 +1,10 @@
-import { check_factories } from "rollo/utils/check_factories";
+import { Component } from "rollo/component";
 import { items } from "rollo/factories/__factories__";
 
 /* Factory that sets connected and parent state. */
 export const connected = (parent, config, ...factories) => {
   /* Check factory dependencies */
-  check_factories([items], factories);
+  Component.factories.check([items], factories);
 
   const cls = class Connected extends parent {
     connectedCallback() {

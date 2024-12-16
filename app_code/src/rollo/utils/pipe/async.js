@@ -7,7 +7,7 @@ export async function pipe(value, ...funcs) {
   return value;
 }
 /* Alternative version (not tested):
-export async function run_pipe(arg, ...pipe) {
-  return await pipe.reduce(async (accPromise, func) => func(await accPromise), Promise.resolve(arg));
+export async function pipe(value, ...funcs) {
+  return await funcs.reduce(async (accPromise, func) => func(await accPromise), Promise.resolve(value));
 }
 */

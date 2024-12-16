@@ -1,4 +1,4 @@
-import { check_factories } from "rollo/utils/check_factories";
+import { Component } from "rollo/component";
 import { items } from "rollo/factories/__factories__";
 import { rule } from "rollo/components/css/factories/rule";
 import { RulesController, FrameRulesController } from "rollo/components/css/utils/rules";
@@ -6,7 +6,7 @@ import { RulesController, FrameRulesController } from "rollo/components/css/util
 /* Factory for rules controller. */
 export const rules = (parent, config, ...factories) => {
   /* Check factory dependencies */
-  check_factories([items, rule], factories);
+  Component.factories.check([items, rule], factories);
   const cls = class Rules extends parent {
     /* Only available during creation. 
     Called:

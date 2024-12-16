@@ -1,4 +1,4 @@
-import { Data } from "rollo/utils/data";
+import { Data } from "@/rollo/types/data";
 
 /* Factory with batch update of properties. */
 export const properties = (parent, config, ...factories) => {

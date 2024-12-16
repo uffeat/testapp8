@@ -1,5 +1,4 @@
-import { check_factories } from "rollo/utils/check_factories";
-import { create_observed_attributes } from "rollo/utils/create_observed_attributes";
+import { Component } from "rollo/component";
 import { attribute } from "rollo/factories/__factories__";
 
 const create_uid = (() => {
@@ -12,10 +11,10 @@ const create_uid = (() => {
 /* Factory assigning uid attribute/prop to components. */
 export const uid = (parent, config, ...factories) => {
   /* Check factory dependencies */
-  check_factories([attribute], factories);
+  Component.factories.check([attribute], factories);
 
   const cls = class UId extends parent {
-    static observedAttributes = create_observed_attributes(parent, "uid");
+    static observedAttributes = Component.tools.create_observed_attributes(parent, "uid");
     #uid;
 
     /* Only available during creation. 
