@@ -10,9 +10,12 @@ export class Data extends Object {
     return new Data(...args);
   };
 
-  constructor(updates = {}) {
+  constructor(updates) {
     super();
-    this.update(updates);
+    if (updates) {
+      this.update(updates);
+    }
+    
   }
 
   /* Returns shallow copy of entries. */
@@ -76,7 +79,10 @@ export class Data extends Object {
 
   /* Updates items from provided object. Items with undefined values are deleted. 
   Chainable. */
-  update(updates = {}) {
+  update(updates) {
+    if (!updates) {
+      return this;
+    }
     /* Allow updates as function */
     if (typeof updates === 'function') {
       updates = updates.call(this) || {}

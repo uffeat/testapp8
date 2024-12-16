@@ -47,7 +47,7 @@ export const events = (parent, config, ...factories) => {
     - before 'call'
     - before 'created_callback'
     - before live DOM connection */
-    update(updates = {}) {
+    update(updates) {
       super.update && super.update(updates);
       /* Register event handlers */
       Object.entries(updates)

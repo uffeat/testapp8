@@ -10,7 +10,7 @@ export const styles = (parent, config, ...factories) => {
     - before 'call'
     - before 'created_callback'
     - before live DOM connection */
-    update(updates = {}) {
+    update(updates) {
       super.update && super.update(updates);
       /* Updates styles */
       Data.create(updates)

@@ -53,7 +53,7 @@ export const state = (parent, config, ...factories) => {
     #previous = Data.create()
 
     /* Updates state data and notifies effects if changes. Chainable. */
-    update(updates = {}) {
+    update(updates) {
       super.update && super.update(updates);
       /* Infer changed items */
       const changes = Data.create(

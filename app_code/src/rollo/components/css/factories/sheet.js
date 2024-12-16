@@ -21,6 +21,7 @@ export const sheet = (parent, config, ...factories) => {
     - before live DOM connection */
     created_callback() {
       super.created_callback && super.created_callback();
+
       /* Add effect to update target */
       this.effects.add(() => {
         this.target = this.connected ? this.getRootNode() : null;
@@ -39,6 +40,8 @@ export const sheet = (parent, config, ...factories) => {
           this.target.adoptedStyleSheets.push(this.sheet);
         }
       }, "target");
+      /* Set default disabled state */
+      this.disabled = false;
       /* Add effect to control disabled */
       this.effects.add(() => {
         this.sheet.disabled = this.disabled;

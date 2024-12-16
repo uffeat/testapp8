@@ -46,7 +46,7 @@ export const items_to_rules = (parent, config, ...factories) => {
             ]);
         };
         effect = (changes) => {
-          if (changes.size === 0) return;
+          if (changes.size === 0) return
           const style = this.owner.rule.style;
           for (const [key, value] of changes.entries) {
             if (value === false) {
@@ -71,21 +71,7 @@ export const items_to_rules = (parent, config, ...factories) => {
       })(this);
     }
 
-    /* Updates component. Chainable. 
-    Called during creation:
-    - after CSS classes
-    - after children
-    - before 'call'
-    - before 'created_callback'
-    - before live DOM connection */
-    update(updates = {}) {
-      super.update && super.update(updates);
-      /* Allow updating items without the '$'-syntax */
-      this.items.update(
-        Data.create(updates).filter(([k, v]) => this.is_css(k))
-      );
-      return this;
-    }
+    
   };
 
   return cls;

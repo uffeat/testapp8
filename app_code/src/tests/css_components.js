@@ -9,12 +9,10 @@ await (async () => {
   await import("rollo/components/css/css_sheet");
   await import("rollo/components/css/css_sheets");
 
-  if (!root) {
-    create("div", {
-      id: "root",
-      parent: document.body,
-    });
-  }
+  create("div", {
+    id: "root",
+    parent: document.body,
+  });
 
   /* Create elements to test css on */
   create("h1", { parent: root }, "Hello World");

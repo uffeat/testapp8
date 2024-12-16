@@ -34,7 +34,7 @@ export const css_var = (parent, config, ...factories) => {
     - before 'call'
     - before 'created_callback'
     - before live DOM connection */
-    update(updates = {}) {
+    update(updates) {
       super.update && super.update(updates);
       /* Update css vars */
       Object.entries(updates)

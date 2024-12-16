@@ -181,7 +181,8 @@ const css_static = (parent, config, ...factories) => {
       throw new Error(`'css-static' components do not accept children.`);
     }
 
-    /* Creates and returns style component with generated CSS. */
+    /* Creates and returns style component with generated CSS.
+    NOTE Does NOT return a component clone! */
     clone() {
       return create("style", { text: this.text });
     }

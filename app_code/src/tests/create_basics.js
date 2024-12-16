@@ -4,12 +4,10 @@ await (async () => {
   const { create } = await import("rollo/component");
  
 
-  if (!root) {
-    create("div", {
-      id: "root",
-      parent: document.body,
-    });
-  }
+  create("div", {
+    id: "root",
+    parent: document.body,
+  });
 
   const button = create(
     "button",

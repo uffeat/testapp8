@@ -4,7 +4,7 @@ import { camel_to_kebab } from "rollo/utils/case";
 /* Factory for enhanced attribute control. */
 export const attribute = (parent, config, ...factories) => {
   const cls = class Attribute extends parent {
-    static PREFIX = 'attribute_'
+    static PREFIX = "attribute_";
 
     /* Returns prop-like getter/setter interface to attribute. 
     Supports:
@@ -56,17 +56,15 @@ export const attribute = (parent, config, ...factories) => {
     });
 
     /* Updates component. Chainable. */
-    update(updates = {}) {
+    update(updates) {
       super.update && super.update(updates);
       /* Update attributes */
       Data.create(updates)
-      .filter(([k, v]) => typeof k === 'string' && k.startsWith(Attribute.PREFIX))
-      .map(([k, v]) =>  [k, this.attribute[k.slice(Attribute.PREFIX.length)]])
-      .forEach(([k, v]) => this.attribute[k] = v);
-
-
-
-      
+        .filter(
+          ([k, v]) => typeof k === "string" && k.startsWith(Attribute.PREFIX)
+        )
+        .map(([k, v]) => [k, this.attribute[k.slice(Attribute.PREFIX.length)]])
+        .forEach(([k, v]) => (this.attribute[k] = v));
       return this;
     }
   };

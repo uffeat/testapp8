@@ -1,5 +1,4 @@
-import "./bootstrap.scss";
-import "./main.css";
+// css_rule
 
 await (async () => {
   const { create } = await import("rollo/component");
@@ -60,62 +59,20 @@ await (async () => {
       )
     )
   );
-
+ 
   const my_sheet = document.querySelector(`css-sheet[name="my_sheet"]`);
   const my_rule = document.querySelector(`css-rule[name="my_rule"]`);
-  const my_rule_clone = my_rule.clone();
-
-// Utility function to create a delay
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
-
-
-// Async function to perform the series of operations
-async function test() {
-  // Update color and selector; backgroundColor and padding remain the same
-  await delay(1000);
+  const my_rule_clone = my_rule.clone()
+  /* Update color and selector; backgroundColor and padding remain the same */
   my_rule.update({ color: "green", selector: "h2" });
-
-  // Update color; selector and all other items remain the same
-  await delay(1000);
-  my_rule.$.color = "blue";
-
-  // Reset rule completely
-  await delay(1000);
-  my_rule.rule = { h1: { backgroundColor: "beige" } };
-
-  // Reset rule but keep selector
-  await delay(1000);
-  my_rule.rule = { color: "red" };
-
-  // Remove rule
-  await delay(1000);
-  my_rule.remove();
-
-  // Apply clone (restores original)
-  await delay(1000);
-  my_sheet.append(my_rule_clone);
-
-  // Remove rule
-  await delay(1000);
-  my_rule_clone.remove();
-
-  // Restore without adding to the DOM
-  await delay(1000);
-  my_rule_clone.target = my_sheet;
-}
-
-
-test();
+  /* Update color; selector and all other items remain the same remains the same */
+  my_rule.$.color = 'blue'
+  /* Reset rule completely */
+  my_rule.rule = {h1: {backgroundColor: 'beige'}}
+  /* Reset rule, but selector */
+  my_rule.rule = {color: 'red'}
+  /* Remove rule */
+  my_rule.remove()
+  /* Apply clone (restores original) */
+  my_sheet.append(my_rule_clone)
 })();
-
-/* Enable tests */
-if (import.meta.env.DEV) {
-  let path = "";
-  window.addEventListener("keydown", async (event) => {
-    if (event.code === "KeyT" && event.shiftKey) {
-      path = prompt("Path:", path);
-      await import(`./tests/${path}.js`);
-    }
-  });
-}

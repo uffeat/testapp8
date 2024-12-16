@@ -1,4 +1,5 @@
 import { Component, create } from "rollo/component";
+import { Data } from "rollo/utils/data";
 import {
   attribute,
   connected,
@@ -71,23 +72,29 @@ const css_rule = (parent, config, ...factories) => {
     created_callback() {
       super.created_callback && super.created_callback();
       super.style.display = "none";
-      /* Effect to control selector. */
-      const selector_effect = (changes) => {
-        if (this.rule) {
+      /* Effect complex to let rule add/remove effect to control selector. */
+      new (class {
+        constructor(owner) {
+          this.#owner = owner;
+          owner.effects.add(() => {
+            if (owner.rule) {
+              owner.effects.add(this.effect, "selector");
+            } else {
+              owner.effects.remove(this.effect);
+            }
+          }, "rule");
+        }
+        get owner() {
+          return this.#owner;
+        }
+        #owner;
+        effect = () => {
           /* Update rule */
-          this.rule.selectorText = this.selector;
-        }
-        /* Sync to attribute */
-        this.attribute.selector = this.selector;
-      };
-      /* Add effect to control selector effect */
-      this.effects.add((changes, previous) => {
-        if (this.rule) {
-          this.effects.add(selector_effect, "selector");
-        } else {
-          this.effects.remove(selector_effect);
-        }
-      }, "rule");
+          this.owner.rule.selectorText = this.owner.selector;
+          /* Sync to attribute */
+          this.owner.attribute.selector = this.owner.selector;
+        };
+      })(this);
     }
 
     /* Returns CSS rule state. */
@@ -146,7 +153,7 @@ const css_rule = (parent, config, ...factories) => {
     - before 'call'
     - before 'created_callback'
     - before live DOM connection */
-    update(updates = {}) {
+    update(updates) {
       super.update && super.update(updates);
       /* Allow setting selector and items in one go */
       Object.entries(updates)
@@ -156,7 +163,6 @@ const css_rule = (parent, config, ...factories) => {
           this.selector = selector;
           this.items.update(items);
         });
-
       return this;
     }
   };
