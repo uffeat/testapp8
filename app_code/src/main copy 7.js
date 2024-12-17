@@ -8,12 +8,11 @@ await (async () => {
 
   create("div", {
     id: "root",
-    parent: document.body,
+    parent: document.body
   });
 
   const state = create("data-state", { name: "my-state", parent: root });
 
-  /* Effect to watch data */
   state.effects.add((changes, previous, owner) => {
     //console.log("previous:", previous);
     //console.log("changes:", changes);
@@ -21,21 +20,28 @@ await (async () => {
     //state.$.foo = 48;
   });
 
-  /* Updating effect to handle new number items */
-  state.effects.add(
-    ([changes, previous, owner]) => {
-      const updates = changes.map(([k, v]) => [k, 2 * v]);
-      owner.items.update(updates);
-    },
-    (changes, previous, owner) => {
-      return [changes.filter(
-        ([k, v]) => typeof v === "number" && previous[k] === undefined
-      ), previous, owner];
-    }
-  );
+  state.effects.add((changes, previous, owner) => {
+    //console.log("previous:", previous);
+    
+
+    const updates = changes.map(([k, v]) => [k, 2 * v])
+    console.log("updates:", updates);
+    state.items.update(updates)
+
+
+  
+    //state.$.foo = 48;
+  },
+  (changes, previous, owner) => {
+    return changes.filter(([k, v]) => typeof v === 'number' && previous[k] === undefined)
+  },
+
+);
+
+
 
   state.$.foo = 42;
-
+ 
   state.$.bar = "bar";
   state.$.stuff = "stuff";
 
