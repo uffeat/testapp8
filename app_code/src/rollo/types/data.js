@@ -62,6 +62,11 @@ export class Data extends Object {
     return this;
   }
 
+  /* Freezes object shallowly. Chainable. */
+  freeze() {
+    return Object.freeze(this)
+  }
+
   /* Returns Data instance with entries mapped according to provided function. */
   map(f) {
     return Data.create(this.entries.map(f));

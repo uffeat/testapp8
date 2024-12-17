@@ -19,7 +19,7 @@ await (async () => {
     console.log("current:", state.items.current);
   });
 
-  // use items.update etc
+
 
   state.$.foo = 42;
   state.$.foo = 43;
@@ -29,9 +29,10 @@ await (async () => {
   //state.items.reset(undefined)
   //state.items.reset(true)
   state.items.filter(([k, v]) => k !== "stuff");
-  state.items.transform(([k, v]) =>
-    typeof v === "number" ? [k, 2 * v] : [k, v]
-  );
+  state.items.transform(([k, v]) => typeof v === "number" ? [k, 2 * v] : [k, v]);
+
+  state.items.update({pind: 'pind', ting: 'ting', foo: undefined})
+  state.items.update([['pind', undefined], ['bar', 'BAR']])
 
   /*
   TODO
