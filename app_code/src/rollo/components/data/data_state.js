@@ -6,8 +6,6 @@ import {
   chain,
   connected,
   hooks,
-  item_to_attribute,
-  item_to_native,
   items,
   name,
   parent,
@@ -16,7 +14,9 @@ import {
   uid,
 } from "rollo/factories/__factories__";
 
-/* Non-visual web component for reactive data. 
+/* Non-visual web component for reactive data. Use as an in-DOM alternative
+to State instances to leverage DOM features, incl. 'data'effect' children
+and styling options.
 NOTE
 - While regular components hold a single State instance ('items'), 
   DataState components also hold a second State instance ('state'),
@@ -25,7 +25,9 @@ NOTE
   syntax is used in 'update', 'state' (and not 'items') is updated.
   In conclusion, 'items' should be used for "standard" component state
   management (and for compatibility with basic factories), while
-  'state' should be used for "actual" state management. */
+  'state' should be used for "actual" state management. 
+- The factories 'item_to_attribute' and 'item_to_native' are not used,
+  since these are of less relevance for 'state'. */
 const data_state = (parent) => {
   const cls = class DataState extends parent {
     static PREFIX = "$";
@@ -134,8 +136,6 @@ Component.author(
   chain,
   connected,
   hooks,
-  //item_to_attribute,
-  //item_to_native,
   items,
   name,
   parent,
