@@ -1,7 +1,9 @@
 import "./bootstrap.scss";
 import "./main.css";
 
+
 await (async () => {
+  await import("rollo/components/data/data_state");
   const { create } = await import("rollo/component");
   const { State } = await import("rollo/factories/state");
 
@@ -10,47 +12,52 @@ await (async () => {
     parent: document.body,
   });
 
-  function use_state(component, updates = {}) {
-    const state = State.create();
-    const effect = (current) => {
-      component.update(current);
-    };
-    state.effects.add(effect);
-    state.update(updates);
-    return state;
-  }
+  const state = create('data-state', {name: 'my-state', parent: root})
+
+  state.effects.add((changes, previous) => {
+    console.log('previous:', previous)
+    console.log('changes:', changes)
+    console.log('current:', state.items.current)
+  })
+
+  // use items.update etc
+
+  state.$.foo = 42
+  state.$.foo = 43
+  state.$.bar = 'bar'
+  state.$.stuff = 'stuff'
+
+  //state.items.reset(undefined)
+
+  //const filtered = state.items.current.filter(([k, v]) => typeof v === 'string') 
+  //console.log('filtered:', filtered)
+
+  
+  state.items.filter(([k, v]) => {
+    if (k === 'stuff') {
+      return false
+    } else {
+      return true
+    }
+  })
+    
+ 
 
   /*
   TODO
-  - some enable outside code to set state, perhaps by
-    - simply add a state prop to component - or let it be a manuel option
-    - wrap a state web component around the component
-    - something else; think factory?
-
-    use_state could be a standard component method (use_state factory)? 
-    Thereby avoiding the need to pass in component... perhaps activate/deactive according to connected?
+  - test data/state methods etc.
+  - data-effect componnent
+  
   */
 
-  function Component() {
-    const component = create("h1");
-    const state = use_state(component, { text: "Unclicked" });
+  /* GOAL:
+  Allow seeting state items directly from conditional effect, e.g.,
+  state.$.foo = something..., so that a conditional effect is set up that updates foo
+  ... or something similar 
+  */
 
-    //state.$.text = "Unclicked";
 
-    component.on.click = (event) => {
-      state.$.text = "Clicked";
-    };
 
-    component.state = state;
-
-    return component;
-  }
-
-  const component = Component();
-
-  root.append(component);
-
-  component.state.$.text = "changed";
 })();
 
 /* Enable tests */

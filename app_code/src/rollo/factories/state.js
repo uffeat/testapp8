@@ -6,8 +6,8 @@ Can also be used stand-alone. */
 export const state = (parent, config, ...factories) => {
   const cls = class State extends parent {
     static create = (...args) => {
-      return new State(...args)
-    }
+      return new State(...args);
+    };
     constructor(owner) {
       super();
       this.#owner = owner;
@@ -57,7 +57,10 @@ export const state = (parent, config, ...factories) => {
 
     /* Filters state reactively as per provided function. Chainable. */
     filter(f) {
-      return this.update(this.#current.filter(f));
+      
+      return this.update(this.#current.map(([k, v]) =>
+        f([k, v]) ? [k, v] : [k, undefined]
+      ));
     }
 
     /* Resets all items reactively to provided value. Chainable. */
@@ -75,13 +78,18 @@ export const state = (parent, config, ...factories) => {
       super.update && super.update(updates);
       updates = Data.create(updates);
       /* Infer changed items */
-      const changes = updates.filter(([k, v]) => this.#current[k] !== v)
+      const changes = updates.filter(([k, v]) => this.#current[k] !== v);
       /* Infer changed items as they were before change */
-      const previous = changes.map(([k, v]) => [k, this.#current[k]])
+      const previous = changes.map(([k, v]) => [k, this.#current[k]]);
       /* Update storage */
       changes.forEach(([k, v]) => {
         this.#previous[k] = this.#current[k];
-        this.#current[k] = v;
+        /* NOTE undefined deletes */
+        if (v === undefined) {
+          delete this.#current[k];
+        } else {
+          this.#current[k] = v;
+        }
       });
       /* Notify effects */
       if (changes.size) {

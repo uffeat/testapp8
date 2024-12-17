@@ -69,7 +69,7 @@ export class Data extends Object {
     return value;
   }
 
-  /* Removes all items or sets all items to a provided value. Chainable. */
+  /* Sets all items to a provided value. Chainable. */
   reset(value) {
     return this.update(this.map(([k, v]) => [k, value]));
   }
@@ -92,11 +92,7 @@ export class Data extends Object {
         if (k in Data.prototype) {
           throw new Error(`Reserved key: ${k}`);
         }
-        if (v === undefined) {
-          delete this[k];
-        } else {
-          this[k] = v;
-        }
+        this[k] = v;
       }
     }
     return this;

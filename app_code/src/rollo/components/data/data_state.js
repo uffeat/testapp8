@@ -1,6 +1,7 @@
 import { Component } from "rollo/component";
 import {
   attribute,
+  chain,
   connected,
   hooks,
   item_to_attribute,
@@ -9,12 +10,13 @@ import {
   name,
   parent,
   properties,
+  //state,
   tags,
   uid,
 } from "rollo/factories/__factories__";
 
 /* Non-visual web component for reactive data. */
-const data_reactive = (parent) => {
+const data_state = (parent) => {
   const cls = class DataReactive extends parent {
     constructor() {
       super();
@@ -37,10 +39,11 @@ const data_reactive = (parent) => {
 };
 
 Component.author(
-  "data-reactive",
+  "data-state",
   HTMLElement,
   {},
   attribute,
+  chain,
   connected,
   hooks,
   item_to_attribute,
@@ -51,5 +54,5 @@ Component.author(
   properties,
   tags,
   uid,
-  data_reactive
+  data_state
 );

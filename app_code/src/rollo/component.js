@@ -89,11 +89,11 @@ export const Component = new (class {
   })();
 
   /* Builds, registers and returns web component from native base and factories. */
-  author = (tag, native, config, ...factories) => {
+  author = (tag, base, config, ...factories) => {
     const _factories = [...factories];
-    let cls = factories.shift()(native, config, ..._factories);
+    let cls = factories.shift()(base, config, ..._factories);
     const names = [cls.name];
-    const chain = [native, cls];
+    const chain = [base, cls];
     for (const factory of factories) {
       cls = factory(cls, config, ..._factories);
       if (names.includes(cls.name)) {
@@ -112,6 +112,9 @@ export const Component = new (class {
         static __config__ = Object.freeze(config || {});
         static __factories__ = Object.freeze(factories.reverse());
         static tag = tag;
+        get __base__() {
+          return base
+        }
         get __chain__() {
           return Meta.__chain__;
         }

@@ -8,7 +8,7 @@ export const item_to_attribute = (parent, config, ...factories) => {
   Component.factories.check([attribute, items], factories);
 
   const cls = class ItemToAttribute extends parent {
-    static PREFIX = "$";
+    static ANTI_PREFIX = "$";
 
     /* Only available during creation. 
     Called:
@@ -22,25 +22,26 @@ export const item_to_attribute = (parent, config, ...factories) => {
       /* Show state as attribute */
       this.effects.add((changes) => {
         if (!(changes instanceof Data)) {
-          console.warn(`Expected 'changes' to be a Data instance. It's not!`)
+          console.warn(`Expected 'changes' to be a Data instance. It's not!`);
           changes = Data.create(changes);
         }
 
-
-
-       
         if (!changes.size) return;
         changes
           .filter(
             ([k, v]) =>
-              !(typeof k === "string" && k.startsWith(ItemToAttribute.PREFIX))
+              typeof k === "string" &&
+              /* Exclude items set up to shadow props; it's up to the prop to sync attr */
+              !k.startsWith(ItemToAttribute.ANTI_PREFIX) &&
+              ["boolean", "number", "string"].includes(typeof v)
           )
           .forEach(([k, v]) => {
-            const key = k in this ? `state-${k}` : k;
-            if (["boolean", "number", "string"].includes(typeof v)) {
-              this.attribute[key] = v;
+            /* By convention and to reduce risk of unintended effects,
+            keys that are also props in base proto are prefixed with 'state- */
+            if (k in this.__base__.prototype) {
+              this.attribute[`state-${k}`] = v;
             } else {
-              this.attribute[key] = null;
+              this.attribute[k] = v;
             }
           });
       });

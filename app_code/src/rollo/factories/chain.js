@@ -16,30 +16,13 @@ export const chain = (parent, config, ...factories) => {
     });
 
     /* Returns prop-like getter interface for access to classes in prototype 
-    chain. Useful, when super is not enough. 
-    NOTE
-    Before using this feature, consider if
-    - a super-based alternative could be conceived
-    - a composition-based solution could be used instead.
-    */
+    chain. */
     get chain() {
       return this.#chain;
     }
-    #chain = (() => {
-      const chain = Object.fromEntries(
-        this.__chain__.map((cls) => [cls.name, cls.prototype])
-      );
-      return new Proxy(this, {
-        get(target, name) {
-          const proto = chain[name];
-          if (proto) {
-            return proto;
-          } else {
-            throw new Error(`Invalid prototype name: ${name}`);
-          }
-        },
-      });
-    })();
+    #chain = Object.fromEntries(
+      this.__chain__.map((cls) => [cls.name, cls.prototype])
+    );
   };
   return cls;
 };
