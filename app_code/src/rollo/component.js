@@ -10,6 +10,7 @@ import {
   item_to_attribute,
   item_to_native,
   items,
+  items_update,
   parent,
   properties,
   styles,
@@ -244,6 +245,11 @@ Component.factories.add(hooks);
 Component.factories.add(item_to_attribute);
 Component.factories.add(item_to_native);
 Component.factories.add(items);
+
+
+Component.factories.add(items_update);
+
+
 Component.factories.add(parent);
 Component.factories.add(properties);
 Component.factories.add(styles);

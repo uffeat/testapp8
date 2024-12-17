@@ -25,7 +25,7 @@ export const target = (parent, config, ...factories) => {
       }, "connected");
 
       /* Add effect to check that target has rules */
-      this.effects.add((changes, previous) => {
+      this.effects.add(() => {
         if (this.target) {
           if (!this.target.rules) {
             throw new Error(`Target does not have rules.`);

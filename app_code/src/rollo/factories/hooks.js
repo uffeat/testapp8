@@ -13,7 +13,7 @@ export const hooks = (parent, config, ...factories) => {
       /* Handle functions */
       const deffered = [];
       hooks
-        .filter((arg) => typeof arg === "function")
+        .filter((hook) => typeof hook === "function")
         .forEach((hook) => {
           const result = hook.call(this);
           if (typeof result === "function") {

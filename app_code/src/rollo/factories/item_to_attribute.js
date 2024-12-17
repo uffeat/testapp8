@@ -20,12 +20,16 @@ export const item_to_attribute = (parent, config, ...factories) => {
     created_callback() {
       super.created_callback && super.created_callback();
       /* Show state as attribute */
-      this.effects.add((changes) => {
+      this.items.effects.add((changes) => {
+        //
+        //
+        //
         if (!(changes instanceof Data)) {
           console.warn(`Expected 'changes' to be a Data instance. It's not!`);
           changes = Data.create(changes);
         }
-
+        //
+        //
         if (!changes.size) return;
         changes
           .filter(

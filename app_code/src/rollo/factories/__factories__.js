@@ -7,6 +7,12 @@ export { css_var } from "rollo/factories/css_var";
 export { descendants } from "rollo/factories/descendants";
 export { hooks } from "rollo/factories/hooks";
 export { items } from "rollo/factories/items";
+
+
+
+export { items_update } from "rollo/factories/items_update";
+
+
 export { item_to_attribute } from "rollo/factories/item_to_attribute";
 export { item_to_native } from "rollo/factories/item_to_native";
 export { name } from "rollo/factories/name";

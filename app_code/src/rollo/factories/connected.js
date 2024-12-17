@@ -9,18 +9,18 @@ export const connected = (parent, config, ...factories) => {
   const cls = class Connected extends parent {
     connectedCallback() {
       super.connectedCallback && super.connectedCallback();
-      this.$.connected = true;
-      this.$.parent = this.parentElement;
+      this.items.$.connected = true;
+      this.items.$.parent = this.parentElement;
     }
 
     disconnectedCallback() {
       super.disconnectedCallback && super.disconnectedCallback();
-      this.$.connected = false;
-      this.$.parent = null
+      this.items.$.connected = false;
+      this.items.$.parent = null
     }
 
     get connected() {
-      return this.$.connected;
+      return this.items.$.connected;
     }
   };
   return cls;

@@ -20,16 +20,25 @@ export const item_to_native = (parent, config, ...factories) => {
     created_callback() {
       super.created_callback && super.created_callback();
       /* Set up automatic update from ItemToNative.PREFIX-prefixed state */
-      this.effects.add((changes) =>
+      this.items.effects.add((changes) => {
+        //
+        //
+        //
+        if (!(changes instanceof Data)) {
+          console.warn(`Expected 'changes' to be a Data instance. It's not!`);
+          changes = Data.create(changes);
+        }
+        //
+        //
         this.update(
-          Data.create(changes)
+          changes
             .filter(
               ([k, v]) =>
                 typeof k === "string" && k.startsWith(ItemToNative.PREFIX)
             )
             .map(([k, v]) => [k.slice(ItemToNative.PREFIX.length), v])
-        )
-      );
+        );
+      });
     }
   };
   return cls;

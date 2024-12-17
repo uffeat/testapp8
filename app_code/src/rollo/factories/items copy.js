@@ -1,4 +1,4 @@
-
+import { Data } from "rollo/types/data";
 import { State } from "rollo/factories/state";
 
 /* Factory with reactive items composition. */
@@ -17,18 +17,35 @@ export const items = (parent, config, ...factories) => {
       return this.#items.$;
     }
 
-    /* Returns effects controller. */
     get effects() {
-      return this.items.effects;
+      return this.#items.effects;
     }
 
-    /* Returns reactive state instance. */
     get items() {
       return this.#items;
     }
     #items = new State(this);
 
-    
+    /* Updates component. Chainable. 
+    Called during creation:
+    - after CSS classes
+    - after children
+    - before 'call'
+    - before 'created_callback'
+    - before live DOM connection */
+    update(updates) {
+      super.update && super.update(updates);
+      /* Update state */
+      this.items.update(
+        Data.create(updates)
+          .filter(
+            ([key, value]) =>
+              typeof key === "string" && key.startsWith(Items.PREFIX)
+          )
+          .map(([key, value]) => [key.slice(Items.PREFIX.length), value])
+      );
+      return this;
+    }
   };
   return cls;
 };

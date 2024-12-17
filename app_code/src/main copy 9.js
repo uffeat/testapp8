@@ -21,7 +21,19 @@ await (async () => {
 
 
 
-  
+  const my_effect = create("data-effect", {
+    name: "my_effect",
+    parent: my_state,
+    effect: (current, previous, owner) => {
+      console.log('current:', current)
+      console.log('owner:', owner)
+
+      //const state = current.filter(([k, v]) => !(k in owner))
+      //console.log('state:', state)
+
+      
+    },
+  });
 })();
 
 /* Enable tests */

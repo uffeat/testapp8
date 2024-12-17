@@ -21,7 +21,7 @@ export const item_to_event = (parent, config, ...factories) => {
     created_callback() {
       super.created_callback && super.created_callback();
       /* Send event on state change */
-      this.effects.add((changes, previous) => {
+      this.items.effects.add((changes, previous) => {
         this.send("state_change", {
           detail: { changes, previous },
         });
