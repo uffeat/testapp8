@@ -5,8 +5,13 @@ import { create_id } from "rolloui/form/utils/create_id";
 /* Returns non-container label component for use with form control. */
 export function Label(updates = {}, ...hooks) {
   const self = create("label.form-label", {
-    attribute_constructorName: "Label",
-  });
+    
+  }, ...hooks);
+
+  /* TODO
+  - Settle on a single way to bind InvalidFeedback to form control!
+  - Should ALWAYS be auto-injected!!!!
+  */
 
   mixin(
     self,

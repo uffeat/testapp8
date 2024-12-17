@@ -3,9 +3,14 @@
 await (async () => {
   const { create } = await import("rollo/component");
   const { Floating } = await import("rolloui/form/Floating");
-  const { InvalidFeedback } = await import("rolloui/form/InvalidFeedback");
+  const { InvalidFeedback } = await import("@/rolloui/form/_InvalidFeedback");
   const { TextInput } = await import("rolloui/form/input/TextInput");
-  const { Label } = await import("rolloui/form/Label");
+  const { Label } = await import("@/rolloui/form/_Label");
+
+  create("div", {
+    id: "root",
+    parent: document.body,
+  });
 
   const form = create(
     "form.d-flex.flex-column.row-gap-3.p-3",
@@ -31,13 +36,9 @@ await (async () => {
     Floating(
       { label: "Foo" },
       TextInput({ name: "foo", required: true }),
-      InvalidFeedback(),
-      /* Connect invalid feedback to input; alternative to using for_name */
-      function () {
-        this.querySelector(".invalid-feedback").form_control =
-          this.querySelector("input");
-      }
+      InvalidFeedback({ for_name: "foo" })
     ),
+
     create(
       "div.input-group",
       {},

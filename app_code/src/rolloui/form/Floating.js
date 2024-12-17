@@ -1,6 +1,6 @@
 import { create } from "rollo/component";
-import { mirror } from "@/rolloui/utils/mirror";
-import { Label } from "rolloui/form/Label";
+import { mirror } from "rolloui/utils/mirror";
+import { Label } from "@/rolloui/form/_Label";
 import { create_id } from "rolloui/form/utils/create_id";
 
 export function Floating({ label, ...updates }, form_control, ...hooks) {

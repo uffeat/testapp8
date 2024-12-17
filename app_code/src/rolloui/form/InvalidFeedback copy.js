@@ -3,11 +3,15 @@ import { mixin } from "rolloui/utils/mixin";
 
 /* Returns invalid feedback component for use with form control. */
 export function InvalidFeedback(updates = {}, ...hooks) {
-  
   const self = create("div.invalid-feedback", {
     attribute_ariaLive: "assertive",
     attribute_constructorName: "InvalidFeedback",
   });
+
+  /* TODO
+  - Settle on a single way to bind InvalidFeedback to form control!
+  - Probably auto-inject!!!!
+  */
 
   mixin(
     self,
@@ -18,30 +22,22 @@ export function InvalidFeedback(updates = {}, ...hooks) {
       /* Lets form control state control component */
       set form_control(form_control) {
         if (this._form_control) {
-          throw new Error(
-            `Component already connected to form control.`
-          );
+          throw new Error(`Component already connected to form control.`);
         }
         /* Effects: Error state -> feedback text */
-        form_control.effects.add(
-          () => {
-            this.text = form_control.$.error;
-          },
-          ["error"]
-        );
+        form_control.effects.add(() => {
+          this.text = form_control.$.error;
+        }, ["error"]);
         /* Effect: Visited & value state -> feedback style */
-        form_control.effects.add(
-          () => {
-            this.invisible =
-              !form_control.$.visited &&
-              !(form_control.required && !form_control.$.value);
-            this.soft =
-              !form_control.$.visited &&
-              form_control.required &&
-              !form_control.$.value;
-          },
-          ["visited", "value"]
-        );
+        form_control.effects.add(() => {
+          this.invisible =
+            !form_control.$.visited &&
+            !(form_control.required && !form_control.$.value);
+          this.soft =
+            !form_control.$.visited &&
+            form_control.required &&
+            !form_control.$.value;
+        }, ["visited", "value"]);
         /* Provide dom hint */
         if (form_control.name) {
           this.attribute.forName = form_control.name;
@@ -61,9 +57,7 @@ export function InvalidFeedback(updates = {}, ...hooks) {
         setTimeout(() => {
           const form = self.closest("form");
           if (!form) {
-            throw new Error(
-              `Component should reside in a form.`
-            );
+            throw new Error(`Component should reside in a form.`);
           }
           const form_control = form.querySelector(`*[name="${for_name}"]`);
           if (!form_control) {
@@ -92,7 +86,7 @@ export function InvalidFeedback(updates = {}, ...hooks) {
   );
 
   self.update(updates);
-  self.call(...hooks)
+  self.call(...hooks);
 
   return self;
 }

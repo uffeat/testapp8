@@ -1,96 +1,44 @@
 import { create } from "rollo/component";
-import { mirror } from "rolloui/utils/mirror";
-import { mixin } from "rolloui/utils/mixin";
 import { base } from "rolloui/form/input/base";
-import { InvalidFeedback } from "rolloui/form/InvalidFeedback";
-import { create_id } from "rolloui/form/utils/create_id";
+import { InvalidFeedback } from "rolloui/form/_InvalidFeedback";
+import { Label } from "rolloui/form/_Label";
 
-/* Returns checkbox-type input element with reactive type-aligned value prop. 
-Primarily intended for use as base. */
-export function Check(updates = {}, ...hooks) {
-  const self = base({
-    attribute_constructorName: "Check",
-    type: "checkbox",
-  });
-  /* Handler to update value state */
-  self.on.change = (event) => {
-    self.$.value = self.checked ? true : null;
-
-    const value = self.checked ? true : null;////
-    console.log("value:", value); /////
-    console.log("value:", self.$.value); /////
-
-
-    
-    ////console.log("self:", self); /////
-    
-  };
-  /* Effect: Value state -> checked */
-  self.effects.add(() => {
-    self.checked = self.$.value ? true : false;
-  }, "value");
-
-
-  /* Mixin for external API */
-  mixin(
-    self,
-    class {
-      get value() {
-        return this.$.value;
-      }
-      set value(value) {
-        self.$.value = value ? true : false;
-        self.checked = self.$.value;
-      }
-    }
-  );
-
-  self.update(updates);
-  self.call(...hooks);
-
-  return self;
-}
-
-/* Returns checkbox-type input element with reactive type-aligned value prop.
+/* Returns checkbox-type input element with reactive type-aligned value state.
 Options for switch (toggle), label and invalid feedback (via required). */
 export function CheckInput(
   { id, name, label, required = false, toggle = false, value, ...updates } = {},
   ...hooks
 ) {
-  /* Prepare tree */
-  const check = Check({ id, name, required, value });
-  const invalid_feedback = required
-    ? InvalidFeedback({ form_control: check })
-    : undefined;
-  if (label) {
-    label = create("label.form-check-label", {}, label);
-    if (!check.id) {
-      check.id = create_id();
-    }
-    label.attribute.for = check.id;
-  }
-  const form_check = create(
-    `div.form-check${toggle ? ".form-switch" : ""}`,
-    {
-      role: toggle ? "switch" : undefined,
-    },
-    check,
-    label
-  );
+  /* Create form control */
+  const form_control = base({
+    id,
+    name,
+    required,
+    type: "checkbox",
+    $value: value,
+  });
+
+  /* Handler: Update value state */
+  form_control.on.change = (event) => {
+    form_control.$.value = form_control.checked ? true : null;
+  };
+
+  /* Effect: Value state -> checked */
+  form_control.effects.add(() => {
+    form_control.checked = form_control.$.value ? true : false;
+  }, "value");
+
   /* Build tree */
-  const self = create(
-    `div.d-flex.flex-column.align-items-start.row-gap-1`,
-    {
-      attribute_constructorName: "CheckInput",
-    },
-    form_check,
-    invalid_feedback
+  return create(
+    `div.d-flex.flex-column.align-items-start.row-gap-0`,
+    updates,
+    create(
+      `div.form-check${toggle ? ".form-switch.mb-0" : ""}`,
+      { role: toggle ? "switch" : undefined },
+      form_control,
+      label ? Label({ form_control, text: label }) : undefined
+    ),
+    required ? InvalidFeedback({ form_control }, ".mt-0") : undefined,
+    ...hooks
   );
-  /* Mirror for external API */
-  mirror(self, check, "name", "value");
-
-  self.update(updates);
-  self.call(...hooks);
-
-  return self;
 }

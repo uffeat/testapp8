@@ -58,12 +58,16 @@ export const attribute = (parent, config, ...factories) => {
     /* Updates component. Chainable. */
     update(updates) {
       super.update && super.update(updates);
+
+
+
+
       /* Update attributes */
       Data.create(updates)
         .filter(
           ([k, v]) => typeof k === "string" && k.startsWith(Attribute.PREFIX)
         )
-        .map(([k, v]) => [k, this.attribute[k.slice(Attribute.PREFIX.length)]])
+        .map(([k, v]) => [k.slice(Attribute.PREFIX.length), v])
         .forEach(([k, v]) => (this.attribute[k] = v));
       return this;
     }

@@ -4,8 +4,13 @@ await (async () => {
   const { create } = await import("rollo/component");
   const { Select } = await import("rolloui/form/input/Select");
   const { Floating } = await import("rolloui/form/Floating");
-  const { InvalidFeedback } = await import("rolloui/form/InvalidFeedback");
-  const { Label } = await import("rolloui/form/Label");
+  const { InvalidFeedback } = await import("@/rolloui/form/_InvalidFeedback");
+  const { Label } = await import("@/rolloui/form/_Label");
+
+  create("div", {
+    id: "root",
+    parent: document.body,
+  });
 
   const form = create(
     "form.d-flex.flex-column.row-gap-3.p-3",
@@ -29,18 +34,6 @@ await (async () => {
           name: "my_style",
           placeholder: "Pick a style...",
           required: true,
-          hooks: [
-            function () {
-              this.effects.add((data) => {
-                if (data.value.previous) {
-                  this.css_class[`text-bg-${data.value.previous}`] = false;
-                }
-                if (data.value.current) {
-                  this.css_class[`text-bg-${data.value.current}`] = true;
-                }
-              }, "value");
-            },
-          ],
         },
         ["Primary", "primary"],
         ["Secondary", "secondary"],
@@ -48,10 +41,23 @@ await (async () => {
         ["Warning", "warning"],
         ["Info", "info"],
         ["Light", "light"],
-        ["Dark", "dark"]
+        ["Dark", "dark"],
+        function () {
+          this.effects.add((current, previous) => {
+            if (previous.value) {
+              this.css_class[`text-bg-${previous.value}`] = false;
+            }
+            if (current.value) {
+              this.css_class[`text-bg-${current.value}`] = true;
+            }
+          }, "value");
+        }
       ),
       InvalidFeedback(),
       /* Connect invalid feedback to input; alternative to using for_name */
+      /*
+      TODO...
+      */
       function () {
         this.querySelector(".invalid-feedback").form_control =
           this.querySelector("select");
@@ -69,7 +75,6 @@ await (async () => {
             placeholder: "Please select...",
             required: true,
             ".rounded-end": true,
-            
           },
           ["Foo", "foo"],
           ["Bar", "green"],

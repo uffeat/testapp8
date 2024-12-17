@@ -72,8 +72,8 @@ export function base(
       Validation aborts, once a truthy validation result (the error message)
       is received. */
       for (const validation of validations) {
-        self.$.message = validation.call(self, self.$.value);
-        if (self.$.message) {
+        self.$.error = validation.call(self, self.$.value);
+        if (self.$.error) {
           break;
         }
       }

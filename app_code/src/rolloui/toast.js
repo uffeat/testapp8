@@ -6,7 +6,7 @@ import { Text } from "rolloui/Text";
 /* Prepare container suitable for stacking toasts */
 document.body.classList.add("position-relative");
 const toast_container = create(
-  `DIV.position-fixed.bottom-0.end-0.p-3.d-flex.flex-column.row-gap-3.z-3`,
+  `div.position-fixed.bottom-0.end-0.p-3.d-flex.flex-column.row-gap-3.z-3`,
   { parent: document.body }
 );
 
@@ -23,30 +23,25 @@ export function toast(
 ) {
   // Create toast element
   const element = create(
-    `DIV.toast`,
+    `div.toast`,
     {
       parent: toast_container,
+      attribute_ariaLive: "assertive",
+      attribute_ariaAtomic: "true",
       role: "alert",
-      attributes: {
-        ariaLive: "assertive",
-        ariaAtomic: "true",
-      },
+      
     },
     create(
-      `DIV.toast-header.d-flex.align-items-center${
+      `div.toast-header.d-flex.align-items-center${
         style ? ".text-bg-" + style : ""
       }`,
       {},
-      Text(`H1.fs-6`, { css: {'my-0': true},  }, title),
+      Text(`h1.fs-6`, { '.my-0': true  }, title),
       dismissible
-        ? CloseButton({
-            style,
-            attributes: {dataBsDismiss: "toast"},
-            css: {'ms-auto': true}
-          })
+        ? CloseButton({ style, attribute_dataBsDismiss: "toast", '.ms-auto': true })
         : undefined
     ),
-    create(`DIV.toast-body`, {}, Text(`P`, {}, content))
+    create(`div.toast-body`, {}, Text(`p`, {}, content))
   );
 
   const toast = new Toast(element, { animation, autohide, delay });

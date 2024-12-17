@@ -2,19 +2,14 @@ import { Collapse } from "bootstrap";
 import { create } from "rollo/component";
 import { mixin } from "@/rolloui/utils/mixin";
 
-
 export function Collapsible({ open = false, ...updates } = {}, ...hooks) {
-  const self = create("div.collapse", { 
-    attribute_constructorName: "InvalidFeedback",
+  const self = create("div.collapse", {
+    attribute_constructorName: "Collapsible",
   });
 
   /* Create protected state items */
-  const set_open = self.reactive.protected.add("open", open);
-  const set_transition = self.reactive.protected.add("transition", false);
-  const set_showing = self.reactive.protected.add("showing");
-  const set_hiding = self.reactive.protected.add("hiding");
-  const set_shown = self.reactive.protected.add("shown");
-  const set_hidden = self.reactive.protected.add("hidden");
+  self.$.open = open;
+  self.$.transition = false;
 
   let controller;
   const initialize = () => {
@@ -24,10 +19,10 @@ export function Collapsible({ open = false, ...updates } = {}, ...hooks) {
     controller = new Collapse(self);
     /* Set transitions state */
     self.on["hidden.bs.collapse"] = (event) => {
-      set_transition(false);
+      self.$.transition = false;
     };
     self.on["shown.bs.collapse"] = (event) => {
-      set_transition(false);
+      self.$.transition = false;
     };
   };
 
@@ -37,7 +32,7 @@ export function Collapsible({ open = false, ...updates } = {}, ...hooks) {
     /* Bootstrap cannot handle JS-initialized collapse components with a hidden 
     start state. Therefore postpone init until first call to open. */
     self.effects.add(
-      function effect(data) {
+      function effect() {
         initialize();
         self.effects.remove(effect);
       },
@@ -46,10 +41,10 @@ export function Collapsible({ open = false, ...updates } = {}, ...hooks) {
   }
 
   /* Open/close and set transition state */
-  self.effects.add((data) => {
+  self.effects.add(() => {
     if (controller) {
       controller[self.$.open ? "show" : "hide"]();
-      set_transition(true);
+      self.$.transition = true;
     }
   }, "open");
 
@@ -62,34 +57,25 @@ export function Collapsible({ open = false, ...updates } = {}, ...hooks) {
   /* Set showing state */
   self.effects.add(
     (data) => {
-      set_showing(self.$.open && self.$.transition);
+      self.$.showing = self.$.open && self.$.transition;
     },
     ["open", "transition"]
   );
 
   /* Set shown state */
-  self.effects.add(
-    (data) => {
-      set_shown(self.$.open && !self.$.transition);
-    },
-    ["open", "transition"]
-  );
+  self.effects.add(() => {
+    self.$.shown = self.$.open && !self.$.transition;
+  }, ["open", "transition"]);
 
   /* Set hiding state */
-  self.effects.add(
-    (data) => {
-      set_hiding(!self.$.open && self.$.transition);
-    },
-    ["open", "transition"]
-  );
+  self.effects.add(() => {
+    self.$.hiding = !self.$.open && self.$.transition;
+  }, ["open", "transition"]);
 
   /* Set hidden state */
-  self.effects.add(
-    (data) => {
-      set_hidden(!self.$.open && !self.$.transition);
-    },
-    ["open", "transition"]
-  );
+  self.effects.add(() => {
+    self.$.hidden = !self.$.open && !self.$.transition;
+  }, ["open", "transition"]);
 
   /* Create external API */
   mixin(
@@ -148,30 +134,32 @@ export function Collapsible({ open = false, ...updates } = {}, ...hooks) {
         return this.$.open;
       }
       set open(open) {
-        set_open(open);
+        this.$.open = open;
       }
 
       /* Alternative to querying 'open' */
       is_open() {
-        return this.open
+        return this.open;
       }
 
       /* Chainable alternative to 'open=false' */
       hide() {
-        set_open(false);
-        return this
+        this.$.open = false;
+        return this;
       }
 
       /* Chainable alternative to 'open=true' */
       show() {
-        set_open(true);
-        return this
+        this.$.open = true;
+
+        return this;
       }
 
       /* Chainable alternative 'open=!open' */
       toggle() {
-        set_open(!this.open);
-        return this
+        this.$.open = !this.$.open;
+
+        return this;
       }
     }
   );

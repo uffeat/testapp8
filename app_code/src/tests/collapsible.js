@@ -5,6 +5,11 @@ await (async () => {
   const { Collapsible } = await import("rolloui/Collapsible");
   const { Menu } = await import("rolloui/Menu");
 
+  create("div", {
+    id: "root",
+    parent: document.body,
+  });
+
   const collapsible = Collapsible(
     {
       parent: root,
@@ -23,9 +28,8 @@ await (async () => {
       '.column-gap-3.ps-0': true,
     },
     create(
-      "button.btn",
+      "button.btn.btn-primary",
       {
-        '.btn-primary': true,
         on_click: (event) => {
           collapsible.open = true;
         },
@@ -33,13 +37,13 @@ await (async () => {
       "Show"
     ),
     create(
-      "button.btn",
+      "button.btn.btn-primary",
       {
         on_click: (event) => {
           collapsible.open = false;
         },
       },
-      '.btn-primary',
+     
       "Hide"
     )
   );

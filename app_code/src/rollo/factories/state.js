@@ -5,6 +5,9 @@ based on flat object data.
 Can also be used stand-alone. */
 export const state = (parent, config, ...factories) => {
   const cls = class State extends parent {
+    static create = (...args) => {
+      return new State(...args)
+    }
     constructor(owner) {
       super();
       this.#owner = owner;

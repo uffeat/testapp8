@@ -3,28 +3,54 @@ import "./main.css";
 
 await (async () => {
   const { create } = await import("rollo/component");
-  const { CheckInput } = await import("rolloui/form/input/CheckInput");
+  const { State } = await import("rollo/factories/state");
 
   create("div", {
     id: "root",
     parent: document.body,
   });
 
-  const form = create(
-    "form.d-flex.flex-column.row-gap-3.p-3",
-    { parent: root, noValidate: true },
-    CheckInput({
-      label: "Accept",
-      name: "accept",
-      required: true,
-      toggle: true,
-      value: true,
-    }),
-    CheckInput({ label: "Agree", name: "agree", required: false, value: true })
-  );
-  const check_input = CheckInput({ label: "Foo", name: "foo" })
-  console.log(check_input.name)
-  console.log(check_input.value)
+  function use_state(component, updates = {}) {
+    const state = State.create();
+    const effect = (current) => {
+      component.update(current);
+    };
+    state.effects.add(effect);
+    state.update(updates);
+    return state;
+  }
+
+  /*
+  TODO
+  - some enable outside code to set state, perhaps by
+    - simply add a state prop to component - or let it be a manuel option
+    - wrap a state web component around the component
+    - something else; think factory?
+
+    use_state could be a standard component method (use_state factory)? 
+    Thereby avoiding the need to pass in component... perhaps activate/deactive according to connected?
+  */
+
+  function Component() {
+    const component = create("h1");
+    const state = use_state(component, { text: "Unclicked" });
+
+    //state.$.text = "Unclicked";
+
+    component.on.click = (event) => {
+      state.$.text = "Clicked";
+    };
+
+    component.state = state;
+
+    return component;
+  }
+
+  const component = Component();
+
+  root.append(component);
+
+  component.state.$.text = "changed";
 })();
 
 /* Enable tests */

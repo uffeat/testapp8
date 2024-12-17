@@ -5,8 +5,8 @@ import { mixin } from "@/rolloui/utils/mixin";
 import { Cancel as CancelIcon } from "rolloui/icons/Cancel";
 import { Upload as SelectIcon } from "rolloui/icons/Upload";
 import { Floating } from "rolloui/form/Floating";
-import { InvalidFeedback } from "rolloui/form/InvalidFeedback";
-import { Label } from "rolloui/form/Label";
+import { InvalidFeedback } from "@/rolloui/form/_InvalidFeedback";
+import { Label } from "@/rolloui/form/_Label";
 
 export function FileInput(
   {

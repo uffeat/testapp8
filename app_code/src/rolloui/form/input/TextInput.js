@@ -1,5 +1,5 @@
 import { create } from "rollo/component";
-import { mixin } from "@/rolloui/utils/mixin";
+import { mixin } from "rolloui/utils/mixin";
 import { base } from "rolloui/form/input/base";
 
 /* Returns text-family input element or textarea. */
@@ -58,12 +58,12 @@ export function TextInput(
     },
     ...hooks
   );
-  /* Protect value state */
-  const set_value = self.reactive.protected.add("value");
+  
   /* Handler: Update value state */
   self.on.input = (event) => {
     const trimmed = self.__super__.value.trim();
-    set_value(trimmed ? trimmed : null);
+    self.$.value = trimmed ? trimmed : null
+   
   };
   /* Create external API */
   mixin(
@@ -79,7 +79,8 @@ export function TextInput(
             value = null;
           }
         }
-        set_value(value);
+        self.$.value = value
+       
         this.__super__.value = value;
       }
     }
