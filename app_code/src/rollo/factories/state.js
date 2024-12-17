@@ -57,7 +57,6 @@ export const state = (parent, config, ...factories) => {
 
     /* Filters state reactively as per provided function. Chainable. */
     filter(f) {
-      
       return this.update(this.#current.map(([k, v]) =>
         f([k, v]) ? [k, v] : [k, undefined]
       ));
@@ -84,7 +83,7 @@ export const state = (parent, config, ...factories) => {
       /* Update storage */
       changes.forEach(([k, v]) => {
         this.#previous[k] = this.#current[k];
-        /* NOTE undefined deletes */
+        /* NOTE undefined deletes. This is critical for other methods! */
         if (v === undefined) {
           delete this.#current[k];
         } else {

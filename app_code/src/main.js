@@ -28,18 +28,8 @@ await (async () => {
   state.$.stuff = 'stuff'
 
   //state.items.reset(undefined)
-
-  //const filtered = state.items.current.filter(([k, v]) => typeof v === 'string') 
-  //console.log('filtered:', filtered)
-
-  
-  state.items.filter(([k, v]) => {
-    if (k === 'stuff') {
-      return false
-    } else {
-      return true
-    }
-  })
+  state.items.reset(true)
+  state.items.filter(([k, v]) => k !== 'stuff')
     
  
 

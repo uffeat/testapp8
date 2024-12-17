@@ -37,6 +37,11 @@ export class Data extends Object {
     return Object.values(this);
   }
 
+  /* Deletes all items */
+  clear() {
+    this.forEach(([k, v]) => delete this[k]);
+  }
+
   /* Returns clone of the Data instance. */
   clone() {
     return Data.create(this.entries);
@@ -51,7 +56,7 @@ export class Data extends Object {
   forEach(f) {
     /* NOTE use:
       [...this.entries]
-    so that 'foreach' can be used to safely mutate object.
+    so that 'forEach' can be used to safely mutate object.
      */
     [...this.entries].forEach(f);
     return this;
@@ -80,8 +85,7 @@ export class Data extends Object {
     return this.update(this.map(f));
   }
 
-  /* Updates items from provided object. Items with undefined values are deleted. 
-  Chainable. */
+  /* Updates items from provided object. Chainable. */
   update(updates) {
     if (updates) {
       /* Allow updates as entries array */
