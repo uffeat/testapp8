@@ -6,22 +6,17 @@ export const parent = (parent, config, ...factories) => {
     }
 
     set parent(parent) {
-      if (typeof parent === "function") {
-        parent = parent.call(this);
-      }
-      if (parent === undefined) return;
       if (parent === this.parentElement) {
         return;
       }
-
-      if (parent === null) {
+      if (!parent) {
         this.remove();
-      } else {
-        if (!(parent instanceof HTMLElement)) {
-          throw new Error(`Invalid parent: ${parent}`);
-        }
-        parent.append(this);
+        return;
       }
+      if (!(parent instanceof HTMLElement)) {
+        throw new Error(`Invalid parent: ${parent}`);
+      }
+      parent.append(this);
     }
   };
   return cls;
