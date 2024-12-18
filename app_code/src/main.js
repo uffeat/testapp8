@@ -5,6 +5,8 @@ import { type } from "rollo/type/type";
 import "rollo/type/types/data/data";
 
 const data_0 = type.create('data', {foo: 'FOO', bar: 'BAR', stuff: 42, thing: 42})
+console.log('data_0.type:', data_0.type)
+//console.log('data_0.__class__:', data_0.__class__)
 const data_1 = data_0.clone()
 
 data_0.foo = 'foo'
@@ -20,7 +22,7 @@ data_0.transform(([k, v]) => {
   }
 })
 
-data_0.filter(([k, v]) => typeof v !== 'number')
+//data_0.filter(([k, v]) => typeof v !== 'number')
 
 /*
 data_0.transform(([k, v]) => {
@@ -35,8 +37,17 @@ data_0.clean()
 
 
 
-//const value = data_0.reduce((data) => data.filter(([k, v]) => typeof v === 'number' ? [k, v]: undefined))
-//console.log('value:',value)
+const value = data_0.reduce(
+  (data) => data.filter(([k, v]) => typeof v === 'number'),
+  (items) => items.values,
+  (values) => {
+    let sum = 0
+    values.forEach(v => sum += v)
+    return sum
+  }
+
+)
+console.log('value:',value)
 
 
 

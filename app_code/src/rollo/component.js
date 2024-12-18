@@ -158,7 +158,7 @@ export const Component = new (class {
       if (result) {
         element = result;
       }
-      /* Prevent 'created_callback' from being used onwards */
+      /* Prevent 'constructed_callback' from being used onwards */
       element.constructed_callback = undefined;
     }
     /* Add CSS classes */

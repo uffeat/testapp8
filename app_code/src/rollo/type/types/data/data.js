@@ -1,14 +1,11 @@
-import { assign } from "rollo/utils/assign";
 import { type } from "rollo/type/type";
+import { hooks } from "rollo/type/factories/hooks";
 
 /* . */
 export const data = (parent, config, ...factories) => {
   const cls = class Data extends parent {
-    constructor(updates) {
+    constructor() {
       super();
-      if (updates) {
-        this.update(updates);
-      }
     }
 
     /* Returns entries. */
@@ -35,7 +32,7 @@ export const data = (parent, config, ...factories) => {
     clean() {
       this.forEach(([k, v]) => {
         if (v === undefined) {
-          delete this[k]
+          delete this[k];
         }
       });
       return this;
@@ -51,14 +48,10 @@ export const data = (parent, config, ...factories) => {
     filter(f) {
       this.forEach(([k, v]) => {
         if (!f([k, v])) {
-          delete this[k]
+          delete this[k];
         }
       });
       return this;
-
-
-
-      
     }
 
     /* Executes provided function with items successively passed in. Chainable. */
@@ -85,7 +78,7 @@ export const data = (parent, config, ...factories) => {
 
     /* . */
     reduce(...funcs) {
-      let value = this.clone()
+      let value = this.clone();
       for (const func of funcs) {
         value = func(value);
       }
@@ -121,16 +114,11 @@ export const data = (parent, config, ...factories) => {
   return cls;
 };
 
-const Data = type.author("data", Object, {}, data);
-
-
-
-assign(Data.prototype, (class {
-  /* Returns shallow clone. */
-  clone() {
-    return type.create('data', {...this})
+type.author("data", Object, {}, hooks, data).assign(
+  class {
+    /* Returns shallow clone. */
+    clone() {
+      return type.create("data", { ...this });
+    }
   }
-}).prototype)
-
-type.registry.add('data', Data)
-
+);

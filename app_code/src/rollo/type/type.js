@@ -1,5 +1,3 @@
-import { assign } from "rollo/utils/assign";
-
 export const type = new (class Type {
   get registry() {
     return this.#registry;
@@ -10,9 +8,9 @@ export const type = new (class Type {
     add = (tag, cls) => {
       if (import.meta.env.DEV) {
         if (tag in this.#registry) {
-          console.info(`Replaced registered type with tag: ${tag}.`);
+          console.info(`Replaced registered type: ${tag}.`);
         } else {
-          console.info(`Registered type with tag: ${tag}.`);
+          console.info(`Registered type: ${tag}.`);
         }
       }
 
@@ -26,18 +24,27 @@ export const type = new (class Type {
     };
   })();
 
-  /* Builds, registers and returns class from native base, config and factories. */
+  /* Builds, registers and returns class from native base, config and factories.
+  Simulates multiple inheritance. */
   author = (tag, base, config, ...factories) => {
+    /* NOTE
+    - 'factories' is passed into each factory, so that the individual factory 
+      is aware of it's siblings. Factories can, but should generally not, 
+      mutate 'factories'. 
+    - 'config' is passed into each factory. 'config' can be an object that 
+      instructs factories. Factories can, but should generally not, mutate 
+      'config'. */
     const _factories = [...factories];
     let cls = factories.shift()(base, config, ..._factories);
+    const chain = [base, cls];
     const names = [];
     if (cls.name) {
       names.push(cls.name);
     }
-
     /* Build composite class */
     for (const factory of factories) {
       cls = factory(cls, config, ..._factories);
+      chain.push(cls);
       /* Check name */
       if (cls.name) {
         if (names.includes(cls.name)) {
@@ -48,13 +55,51 @@ export const type = new (class Type {
         names.push(cls.name);
       }
     }
+    /* Give cls the ability to mutate its prototype by directly assigning 
+    members from other classes. 
+    NOTE
+    - In addition to usage below, this can be useful for modifying a composite 
+      class after it has been built from factories, e.g., when:
+      - Something must be done that requires guarantee that all factories have benn 
+        implemented.
+      - The class should be modified with objects outside its factories.
+      Be aware that:
+      - Constructors in sources classes are ignored, i.e., cannot be used.
+      - Sources classes cannot use 'super' and private fields.
+      - Target class members may be overwritten without warning. */
+    Object.defineProperty(cls, "assign", {
+      configurable: false,
+      enumerable: false,
+      writable: false,
+      value: (...sources) => {
+        sources.forEach((source) =>
+          Object.defineProperties(
+            cls.prototype,
+            Object.getOwnPropertyDescriptors(source.prototype)
+          )
+        );
+        return cls;
+      },
+    });
     /* Add meta */
-    assign(cls.prototype, (class {
-      get tag() {
-        return tag
+    const __chain__ = Object.freeze(chain.reverse());
+    const __config__ = Object.freeze(config || {});
+    cls.assign(
+      class {
+        get __chain__() {
+          return __chain__;
+        }
+        get __class__() {
+          return cls;
+        }
+        get __config__() {
+          return __config__;
+        }
+        get type() {
+          return tag;
+        }
       }
-    }).prototype)
-
+    );
     /* Register and return class */
     return this.registry.add(tag, cls);
   };
@@ -76,23 +121,19 @@ export const type = new (class Type {
       if (result) {
         self = result;
       }
-      /* Prevent 'created_callback' from being used onwards */
+      /* Prevent 'constructed_callback' from being used onwards */
       self.constructed_callback = undefined;
     }
-
     /* Call the 'update' lifecycle method */
     self.update && self.update(updates);
-
     /* Call the 'call' lifecycle method */
     self.call && self.call(...hooks);
-
     /* Call the 'created_callback' lifecycle method */
     if (self.created_callback) {
       self.created_callback && self.created_callback();
       /* Prevent 'created_callback' from being used onwards */
       self.created_callback = undefined;
     }
-
     return self;
   };
 })();
