@@ -31,15 +31,34 @@ export const data = (parent, config, ...factories) => {
       return Object.values(this);
     }
 
-    /* Deletes all items */
+    /* Deletes all items with undefined values. Chainable. */
+    clean() {
+      this.forEach(([k, v]) => {
+        if (v === undefined) {
+          delete this[k]
+        }
+      });
+      return this;
+    }
+
+    /* Deletes all items. Chainable. */
     clear() {
       this.forEach(([k, v]) => delete this[k]);
+      return this;
     }
 
     /* . */
     filter(f) {
-      const updates = this.entries.filter(f);
-      return this.update(updates);
+      this.forEach(([k, v]) => {
+        if (!f([k, v])) {
+          delete this[k]
+        }
+      });
+      return this;
+
+
+
+      
     }
 
     /* Executes provided function with items successively passed in. Chainable. */
@@ -57,10 +76,19 @@ export const data = (parent, config, ...factories) => {
       return Object.freeze(this);
     }
 
-    /* Deletes item by key and return value of deleted item. */
+    /* Deletes item by key and return value of deleted item. Chainable. */
     pop(key) {
       const value = this[key];
       delete this[k];
+      return value;
+    }
+
+    /* . */
+    reduce(...funcs) {
+      let value = this.clone()
+      for (const func of funcs) {
+        value = func(value);
+      }
       return value;
     }
 
@@ -73,7 +101,6 @@ export const data = (parent, config, ...factories) => {
     /* Mutates according to provided function. Chainable. */
     transform(f) {
       const updates = this.entries.map(f);
-
       return this.update(updates);
     }
 
@@ -85,7 +112,6 @@ export const data = (parent, config, ...factories) => {
           updates = Object.fromEntries(updates);
         }
         for (const [k, v] of Object.entries(updates)) {
-          
           this[k] = v;
         }
       }
@@ -100,8 +126,9 @@ const Data = type.author("data", Object, {}, data);
 
 
 assign(Data.prototype, (class {
+  /* Returns shallow clone. */
   clone() {
-    return type.create('data', this.entries)
+    return type.create('data', {...this})
   }
 }).prototype)
 
