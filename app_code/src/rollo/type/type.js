@@ -8,12 +8,13 @@ Notable features:
 
 */
 export const type = new (class Type {
+  /* Returns registry controller. */
   get registry() {
     return this.#registry;
   }
   #registry = new (class Registry {
     #registry = {};
-    /*  */
+    /* Registers and returns class. */
     add = (tag, cls) => {
       if (import.meta.env.DEV) {
         if (tag in this.#registry) {
@@ -22,12 +23,10 @@ export const type = new (class Type {
           console.info(`Registered type: ${tag}.`);
         }
       }
-
       this.#registry[tag] = cls;
-
       return cls;
     };
-    /*  */
+    /* Returns registered class. */
     get = (tag) => {
       return this.#registry[tag];
     };
@@ -121,28 +120,28 @@ export const type = new (class Type {
       throw new Error(`No type with tag '${tag}' not registered.`);
     }
     /* Create instance */
-    let self = new cls();
+    let instance = new cls();
 
     /* Call the 'constructed_callback' lifecycle method */
-    if (self.constructed_callback) {
+    if (instance.constructed_callback) {
       const result = element.constructed_callback(config);
       /* Allow truthy result to replace instance */
       if (result) {
-        self = result;
+        instance = result;
       }
       /* Prevent 'constructed_callback' from being used onwards */
-      self.constructed_callback = undefined;
+      instance.constructed_callback = undefined;
     }
     /* Call the 'update' standard method */
-    self.update && self.update(updates);
+    instance.update && instance.update(updates);
     /* Call the 'call' standard method */
-    self.call && self.call(...hooks);
+    instance.call && instance.call(...hooks);
     /* Call the 'created_callback' lifecycle method */
-    if (self.created_callback) {
-      self.created_callback && self.created_callback();
+    if (instance.created_callback) {
+      instance.created_callback && instance.created_callback();
       /* Prevent 'created_callback' from being used onwards */
-      self.created_callback = undefined;
+      instance.created_callback = undefined;
     }
-    return self;
+    return instance;
   };
 })();

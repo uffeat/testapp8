@@ -21,13 +21,14 @@ import {
 import { assign } from "rollo/utils/assign";
 
 /* Utility for authoring web components and instantiating elements. */
-export const Component = new (class {
+export const Component = new (class Component {
+  /* Returns registry controller. */
   get registry() {
     return this.#registry;
   }
-  #registry = new (class {
+  #registry = new (class Registry {
     #registry = {};
-    /*  */
+    /* Registers and returns class. */
     add = (tag, cls) => {
       if (tag.includes("-")) {
         customElements.define(tag, cls);
@@ -47,16 +48,18 @@ export const Component = new (class {
       this.#registry[tag] = cls;
       return cls;
     };
-    /*  */
+    /* Returns registered class. */
     get = (tag) => {
       return this.#registry[tag];
     };
   })();
 
+  /* Returns controller for managing factories to be used for on-demand component 
+  authoring. */
   get factories() {
     return this.#factories;
   }
-  #factories = new (class {
+  #factories = new (class Factories {
     #registry = [];
     /* Registers conditional web component class factory */
     add = (factory, condition) => {
@@ -81,7 +84,7 @@ export const Component = new (class {
   get tools() {
     return this.#tools;
   }
-  #tools = new (class {
+  #tools = new (class Tools {
     create_observed_attributes = (parent, ...observedAttributes) => {
       return Array.from(
         new Set([...observedAttributes, ...(parent.observedAttributes || [])])
@@ -105,6 +108,10 @@ export const Component = new (class {
       names.push(cls.name);
       chain.push(cls);
     }
+
+    /* TODO
+    - Refactor to align with 'type'
+    */
 
     assign(
       cls.prototype,
