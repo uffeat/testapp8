@@ -169,7 +169,7 @@ export const Component = new (class {
     if (!element.tagName.includes("-")) {
       element.setAttribute("web-component", "");
     }
-    /* Call the 'update' lifecycle method */
+    /* Call the 'update' standard method */
     element.update && element.update(updates);
     /* Append children from hooks */
     element.append &&
@@ -179,7 +179,7 @@ export const Component = new (class {
             v instanceof HTMLElement || ["number", "string"].includes(typeof v)
         )
       );
-    /* Call the 'call' lifecycle method */
+    /* Call the 'call' standard method */
     element.call && element.call(...hooks);
     if (element.isConnected) {
       throw new Error(

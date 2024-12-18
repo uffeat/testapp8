@@ -1,3 +1,12 @@
+/* Utility for authoring instantiating classes. 
+Notable features:
+- Factory-based simulated multiple inheritance.
+- Object registry inspired by web components.
+- Unified instantiation from registered classes with support for:
+  - Custom life-cycle methods.
+  - Standard methods called in a standard order
+
+*/
 export const type = new (class Type {
   get registry() {
     return this.#registry;
@@ -124,9 +133,9 @@ export const type = new (class Type {
       /* Prevent 'constructed_callback' from being used onwards */
       self.constructed_callback = undefined;
     }
-    /* Call the 'update' lifecycle method */
+    /* Call the 'update' standard method */
     self.update && self.update(updates);
-    /* Call the 'call' lifecycle method */
+    /* Call the 'call' standard method */
     self.call && self.call(...hooks);
     /* Call the 'created_callback' lifecycle method */
     if (self.created_callback) {

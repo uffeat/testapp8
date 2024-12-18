@@ -1,7 +1,11 @@
 import { type } from "rollo/type/type";
 import { hooks } from "rollo/type/factories/hooks";
 
-/* . */
+/* Factory for enhancing plain object features, notably:
+- Batch updating.
+- Conditional mutation with (chainable) methods that resemble 
+  (mutating versions of) array methods.
+- Properties that reduce the need for using static Object methods. */
 export const data = (parent, config, ...factories) => {
   const cls = class Data extends parent {
     constructor() {
@@ -44,7 +48,7 @@ export const data = (parent, config, ...factories) => {
       return this;
     }
 
-    /* . */
+    /* Deletes items as per provided function. */
     filter(f) {
       this.forEach(([k, v]) => {
         if (!f([k, v])) {
@@ -69,14 +73,16 @@ export const data = (parent, config, ...factories) => {
       return Object.freeze(this);
     }
 
-    /* Deletes item by key and return value of deleted item. Chainable. */
+    /* Deletes item by key and returns value of deleted item. */
     pop(key) {
       const value = this[key];
       delete this[k];
       return value;
     }
 
-    /* . */
+    /* Calls a series of functions with one function's result passed into the next 
+    function. A copy of this object is passed into the first function. Returns 
+    the result of the last function. */
     reduce(...funcs) {
       let value = this.clone();
       for (const func of funcs) {
@@ -91,7 +97,7 @@ export const data = (parent, config, ...factories) => {
       return this.update(updates);
     }
 
-    /* Mutates according to provided function. Chainable. */
+    /* Mutates items as per provided function. Chainable. */
     transform(f) {
       const updates = this.entries.map(f);
       return this.update(updates);
