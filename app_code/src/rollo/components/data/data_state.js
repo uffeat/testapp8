@@ -14,9 +14,9 @@ import {
   uid,
 } from "rollo/factories/__factories__";
 
-/* Non-visual web component for reactive data. Use as an in-DOM alternative
-to State instances to leverage DOM features, incl. 'data'effect' children
-and styling options.
+/* Non-visual web component for reactive data. Use as a more tangible in-DOM 
+alternative to State instances to leverage DOM features, incl. 'data-effect' 
+children and options to style based on state mark-up.
 NOTE
 - While regular components hold a single State instance ('items'), 
   DataState components also hold a second State instance ('state'),

@@ -1,28 +1,15 @@
 import "./bootstrap.scss";
 import "./main.css";
 
-await (async () => {
-  await import("rollo/components/data/data_state");
-  await import("rollo/components/data/data_effect");
-  const { create } = await import("rollo/component");
+import { type } from "rollo/type/type";
+import "rollo/type/types/data/data";
 
-  create("div", {
-    id: "root",
-    parent: document.body,
-  });
+const data = type.create('data')
 
-  const my_state = create("data-state", { name: "my_state", parent: root });
-
-  my_state.$.foo = 42;
-  my_state.$.bar = "bar";
-  my_state.$.stuff = "stuff";
+console.log(data.tag)
 
 
 
-
-
-  
-})();
 
 /* Enable tests */
 if (import.meta.env.DEV) {
