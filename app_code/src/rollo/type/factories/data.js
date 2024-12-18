@@ -91,6 +91,9 @@ export const data = (parent, config, ...factories) => {
       if (updates) {
         /* Allow updates as entries array */
         if (Array.isArray(updates)) {
+
+          console.log('updates:', updates)////
+          
           updates = Object.fromEntries(updates);
         }
         for (const [k, v] of Object.entries(updates)) {

@@ -1,10 +1,8 @@
 import { type } from "rollo/type/type";
 import { hooks } from "rollo/type/factories/hooks";
 import "rollo/type/types/data/data";
-import { Handler } from "rollo/type/types/state/utils/handler";
-import { Effect } from "rollo/type/types/state/utils/effect";
-import { Effects } from "rollo/type/types/state/utils/effects";
-
+import { Effect as Argument } from "@/rollo/type/types/state/utils/_argument";
+import { Effects } from "@/rollo/type/types/state/utils/_effects";
 
 /* Factory for reative state. */
 export const factory = (parent, config, ...factories) => {
@@ -38,7 +36,7 @@ export const factory = (parent, config, ...factories) => {
       }
       this.#condition = condition;
     }
-    #condition
+    #condition;
 
     /* Returns current state data.
     NOTE 
@@ -52,11 +50,11 @@ export const factory = (parent, config, ...factories) => {
     get effects() {
       return this.#effects;
     }
-    #effects = new Effects(this)
+    #effects = new Effects(this);
 
     /* Returns owner. */
     get owner() {
-      return this.#owner;
+      return this.#owner || this;
     }
     /* Sets owner. */
     set owner(owner) {
@@ -76,9 +74,7 @@ export const factory = (parent, config, ...factories) => {
     #previous = type.create("data");
 
     /* . */
-    get size() {
-    
-    }
+    get size() {}
 
     /* Returns transformer. */
     get transformer() {
@@ -91,35 +87,22 @@ export const factory = (parent, config, ...factories) => {
       }
       this.#transformer = transformer;
     }
-    #transformer
+    #transformer;
 
     /* . */
-    clean() {
-      
-    }
+    clean() {}
 
     /* . */
-    clear() {
-      
-    }
+    clear() {}
 
     /* . */
-    filter(f) {
-      
-    }
+    filter(f) {}
 
     /* . */
-    forEach(f) {
-      
-    }
+    forEach(f) {}
 
     /* . */
-    pop(key) {
-    
-    }
-    
-
-   
+    pop(key) {}
 
     /* . */
     reset(value) {}
@@ -130,34 +113,72 @@ export const factory = (parent, config, ...factories) => {
     /* Updates items from provided object. Chainable. */
     update(updates) {
       super.update && super.update(updates);
-      if (updates) {
-        /* Allow updates as entries array */
-        if (Array.isArray(updates)) {
-          updates = Object.fromEntries(updates);
-        }
-        for (const [k, v] of Object.entries(updates)) {
-          this[k] = v;
-        }
+      if (!updates) return this;
+
+      
+
+
+
+      updates = type.create("data", updates);
+
+     
+
+
+      if (this.condition && !this.condition(updates)) return this;
+      if (this.transformer) {
+        updates = this.transformer(updates)
       }
-      return this;
-
-
+      /* Infer changed items */
+      const changes = type.create(
+        "data",
+        updates.filter(([k, v]) => this.#current[k] !== v)
+      );
+      /* Infer changed items as they were before change */
+      const previous = type.create(
+        "data",
+        changes.entries.map(([k, v]) => [k, this.#current[k]])
+      );
 
 
       
+     
+
+
+
+
+      /* Update storage */
+      changes.forEach(([k, v]) => {
+        this.#previous[k] = this.#current[k];
+        /* NOTE undefined deletes. This is critical for other methods! */
+        if (v === undefined) {
+          delete this.#current[k];
+        } else {
+          this.#current[k] = v;
+        }
+      });
+      /* Notify effects */
+      if (changes.size) {
+        this.effects.notify(
+          Argument.create({ current: changes, previous, owner: this })
+        );
+      }
+      return this;
     }
   };
   return cls;
 };
 
-type.author("state", Object, {}, hooks, factory).assign(
+type.author(
+  "state", 
+  Object, 
+  {}, 
+  ////hooks, 
+  factory
+).assign(
   class {
-    /* Returns shallow clone. */
+    /* Returns clone with shallow copy of current data and everything else reset. */
     clone() {
-      /* TODO
-      - Refactor
-      */
-      return type.create("state", { ...this });
+      return type.create("state", { ...this.current });
     }
   }
 );

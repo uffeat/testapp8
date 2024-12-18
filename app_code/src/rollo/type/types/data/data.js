@@ -4,7 +4,7 @@ import { hooks } from "rollo/type/factories/hooks";
 
 /* Type factory for 'data'. */
 export const factory = (parent, config, ...factories) => {
-  const cls = class Type extends parent {
+  const cls = class DataType extends parent {
     constructor() {
       super();
     }
@@ -23,7 +23,20 @@ export const factory = (parent, config, ...factories) => {
   return cls;
 };
 
-type.author("data", Object, {}, data, hooks, factory).assign(
+type.author(
+  "data", 
+  Object, 
+  {}, 
+
+  /* TODO Fix order (in author!) */
+  factory,
+  data, 
+  
+  hooks, 
+
+  
+  
+).assign(
   class {
     /* Returns shallow clone. */
     clone() {

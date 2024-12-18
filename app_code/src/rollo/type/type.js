@@ -113,7 +113,7 @@ export const type = new (class Type {
   };
 
   /* Returns instance of class. */
-  create = (tag, { config = {}, ...updates } = {}, ...hooks) => {
+  create = (tag, updates, ...hooks) => {
     /* Get class from registry */
     const cls = this.registry.get(tag);
     if (!cls) {
@@ -121,6 +121,17 @@ export const type = new (class Type {
     }
     /* Create instance */
     let instance = new cls();
+
+    /* Extract 'config'
+    NOTE
+    - Although 'updates' is likely a plain object, it could be, e.g. undefined 
+    or an array. Cannot, therefore, provide 'config' by destructuring in method 
+    signature, but must do so in a more controlled way.  */
+    let config
+    if (updates && updates.config) {
+      config = updates.config
+      delete updates.config
+    }
 
     /* Call the 'constructed_callback' lifecycle method */
     if (instance.constructed_callback) {
@@ -133,7 +144,7 @@ export const type = new (class Type {
       instance.constructed_callback = undefined;
     }
     /* Call the 'update' standard method */
-    instance.update && instance.update(updates);
+    updates && instance.update && instance.update(updates);
     /* Call the 'call' standard method */
     instance.call && instance.call(...hooks);
     /* Call the 'created_callback' lifecycle method */

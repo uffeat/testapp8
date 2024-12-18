@@ -1,14 +1,18 @@
-export class Handler {
-  constructor({ condition, owner, source, transformer }) {
-    this.#condition = condition;
-    this.#owner = owner;
+export class Effect {
+  static create = (...args) => {
+    return new Effect(...args);
+  };
+  constructor({ condition, source, transformer }) {
+    if (condition) {
+      if (typeof condition === "function") {
+        this.#condition = condition;
+      } else {
+        this.#condition = interpret_condition(condition);
+      }
+    }
     this.#source = source;
     this.#transformer = transformer;
   }
-
-  /* TODO
-    - handler owner?
-    */
 
   /* Returns condition. */
   get condition() {
@@ -21,12 +25,6 @@ export class Handler {
     return this.#source;
   }
   #source;
-
-  /* Returns owner. */
-  get owner() {
-    return this.#owner;
-  }
-  #owner;
 
   /* Returns transformer. */
   get transformer() {
@@ -47,37 +45,32 @@ export class Handler {
   }
 }
 
-
 /* Creates and return condition function from short-hand. */
 function interpret_condition(condition) {
   if (typeof condition === "string") {
     /* Create condition function from string short-hand:
-    changes must contain a key corresponding to the string short-hand. */
-    const key = condition;
-    condition = (changes) => key in changes;
-  } else if (Array.isArray(condition)) {
+    Changes must contain a key corresponding to the string short-hand. */
+    return (effect) => condition in effect.current;
+  }
+
+  if (Array.isArray(condition)) {
     /* Create condition function from array short-hand:
-    changes must contain a key that is present in the array short-hand. */
-    const keys = condition;
-    condition = (changes) => {
-      for (const key of keys) {
-        if (key in changes) {
-          return true;
-        }
+    Changes must contain a key that is present in the array short-hand. */
+    return (effect) => {
+      for (const key of condition) {
+        if (key in effect.current) return true;
       }
       return false;
     };
-  } else if (
-    typeof condition === "object" &&
-    Object.keys(condition).length === 1
-  ) {
+  }
+
+  if (typeof condition === "object" && Object.keys(condition).length === 1) {
     /* Create condition function from single-item object short-hand:
-    changes must contain a key-value pair corresponding to the object short-hand. */
+    Changes must contain a key-value pair corresponding to the object short-hand. */
     const key = Object.keys(condition)[0];
     const value = Object.values(condition)[0];
-    condition = (changes) => changes[key] === value;
-  } else {
-    throw new Error(`Invalid condition: ${condition}`);
+    return (effect) => effect.current[key] === value;
   }
-  return condition;
+
+  throw new Error(`Invalid condition: ${condition}`);
 }
