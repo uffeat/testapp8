@@ -15,31 +15,18 @@ export const state = (parent, config, ...factories) => {
         return target.#current[k];
       },
       set: (target, key, value) => {
-        if (value && value.__type__ === 'subscription') {
-        
-         
-         
-
-         
-
-          value.state.effects.add((data) => {
-            target.update({ [key]: value.reducer(data) });
-          }, value.condition, value.transformer)
-
-
-
-
-
-
-
-          
+        if (value && value.__type__ === "subscription") {
+          value.state.effects.add(
+            (data) => {
+              target.update({ [key]: value.reducer(data) });
+            },
+            value.condition,
+            value.transformer
+          );
         } else {
           target.update({ [key]: value });
         }
 
-
-
-        
         return true;
       },
     });
@@ -71,9 +58,22 @@ export const state = (parent, config, ...factories) => {
     }
     #effects = new Effects(this);
 
+    /* Returns name. */
+    get name() {
+      return this.#name;
+    }
+    /* Sets name. */
+    set name(name) {
+      if (this.#name) {
+        throw new Error(`'name' cannot be changed.`);
+      }
+      this.#name = name;
+    }
+    #name;
+
     /* Returns owner. */
     get owner() {
-      return this.#owner || this;
+      return this.#owner;
     }
     /* Sets owner. */
     set owner(owner) {
@@ -136,10 +136,18 @@ export const state = (parent, config, ...factories) => {
 
       update = type.create("data", update);
 
+      /* Handle update of non-state items */
+      type
+        .create("data", update)
+        .filter(([k, v]) => k in this)
+        .forEach(([k, v]) => (this[k] = v));
+      /* Filter as per condition */
       if (this.condition && !this.condition(update)) return this;
+      /* Transform as per transformer */
       if (this.transformer) {
         update = this.transformer(update);
-        if (update.__type__ !== 'data') {
+        /* Ensure that transformed update is a Data instance */
+        if (update.__type__ !== "data") {
           update = type.create("data", update);
         }
       }
@@ -153,7 +161,6 @@ export const state = (parent, config, ...factories) => {
         "data",
         current.entries.map(([k, v]) => [k, this.#current[k]])
       );
-
       /* Update storage */
       current.forEach(([k, v]) => {
         this.#previous[k] = this.#current[k];
@@ -166,9 +173,7 @@ export const state = (parent, config, ...factories) => {
       });
       /* Notify effects */
       if (current.size) {
-        this.effects.notify(
-          Message.create({ current, previous, owner: this })
-        );
+        this.effects.notify(Message.create({ current, previous, owner: this }));
       }
       return this;
     }
