@@ -1,9 +1,9 @@
 import { type } from "rollo/type/type";
-import { data } from "rollo/type/factories/data";
+import { data } from "rollo/type/types/data/factories/data";
 import { hooks } from "rollo/type/factories/hooks";
 
 /* Implementation class for the 'data' factory. */
-class Data extends Object {
+class DataType extends Object {
   constructor() {
     super();
   }
@@ -23,13 +23,10 @@ class Data extends Object {
 type
   .author(
     "data",
-    Data,
+    DataType,
     {},
-    
     hooks,
-    data,
-    /* HACK to control console representation. */
-    //(parent) => class Data extends parent {}
+    data
   )
   .assign(
     class {

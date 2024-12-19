@@ -75,33 +75,29 @@ export const data = (parent, config, ...factories) => {
 
     /* Sets all items to a provided value. Chainable. */
     reset(value) {
-      const updates = this.entries.map(([k, v]) => [k, value]);
-      return this.update(updates);
+      const update = this.entries.map(([k, v]) => [k, value]);
+      return this.update(update);
     }
 
     /* Mutates items as per provided function. Chainable. */
     transform(f) {
-      const updates = this.entries.map(f);
-      return this.update(updates);
+      const update = this.entries.map(f);
+      return this.update(update);
     }
 
     /* Updates items from provided object. Chainable. */
-    update(updates) {
-      super.update && super.update(updates);
-      if (updates) {
-        /* Allow updates as entries array */
-        if (Array.isArray(updates)) {
-
-          ////console.log('updates:', updates)////
-          
-          updates = Object.fromEntries(updates);
-        }
-        for (const [k, v] of Object.entries(updates)) {
-          this[k] = v;
-        }
+    update(update) {
+      super.update && super.update(update);
+      if (!update) return this;
+      /* Allow update as entries array */
+      if (Array.isArray(update)) {
+        update = Object.fromEntries(update);
       }
+      for (const [k, v] of Object.entries(update)) {
+        this[k] = v;
+      }
+
       return this;
     }
   };
-  
 };

@@ -4,9 +4,7 @@ Notable features:
 - Object registry inspired by web components.
 - Unified instantiation from registered classes with support for:
   - Custom life-cycle methods.
-  - Standard methods called in a standard order
-
-*/
+  - Standard methods called in a standard order. */
 export const type = new (class Type {
   /* Returns registry controller. */
   get registry() {
@@ -34,47 +32,44 @@ export const type = new (class Type {
 
   /* Builds, registers and returns class from base, config and factories.
   Simulates multiple inheritance. */
-  author(tag, cls, config, ...factories) {
+  author(tag, cls, config = {}, ...factories) {
     /* NOTE
     - 'factories' is passed into each factory, so that the individual factory 
-      is aware of it's siblings. Factories can, but should generally not, 
-      mutate 'factories'. 
+      is aware of it's siblings.
     - 'config' is passed into each factory. 'config' can be an object that 
-      instructs factories. Factories can, but should generally not, mutate 
-      'config'. */
+      instructs factories. 
+    - Factories can, but should generally not, mutate 'config' and 'factories'. */
 
     const chain = [cls];
     const names = [];
 
-    //factories.push((parent) => class Type extends parent {}, (parent) => class Composite extends parent {});
+    
 
     /* Build composite class */
     for (const factory of factories) {
       cls = factory(cls, config, ...factories);
-      /* Check name */
-      if (cls.name) {
-        if (names.includes(cls.name)) {
-          console.warn(`Duplicate factory class name: ${cls.name}`);
-        }
-        names.push(cls.name);
-      } else {
-        console.warn(`Unnamed factory class:`, cls);
-      }
-
       /* Handle chain */
-      
       chain.push(cls);
+      /* Check name */
+      if (import.meta.env.DEV) {
+        if (cls.name) {
+          if (names.includes(cls.name)) {
+            console.warn(`Duplicate factory class name: ${cls.name}`);
+          }
+          names.push(cls.name);
+        } else {
+          console.warn(`Unnamed factory class:`, cls);
+        }
+      }
     }
 
-    /* Wrap the built cls in a common 'Type' class.
-      - The 'Type' class becomes the '__class__' value. 
-        This signals that the class is a composite class created by 'type'.
-        Otherwise, '__class__' would be the last factory class, which would be 
-        misleading.
+    /* Wrap the built cls in a common 'Type' class. Reason:
       - By injecting an additional prototype, any console representation of an 
         instance will refer to the last factory class; otherwise, it would be 
         the second-last factory class (confusing and inconsistent with the 
-        built chain). */
+        built chain). 
+      Done here (rather than in an injected factory), so that 'Type' does not 
+      appear in '__chain__' (where it would serve no purpose). */
     cls = class Type extends cls {};
 
     /* Give cls the ability to mutate its prototype by directly assigning 
@@ -105,19 +100,19 @@ export const type = new (class Type {
     });
     /* Add meta */
     const __chain__ = Object.freeze(chain);
-    const __config__ = Object.freeze(config || {});
+    const __config__ = Object.freeze(config);
     cls.assign(
       class {
+        /* Returns array of classes used when the class was authored. */
         get __chain__() {
           return __chain__;
         }
-        get __class__() {
-          return cls;
-        }
+        /* Returns config object used when the class was authored. */
         get __config__() {
           return __config__;
         }
-        get type() {
+        /* Returns the registration key of the class. */
+        get __type__() {
           return tag;
         }
       }
@@ -154,7 +149,7 @@ export const type = new (class Type {
         throw new Error(`Type '${tag}' not registered.`);
       }
       /* Create instance */
-      instance = new cls();
+      instance = new cls(update, ...hooks);
     } else {
       instance = tag;
     }

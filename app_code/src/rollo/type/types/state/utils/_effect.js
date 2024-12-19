@@ -3,20 +3,19 @@ export class Effect {
     return new Effect(...args);
   };
   constructor({ condition, source, transformer }) {
-    if (condition) {
-      if (typeof condition === "function") {
-        this.#condition = condition;
-      } else {
-        this.#condition = interpret_condition(condition);
-      }
-    }
-    this.#source = source;
-    this.#transformer = transformer;
+    this.update({ condition, source, transformer });
   }
 
   /* Returns condition. */
   get condition() {
     return this.#condition;
+  }
+  /* Sets condition. */
+  set condition(condition) {
+    if (condition && typeof condition !== "function") {
+      condition = interpret_condition(condition);
+    }
+    this.#condition = condition;
   }
   #condition;
 
@@ -24,11 +23,19 @@ export class Effect {
   get source() {
     return this.#source;
   }
+  /* Sets source. */
+  set source(source) {
+    this.#source = source;
+  }
   #source;
 
   /* Returns transformer. */
   get transformer() {
     return this.#transformer;
+  }
+  /* Sets transformer. */
+  set transformer(transformer) {
+    this.#transformer = transformer;
   }
   #transformer;
 
@@ -42,6 +49,13 @@ export class Effect {
       effect = this.transformer(effect);
     }
     this.source(effect);
+  }
+
+  update({ condition, source, transformer } = {}) {
+    this.condition = condition;
+    this.source = source;
+    this.transformer = transformer;
+    return this;
   }
 }
 

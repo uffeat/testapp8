@@ -1,7 +1,7 @@
-/* Argument for effect handlers. */
-export class Effect {
+/* Argument for effects. */
+export class Message {
   static create = (...args) => {
-    return new Effect(...args);
+    return new Message(...args);
   };
   constructor({ current, previous, owner }) {
     this.#current = current;
