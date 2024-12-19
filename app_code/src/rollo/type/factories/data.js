@@ -4,7 +4,7 @@
   (mutating versions of) array methods.
 - Properties that reduce the need for using static Object methods. */
 export const data = (parent, config, ...factories) => {
-  const cls = class Data extends parent {
+  return class Data extends parent {
     /* Returns entries. */
     get entries() {
       return Object.entries(this);
@@ -92,7 +92,7 @@ export const data = (parent, config, ...factories) => {
         /* Allow updates as entries array */
         if (Array.isArray(updates)) {
 
-          console.log('updates:', updates)////
+          ////console.log('updates:', updates)////
           
           updates = Object.fromEntries(updates);
         }
@@ -103,5 +103,5 @@ export const data = (parent, config, ...factories) => {
       return this;
     }
   };
-  return cls;
+  
 };

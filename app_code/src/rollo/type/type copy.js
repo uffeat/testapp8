@@ -34,7 +34,7 @@ export const type = new (class Type {
 
   /* Builds, registers and returns class from base, config and factories.
   Simulates multiple inheritance. */
-  author(tag, cls, config, ...factories) {
+  author(tag, base, config, ...factories) {
     /* NOTE
     - 'factories' is passed into each factory, so that the individual factory 
       is aware of it's siblings. Factories can, but should generally not, 
@@ -42,41 +42,122 @@ export const type = new (class Type {
     - 'config' is passed into each factory. 'config' can be an object that 
       instructs factories. Factories can, but should generally not, mutate 
       'config'. */
-
-    const chain = [cls];
+   
+    let cls = class {}
+    const chain = [];
     const names = [];
 
-    //factories.push((parent) => class Type extends parent {}, (parent) => class Composite extends parent {});
+    const factory = () => {
+      return class Foo extends base {
+        constructor() {
+          super()
+        }
+      }
+    }
 
+    factories = [...factories, factory]
+
+
+    
     /* Build composite class */
     for (const factory of factories) {
       cls = factory(cls, config, ...factories);
+      chain.push(cls);
       /* Check name */
       if (cls.name) {
         if (names.includes(cls.name)) {
-          console.warn(`Duplicate factory class name: ${cls.name}`);
+          console.warn(
+            `Factory class names should be unique for better traceability. Got duplicate: ${cls.name}`
+          );
         }
         names.push(cls.name);
-      } else {
-        console.warn(`Unnamed factory class:`, cls);
       }
-
-      /* Handle chain */
-      
-      chain.push(cls);
     }
 
-    /* Wrap the built cls in a common 'Type' class.
-      - The 'Type' class becomes the '__class__' value. 
-        This signals that the class is a composite class created by 'type'.
-        Otherwise, '__class__' would be the last factory class, which would be 
-        misleading.
-      - By injecting an additional prototype, any console representation of an 
-        instance will refer to the last factory class; otherwise, it would be 
-        the second-last factory class (confusing and inconsistent with the 
-        built chain). */
-    cls = class Type extends cls {};
+    
+    console.dir(cls)
 
+
+    /* Give cls the ability to mutate its prototype by directly assigning 
+    members from other classes. 
+    NOTE
+    - In addition to usage below, this can be useful for modifying a composite 
+      class after it has been built from factories, e.g., when:
+      - Something must be done that requires guarantee that all factories have been 
+        implemented.
+      - The class needs to be modified with objects outside its factories.
+      Be aware that:
+      - Constructors in sources classes are ignored, i.e., cannot be used.
+      - Sources classes cannot use 'super' and private fields.
+      - Target class members may be overwritten without warning. */
+    Object.defineProperty(cls, "assign", {
+      configurable: false,
+      enumerable: false,
+      writable: false,
+      value: (...sources) => {
+        sources.forEach((source) =>
+          Object.defineProperties(
+            cls.prototype,
+            Object.getOwnPropertyDescriptors(source.prototype)
+          )
+        );
+        return cls;
+      },
+    });
+    /* Add meta */
+    const __chain__ = Object.freeze(chain.reverse());
+    const __config__ = Object.freeze(config || {});
+    cls.assign(
+      class {
+        get __chain__() {
+          return __chain__;
+        }
+        get __class__() {
+          return cls;
+        }
+        get __config__() {
+          return __config__;
+        }
+        get type() {
+          return tag;
+        }
+      }
+    );
+    /* Register and return class */
+    return this.registry.add(tag, cls);
+  }
+
+  /* Builds, registers and returns class from base, config and factories.
+  Simulates multiple inheritance. */
+  XXXauthor(tag, base, config, ...factories) {
+    /* NOTE
+    - 'factories' is passed into each factory, so that the individual factory 
+      is aware of it's siblings. Factories can, but should generally not, 
+      mutate 'factories'. 
+    - 'config' is passed into each factory. 'config' can be an object that 
+      instructs factories. Factories can, but should generally not, mutate 
+      'config'. */
+    const _factories = [...factories];
+    let cls = factories.shift()(base, config, ..._factories);
+    const chain = [base, cls];
+    const names = [];
+    if (cls.name) {
+      names.push(cls.name);
+    }
+    /* Build composite class */
+    for (const factory of factories) {
+      cls = factory(cls, config, ..._factories);
+      chain.push(cls);
+      /* Check name */
+      if (cls.name) {
+        if (names.includes(cls.name)) {
+          console.warn(
+            `Factory class names should be unique for better traceability. Got duplicate: ${cls.name}`
+          );
+        }
+        names.push(cls.name);
+      }
+    }
     /* Give cls the ability to mutate its prototype by directly assigning 
     members from other classes. 
     NOTE
@@ -104,7 +185,7 @@ export const type = new (class Type {
       },
     });
     /* Add meta */
-    const __chain__ = Object.freeze(chain);
+    const __chain__ = Object.freeze(chain.reverse());
     const __config__ = Object.freeze(config || {});
     cls.assign(
       class {

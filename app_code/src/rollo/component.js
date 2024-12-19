@@ -195,7 +195,7 @@ export const Component = new (class Component {
     }
     /* Call the 'created_callback' lifecycle method */
     if (element.created_callback) {
-      element.created_callback && element.created_callback();
+      element.created_callback();
       /* Prevent 'created_callback' from being used onwards */
       element.created_callback = undefined;
     }

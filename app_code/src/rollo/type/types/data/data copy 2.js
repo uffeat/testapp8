@@ -2,7 +2,6 @@ import { type } from "rollo/type/type";
 import { data } from "rollo/type/factories/data";
 import { hooks } from "rollo/type/factories/hooks";
 
-/* Implementation class for the 'data' factory. */
 class Data extends Object {
   constructor() {
     super();
@@ -18,24 +17,26 @@ class Data extends Object {
     }
     return value;
   }
-}
+};
 
-type
-  .author(
-    "data",
-    Data,
-    {},
-    
-    hooks,
-    data,
-    /* HACK to control console representation. */
-    //(parent) => class Data extends parent {}
-  )
-  .assign(
-    class {
-      /* Returns shallow clone. */
-      clone() {
-        return type.create("data", { ...this });
-      }
+type.author(
+  "data", 
+  Data,
+  {}, 
+
+ 
+ 
+  data, 
+  
+  hooks, 
+
+  
+  
+).assign(
+  class {
+    /* Returns shallow clone. */
+    clone() {
+      return type.create("data", { ...this });
     }
-  );
+  }
+);

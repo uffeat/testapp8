@@ -2,7 +2,30 @@ import { type } from "rollo/type/type";
 import { data } from "rollo/type/factories/data";
 import { hooks } from "rollo/type/factories/hooks";
 
-/* Implementation class for the 'data' factory. */
+/* Type factory for 'data'. */
+const factory = (parent, config, ...factories) => {
+  return class Data extends parent {
+    constructor() {
+      super();
+    }
+
+    /* Calls a series of functions with one function's result passed into the next 
+    function. A copy of this object is passed into the first function. Returns 
+    the result of the last function. */
+    reduce(...funcs) {
+      let value = this.clone();
+      for (const func of funcs) {
+        value = func(value);
+      }
+      return value;
+    }
+  };
+};
+
+const name = (parent) => {
+  return class Data extends parent {};
+};
+
 class Data extends Object {
   constructor() {
     super();
@@ -18,19 +41,12 @@ class Data extends Object {
     }
     return value;
   }
-}
+};
+
+
 
 type
-  .author(
-    "data",
-    Data,
-    {},
-    
-    hooks,
-    data,
-    /* HACK to control console representation. */
-    //(parent) => class Data extends parent {}
-  )
+  .author("data", Data, {}, data, hooks)
   .assign(
     class {
       /* Returns shallow clone. */
