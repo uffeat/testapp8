@@ -4,7 +4,13 @@ import "./main.css";
 await (async () => {
   const { type } = await import("rollo/type/type");
   await import("rollo/type/types/state/state");
+  await import("rollo/type/types/data/data");
   await import("rollo/type/types/state/subscription");
+
+  const data = type.create("data", {
+    foo: "FOO",
+  });
+  console.log("stuff:", data.__class__.stuff);
 
   const state = type.create("state", {
     $name: 'my_state',

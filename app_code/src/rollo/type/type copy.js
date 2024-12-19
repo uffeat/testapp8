@@ -49,6 +49,8 @@ export const type = new (class Type {
     const chain = [cls];
     const names = [];
 
+    
+
     /* Build composite class */
     for (const factory of factories) {
       cls = factory(cls, config, ...factories);
@@ -103,15 +105,20 @@ export const type = new (class Type {
       },
     });
 
+
     ////
     ////
     cls.create = (kwargs, ...args) => {
-      return this.create(tag, kwargs, ...args);
-    };
+      return this.create(tag, kwargs, ...args)
+    }
+      
+
+
+
 
     /* Add meta */
     const __chain__ = Object.freeze(chain);
-
+    
     const __config__ = Object.freeze(config);
     cls.assign(
       class {
@@ -120,7 +127,7 @@ export const type = new (class Type {
           return __chain__;
         }
         get __class__() {
-          return cls;
+          return cls
         }
         /* Returns config object used when the class was authored. */
         get __config__() {
@@ -154,6 +161,8 @@ export const type = new (class Type {
     return (kwargs, ...hooks) => this.create(instance, kwargs, ...hooks);
   }
 
+  
+
   /* Returns instance of class. */
   create(tag, kwargs, ...args) {
     let instance;
@@ -165,19 +174,26 @@ export const type = new (class Type {
       }
       /* Create instance */
       instance = new cls(kwargs, ...args);
+
+      if (cls.creation) {
+        
+      }
+
+
+
     } else {
       instance = tag;
     }
 
-    if (instance.create) {
-      instance.create(kwargs);
-    } else {
-      /* Call the 'update' standard method */
-      kwargs && instance.update && instance.update(kwargs);
-      /* Call the 'hooks' standard method */
-      instance.hooks && instance.hooks(...args);
-    }
+    
 
+   
+
+
+    /* Call the 'update' standard method */
+    kwargs && instance.update && instance.update(kwargs);
+    /* Call the 'hooks' standard method */
+    instance.hooks && instance.hooks(...args);
     /* Call the 'created_callback' lifecycle method */
     if (instance.created_callback) {
       const result = instance.created_callback();
