@@ -1,7 +1,18 @@
 import { type } from "rollo/type/type";
 import { state } from "rollo/type/types/state/factories/state";
 
-/* . */
+/* Utility for binding a state item to another state. 
+NOTE
+- The responsibilities of a Subscription instances are to:
+  - Identify itself to a subscribing state, when assigning a state item a
+    Subscription instance.
+  - Convey information that enables the subscribing state to 
+    set up an effect in the publishing state, so that an item in the 
+    subscribing state is automatically updated, when the publishing state
+    changes, subject to any condition. 
+  - Subscriptions can therefore be used as direct and more declarative way
+    of setting up inter-state effects, i.e., by assignment instead of 
+    explicit function-setup. */
 class Subscription {
   constructor({ condition, reducer, state, transformer } = {}) {
     if (!state) {
