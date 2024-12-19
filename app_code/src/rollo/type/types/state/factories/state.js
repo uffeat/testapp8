@@ -6,15 +6,42 @@ import { Effects } from "rollo/type/types/state/utils/_effects";
 /* Factory for reative state. */
 export const state = (parent, config, ...factories) => {
   const cls = class State extends parent {
+    static PREFIX = "$";
+
+
+    created_callback() {
+      super.created_callback && super.created_callback();
+      
+      /* Set up automatic property update from prefixed state */
+      this.effects.add((data) => {
+        const update = data.current
+          .clone()
+          /* NOTE Operate on clone to avoid mutation of data.current */
+          .filter(
+            ([k, v]) => typeof k === "string" && k.startsWith(State.PREFIX)
+          )
+          .forEach(([k, v]) => (this[k.slice(State.PREFIX.length)] = v));
+        this.update(update)
+      });
+
+      
+    }
+
     /* Provives API for getting/setting single state items. */
     get $() {
       return this.#$;
     }
     #$ = new Proxy(this, {
-      get: (target, k) => {
-        return target.#current[k];
+      get: (target, key) => {
+        if (key in target) {
+          throw new Error(`Reserved key: ${key}`);
+        }
+        return target.#current[key];
       },
       set: (target, key, value) => {
+        if (key in target) {
+          throw new Error(`Reserved key: ${key}`);
+        }
         if (value && value.__type__ === "subscription") {
           value.state.effects.add(
             (data) => {
@@ -129,14 +156,18 @@ export const state = (parent, config, ...factories) => {
     /* . */
     transform(f) {}
 
-    /* Updates items from provided object. Chainable. */
+    /* Updates state and properties from provided object. Chainable. */
     update(update) {
       super.update && super.update(update);
       if (!update) return this;
 
       update = type.create("data", update);
 
-      /* Handle update of non-state items */
+      /* Handle update of non-state items, 
+      NOTE
+      - If, e.g., a 'name' item is in 'update', the name property updates, 
+        but NOT a 'name' state item. However, '$name' updates the 'name' property,
+        AND a '$name' state. */
       type
         .create("data", update)
         .filter(([k, v]) => k in this)
@@ -154,7 +185,7 @@ export const state = (parent, config, ...factories) => {
       /* Infer changed items */
       const current = type.create(
         "data",
-        update.filter(([k, v]) => this.#current[k] !== v)
+        update.filter(([k, v]) => !(k in this) && this.#current[k] !== v)
       );
       /* Infer changed items as they were before change */
       const previous = type.create(

@@ -98,14 +98,29 @@ export const type = new (class Type {
         return cls;
       },
     });
+
+
+    cls.create = (kwargs, ...args) => {
+      return this.create(tag, kwargs, ...args)
+
+
+    }
+
+
+
+
     /* Add meta */
     const __chain__ = Object.freeze(chain);
+    
     const __config__ = Object.freeze(config);
     cls.assign(
       class {
         /* Returns array of classes used when the class was authored. */
         get __chain__() {
           return __chain__;
+        }
+        get __class__() {
+          return cls
         }
         /* Returns config object used when the class was authored. */
         get __config__() {
@@ -136,11 +151,11 @@ export const type = new (class Type {
       /* Prevent 'constructed_callback' from being used onwards */
       instance.constructed_callback = undefined;
     }
-    return (update, ...hooks) => this.create(instance, update, ...hooks);
+    return (kwargs, ...hooks) => this.create(instance, kwargs, ...hooks);
   }
 
   /* Returns instance of class. */
-  create(tag, update, ...hooks) {
+  create(tag, kwargs, ...args) {
     let instance;
     if (typeof tag === "string") {
       /* Get class from registry */
@@ -149,12 +164,12 @@ export const type = new (class Type {
         throw new Error(`Type '${tag}' not registered.`);
       }
       /* Create instance */
-      instance = new cls(update, ...hooks);
+      instance = new cls(kwargs, ...hooks);
     } else {
       instance = tag;
     }
     /* Call the 'update' standard method */
-    update && instance.update && instance.update(update);
+    kwargs && instance.update && instance.update(kwargs);
     /* Call the 'hooks' standard method */
     instance.hooks && instance.hooks(...hooks);
     /* Call the 'created_callback' lifecycle method */

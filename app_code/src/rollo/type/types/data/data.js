@@ -4,8 +4,25 @@ import { hooks } from "rollo/type/factories/hooks";
 
 /* Implementation class for the 'data' factory. */
 class DataType extends Object {
+
+
+
   constructor() {
     super();
+  }
+
+  /* Returns shallow clone. Enables use of Data methods without mutation. */
+  clone() {
+
+    return this.__class__.create({ ...this })
+
+    const cloned =  new this.__class__()
+    cloned.update({ ...this })
+    return cloned
+
+
+
+    return type.create("data", { ...this });
   }
 
   /* Calls a series of functions with one function's result passed into the next 
@@ -20,19 +37,4 @@ class DataType extends Object {
   }
 }
 
-type
-  .author(
-    "data",
-    DataType,
-    {},
-    hooks,
-    data
-  )
-  .assign(
-    class {
-      /* Returns shallow clone. */
-      clone() {
-        return type.create("data", { ...this });
-      }
-    }
-  );
+type.author("data", DataType, {}, hooks, data)

@@ -7,17 +7,20 @@ await (async () => {
   await import("rollo/type/types/state/subscription");
 
   const state = type.create("state", {
+    $name: 'my_state',
     foo: "FOO",
     bar: "BAR",
     stuff: 42,
     thing: 42,
   });
 
+  console.log("name:", state.name);
+
   //console.log("current:", state.current);
 
   state.effects.add((data) => {
     //console.log("data:", data);
-    //console.log("current:", data.current);
+    console.log("current:", data.current);
     //console.log("previous:", data.previous);
   });
 
@@ -40,7 +43,7 @@ await (async () => {
 
   family.effects.add((data) => {
     //console.log("data:", data);
-    console.log("uffe:", data.current.uffe);
+    //console.log("uffe:", data.current.uffe);
     //console.log("previous:", data.previous);
   }, 'uffe');
 
