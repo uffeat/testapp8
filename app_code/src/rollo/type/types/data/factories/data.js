@@ -4,7 +4,10 @@
   (mutating versions of) array methods.
 - Properties that reduce the need for using static Object methods. */
 export const data = (parent, config, ...factories) => {
-  return class Data extends parent {
+  return class data extends parent {
+    constructor() {
+      super();
+    }
     /* Returns entries. */
     get entries() {
       return Object.entries(this);

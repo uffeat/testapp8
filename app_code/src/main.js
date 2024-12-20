@@ -3,58 +3,21 @@ import "./main.css";
 
 await (async () => {
   const { type } = await import("rollo/type/type");
-  await import("rollo/type/types/state/state");
-  await import("rollo/type/types/data/data");
-  await import("rollo/type/types/state/subscription");
 
+  await import("rollo/type/types/data/data");
+
+
+  
   const data = type.create("data", {
     foo: "FOO",
   });
-  console.log("stuff:", data.__class__.stuff);
 
-  const state = type.create("state", {
-    $name: 'my_state',
-    foo: "FOO",
-    bar: "BAR",
-    stuff: 42,
-    thing: 42,
-  });
-
-  console.log("name:", state.name);
-
-  //console.log("current:", state.current);
-
-  state.effects.add((data) => {
-    //console.log("data:", data);
-    console.log("current:", data.current);
-    //console.log("previous:", data.previous);
-  });
-
-  state.update({ foo: "foofoo" });
-
-
-
-  const family = type.create("state", {
-    uffe: 1969,
-    charlotte: 1969,
-    hugo: 2003,
-    carl: 2005,
-  });
-
-  family.$.uffe = type.create("subscription", {
-    state: state,
-    condition: "foo",
-    reducer: (data) => data.current.foo,
-  });
-
-  family.effects.add((data) => {
-    //console.log("data:", data);
-    //console.log("uffe:", data.current.uffe);
-    //console.log("previous:", data.previous);
-  }, 'uffe');
-
-
-  state.$.foo = 'FooBar'
+  console.log('data:', data)
+  console.log('chain:', data.__chain__)
+  console.log('class:', data.__class__)
+  console.log('type:', data.__type__)
+  
+ 
 
 
 

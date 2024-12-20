@@ -1,6 +1,9 @@
 /* Factory that calls hook functions bound in 'call'. */
 export const hooks = (parent, config, ...factories) => {
-  return class Hooks extends parent {
+  return class hooks extends parent {
+    constructor() {
+      super();
+    }
     /* Handles hook functions. Chainable. 
     Called during creation:
     - after 'constructed_callback'

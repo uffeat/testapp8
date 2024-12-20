@@ -2,17 +2,21 @@ import { type } from "rollo/type/type";
 import { data } from "rollo/type/types/data/factories/data";
 import { hooks } from "rollo/type/factories/hooks";
 
+const Composite = type.compose(Object, {}, data, hooks)
+
 /* Implementation class for the 'data' factory. */
-class DataType extends Object {
+class Data extends Composite {
+  static create = (update) => {
+    return new Data().update(update)
+
+  }
 
 
   constructor() {
     super();
   }
 
-  create(update) {
-    this.update(update)
-  }
+
 
   
 
@@ -39,4 +43,4 @@ class DataType extends Object {
   }
 }
 
-type.author("data", DataType, {}, hooks, data);
+type.register("data", Data);

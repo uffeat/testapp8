@@ -1,10 +1,15 @@
+const META_PROPERTY_OPTIONS = Object.freeze({
+  configurable: false,
+  enumerable: false,
+  writable: false,
+});
+
 /* Utility for authoring instantiating classes. 
 Notable features:
 - Factory-based simulated multiple inheritance.
 - Object registry inspired by web components.
-- Unified instantiation from registered classes with support for:
-  - Custom life-cycle methods.
-  - Standard methods called in a standard order. */
+- Unified instantiation from registered classes with standardized factory 
+  patterns. */
 export const type = new (class Type {
   /* Returns registry controller. */
   get registry() {
@@ -13,7 +18,7 @@ export const type = new (class Type {
   #registry = new (class Registry {
     #registry = {};
     /* Registers and returns class. */
-    add = (tag, cls) => {
+    add(tag, cls) {
       if (import.meta.env.DEV) {
         if (tag in this.#registry) {
           console.info(`Replaced registered type: ${tag}.`);
@@ -21,163 +26,57 @@ export const type = new (class Type {
           console.info(`Registered type: ${tag}.`);
         }
       }
+
       this.#registry[tag] = cls;
       return cls;
-    };
+    }
     /* Returns registered class. */
-    get = (tag) => {
+    get(tag) {
       return this.#registry[tag];
-    };
+    }
   })();
 
-  /* TODO
-  - Allow specification of create sequence (provide defaults - perhaps just life cycles and update)
-    .. OR  go for single arg (update)?
-  
-  */
-
-  /* Builds, registers and returns class from base, config and factories.
-  Simulates multiple inheritance. */
-  author(tag, cls, config = {}, ...factories) {
-    /* NOTE
-    - 'factories' is passed into each factory, so that the individual factory 
-      is aware of it's siblings.
-    - 'config' is passed into each factory. 'config' can be an object that 
-      instructs factories. 
-    - Factories can, but should generally not, mutate 'config' and 'factories'. */
-
+  /* Builds composite class */
+  compose(cls, config = {}, ...factories) {
+    cls = cls || class {};
     const chain = [cls];
-    const names = [];
-
-    /* Build composite class */
     for (const factory of factories) {
       cls = factory(cls, config, ...factories);
       /* Handle chain */
       chain.push(cls);
-      /* Check name */
-      if (import.meta.env.DEV) {
-        if (cls.name) {
-          if (names.includes(cls.name)) {
-            console.warn(`Duplicate factory class name: ${cls.name}`);
-          }
-          names.push(cls.name);
-        } else {
-          console.warn(`Unnamed factory class:`, cls);
-        }
-      }
     }
+    /* */
+    add_meta_property(cls, 'chain', Object.freeze(chain))
 
-    /* Wrap the built cls in a common 'Type' class. Reason:
-      - By injecting an additional prototype, any console representation of an 
-        instance will refer to the last factory class; otherwise, it would be 
-        the second-last factory class (confusing and inconsistent with the 
-        built chain). 
-      Done here (rather than in an injected factory), so that 'Type' does not 
-      appear in '__chain__' (where it would serve no purpose). */
-    cls = class Type extends cls {};
-
-    /* Give cls the ability to mutate its prototype by directly assigning 
-    members from other classes. 
-    NOTE
-    - In addition to usage below, this can be useful for modifying a composite 
-      class after it has been built from factories, e.g., when:
-      - Something must be done that requires guarantee that all factories have benn 
-        implemented.
-      - The class needs to be modified with objects outside its factories.
-      Be aware that:
-      - Constructors in sources classes are ignored, i.e., cannot be used.
-      - Sources classes cannot use 'super' and private fields.
-      - Target class members may be overwritten without warning. */
-    Object.defineProperty(cls, "assign", {
-      configurable: false,
-      enumerable: false,
-      writable: false,
-      value: (...sources) => {
-        sources.forEach((source) =>
-          Object.defineProperties(
-            cls.prototype,
-            Object.getOwnPropertyDescriptors(source.prototype)
-          )
-        );
-        return cls;
-      },
-    });
-
-    ////
-    ////
-    cls.create = (kwargs, ...args) => {
-      return this.create(tag, kwargs, ...args);
-    };
-
-    /* Add meta */
-    const __chain__ = Object.freeze(chain);
-
-    const __config__ = Object.freeze(config);
-    cls.assign(
-      class {
-        /* Returns array of classes used when the class was authored. */
-        get __chain__() {
-          return __chain__;
-        }
-        get __class__() {
-          return cls;
-        }
-        /* Returns config object used when the class was authored. */
-        get __config__() {
-          return __config__;
-        }
-        /* Returns the registration key of the class. */
-        get __type__() {
-          return tag;
-        }
-      }
-    );
-    /* Register and return class */
-    return this.registry.add(tag, cls);
+    return cls;
   }
 
-  /* Creates and configures instance of class. 
-  Returns function for further instance setup. */
+  /* . */
   config(tag, config) {
+    /* Get class from registry */
+    const cls = this.get(tag);
     /* Create instance */
-    let instance = this.create(tag);
+    let instance = new cls();
     /* Call the 'constructed_callback' lifecycle method */
     if (instance.constructed_callback) {
-      const result = element.constructed_callback(config);
-      /* Allow truthy result to replace instance */
-      if (result) {
-        instance = result;
-      }
+      instance = instance.constructed_callback(config) || instance;
       /* Prevent 'constructed_callback' from being used onwards */
       instance.constructed_callback = undefined;
     }
-    return (kwargs, ...hooks) => this.create(instance, kwargs, ...hooks);
+    return instance;
   }
 
   /* Returns instance of class. */
-  create(tag, kwargs, ...args) {
+  create(tag, ...args) {
+    /* Get class from registry */
+    const cls = this.get(tag);
+    /* Create instance */
     let instance;
-    if (typeof tag === "string") {
-      /* Get class from registry */
-      const cls = this.registry.get(tag);
-      if (!cls) {
-        throw new Error(`Type '${tag}' not registered.`);
-      }
-      /* Create instance */
-      instance = new cls(kwargs, ...args);
+    if (cls.create) {
+      instance = cls.create(...args);
     } else {
-      instance = tag;
+      instance = new cls(...args);
     }
-
-    if (instance.create) {
-      instance.create(kwargs);
-    } else {
-      /* Call the 'update' standard method */
-      kwargs && instance.update && instance.update(kwargs);
-      /* Call the 'hooks' standard method */
-      instance.hooks && instance.hooks(...args);
-    }
-
     /* Call the 'created_callback' lifecycle method */
     if (instance.created_callback) {
       const result = instance.created_callback();
@@ -190,4 +89,92 @@ export const type = new (class Type {
     }
     return instance;
   }
+
+  /* */
+  get(tag) {
+    const cls = this.registry.get(tag);
+    if (!cls) {
+      throw new Error(`Type '${tag}' not registered.`);
+    }
+    return cls;
+  }
+
+  /* */
+  register(tag, cls) {
+    
+    add_meta_property(cls.prototype, "class", cls)
+
+    Object.defineProperty(cls.prototype, "__type__", {
+      ...META_PROPERTY_OPTIONS,
+      value: tag,
+    });
+
+    if (cls.__chain__) {
+      Object.defineProperty(cls.prototype, "__chain__", {
+        ...META_PROPERTY_OPTIONS,
+        value: Chain.create(...cls.__chain__, cls),
+      });
+    }
+
+    return this.registry.add(tag, cls);
+  }
 })();
+
+/* */
+export function assign(cls, ...sources) {
+  sources.forEach((source) =>
+    Object.defineProperties(
+      cls.prototype,
+      Object.getOwnPropertyDescriptors(source.prototype)
+    )
+  );
+  return cls;
+}
+
+/* */
+function add_meta_property(target, name, value) {
+  Object.defineProperty(target, `__${name}__`, {
+    configurable: false,
+    enumerable: false,
+    writable: false,
+    value,
+  });
+  return target;
+}
+
+/* */
+class Chain {
+  static create = (...args) => {
+    return new Chain(...args);
+  };
+  constructor(...classes) {
+    this.#classes = Object.freeze(
+      Object.fromEntries(classes.map((cls) => [cls.name, cls]))
+    );
+    this.#list = Object.freeze(classes);
+    this.#names = Object.freeze(classes.map((cls) => cls.name));
+  }
+
+  /* Returns (frozen) name-class object for classes in chain. */
+  get classes() {
+    return this.#classes;
+  }
+  #classes;
+
+  /* Returns (frozen) array of classes in chain. */
+  get list() {
+    return this.#list;
+  }
+  #list;
+
+  /* Returns (frozen) array of names of classes in chain. */
+  get names() {
+    return this.#names;
+  }
+  #names;
+
+  /* Returns number of classes in chain. */
+  get size() {
+    return this.#list.length;
+  }
+}
