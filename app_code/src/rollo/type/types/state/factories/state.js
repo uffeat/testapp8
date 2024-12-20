@@ -53,7 +53,6 @@ export const state = (parent, config, ...factories) => {
         } else {
           target.update({ [key]: value });
         }
-
         return true;
       },
     });

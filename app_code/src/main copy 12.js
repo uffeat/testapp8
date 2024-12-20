@@ -36,34 +36,35 @@ await (async () => {
           if (key in target) {
             return wrapper[key];
           }
-
-          /* Handle source members and symbols */
-          if (key in target.source || typeof key === "symbol") {
-            const value = Reflect.get(target.source, key);
-            /* Bind function values to source */
+          /* Handle standard source members */
+          if (key in target.source) {
+            const value = target.source[key];
+            /* Bind function values to wrapper */
             return typeof value === "function"
               ? value.bind(target.source)
               : value;
           }
-
-          /* Handle native methods */
-          const value = Reflect.get(target, key);
-          if (value !== undefined) {
-            return value;
+          /* Handle common symbols, e.g., Symbol.iterator or Symbol.toStringTag */
+          if (typeof key === "symbol") {
+            return Reflect.get(target.source, key);
           }
 
-          throw new Error(`Invalid key: ${String(key)}`);
+          /* Handle common native methods */
+          if (["toString", "valueOf"].includes(key)) {
+            return Reflect.get(target.source, key)
+          }
+
+          throw new Error(`Invalid key: ${key}`);
         },
         set: (target, key, value) => {
-          /* Handle wrapper members */
           if (key in target) {
             return Reflect.set(target, key, value);
           }
-          /* Handle source members */
+
           if (key in target.source) {
             return Reflect.set(target.source, key, value);
           }
-          throw new Error(`Invalid key: ${String(key)}`);
+          throw new Error(`Invalid key: ${key}`);
         },
       });
     }
@@ -101,29 +102,8 @@ await (async () => {
   const wrapper = new BaseWrapper(new AsIfUnextendable());
   console.log(wrapper.foo);
   console.log(wrapper.bar);
-  //console.log(wrapper.stuff);
   wrapper.do_foo();
   wrapper.do_bar();
-  console.log(wrapper.toString());
-
-
-  const iterable = {
-    *[Symbol.iterator]() {
-      yield 1;
-      yield 2;
-      yield 3;
-    },
-  };
-
-  const wrapper_1 = new BaseWrapper(iterable);
-  console.log([...wrapper_1]);
-
-
-
-
-
-
-
 })();
 
 /* Enable tests */

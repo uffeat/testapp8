@@ -1,8 +1,8 @@
 /* Utility for composing and instantiating classes. 
 Provides a touch of Python-flavor to class usage.
 Notable features:
-- Factory-based simulated multiple inheritance.
-- Object registry inspired by web components.
+- Factory-based simulated multiple inheritance with support for 'super'.
+- Registry inspired by web components.
 - Unified instantiation from registered classes with standardized factory 
   patterns. */
 export const type = new (class Type {
@@ -42,15 +42,14 @@ export const type = new (class Type {
     - Factories can, but should generally not, mutate 'config' and 'factories'. 
     - Factories may depend on each other. To ensure that such dependencies 
       are not broken
-      - factories can perform any checks (as they receive the 'factories')
-      ... or, more elegantly
+      - factories can perform checks (as they receive the 'factories')
+      ... or, more elegantly,
       - factory classes can be given a static 'dependencies' array, which
         is automatically checked against 'factories' during composition.
-    - By convention, the name of factory function and name of the class it 
-      returns should be the same and in snake-case. This can be useful during chain 
-      inspection to signal that a given class was injected into the chain by 
-      a factory. However, this is just a soft convention and breaking it has 
-      no consequence. */
+    - By soft inconsequential convention, the name of a factory function and 
+      name of the class it returns should be the same and in snake-case. 
+      This can be useful during chain  inspection to signal that a given class 
+      was injected into the chain by a factory. */
     cls = cls || class {};
     const chain = [cls];
     for (const factory of factories) {
@@ -111,7 +110,10 @@ export const type = new (class Type {
     return instance;
   }
 
-  /* */
+  /* Returns registered class. Throws error, if invalid tag. 
+  NOTE
+  - Use 'registry.get' instead to attempt getting registered class without 
+    potential exception. */
   get(tag) {
     const cls = this.registry.get(tag);
     if (!cls) {
@@ -120,11 +122,14 @@ export const type = new (class Type {
     return cls;
   }
 
-  /* */
+  /* Adds meta data to, registers and returns a class. 
+  NOTE
+  - Use 'registry.add' instead to register without adding meta data. */
   register(tag, cls) {
     add_meta_property(cls.prototype, "class", cls);
     add_meta_property(cls.prototype, "type", tag);
     if (cls.__chain__) {
+      /* Give instance enhanced access to classes in it's prototype chain */
       add_meta_property(
         cls.prototype,
         "chain",
@@ -135,18 +140,42 @@ export const type = new (class Type {
   }
 })();
 
-/* */
-export function assign(cls, ...sources) {
+/* Assigns members of source classes' prototypes onto target
+(and returns target).
+NOTE
+- Constructors in sources classes are ignored, i.e., cannot be used
+- Sources classes cannot use 'super' and private fields
+- Target members may be overwritten without warning.
+Use cases:
+- Crude alternative/supplement to 'type.compose', if the class' prototype is 
+  passed in as 'target'.
+- Instance-level modification (memory inefficient). */
+export function assign(target, ...sources) {
   sources.forEach((source) =>
     Object.defineProperties(
-      cls.prototype,
+      target.prototype,
       Object.getOwnPropertyDescriptors(source.prototype)
     )
   );
-  return cls;
+  return target;
 }
 
-/* Controller for access to classes in prototype chain. */
+/* Controller for access to classes in prototype chain. 
+NOTE
+- Tightly coupled with 'type.register'.
+- JavaScript's prototype-based object model can be tricky, if a class instance
+  needs access to classes in its chain. 'Chain' helps with this!
+  Use case examples:
+  - Check if a given class is in the instance's chain.
+  - Retrieval of member from the prototype a specific class, e.g.,
+      data.__chain__.proto.data.clean.call(data)
+    could correspond to
+      data.clean()
+    ... but may not, if the class behind 'data' has been composed from multiple 
+    factory classes that have 'clean' methods.
+    'this.__chain__.proto' can be useful inside factory classes. Can also be 
+    useful for calling such a retrieved method bound to an object other than 
+    the instance. */
 class Chain {
   static create = (...args) => {
     return new Chain(...args);
@@ -177,13 +206,26 @@ class Chain {
   }
   #names;
 
+  /* Returns object, from which prototype of chain class can be retrieved by name. */
+  get proto() {
+    return this.#proto;
+  }
+  #proto = new Proxy(this, {
+    get: (target, name) => {
+      const cls = target.classes[name];
+      if (cls) {
+        return cls.prototype;
+      }
+    },
+  });
+
   /* Returns number of classes in chain. */
   get size() {
     return this.#list.length;
   }
 }
 
-/* Add meta property to target. */
+/* Adds meta property to target. */
 function add_meta_property(target, name, value) {
   Object.defineProperty(target, `__${name}__`, {
     configurable: false,
