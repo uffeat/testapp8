@@ -1,4 +1,4 @@
-/* Utility for authoring instantiating classes. 
+/* Utility for composing and instantiating classes. 
 Provides a touch of Python-flavor to class usage.
 Notable features:
 - Factory-based simulated multiple inheritance.
@@ -50,9 +50,7 @@ export const type = new (class Type {
       returns should be the same and in snake-case. This can be useful during chain 
       inspection to signal that a given class was injected into the chain by 
       a factory. However, this is just a soft convention and breaking it has 
-      no consequence.
-    
-    */
+      no consequence. */
     cls = cls || class {};
     const chain = [cls];
     for (const factory of factories) {
@@ -62,27 +60,37 @@ export const type = new (class Type {
       }
       chain.push(cls);
     }
-    /* Add '__chain__' meta property to cls. */
+    /* Add '__chain__' meta property to cls */
     add_meta_property(cls, "chain", Object.freeze(chain));
     return cls;
   }
 
-  /* . */
-  config(tag, config) {
+  /* Returns instance of registered class.
+  - Uses the 'constructed_callback' lifecycle method. 
+  - Does NOT use the standard 'create' pattern.
+  NOTE
+  - 'config' is specialized alternative to 'create' that can be used, when 
+    polymorphism and/or special configuration is required during creation. */
+  config(tag, config, ...args) {
     /* Get class from registry */
     const cls = this.get(tag);
     /* Create instance */
     let instance = new cls();
     /* Call the 'constructed_callback' lifecycle method */
     if (instance.constructed_callback) {
-      instance = instance.constructed_callback(config) || instance;
+      /* Allow truthy result to replace instance */
+      instance = instance.constructed_callback(config, ...args) || instance;
       /* Prevent 'constructed_callback' from being used onwards */
       instance.constructed_callback = undefined;
     }
     return instance;
   }
 
-  /* Returns instance of class. */
+  /* Returns instance of registered class.
+  - Uses the standard 'create' pattern.
+  - Uses the 'created_callback' lifecycle method. 
+  NOTE
+  - 'create' is the workhorse of the 'type' object. */
   create(tag, ...args) {
     /* Get class from registry */
     const cls = this.get(tag);
@@ -95,11 +103,8 @@ export const type = new (class Type {
     }
     /* Call the 'created_callback' lifecycle method */
     if (instance.created_callback) {
-      const result = instance.created_callback();
       /* Allow truthy result to replace instance */
-      if (result) {
-        instance = result;
-      }
+      instance = instance.created_callback() || instance;
       /* Prevent 'created_callback' from being used onwards */
       instance.created_callback = undefined;
     }
