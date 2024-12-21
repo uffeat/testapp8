@@ -2,9 +2,12 @@ import "./bootstrap.scss";
 import "./main.css";
 
 await (async () => {
-  const { type } = await import("rollo/type/type");
+  const { type, assign } = await import("rollo/type/type");
 
   await import("rollo/type/types/data/data");
+
+
+
 
   const data = type.create("data", {
     foo: "FOO",
@@ -21,7 +24,12 @@ await (async () => {
   console.log('data:', data)
   */
 
-  /* Base class for psudo-extending unextendable sources. */
+
+
+  /* Base class for pseudo-extending unextendable sources.
+  NOTE
+  - Strict key requirement, i.e., attempts to access keys that are not defined 
+    in wrapper or source (or their prototype chains) throw an error. */
   class BaseWrapper {
     /* Returns proxy that gives first priority to wrapper instance and 
     second priority to wrapped source. */
@@ -36,22 +44,19 @@ await (async () => {
           if (key in target) {
             return wrapper[key];
           }
-
           /* Handle source members and symbols */
           if (key in target.source || typeof key === "symbol") {
             const value = Reflect.get(target.source, key);
-            /* Bind function values to source */
+            /* Bind any function value to source */
             return typeof value === "function"
               ? value.bind(target.source)
               : value;
           }
-
           /* Handle native methods */
           const value = Reflect.get(target, key);
           if (value !== undefined) {
             return value;
           }
-
           throw new Error(`Invalid key: ${String(key)}`);
         },
         set: (target, key, value) => {
@@ -76,8 +81,12 @@ await (async () => {
 
     /* Temporarily added for testing */
     get bar() {
-      return "bar";
+      return this.#bar
     }
+    set bar(bar) {
+      this.#bar = bar
+    }
+    #bar = 'bar'
 
     /* Temporarily added for testing */
     do_bar() {
@@ -88,20 +97,42 @@ await (async () => {
   }
 
   /* Testing */
-  class AsIfUnextendable {
+  
+  /* Create an unextendable source */
+  const source = Object.freeze(new (class Source {
     get foo() {
-      return "foo";
+      return this.#foo
     }
+    set foo(foo) {
+      this.#foo = foo
+    }
+    #foo = 'foo'
 
     do_foo() {
       console.log("Doing foo...");
     }
+  })())
+
+  const wrapper = new BaseWrapper(source);
+
+  wrapper.bar = 'BAR'
+  wrapper.foo = 'FOO'
+
+  console.log('foo:', wrapper.foo);
+  console.log('bar:', wrapper.bar);
+  try {
+    console.log(wrapper.stuff)
+  } catch {
+    console.log(`Correctly prevented getting an invalid key`)
+  }
+  try {
+    wrapper.stuff = 42
+  } catch {
+    console.log(`Correctly prevented setting an invalid key`)
   }
 
-  const wrapper = new BaseWrapper(new AsIfUnextendable());
-  console.log(wrapper.foo);
-  console.log(wrapper.bar);
-  //console.log(wrapper.stuff);
+
+  
   wrapper.do_foo();
   wrapper.do_bar();
   console.log(wrapper.toString());
