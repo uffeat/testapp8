@@ -1,6 +1,6 @@
 import { type } from "rollo/type/type";
-import { Effect } from "@/rollo/type/types/state/utils/_effect";
-import { Message } from "@/rollo/type/types/state/utils/_message";
+import { Effect } from "@/rollo/type/types/state/tools/_effect";
+import { Message } from "@/rollo/type/types/state/tools/_message";
 
 /* Controller for effects. */
 export class Effects {
@@ -31,13 +31,8 @@ export class Effects {
   NOTE 
   - Effects are stored as keys with condition as values. */
   add(source, condition, transformer) {
-    const effect = Effect.create({source, condition, transformer});
+    const effect = Effect.create({ source, condition, transformer });
 
-
-
-
-      
-    
     /* Register effect */
     this.#registry.set(effect, true);
     /* Call effect */
@@ -54,7 +49,7 @@ export class Effects {
   }
 
   create(source, condition, transformer) {
-    return Effect.create({source, condition, transformer});
+    return Effect.create({ source, condition, transformer });
   }
 
   /* Tests, if effect is in registry. */

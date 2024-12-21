@@ -1,5 +1,4 @@
 import { type } from "rollo/type/type";
-import { state } from "rollo/type/types/state/factories/state";
 
 /* Utility for binding a state item to another state. 
 NOTE
@@ -14,6 +13,10 @@ NOTE
     of setting up inter-state effects, i.e., by assignment instead of 
     explicit function-setup. */
 class Subscription {
+  static create = (...args) => {
+    return new Subscription(...args);
+  };
+
   constructor({ condition, reducer, state, transformer } = {}) {
     if (!state) {
       throw new Error(`'state' not provided.`);
@@ -52,4 +55,4 @@ class Subscription {
   #transformer;
 }
 
-type.author("subscription", Subscription);
+type.register("subscription", Subscription);

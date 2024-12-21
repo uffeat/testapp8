@@ -80,7 +80,7 @@ export const type = new (class Type {
       /* Allow truthy result to replace instance */
       instance = instance.constructed_callback(config, ...args) || instance;
       /* Prevent 'constructed_callback' from being used onwards */
-      instance.constructed_callback = undefined;
+      delete instance.constructed_callback
     }
     return instance;
   }
@@ -102,10 +102,9 @@ export const type = new (class Type {
     }
     /* Call the 'created_callback' lifecycle method */
     if (instance.created_callback) {
-      /* Allow truthy result to replace instance */
-      instance = instance.created_callback() || instance;
+      instance.created_callback()
       /* Prevent 'created_callback' from being used onwards */
-      instance.created_callback = undefined;
+      delete instance.created_callback
     }
     return instance;
   }
@@ -140,42 +139,11 @@ export const type = new (class Type {
   }
 })();
 
-/* Assigns members of source classes' prototypes onto target
-(and returns target).
-NOTE
-- Constructors in sources classes are ignored, i.e., cannot be used
-- Sources classes cannot use 'super' and private fields
-- Target members may be overwritten without warning.
-Use cases:
-- Crude alternative/supplement to 'type.compose', if the class' prototype is 
-  passed in as 'target'.
-- Instance-level modification (memory inefficient). */
-export function assign(target, ...sources) {
-  sources.forEach((source) =>
-    Object.defineProperties(
-      target.prototype,
-      Object.getOwnPropertyDescriptors(source.prototype)
-    )
-  );
-  return target;
-}
-
 /* Controller for access to classes in prototype chain. 
 NOTE
 - Tightly coupled with 'type.register'.
 - JavaScript's prototype-based object model can be tricky, if a class instance
-  needs access to classes in its chain. 'Chain' helps with this!
-  Use case examples:
-  - Check if a given class is in the instance's chain.
-  - Retrieval of member from the prototype a specific class, e.g.,
-      data.__chain__.proto.data.clean.call(data)
-    could correspond to
-      data.clean()
-    ... but may not, if the class behind 'data' has been composed from multiple 
-    factory classes that have 'clean' methods.
-    'this.__chain__.proto' can be useful inside factory classes. Can also be 
-    useful for calling such a retrieved method bound to an object other than 
-    the instance. */
+  needs access to classes in its chain. 'Chain' helps with this! */
 class Chain {
   static create = (...args) => {
     return new Chain(...args);
@@ -206,16 +174,37 @@ class Chain {
   }
   #names;
 
-  /* Returns object, from which prototype of chain class can be retrieved by name. */
-  get proto() {
-    return this.#proto;
+  /* Returns object, from which 
+  - prototype of chain class can be retrieved by name, e.g.,
+      data.__chain__.prototypes.data.clean.call(data)
+    ... in contrast to
+      data.clean()
+    provides an exact version of 'clean'; relevant, if 'clean' appears 
+    in multiple classes.
+  - the 'in' operator can be used to test, if a given property is defined in 
+    the prototype chain, e.g.,
+      if ('size' in data.__chain__.prototypes)
+    specifically tests, if 'size' is a defined property somewhere in the 
+    prototype chain, whereas
+      if ('size' in data)
+    also includes ad-hoc added items. */
+  get prototypes() {
+    return this.#prototypes;
   }
-  #proto = new Proxy(this, {
+  #prototypes = new Proxy(this, {
     get: (target, name) => {
       const cls = target.classes[name];
       if (cls) {
         return cls.prototype;
       }
+    },
+    has: (target, key) => {
+      for (const cls of target.list) {
+        if (Object.hasOwn(cls.prototype, key)) {
+          return true;
+        }
+      }
+      return false;
     },
   });
 

@@ -1,8 +1,8 @@
 import { type } from "rollo/type/type";
 import { data } from "rollo/type/types/data/factories/data";
-import { hooks } from "rollo/type/factories/hooks";
 
-const Composite = type.compose(Object, {}, data, hooks);
+
+const Composite = type.compose(Object, {}, data);
 
 /* Implementation class for the 'data' factory. */
 class Data extends Composite {

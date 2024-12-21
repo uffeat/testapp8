@@ -1,11 +1,11 @@
 import { type } from "rollo/type/type";
 import "rollo/type/types/data/data";
-import { Message } from "rollo/type/types/state/utils/_message";
-import { Effects } from "rollo/type/types/state/utils/_effects";
+import { Message } from "rollo/type/types/state/tools/_message";
+import { Effects } from "rollo/type/types/state/tools/_effects";
 
 /* Factory for reative state. */
 export const state = (parent, config, ...factories) => {
-  const cls = class State extends parent {
+  const cls = class state extends parent {
     static PREFIX = "$";
 
 
