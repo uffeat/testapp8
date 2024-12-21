@@ -6,9 +6,6 @@ await (async () => {
 
   await import("rollo/type/types/data/data");
 
-
-
-
   const data = type.create("data", {
     foo: "FOO",
     nothing: undefined,
@@ -24,18 +21,15 @@ await (async () => {
   console.log('data:', data)
   */
 
-
-
-  /* Base class for pseudo-extending unextendable sources.
+  /* Base class for pseudo-extending unextendable source instances.
   NOTE
   - Strict key requirement, i.e., attempts to access keys that are not defined 
     in wrapper or source (or their prototype chains) throw an error. */
   class BaseWrapper {
-    /* Returns proxy that gives first priority to wrapper instance and 
-    second priority to wrapped source. */
+    /* Returns proxy with first-wrapper-then-source resolution priority. */
     constructor(source) {
       this.#source = source;
-
+      /* Create a wrapper this ref to enable use of private fileds in wrapper. */
       const wrapper = this;
 
       return new Proxy(this, {
@@ -70,6 +64,17 @@ await (async () => {
           }
           throw new Error(`Invalid key: ${String(key)}`);
         },
+        has: (target, key) => {
+          /* Check wrapper (incl. prototype chain) */
+          if (key in target) {
+            return true;
+          }
+          /* Check source (incl. prototype chain)
+          NOTE 
+          - `key in target.source` only checks sources' own properties
+          - `Reflect.has(target, key)` checks sources' prototype chain */
+          return key in target.source || Reflect.has(target, key);
+        },
       });
     }
 
@@ -81,12 +86,12 @@ await (async () => {
 
     /* Temporarily added for testing */
     get bar() {
-      return this.#bar
+      return this.#bar;
     }
     set bar(bar) {
-      this.#bar = bar
+      this.#bar = bar;
     }
-    #bar = 'bar'
+    #bar = "bar";
 
     /* Temporarily added for testing */
     do_bar() {
@@ -97,64 +102,70 @@ await (async () => {
   }
 
   /* Testing */
-  
-  /* Create an unextendable source */
-  const source = Object.freeze(new (class Source {
-    get foo() {
-      return this.#foo
+  (() => {
+    const wrapper = new BaseWrapper(
+      Object.freeze(
+        new (class Source extends class {
+          get thing() {
+            return "THING";
+          }
+        } {
+          constructor() {
+            super();
+          }
+          get foo() {
+            return this.#foo;
+          }
+          set foo(foo) {
+            this.#foo = foo;
+          }
+          #foo = "foo";
+
+          /* For testing handling of symbols */
+          get numbers() {
+            return {
+              *[Symbol.iterator]() {
+                yield 1;
+                yield 2;
+                yield 3;
+              },
+            };
+          }
+
+          do_foo() {
+            console.log("Doing foo...");
+          }
+        })()
+      )
+    );
+
+    wrapper.bar = "BAR";
+    wrapper.foo = "FOO";
+
+    console.log("foo:", wrapper.foo);
+    console.log("bar:", wrapper.bar);
+    console.log("thing:", wrapper.thing);
+    try {
+      console.log(wrapper.stuff);
+    } catch {
+      console.log(`Correctly prevented getting an invalid key`);
     }
-    set foo(foo) {
-      this.#foo = foo
+    try {
+      wrapper.stuff = 42;
+    } catch {
+      console.log(`Correctly prevented setting an invalid key`);
     }
-    #foo = 'foo'
 
-    do_foo() {
-      console.log("Doing foo...");
-    }
-  })())
+    wrapper.do_foo();
+    wrapper.do_bar();
+    console.log("toString:", wrapper.toString());
+    console.log("valueOf:", wrapper.valueOf());
+    console.log("numbers:", ...wrapper.numbers);
 
-  const wrapper = new BaseWrapper(source);
-
-  wrapper.bar = 'BAR'
-  wrapper.foo = 'FOO'
-
-  console.log('foo:', wrapper.foo);
-  console.log('bar:', wrapper.bar);
-  try {
-    console.log(wrapper.stuff)
-  } catch {
-    console.log(`Correctly prevented getting an invalid key`)
-  }
-  try {
-    wrapper.stuff = 42
-  } catch {
-    console.log(`Correctly prevented setting an invalid key`)
-  }
-
-
-  
-  wrapper.do_foo();
-  wrapper.do_bar();
-  console.log(wrapper.toString());
-
-
-  const iterable = {
-    *[Symbol.iterator]() {
-      yield 1;
-      yield 2;
-      yield 3;
-    },
-  };
-
-  const wrapper_1 = new BaseWrapper(iterable);
-  console.log([...wrapper_1]);
-
-
-
-
-
-
-
+    console.log("Got foo:", "foo" in wrapper);
+    console.log("Got bar:", "bar" in wrapper);
+    console.log("Got thing:", "thing" in wrapper);
+  })();
 })();
 
 /* Enable tests */
