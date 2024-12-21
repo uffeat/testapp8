@@ -22,7 +22,6 @@ await (async () => {
   */
 
   
-  
 
   const { Wrapper, wrap } = await import("rollo/type/tools/wrapper");
 
@@ -116,9 +115,6 @@ await (async () => {
   /* Testing */
   (() => {
     class MyWrapper {
-      
-
-
       constructor(source) {
         this.source = source
 
