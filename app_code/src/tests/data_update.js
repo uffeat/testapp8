@@ -5,14 +5,16 @@ await (async () => {
   await import("rollo/type/types/data/data");
 
   const data = type.create("data", {
+    __condition__: (update) => {
+      const filtered = {};
+    },
+
     foo: "foo",
-    bar: "barr",
+    bar: "bar",
     stuff: 42,
     thing: 42,
   });
 
-
+  data.update({ foo: "FOO", bar: "BAR" });
   console.log("data:", data);
-
-  
 })();

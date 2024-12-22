@@ -3,23 +3,29 @@ import "./main.css";
 
 await (async () => {
   const { type } = await import("rollo/type/type");
-  await import("rollo/type/types/data/data");
+  await import("rollo/type/types/state/state");
+  await import("rollo/type/types/state/subscription");
 
-  const data = type.create("data", {
+  const state = type.create("state", {
+    name: "my_state",
     foo: "foo",
     bar: "bar",
     stuff: 42,
     thing: 42,
   });
 
-  const [current, previous] = data.update({foo: 'FOO', bar: 'BAR'})
-  console.log("current:", current);
-  console.log("previous:", previous);
+  state.effects.add((data) => {
+    //console.log("data:", data);
+    console.log("previous from effect:", data.previous);
+    console.log("current from effect:", data.current);
+  });
 
+  state.foo = "FOO";
+  state({bar: 'BAR'})
+  state.update({bar: 'BARBAR'})
 
-  console.log("data:", data);
-
-  
+  console.log("current:", state.current);
+  console.log("previous:", state.previous);
 })();
 
 /* Enable tests */
@@ -28,7 +34,7 @@ if (import.meta.env.DEV) {
   window.addEventListener("keydown", async (event) => {
     if (event.code === "KeyT" && event.shiftKey) {
       path = prompt("Path:", path);
-      await import(`./tests/${path}.js`);
+      await import(`@/tests/${path}.js`);
     }
   });
 }

@@ -35,8 +35,7 @@ export class Effects {
 
     /* Register effect */
     this.#registry.set(effect, true);
-    
-    
+
     /* Call effect */
     effect.call(
       Message.create({
