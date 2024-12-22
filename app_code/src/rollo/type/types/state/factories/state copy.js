@@ -1,7 +1,7 @@
 import { type } from "rollo/type/type";
 import "rollo/type/types/data/data";
-import { Message } from "rollo/type/types/state/tools/_message";
-import { Effects } from "rollo/type/types/state/tools/_effects";
+import { Message } from "@/rollo/type/types/state/tools/message";
+import { Effects } from "@/rollo/type/types/state/tools/effects";
 
 /* Factory for reative state. */
 export const state = (parent, config, ...factories) => {

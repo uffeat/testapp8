@@ -3,24 +3,23 @@ import "./main.css";
 
 await (async () => {
   const { type } = await import("rollo/type/type");
+  await import("rollo/type/types/data/data");
 
-  type.macros.add(function foo(tag, ...args) {
-    if (tag !== "foo") return;
-
-    class Foo {
-      constructor() {
-        console.log(`'Foo' instance created.`);
-      }
-    }
-
-    this.register("foo", Foo);
-    this.macros.remove(foo);
-    return true;
+  const data = type.create("data", {
+    foo: "foo",
+    bar: "bar",
+    stuff: 42,
+    thing: 42,
   });
 
-  type.create("foo");
-  console.log(`Macros registered: ${type.macros.size}`) // Correctly shows 0
+  const [current, previous] = data.update({foo: 'FOO', bar: 'BAR'})
+  console.log("current:", current);
+  console.log("previous:", previous);
 
+
+  console.log("data:", data);
+
+  
 })();
 
 /* Enable tests */

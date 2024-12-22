@@ -2,10 +2,10 @@ import "rollo/type/types/data/data";
 import { type } from "rollo/type/type";
 import { name } from "rollo/type/factories/name";
 import { owner } from "rollo/type/factories/owner";
-import { condition } from "rollo/type/types/state/factories/condition";
-import { transformer } from "rollo/type/types/state/factories/transformer";
-import { Message } from "rollo/type/types/state/tools/_message";
-import { Effects } from "rollo/type/types/state/tools/_effects";
+import { condition } from "@/rollo/type/types/data/factories/condition";
+import { transformer } from "@/rollo/type/types/data/factories/transformer";
+import { Message } from "@/rollo/type/types/state/tools/message";
+import { Effects } from "@/rollo/type/types/state/tools/effects";
 
 const Composite = type.compose(
   Object,

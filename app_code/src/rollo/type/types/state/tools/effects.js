@@ -1,6 +1,6 @@
 import { type } from "rollo/type/type";
-import { Effect } from "@/rollo/type/types/state/tools/_effect";
-import { Message } from "@/rollo/type/types/state/tools/_message";
+import { Effect } from "@/rollo/type/types/state/tools/effect";
+import { Message } from "@/rollo/type/types/state/tools/message";
 
 /* Controller for effects. */
 export class Effects {
@@ -35,6 +35,8 @@ export class Effects {
 
     /* Register effect */
     this.#registry.set(effect, true);
+    
+    
     /* Call effect */
     effect.call(
       Message.create({

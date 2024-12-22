@@ -1,4 +1,4 @@
-// chain
+// type_chain
 
 await (async () => {
   const { type } = await import("rollo/type/type");
