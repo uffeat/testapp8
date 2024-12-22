@@ -17,12 +17,6 @@ class Data extends Composite {
   /* Returns shallow clone. Enables use of Data methods without mutation. */
   clone() {
     return this.__class__.create({ ...this });
-
-    const cloned = new this.__class__();
-    cloned.update({ ...this });
-    return cloned;
-
-    return type.create("data", { ...this });
   }
 
   /* Calls a series of functions with one function's result passed into the next 

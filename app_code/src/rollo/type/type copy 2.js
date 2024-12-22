@@ -1,5 +1,3 @@
-import { Chain } from "rollo/type/tools/chain";
-
 /* Utility for composing and instantiating classes. 
 Provides a touch of Python-flavor to class usage.
 Notable features:
@@ -32,62 +30,6 @@ export const type = new (class Type {
     }
   })();
 
-  /* Returns macro controller. */
-  get macros() {
-    return this.#macros;
-  }
-  #macros = new (class Macro {
-    #owner;
-    #registry = new Set();
-    constructor(owner) {
-      this.#owner = owner;
-    }
-
-    /* Returns number of registered macros. */
-    get size() {
-      return [...this.#registry.values()].length;
-    }
-
-    /* Registers and returns macro. */
-    add(macro) {
-      if (import.meta.env.DEV) {
-        if (this.#registry.has(macro)) {
-          console.info(
-            `Replaced registered macro${macro.name ? `: ${macro.name}` : ""}.`
-          );
-        } else {
-          console.info(
-            `Registered macro${macro.name ? `: ${macro.name}` : ""}.`
-          );
-        }
-      }
-      this.#registry.add(macro);
-      return macro;
-    }
-
-    /* Calls registered macros. */
-    call(tag, ...args) {
-      /* Iterate over a copy of values to allow macros to safely remove 
-      themselves from registry. */
-      for (const macro of [...this.#registry.values()]) {
-        const result = macro.call(this.#owner, tag, ...args);
-        if (result) return result;
-      }
-    }
-
-    /* Removes macro. */
-    remove(macro) {
-      if (this.#registry.has(macro)) {
-        this.#registry.delete(macro);
-        if (import.meta.env.DEV) {
-          console.info(
-            `Deregistered macro${macro.name ? `: ${macro.name}` : ""}.`
-          );
-        }
-      }
-    }
-  })(this);
-
   /* Builds, adds meta data to, and returns composite class from optional 
   base class, optional configuration and factories. */
   compose(cls, config = {}, ...factories) {
@@ -108,14 +50,29 @@ export const type = new (class Type {
       name of the class it returns should be the same and in snake-case. 
       This can be useful during chain  inspection to signal that a given class 
       was injected into the chain by a factory. */
+    
     const chain = [cls];
+   
     for (const factory of factories) {
       cls = factory(cls, config, ...factories);
+      if (!cls.name) {
+        throw new Error(`Factory classes should have a name.`)
+      }
+     
       if (cls.dependencies) {
         check_factory_dependencies(cls.dependencies, factories);
       }
       chain.push(cls);
     }
+
+    /* TODO
+    - Use chain to check that names are unique
+
+
+
+
+    /* Add '__chain__' meta property to cls */
+    add_meta_property(cls, "chain", Object.freeze(chain));
     return cls;
   }
 
@@ -124,8 +81,7 @@ export const type = new (class Type {
   - Does NOT use the standard 'create' pattern.
   NOTE
   - 'config' is specialized alternative to 'create' that can be used, when 
-    polymorphism and/or special configuration is required during creation. 
-  */
+    polymorphism and/or special configuration is required during creation. */
   config(tag, config, ...args) {
     /* Get class from registry */
     const cls = this.get(tag);
@@ -145,11 +101,10 @@ export const type = new (class Type {
   - Uses the standard 'create' pattern.
   - Uses the 'created_callback' lifecycle method. 
   NOTE
-  - 'create' is the workhorse of the 'type' object. 
-  */
+  - 'create' is the workhorse of the 'type' object. */
   create(tag, ...args) {
     /* Get class from registry */
-    const cls = this.get(tag, ...args);
+    const cls = this.get(tag);
     /* Create instance */
     let instance;
     if (cls.create) {
@@ -166,39 +121,120 @@ export const type = new (class Type {
     return instance;
   }
 
-  /* Returns registered class.  
+  /* Returns registered class. Throws error, if invalid tag. 
   NOTE
-  - Calls macros and retries registry, if class not initially found.
-  - Throws error, if invalid tag.
-  - Use 'registry.get' instead to request registered class without 
-    potential exception. 
-  */
-  get(tag, ...args) {
+  - Use 'registry.get' instead to attempt getting registered class without 
+    potential exception. */
+  get(tag) {
     const cls = this.registry.get(tag);
-    if (cls) return cls;
-    /* Give macros a chance to register the requested class */
-    const result = this.macros.call(tag, ...args);
-    const error = `Type '${tag}' not registered.`;
-    if (result) {
-      /* A macro may have registered the requested class; check the registry again */
-      const cls = this.registry.get(tag);
-      if (cls) return cls;
-      throw new Error(error);
+    if (!cls) {
+      throw new Error(`Type '${tag}' not registered.`);
     }
-    throw new Error(error);
+    return cls;
   }
 
   /* Adds meta data to, registers and returns a class. 
   NOTE
-  - Use 'registry.add' instead to register without adding meta data. 
-  */
+  - Use 'registry.add' instead to register without adding meta data. */
   register(tag, cls) {
     add_meta_property(cls.prototype, "class", cls);
     add_meta_property(cls.prototype, "type", tag);
-    add_meta_property(cls.prototype, "chain", Chain.create(cls));
+    let chain;
+    if (cls.__chain__) {
+      chain = [...cls.__chain__, cls];
+    } else {
+      chain = [cls];
+    }
+    add_meta_property(cls.prototype, "chain", Chain.create(...chain));
+
     return this.registry.add(tag, cls);
   }
 })();
+
+/* Controller for access to classes in prototype chain. 
+NOTE
+- Tightly coupled with 'type.register'.
+- JavaScript's prototype-based object model can be tricky, if a class instance
+  needs access to classes in its chain. 'Chain' helps with this! */
+class Chain {
+  static create = (...args) => {
+    return new Chain(...args);
+  };
+  constructor(...classes) {
+    this.#prototypes = Object.freeze(
+      Object.fromEntries(classes.map((cls) => [cls.name, cls.prototype]))
+    );
+
+    this.#classes = Object.freeze(
+      Object.fromEntries(classes.map((cls) => [cls.name, cls]))
+    );
+    this.#list = Object.freeze(classes);
+    this.#names = Object.freeze(classes.map((cls) => cls.name));
+
+    /* TODO
+    - Probably use Set instead */
+    const defined = {};
+    for (const cls of this.list) {
+      const names = Object.getOwnPropertyNames(cls.prototype);
+      for (const name of names) {
+        defined[name] = true;
+      }
+    }
+    this.#defined = Object.freeze(defined);
+  }
+
+  /* Returns (frozen) name-class object for classes in chain. */
+  get classes() {
+    return this.#classes;
+  }
+  #classes;
+
+  /* . 
+  
+  can be used to test, if a given property is defined in 
+    the prototype chain, e.g.,
+      if ('size' in data.__chain__.defined)
+    specifically tests, if 'size' is a defined property somewhere in the 
+    prototype chain, whereas
+      if ('size' in data)
+    also includes ad-hoc added items.
+  
+  */
+  get defined() {
+    return this.#defined;
+  }
+  #defined;
+
+  /* Returns (frozen) array of classes in chain. */
+  get list() {
+    return this.#list;
+  }
+  #list;
+
+  /* Returns (frozen) array of names of classes in chain. */
+  get names() {
+    return this.#names;
+  }
+  #names;
+
+  /* Returns object, from which 
+  - prototype of chain class can be retrieved by name, e.g.,
+      data.__chain__.prototypes.data.clean.call(data)
+    ... in contrast to
+      data.clean()
+    provides an exact version of 'clean'; relevant, if 'clean' appears 
+    in multiple classes.
+    */
+  get prototypes() {
+    return this.#prototypes;
+  }
+  #prototypes;
+
+  /* Returns number of classes in chain. */
+  get size() {
+    return this.#list.length;
+  }
+}
 
 /* Adds meta property to target. */
 function add_meta_property(target, name, value) {
@@ -211,7 +247,7 @@ function add_meta_property(target, name, value) {
   return target;
 }
 
-/* Checks factory dependencies */
+/* */
 function check_factory_dependencies(dependencies, factories) {
   const missing = new Set(dependencies).difference(new Set(factories));
   if (missing.size > 0) {

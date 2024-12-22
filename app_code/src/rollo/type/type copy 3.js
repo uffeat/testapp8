@@ -1,5 +1,8 @@
 import { Chain } from "rollo/type/tools/chain";
 
+/* TODO
+ */
+
 /* Utility for composing and instantiating classes. 
 Provides a touch of Python-flavor to class usage.
 Notable features:
@@ -43,22 +46,13 @@ export const type = new (class Type {
       this.#owner = owner;
     }
 
-    /* Returns number of registered macros. */
-    get size() {
-      return [...this.#registry.values()].length;
-    }
-
     /* Registers and returns macro. */
     add(macro) {
       if (import.meta.env.DEV) {
         if (this.#registry.has(macro)) {
-          console.info(
-            `Replaced registered macro${macro.name ? `: ${macro.name}` : ""}.`
-          );
+          console.info(`Replaced registered macro: ${macro.name}.`);
         } else {
-          console.info(
-            `Registered macro${macro.name ? `: ${macro.name}` : ""}.`
-          );
+          console.info(`Registered macro: ${macro.name}.`);
         }
       }
       this.#registry.add(macro);
@@ -71,20 +65,13 @@ export const type = new (class Type {
       themselves from registry. */
       for (const macro of [...this.#registry.values()]) {
         const result = macro.call(this.#owner, tag, ...args);
-        if (result) return result;
+        if (result) return result
       }
     }
 
     /* Removes macro. */
     remove(macro) {
-      if (this.#registry.has(macro)) {
-        this.#registry.delete(macro);
-        if (import.meta.env.DEV) {
-          console.info(
-            `Deregistered macro${macro.name ? `: ${macro.name}` : ""}.`
-          );
-        }
-      }
+      this.#registry.delete(macro);
     }
   })(this);
 
@@ -166,26 +153,27 @@ export const type = new (class Type {
     return instance;
   }
 
-  /* Returns registered class.  
+  /* Calls macros and returns registered class.  
   NOTE
-  - Calls macros and retries registry, if class not initially found.
   - Throws error, if invalid tag.
-  - Use 'registry.get' instead to request registered class without 
+  - Use 'registry.get' instead to attempt getting registered class without 
     potential exception. 
   */
   get(tag, ...args) {
     const cls = this.registry.get(tag);
-    if (cls) return cls;
-    /* Give macros a chance to register the requested class */
-    const result = this.macros.call(tag, ...args);
-    const error = `Type '${tag}' not registered.`;
+    if (cls) return cls; 
+    
+
+
+    const result = this.macros.call(tag, ...args)
     if (result) {
-      /* A macro may have registered the requested class; check the registry again */
-      const cls = this.registry.get(tag);
-      if (cls) return cls;
-      throw new Error(error);
+      
     }
-    throw new Error(error);
+
+    //throw new Error(`Type '${tag}' not registered.`);
+    
+    
+    return cls;
   }
 
   /* Adds meta data to, registers and returns a class. 
