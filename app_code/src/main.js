@@ -3,35 +3,165 @@ import "./main.css";
 
 await (async () => {
   const { type } = await import("rollo/type/type");
-  await import("rollo/type/types/state/state");
-  await import("rollo/type/types/state/subscription");
+  await import("rollo/type/types/data/data");
 
-  const state = type.create("state", {
-    name: 'my_state',
+  const data = type.create("data", {
     foo: "FOO",
-    bar: "BAR",
-    stuff: 42,
-    thing: 42,
+    bar: undefined,
   });
 
-  
+  //console.log("data:", data);
 
-  state.effects.add((data) => {
-    //console.log("data:", data);
-    console.log("previous from effect:", data.previous);
-    console.log("current from effect:", data.current);
-    
-  });
+  const cls = type.get("data");
 
-  state.foo = 'foo'
+  //console.log("cls:", cls);
 
-  console.log("current:", state.current);
-  console.log("previous:", state.previous);
-  
+  /* Controller for prototype chain */
+  class Chain {
+    static create = (...args) => {
+      return new Chain(...args);
+    };
+    constructor(owner) {
+      if (
+        typeof owner !== "function" ||
+        !/^class\s/.test(Function.prototype.toString.call(owner))
+      ) {
+        throw new Error(`'owner' should be a class.`);
+      }
 
+      this.#owner = owner;
+    }
 
+    /* Returns array of classes in prototype chain. 
+    NOTE
+    - Lazily created. */
+    get chain() {
+      if (!this.#chain) {
+        this.#chain = [this.owner];
+        let cls = Object.getPrototypeOf(this.owner);
+        while (cls) {
+          this.#chain.push(cls);
+          cls = Object.getPrototypeOf(cls);
+          if (cls === Object) {
+            //this.#chain.push(cls); // Includes Object
+            break;
+          }
+        }
+        Object.freeze(this.#chain);
+      }
+      return this.#chain;
+    }
+    #chain;
 
-  
+    /* Returns set of defined properties in the entire prototype chain.
+    NOTE
+    - Lazily created.
+    - Corresponds to a bound and prototype chain-wide version of 'Object.hasOwn'. 
+    EXAMPLES
+    - Check, if 'name' is a defined property:
+        console.log('name is defined:', chain.defined.has('name'));
+     */
+    get defined() {
+      if (!this.#defined) {
+        this.#defined = new Set();
+        for (const cls of this.chain) {
+          for (const name of Object.getOwnPropertyNames(cls.prototype)) {
+            this.#defined.add(name);
+          }
+        }
+        Object.freeze(this.#defined);
+      }
+      return this.#defined;
+    }
+    #defined;
+
+    /* Returns a set of class names.
+    NOTE
+    - Lazily created. 
+    - Error, if a class does not have a name.
+    - Error, if duplicate class names.
+    EXAMPLES
+    - Check, if a class with name 'Data' is in the prototype chain:
+        console.log("A class with the name 'Data' is in the chain:", chain.names.has('Data'));
+        
+    */
+    get names() {
+      if (!this.#names) {
+        const names = [];
+        for (const cls of this.chain) {
+          if (!cls.name) {
+            throw new Error(`Class does not have a name.`);
+          }
+          if (names.includes(cls.name)) {
+            throw new Error(`Duplicate class name: ${cls.name}.`);
+          }
+          names.push(cls.name);
+        }
+        this.#names = Object.freeze(new Set(names));
+        
+      }
+      return this.#names;
+    }
+    #names;
+
+    /* Returns owner class. */
+    get owner() {
+      return this.#owner;
+    }
+    #owner;
+
+    /* Returns an object with name-prototype items.
+    NOTE
+    - Lazily created. 
+    - Error, if a prototype does not have a name.
+    - Error, if duplicate prototype names.
+    EXAMPLES
+    - 
+    */
+    get prototypes() {
+      if (!this.#prototypes) {
+        this.#prototypes = {};
+        const names = [];
+        for (const cls of this.chain) {
+          if (!cls.name) {
+            throw new Error(`Class does not have a name.`);
+          }
+          if (names.includes(cls.name)) {
+            throw new Error(`Duplicate class name: ${cls.name}.`);
+          }
+          names.push(cls.name);
+          this.#prototypes[cls.name] = cls.prototype;////
+        }
+        Object.freeze(this.#prototypes);
+      }
+      return this.#prototypes;
+    }
+    #prototypes;
+
+    /* Returns number of prototypes in chain. */
+    get size() {
+      return this.chain.length;
+    }
+  }
+
+  const chain = Chain.create(cls);
+
+  console.log("chain:", chain.chain);
+  console.log("defined:", chain.defined);
+  console.log("clean is defined:", chain.defined.has("clean"));
+  console.log("foo is defined:", chain.defined.has("foo"));
+  console.log("names:", chain.names);
+  console.log("A class with the name 'Data' is in the chain:", chain.names.has('Data'));
+  console.log("size:", chain.size);
+
+  //console.log("prototypes:", chain.prototypes);
+
+  chain.prototypes.data.clean.call(data);
+  console.log("data:", data);
+
+  //
+  //
+  //
 })();
 
 /* Enable tests */
