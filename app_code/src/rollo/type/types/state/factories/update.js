@@ -17,7 +17,7 @@ export const update = (parent, config, ...factories) => {
 
     /* Returns non-defined state items as-was before most recent change.
     NOTE 
-    - Can, but should generally not, be mutated. */
+    - Can, but should generally not, be mutated outside the update class. */
     get previous() {
       return this.#previous;
     }
@@ -27,16 +27,22 @@ export const update = (parent, config, ...factories) => {
     update(update) {
       if (!update) return this;
       update = type.create("data", update);
+
+
       /* Infer changed items */
       const current = type.create(
         "data",
         update.filter(([k, v]) => this[k] !== v)
       );
+
+
       /* Infer changed items as they were before change */
       const previous = type.create(
         "data",
         current.entries.map(([k, v]) => [k, this.previous[k]])
       );
+
+
       /* Update */
       current.forEach(([k, v]) => {
         this.previous[k] = this[k];
@@ -47,6 +53,8 @@ export const update = (parent, config, ...factories) => {
           this[k] = v;
         }
       });
+
+      
       /* Notify effects */
       if (current.size) {
         this.effects.notify(Message.create({ current, previous, owner: this }));

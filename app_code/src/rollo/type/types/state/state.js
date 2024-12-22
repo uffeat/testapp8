@@ -5,9 +5,6 @@ import { condition } from "rollo/type/types/state/factories/condition";
 import { transformer } from "rollo/type/types/state/factories/transformer";
 import { update } from "rollo/type/types/state/factories/update";
 
-
-
-/* Implement 'state' */
 type.register(
   "state",
   class State extends type.compose(
@@ -38,11 +35,10 @@ type.register(
         has: (target, key) => {
           return key in instance.current;
         },
-        
+
         apply: (target, thisArg, args) => {
           return instance.update.apply(instance, args);
         },
-        
       });
     };
     constructor() {
