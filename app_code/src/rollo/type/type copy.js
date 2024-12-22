@@ -50,27 +50,15 @@ export const type = new (class Type {
       name of the class it returns should be the same and in snake-case. 
       This can be useful during chain  inspection to signal that a given class 
       was injected into the chain by a factory. */
-    
+    cls = cls || class {};
     const chain = [cls];
-   
     for (const factory of factories) {
       cls = factory(cls, config, ...factories);
-      if (!cls.name) {
-        throw new Error(`Factory classes should have a name.`)
-      }
-      names.push
       if (cls.dependencies) {
         check_factory_dependencies(cls.dependencies, factories);
       }
       chain.push(cls);
     }
-
-    /* TODO
-    - Use chain to check that names are unique
-
-
-
-
     /* Add '__chain__' meta property to cls */
     add_meta_property(cls, "chain", Object.freeze(chain));
     return cls;
@@ -92,7 +80,7 @@ export const type = new (class Type {
       /* Allow truthy result to replace instance */
       instance = instance.constructed_callback(config, ...args) || instance;
       /* Prevent 'constructed_callback' from being used onwards */
-      delete instance.constructed_callback;
+      delete instance.constructed_callback
     }
     return instance;
   }
@@ -114,9 +102,9 @@ export const type = new (class Type {
     }
     /* Call the 'created_callback' lifecycle method */
     if (instance.created_callback) {
-      instance.created_callback();
+      instance.created_callback()
       /* Prevent 'created_callback' from being used onwards */
-      delete instance.created_callback;
+      delete instance.created_callback
     }
     return instance;
   }
@@ -139,14 +127,14 @@ export const type = new (class Type {
   register(tag, cls) {
     add_meta_property(cls.prototype, "class", cls);
     add_meta_property(cls.prototype, "type", tag);
-    let chain;
     if (cls.__chain__) {
-      chain = [...cls.__chain__, cls];
-    } else {
-      chain = [cls];
+      /* Give instance enhanced access to classes in it's prototype chain */
+      add_meta_property(
+        cls.prototype,
+        "chain",
+        Chain.create(...cls.__chain__, cls)
+      );
     }
-    add_meta_property(cls.prototype, "chain", Chain.create(...chain));
-
     return this.registry.add(tag, cls);
   }
 })();
@@ -161,26 +149,11 @@ class Chain {
     return new Chain(...args);
   };
   constructor(...classes) {
-    this.#prototypes = Object.freeze(
-      Object.fromEntries(classes.map((cls) => [cls.name, cls.prototype]))
-    );
-
     this.#classes = Object.freeze(
       Object.fromEntries(classes.map((cls) => [cls.name, cls]))
     );
     this.#list = Object.freeze(classes);
     this.#names = Object.freeze(classes.map((cls) => cls.name));
-
-    /* TODO
-    - Probably use Set instead */
-    const defined = {};
-    for (const cls of this.list) {
-      const names = Object.getOwnPropertyNames(cls.prototype);
-      for (const name of names) {
-        defined[name] = true;
-      }
-    }
-    this.#defined = Object.freeze(defined);
   }
 
   /* Returns (frozen) name-class object for classes in chain. */
@@ -189,21 +162,21 @@ class Chain {
   }
   #classes;
 
-  /* . 
-  
-  can be used to test, if a given property is defined in 
-    the prototype chain, e.g.,
-      if ('size' in data.__chain__.defined)
-    specifically tests, if 'size' is a defined property somewhere in the 
-    prototype chain, whereas
-      if ('size' in data)
-    also includes ad-hoc added items.
-  
-  */
+  /* . */
   get defined() {
     return this.#defined;
   }
-  #defined;
+  #defined = (() => {
+    const defined = {}
+    for (const cls of this.list) {
+      if (Object.hasOwn(cls.prototype, key)) {
+        return true;
+      }
+    }
+
+
+
+  })()
 
   /* Returns (frozen) array of classes in chain. */
   get list() {
@@ -224,11 +197,32 @@ class Chain {
       data.clean()
     provides an exact version of 'clean'; relevant, if 'clean' appears 
     in multiple classes.
-    */
+  - the 'in' operator can be used to test, if a given property is defined in 
+    the prototype chain, e.g.,
+      if ('size' in data.__chain__.prototypes)
+    specifically tests, if 'size' is a defined property somewhere in the 
+    prototype chain, whereas
+      if ('size' in data)
+    also includes ad-hoc added items. */
   get prototypes() {
     return this.#prototypes;
   }
-  #prototypes;
+  #prototypes = new Proxy(this, {
+    get: (target, name) => {
+      const cls = target.classes[name];
+      if (cls) {
+        return cls.prototype;
+      }
+    },
+    has: (target, key) => {
+      for (const cls of target.list) {
+        if (Object.hasOwn(cls.prototype, key)) {
+          return true;
+        }
+      }
+      return false;
+    },
+  });
 
   /* Returns number of classes in chain. */
   get size() {

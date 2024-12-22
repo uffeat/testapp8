@@ -18,9 +18,9 @@ export const state = (parent, config, ...factories) => {
           .clone()
           /* NOTE Operate on clone to avoid mutation of data.current */
           .filter(
-            ([k, v]) => typeof k === "string" && k.startsWith(State.PREFIX)
+            ([k, v]) => typeof k === "string" && k.startsWith(state.PREFIX)
           )
-          .forEach(([k, v]) => (this[k.slice(State.PREFIX.length)] = v));
+          .forEach(([k, v]) => (this[k.slice(state.PREFIX.length)] = v));
         this.update(update)
       });
 
