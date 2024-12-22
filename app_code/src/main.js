@@ -22,20 +22,18 @@ await (async () => {
       return new Chain(...args);
     };
     constructor(owner) {
-      if (
-        typeof owner !== "function" ||
-        !/^class\s/.test(Function.prototype.toString.call(owner))
-      ) {
-        throw new Error(`'owner' should be a class.`);
+      if (owner) {
+        this.owner = owner;
       }
-
-      this.#owner = owner;
     }
 
     /* Returns array of classes in prototype chain. 
     NOTE
     - Lazily created. */
     get chain() {
+      if (!this.owner) {
+        throw new Error(`'owner' not set.`);
+      }
       if (!this.#chain) {
         this.#chain = [this.owner];
         let cls = Object.getPrototypeOf(this.owner);
@@ -43,7 +41,6 @@ await (async () => {
           this.#chain.push(cls);
           cls = Object.getPrototypeOf(cls);
           if (cls === Object) {
-            //this.#chain.push(cls); // Includes Object
             break;
           }
         }
@@ -98,7 +95,6 @@ await (async () => {
           names.push(cls.name);
         }
         this.#names = Object.freeze(new Set(names));
-        
       }
       return this.#names;
     }
@@ -107,6 +103,18 @@ await (async () => {
     /* Returns owner class. */
     get owner() {
       return this.#owner;
+    }
+    /* Sets owner class.
+    NOTE
+    - 'write-once' property. */
+    set owner(owner) {
+      if (this.#owner) {
+        throw new Error(`'owner' cannot be changed.`);
+      }
+      if (!this.#is_class(owner)) {
+        throw new Error(`'owner' should be a class.`);
+      }
+      this.#owner = owner;
     }
     #owner;
 
@@ -130,7 +138,7 @@ await (async () => {
             throw new Error(`Duplicate class name: ${cls.name}.`);
           }
           names.push(cls.name);
-          this.#prototypes[cls.name] = cls.prototype;////
+          this.#prototypes[cls.name] = cls.prototype; ////
         }
         Object.freeze(this.#prototypes);
       }
@@ -142,6 +150,14 @@ await (async () => {
     get size() {
       return this.chain.length;
     }
+
+    /* Tests, if value is a class. */
+    #is_class(value) {
+      return (
+        typeof value === "function" &&
+        /^class\s/.test(Function.prototype.toString.call(value))
+      );
+    }
   }
 
   const chain = Chain.create(cls);
@@ -151,7 +167,10 @@ await (async () => {
   console.log("clean is defined:", chain.defined.has("clean"));
   console.log("foo is defined:", chain.defined.has("foo"));
   console.log("names:", chain.names);
-  console.log("A class with the name 'Data' is in the chain:", chain.names.has('Data'));
+  console.log(
+    "A class with the name 'Data' is in the chain:",
+    chain.names.has("Data")
+  );
   console.log("size:", chain.size);
 
   //console.log("prototypes:", chain.prototypes);
