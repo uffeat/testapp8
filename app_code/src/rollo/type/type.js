@@ -58,7 +58,7 @@ export const type = new (class Type {
       if (!cls.name) {
         throw new Error(`Factory classes should have a name.`)
       }
-      names.push
+     
       if (cls.dependencies) {
         check_factory_dependencies(cls.dependencies, factories);
       }

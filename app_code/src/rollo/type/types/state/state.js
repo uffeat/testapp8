@@ -34,7 +34,7 @@ class State extends Composite {
         return true;
       },
       has: (target, key) => {
-        return true;
+        return key in target.current;
       },
     });
   };
