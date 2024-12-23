@@ -57,28 +57,6 @@ export class Type {
   }
 
   /* Returns instance of registered class.
-  - Uses the 'constructed_callback' lifecycle method. 
-  - Does NOT use the standard 'create' pattern.
-  NOTE
-  - 'config' is specialized alternative to 'create' that can be used, when 
-    polymorphism and/or special configuration is required during creation. 
-  */
-  config(tag, config, ...args) {
-    /* Get class from registry */
-    const cls = this.get(tag);
-    /* Create instance */
-    let instance = new cls();
-    /* Call the 'constructed_callback' lifecycle method */
-    if (instance.constructed_callback) {
-      /* Allow truthy result to replace instance */
-      instance = instance.constructed_callback(config, ...args) || instance;
-      /* Prevent 'constructed_callback' from being used onwards */
-      delete instance.constructed_callback;
-    }
-    return instance;
-  }
-
-  /* Returns instance of registered class.
   - Uses the standard 'create' pattern.
   - Uses the 'created_callback' lifecycle method. 
   NOTE
@@ -94,11 +72,11 @@ export class Type {
     } else {
       instance = new cls(...args);
     }
-    /* Call the 'created_callback' lifecycle method */
-    if (instance.created_callback) {
-      instance.created_callback();
-      /* Prevent 'created_callback' from being used onwards */
-      delete instance.created_callback;
+    /* Call the 'created' lifecycle method */
+    if (instance.created) {
+      instance.created();
+      /* Prevent 'created' from being used onwards */
+      delete instance.created;
     }
     return instance;
   }
@@ -129,6 +107,6 @@ export class Type {
     add_meta(cls.prototype, "type", tag);
     add_meta(cls.prototype, "chain", Chain.create(cls));
     this.registry.add(tag, cls);
-    return cls
+    return cls;
   }
 }

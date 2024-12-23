@@ -1,23 +1,44 @@
 import "./bootstrap.scss";
 import "./main.css";
 
-
-
 await (async () => {
-  
-
   const { Data } = await import("rollo/type/types/data/data");
 
   const data = Data.create({
     foo: "foo",
     bar: "bar",
+    thing: true,
     stuff: 42,
-    thing: 42,
     name: "uffe",
   });
 
-  data({ foo: "FOO", bar: "BAR" });
-  console.log("data.data:", data.data);
+  /* BUG
+   */
+  //data({ foo: "FOO", bar: "BAR" });
+
+  //console.log("data:", data);
+
+  class Foo extends Function {
+    constructor() {
+      super();
+      const instance = this;
+
+      return new Proxy(instance, {
+        apply(target, thisArg, args) {
+          return instance.__call__(...args);
+        },
+      });
+    }
+    __call__(...args) {
+      console.log("Called with arguments:", args);
+    }
+  }
+
+  const foo = new Foo();
+  foo(1, 2, 3);
+
+
+
 })();
 
 /* Enable tests */

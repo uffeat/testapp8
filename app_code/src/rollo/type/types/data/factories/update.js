@@ -1,4 +1,3 @@
-import { DELETE } from "rollo/type/types/data/tools/delete";
 
 /* Implements features related to batch updating with the 'update' method as the cornerstone. 
 NOTE
@@ -39,7 +38,7 @@ export const update = (parent, config, ...factories) => {
       }
       /* Update */
       for (const [k, v] of Object.entries(update)) {
-        if (v instanceof DELETE || v === DELETE) {
+        if (v === '__') {
           delete this[k];
         } else {
           this[k] = v;

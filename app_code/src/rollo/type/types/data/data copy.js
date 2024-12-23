@@ -35,7 +35,7 @@ export const Data = (() => {
   class Data extends composition {
     static create = (update) => {
       const instance = new Data().update(update);
-      return new Proxy(this, {
+      return new Proxy(instance, {
         get: (target, key) => {
           return instance[key];
         },
@@ -47,7 +47,7 @@ export const Data = (() => {
           return key in instance.data;
         },
         apply: (target, thisArg, args) => {
-          return instance.update.apply(instance, args);
+          return instance.__call__.apply(instance, args);
         },
       });
     };
@@ -55,6 +55,12 @@ export const Data = (() => {
     constructor() {
       super();
     }
+
+    __call__(...args) {
+      console.log("Called with arguments:", args);
+    }
+
+    
 
     toString() {
       return this.jsonable ? this.json() : this.text();
