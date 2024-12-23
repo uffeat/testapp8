@@ -1,11 +1,7 @@
 import "./bootstrap.scss";
 import "./main.css";
 
-
-
 await (async () => {
-  
-
   const { Data } = await import("rollo/type/types/data/data");
 
   const data = Data.create({
