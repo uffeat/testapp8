@@ -1,6 +1,6 @@
 /* Factory for write-once owner property. */
 export const owner = (parent, config, ...factories) => {
-  const cls = class owner extends parent {
+  class owner extends parent {
     /* Returns owner. */
     get owner() {
       return this.#owner;
@@ -14,5 +14,5 @@ export const owner = (parent, config, ...factories) => {
     }
     #owner;
   };
-  return cls;
+  return owner;
 };

@@ -2,30 +2,43 @@ import "./bootstrap.scss";
 import "./main.css";
 
 await (async () => {
-  const { type } = await import("rollo/type/type");
-  await import("rollo/type/types/state/state");
-  await import("rollo/type/types/state/subscription");
+  
 
-  const state = type.create("state", {
-    name: "my_state",
+  const { Data } = await import("rollo/type/types/data/data");
+
+
+
+  const data = Data.create({
     foo: "foo",
     bar: "bar",
     stuff: 42,
     thing: 42,
+
+    name: 'uffe'
   });
 
-  state.effects.add((data) => {
-    //console.log("data:", data);
-    console.log("previous from effect:", data.previous);
-    console.log("current from effect:", data.current);
-  });
+  data.update({ foo: "FOO", bar: "BAR"});
 
-  state.foo = "FOO";
-  state({bar: 'BAR'})
-  state.update({bar: 'BARBAR'})
 
-  console.log("current:", state.current);
-  console.log("previous:", state.previous);
+  console.log('Can be json:', data.jsonable)
+
+
+  console.log('sorted json:', data.json(true))
+
+ 
+
+
+
+
+
+  console.log("data:", data);
+  console.log(`data: ${data}`);
+
+  //console.log("name:", data.name);
+ 
+
+
+  console.log("data.data:", data.data);
 })();
 
 /* Enable tests */

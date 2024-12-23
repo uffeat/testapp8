@@ -128,6 +128,7 @@ export class Type {
     add_meta(cls.prototype, "class", cls);
     add_meta(cls.prototype, "type", tag);
     add_meta(cls.prototype, "chain", Chain.create(cls));
-    return this.registry.add(tag, cls);
+    this.registry.add(tag, cls);
+    return cls
   }
 }

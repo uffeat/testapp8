@@ -41,6 +41,7 @@ type.register(
         },
       });
     };
+    
     constructor() {
       super();
     }

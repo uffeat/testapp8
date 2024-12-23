@@ -1,8 +1,6 @@
-/* . */
+/* Implements clean method. */
 export const clean = (parent, config, ...factories) => {
   return class clean extends parent {
-    
-
     /* Deletes all items with undefined values. Chainable. */
     clean() {
       [...Object.entries(this)].forEach(([k, v]) => {
@@ -12,7 +10,5 @@ export const clean = (parent, config, ...factories) => {
       });
       return this;
     }
-
-    
   };
 };

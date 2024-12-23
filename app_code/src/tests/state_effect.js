@@ -7,8 +7,8 @@ await (async () => {
 
   const state = type.create("state", {
     name: "my_state",
-    foo: "FOO",
-    bar: "BAR",
+    foo: "foo",
+    bar: "bar",
     stuff: 42,
     thing: 42,
   });
@@ -19,7 +19,9 @@ await (async () => {
     console.log("current from effect:", data.current);
   });
 
-  state.foo = "foo";
+  state.foo = "FOO";
+  state({bar: 'BAR'})
+  state.update({bar: 'BARBAR'})
 
   console.log("current:", state.current);
   console.log("previous:", state.previous);

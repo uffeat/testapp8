@@ -1,8 +1,7 @@
-/* Factory for enhancing plain object features, notably:
-- Batch updating.
-- Conditional mutation with (chainable) methods that resemble 
-  (mutating versions of) array methods.
-- Properties that reduce the need for using static Object methods. */
+/* Implements 
+- getters as alternatives to using staic Object methods
+- 'size' as a normlized property for length of keys.
+-  'data' as means to extract data, and not accessor, properties.   */
 export const items = (parent, config, ...factories) => {
   return class items extends parent {
     /* Returns entries. */
@@ -15,6 +14,11 @@ export const items = (parent, config, ...factories) => {
       return Object.keys(this);
     }
 
+    /* Returns object with current data items, i.e., not including accessor items. */
+    get data() {
+      return { ...this };
+    }
+
     /* Returns length of keys. */
     get size() {
       return Object.keys(this).length;
@@ -24,7 +28,5 @@ export const items = (parent, config, ...factories) => {
     get values() {
       return Object.values(this);
     }
-
-    
   };
 };

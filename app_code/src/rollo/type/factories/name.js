@@ -1,6 +1,6 @@
 /* Factory for write-once name property. */
 export const name = (parent, config, ...factories) => {
-  const cls = class name extends parent {
+  class name extends parent {
     /* Returns name. */
     get name() {
       return this.#name;
@@ -13,6 +13,14 @@ export const name = (parent, config, ...factories) => {
       this.#name = name;
     }
     #name;
-  };
-  return cls;
+    
+  }
+
+
+  
+
+
+
+
+  return name;
 };
