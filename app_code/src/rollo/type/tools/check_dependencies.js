@@ -1,3 +1,7 @@
+/* TODO
+- Purge (not used) 
+*/
+
 /* Checks dependencies */
 export function check_dependencies(dependencies, factories) {
   const missing = new Set(dependencies).difference(new Set(factories));

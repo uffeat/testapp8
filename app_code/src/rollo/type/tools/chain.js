@@ -1,3 +1,8 @@
+/* TODO
+- Purge (not used) 
+*/
+
+
 /* Controller for class-based prototype chains.
   Useful for:
   - Prototype chain inspection.

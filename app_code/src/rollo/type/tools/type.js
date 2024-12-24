@@ -1,7 +1,7 @@
-import { Chain } from "rollo/type/tools/chain";
 import { Macro } from "rollo/type/tools/macro";
 import { Registry } from "rollo/type/tools/registry";
 import { add_meta } from "rollo/type/tools/add_meta";
+import { is_class } from "rollo/type/tools/is_class";
 
 /* Utility for composing and instantiating classes. 
 Provides a touch of Python-flavor to class usage.
@@ -41,28 +41,21 @@ export class Type {
       This can be useful during chain  inspection to signal that a given class 
       was injected into the chain by a factory. */
 
-    const classes = Classes.create()
-    
-
+    const classes = Classes.create();
     if (is_class(cls)) {
       classes.add(cls);
     }
-
     for (const factory of factories) {
       cls = factory(cls, config, ...factories);
       classes.add(cls);
     }
-    cls.__classes__ = classes
-    
-
-    //console.log("__chain__:", cls.__chain__);
-
+    cls.__classes__ = classes;
     return cls;
   }
 
   /* Returns instance of registered class.
   - Uses the standard 'create' pattern.
-  - Uses the 'created_callback' lifecycle method. 
+  - Uses the 'create' instance lifecycle method. 
   NOTE
   - 'create' is the workhorse of the 'type' object. 
   */
@@ -97,29 +90,22 @@ export class Type {
     throw new Error(`Type '${tag}' not registered.`);
   }
 
-  /* Adds meta data to, registers and returns a class. 
+  /* Adds meta data to, registers, and returns a class. 
   NOTE
   - Use 'registry.add' instead to register without adding meta data. 
   */
   register(tag, cls) {
-    
-
     if (cls.__classes__) {
-      cls.__classes__.add(cls)
-      cls.__classes__.freeze()
-
-      ////console.log("__classes__:", cls.__classes__);////
+      cls.__classes__.add(cls);
+      cls.__classes__.freeze();
     } else {
-      cls.__classes__ = Classes.create()
-      cls.__classes__.add(cls)
-      cls.__classes__.freeze()
+      cls.__classes__ = Classes.create();
+      cls.__classes__.add(cls);
+      cls.__classes__.freeze();
     }
-
     add_meta(cls.prototype, "classes", cls.__classes__);
-
     add_meta(cls.prototype, "class", cls);
     add_meta(cls.prototype, "type", tag);
-    add_meta(cls.prototype, "chain", Chain.create(cls));
     this.registry.add(tag, cls);
     return cls;
   }
@@ -180,85 +166,13 @@ class Classes {
     if (this.#frozen) {
       throw new Error(`Already frozen.`);
     }
-    [this.#classes, this.#defined, this.#names, this.#prototypes].forEach(
-      (object) => Object.freeze(object)
+    [this.#classes, this.#defined, this.#prototypes].forEach((object) =>
+      Object.freeze(object)
     );
+    /* Convert names to set (to enable the faster 'has', rather than 'includes') and freeze */
+    this.#names = Object.freeze(new Set(this.#names));
+
     this.#frozen = true;
   }
   #frozen;
-}
-
-class Meta {
-  static create = () => new Meta();
-
-  get class() {
-    return this.#class;
-  }
-  set class(cls) {
-    this.#class = cls;
-  }
-  #class;
-
-  get classes() {
-    return this.#classes;
-  }
-  #classes = [];
-
-  get defined() {
-    return this.#defined;
-  }
-  #defined = new Set();
-
-  get names() {
-    return this.#names;
-  }
-  #names = [];
-
-  get prototypes() {
-    return this.#prototypes;
-  }
-  #prototypes = {};
-
-  get type() {
-    return this.#type;
-  }
-  set type(type) {
-    this.#type = type;
-  }
-  #type;
-
-  add(cls) {
-    /* Check class */
-    if (!is_class(cls)) {
-      throw new TypeError(`Expected a class. Got: ${String(cls)}`);
-    }
-    if (!cls.name) {
-      throw new Error(`Class does not have a name.`);
-    }
-    /* Build classes */
-    this.#classes.push(cls);
-    /* Build defined */
-    for (const name of Object.getOwnPropertyNames(cls.prototype)) {
-      this.#defined.add(name);
-    }
-    /* Build names */
-    if (this.#names.includes(cls.name)) {
-      throw new Error(`Duplicate class name: ${cls.name}.`);
-    }
-    this.#names.push(cls.name);
-    /* Build prototypes */
-    this.#prototypes[cls.name] = cls.prototype;
-  }
-
-  create_chain() {
-    //TODO
-  }
-}
-
-/* Tests, if value is a class. */
-function is_class(value) {
-  return (
-    typeof value === "function" &&
-    /^class\s/.test(Function.prototype.toString.call(value))
-  );
 }

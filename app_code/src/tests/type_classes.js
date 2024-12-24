@@ -1,5 +1,4 @@
-import "./bootstrap.scss";
-import "./main.css";
+// type_classes
 
 await (async () => {
   const { type } = await import("rollo/type/type");
@@ -25,14 +24,3 @@ await (async () => {
   classes.prototypes.clean.clean.call(data);
   console.log("After clean:", data.data);
 })();
-
-/* Enable tests */
-if (import.meta.env.DEV) {
-  let path = "";
-  window.addEventListener("keydown", async (event) => {
-    if (event.code === "KeyT" && event.shiftKey) {
-      path = prompt("Path:", path);
-      await import(`@/tests/${path}.js`);
-    }
-  });
-}
