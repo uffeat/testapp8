@@ -38,7 +38,7 @@ export class Type {
       are not broken factories can perform checks (as they receive the 'factories')
     - By soft inconsequential convention, the name of a factory function and 
       name of the class it returns should be the same and in snake-case. 
-      This can be useful during chain  inspection to signal that a given class 
+      This can be useful during chain inspection to signal that a given class 
       was injected into the chain by a factory. */
 
     const classes = Classes.create();
@@ -50,6 +50,14 @@ export class Type {
       classes.add(cls);
     }
     cls.__classes__ = classes;
+    /* NOTE
+    - At this point, 'cls.__classes__' is intentionally an unprotected static 
+      data property.
+    - Completion and protection of 'cls.__classes__' takes place in 'register'.
+    - While it is possible to subsequently access the prototype chain without 
+      the use of 'Classes', its more efficient to exploit that 'compose' get full
+      access to prototype chain (s it builds it).
+    */
     return cls;
   }
 
@@ -92,6 +100,14 @@ export class Type {
 
   /* Adds meta data to, registers, and returns a class. 
   NOTE
+  - Typical use pattern: In a dedicated JS module,
+    - Create a composed class with 'compose'
+    - Create a registation class that extends the composed class
+    - Typically, give the registation class a static 'create' method for 
+      flexibility.
+    - Register the registation class with 'register'.
+    - Optionally, expose the result of 'register' for export to provide a 
+      syntactical alternative to 'type.create'
   - Use 'registry.add' instead to register without adding meta data. 
   */
   register(tag, cls) {
@@ -111,24 +127,44 @@ export class Type {
   }
 }
 
+/* Composition class for providing access to the prototype chain. */
 class Classes {
   static create = () => new Classes();
 
+  /* Returns array of classes in prototype chain. */
   get classes() {
     return this.#classes;
   }
   #classes = [];
 
+  /* Returns set of defined properties in the entire prototype chain.
+  NOTE
+  - Corresponds to a bound and prototype chain-wide version of 'Object.hasOwn'. 
+  EXAMPLES
+  - Check, if 'name' is a defined property:
+      console.log('name is defined:', classes.defined.has('name')); 
+  */
   get defined() {
     return this.#defined;
   }
   #defined = new Set();
 
+  /* Once 'freeze' has been called, returns a set of class names for classes the
+  in prototype chain.
+  EXAMPLES
+  - Check, if a class with name 'Data' is in the prototype chain:
+      console.log("A class with the name 'Data' is in the chain:", classes.names.has('Data'));
+  */
   get names() {
     return this.#names;
   }
   #names = [];
 
+  /* Returns an object with name-prototype items for classes in the prototype chain.
+  EXAMPLES
+  - Get and use the 'clean' method from the 'clean' class in the prototype chain:
+      classes.prototypes.clean.clean.call(data);
+  */
   get prototypes() {
     return this.#prototypes;
   }
@@ -139,6 +175,7 @@ class Classes {
     return this.classes.length;
   }
 
+  /* Registers class. */
   add(cls) {
     /* Check class */
     if (!is_class(cls)) {
@@ -162,6 +199,7 @@ class Classes {
     this.#prototypes[cls.name] = cls.prototype;
   }
 
+  /* Freezes accessor properties. */
   freeze() {
     if (this.#frozen) {
       throw new Error(`Already frozen.`);
@@ -169,9 +207,9 @@ class Classes {
     [this.#classes, this.#defined, this.#prototypes].forEach((object) =>
       Object.freeze(object)
     );
-    /* Convert names to set (to enable the faster 'has', rather than 'includes') and freeze */
+    /* Convert 'names' to set (to enable the faster 'has', rather than 'includes') 
+    and freeze */
     this.#names = Object.freeze(new Set(this.#names));
-
     this.#frozen = true;
   }
   #frozen;
