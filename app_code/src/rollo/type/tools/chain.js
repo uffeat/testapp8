@@ -115,8 +115,8 @@
     - Error, if a class does not have a name.
     - Error, if duplicate class names.
     EXAMPLES
-    - Get and use the 'clean' method from the 'data' class in the prototype chain:
-        chain.prototypes.data.clean.call(data);
+    - Get and use the 'clean' method from the 'clean' class in the prototype chain:
+        chain.prototypes.clean.clean.call(data);
     */
     get prototypes() {
       if (!this.#prototypes) {

@@ -1,3 +1,7 @@
+/* TODO
+- Refactor to use update with '__' values.
+*/
+
 /* Implements clean method. */
 export const clean = (parent, config, ...factories) => {
   return class clean extends parent {

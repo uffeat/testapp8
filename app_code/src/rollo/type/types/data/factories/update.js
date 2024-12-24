@@ -1,3 +1,7 @@
+/* TODO
+- Move other methods to own factories
+*/
+
 
 /* Implements features related to batch updating with the 'update' method as the cornerstone. 
 NOTE
@@ -39,6 +43,8 @@ export const update = (parent, config, ...factories) => {
       /* Update */
       for (const [k, v] of Object.entries(update)) {
         if (v === '__') {
+          /* NOTE By convention '__' values deletes. This is critical for other 
+          methods! */
           delete this[k];
         } else {
           this[k] = v;

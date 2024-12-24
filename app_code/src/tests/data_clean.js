@@ -5,13 +5,14 @@ await (async () => {
   await import("rollo/type/types/data/data");
 
   const data = type.create("data", {
-    foo: "FOO",
-    bar: "BAR",
+    foo: "foo",
+    bar: "bar",
     stuff: undefined,
     thing: undefined,
   });
 
+  console.log("Before clean:", data.data);
   /* Delete all items with undefined values */
   data.clean();
-  console.log("data:", data);
+  console.log("After clean:", data.data);
 })();

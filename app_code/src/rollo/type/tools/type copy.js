@@ -3,6 +3,7 @@ import { Macro } from "rollo/type/tools/macro";
 import { Registry } from "rollo/type/tools/registry";
 import { add_meta } from "rollo/type/tools/add_meta";
 
+
 /* Utility for composing and instantiating classes. 
 Provides a touch of Python-flavor to class usage.
 Notable features:
@@ -40,23 +41,12 @@ export class Type {
       name of the class it returns should be the same and in snake-case. 
       This can be useful during chain  inspection to signal that a given class 
       was injected into the chain by a factory. */
-
-    const classes = Classes.create()
-    
-
-    if (is_class(cls)) {
-      classes.add(cls);
-    }
-
+    const chain = [cls];
     for (const factory of factories) {
       cls = factory(cls, config, ...factories);
-      classes.add(cls);
+      
+      chain.push(cls);
     }
-    cls.__classes__ = classes
-    
-
-    //console.log("__chain__:", cls.__chain__);
-
     return cls;
   }
 
@@ -70,7 +60,7 @@ export class Type {
     /* Get class from registry */
     const cls = this.get(tag, ...args);
     /* Create instance */
-    let instance = cls.create ? cls.create(...args) : new cls(...args);
+    let instance = cls.create ? cls.create(...args) : new cls(...args)
     /* Call the 'create' lifecycle method */
     if (instance.create) {
       instance = instance.create() || instance;
@@ -102,163 +92,10 @@ export class Type {
   - Use 'registry.add' instead to register without adding meta data. 
   */
   register(tag, cls) {
-    
-
-    if (cls.__classes__) {
-      cls.__classes__.add(cls)
-      cls.__classes__.freeze()
-
-      ////console.log("__classes__:", cls.__classes__);////
-    } else {
-      cls.__classes__ = Classes.create()
-      cls.__classes__.add(cls)
-      cls.__classes__.freeze()
-    }
-
-    add_meta(cls.prototype, "classes", cls.__classes__);
-
     add_meta(cls.prototype, "class", cls);
     add_meta(cls.prototype, "type", tag);
     add_meta(cls.prototype, "chain", Chain.create(cls));
     this.registry.add(tag, cls);
     return cls;
   }
-}
-
-class Classes {
-  static create = () => new Classes();
-
-  get classes() {
-    return this.#classes;
-  }
-  #classes = [];
-
-  get defined() {
-    return this.#defined;
-  }
-  #defined = new Set();
-
-  get names() {
-    return this.#names;
-  }
-  #names = [];
-
-  get prototypes() {
-    return this.#prototypes;
-  }
-  #prototypes = {};
-
-  /* Returns number of classes in prototype chain. */
-  get size() {
-    return this.classes.length;
-  }
-
-  add(cls) {
-    /* Check class */
-    if (!is_class(cls)) {
-      throw new TypeError(`Expected a class. Got: ${String(cls)}`);
-    }
-    if (!cls.name) {
-      throw new Error(`Class does not have a name.`);
-    }
-    /* Build classes */
-    this.#classes.unshift(cls);
-    /* Build defined */
-    for (const name of Object.getOwnPropertyNames(cls.prototype)) {
-      this.#defined.add(name);
-    }
-    /* Build names */
-    if (this.#names.includes(cls.name)) {
-      throw new Error(`Duplicate class name: ${cls.name}.`);
-    }
-    this.#names.unshift(cls.name);
-    /* Build prototypes */
-    this.#prototypes[cls.name] = cls.prototype;
-  }
-
-  freeze() {
-    if (this.#frozen) {
-      throw new Error(`Already frozen.`);
-    }
-    [this.#classes, this.#defined, this.#names, this.#prototypes].forEach(
-      (object) => Object.freeze(object)
-    );
-    this.#frozen = true;
-  }
-  #frozen;
-}
-
-class Meta {
-  static create = () => new Meta();
-
-  get class() {
-    return this.#class;
-  }
-  set class(cls) {
-    this.#class = cls;
-  }
-  #class;
-
-  get classes() {
-    return this.#classes;
-  }
-  #classes = [];
-
-  get defined() {
-    return this.#defined;
-  }
-  #defined = new Set();
-
-  get names() {
-    return this.#names;
-  }
-  #names = [];
-
-  get prototypes() {
-    return this.#prototypes;
-  }
-  #prototypes = {};
-
-  get type() {
-    return this.#type;
-  }
-  set type(type) {
-    this.#type = type;
-  }
-  #type;
-
-  add(cls) {
-    /* Check class */
-    if (!is_class(cls)) {
-      throw new TypeError(`Expected a class. Got: ${String(cls)}`);
-    }
-    if (!cls.name) {
-      throw new Error(`Class does not have a name.`);
-    }
-    /* Build classes */
-    this.#classes.push(cls);
-    /* Build defined */
-    for (const name of Object.getOwnPropertyNames(cls.prototype)) {
-      this.#defined.add(name);
-    }
-    /* Build names */
-    if (this.#names.includes(cls.name)) {
-      throw new Error(`Duplicate class name: ${cls.name}.`);
-    }
-    this.#names.push(cls.name);
-    /* Build prototypes */
-    this.#prototypes[cls.name] = cls.prototype;
-  }
-
-  create_chain() {
-    //TODO
-  }
-}
-
-/* Tests, if value is a class. */
-function is_class(value) {
-  return (
-    typeof value === "function" &&
-    /^class\s/.test(Function.prototype.toString.call(value))
-  );
 }

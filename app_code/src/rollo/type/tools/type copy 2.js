@@ -41,19 +41,46 @@ export class Type {
       This can be useful during chain  inspection to signal that a given class 
       was injected into the chain by a factory. */
 
-    const classes = Classes.create()
-    
+    /* TODO
+    - meta abstration
+    */
+    /* Init meta */
+    const classes = [];
+    const names = [];
+    const defined = new Set();
+    const prototypes = {};
+
+    const build_meta = (cls) => {
+      /* Build chain */
+      classes.push(cls);
+      /* Build names */
+      if (!cls.name) {
+        throw new Error(`Class does not have a name.`);
+      }
+      if (names.includes(cls.name)) {
+        throw new Error(`Duplicate class name: ${cls.name}.`);
+      }
+      names.push(cls.name);
+      /* Build defined */
+      for (const name of Object.getOwnPropertyNames(cls.prototype)) {
+        defined.add(name);
+      }
+      /* Build prototypes */
+      prototypes[cls.name] = cls.prototype;
+    };
 
     if (is_class(cls)) {
-      classes.add(cls);
+      build_meta(cls);
     }
 
     for (const factory of factories) {
       cls = factory(cls, config, ...factories);
-      classes.add(cls);
+      build_meta(cls);
     }
-    cls.__classes__ = classes
-    
+    cls.__classes__ = classes.reverse();
+    cls.__names__ = names.reverse();
+    cls.__defined__ = defined;
+    cls.__prototypes__ = prototypes;
 
     //console.log("__chain__:", cls.__chain__);
 
@@ -102,20 +129,19 @@ export class Type {
   - Use 'registry.add' instead to register without adding meta data. 
   */
   register(tag, cls) {
-    
-
-    if (cls.__classes__) {
-      cls.__classes__.add(cls)
-      cls.__classes__.freeze()
-
-      ////console.log("__classes__:", cls.__classes__);////
-    } else {
-      cls.__classes__ = Classes.create()
-      cls.__classes__.add(cls)
-      cls.__classes__.freeze()
+    if (!is_class(cls)) {
+      throw new TypeError(`Expected a class. Got: ${String(cls)}`);
+    }
+    if (!cls.name) {
+      throw new Error(`Class does not have a name.`);
     }
 
-    add_meta(cls.prototype, "classes", cls.__classes__);
+    if (cls.__classes__) {
+      cls.__classes__ = [cls, ...cls.__classes__];
+
+      console.log("__classes__:", cls.__classes__);
+    } else {
+    }
 
     add_meta(cls.prototype, "class", cls);
     add_meta(cls.prototype, "type", tag);
@@ -148,11 +174,6 @@ class Classes {
   }
   #prototypes = {};
 
-  /* Returns number of classes in prototype chain. */
-  get size() {
-    return this.classes.length;
-  }
-
   add(cls) {
     /* Check class */
     if (!is_class(cls)) {
@@ -162,7 +183,7 @@ class Classes {
       throw new Error(`Class does not have a name.`);
     }
     /* Build classes */
-    this.#classes.unshift(cls);
+    this.#classes.push(cls);
     /* Build defined */
     for (const name of Object.getOwnPropertyNames(cls.prototype)) {
       this.#defined.add(name);
@@ -171,7 +192,7 @@ class Classes {
     if (this.#names.includes(cls.name)) {
       throw new Error(`Duplicate class name: ${cls.name}.`);
     }
-    this.#names.unshift(cls.name);
+    this.#names.push(cls.name);
     /* Build prototypes */
     this.#prototypes[cls.name] = cls.prototype;
   }

@@ -35,7 +35,12 @@ export const Data = (() => {
   class Data extends composition {
     static create = (update) => {
       const instance = new Data().update(update);
-      return new Proxy(this, {
+
+      
+
+
+
+      return new Proxy(instance, {
         get: (target, key) => {
           return instance[key];
         },

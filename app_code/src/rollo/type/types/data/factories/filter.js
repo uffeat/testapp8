@@ -1,3 +1,7 @@
+/* TODO
+- Refactor to use update with '__' values.
+*/
+
 /* Implements filter method. */
 export const filter = (parent, config, ...factories) => {
   return class filter extends parent {

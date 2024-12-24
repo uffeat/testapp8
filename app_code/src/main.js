@@ -2,18 +2,30 @@ import "./bootstrap.scss";
 import "./main.css";
 
 await (async () => {
-  const { Data } = await import("rollo/type/types/data/data");
+  const { type } = await import("rollo/type/type");
+  await import("rollo/type/types/data/data");
 
-  const data = Data.create({
+  const data = type.create("data", {
     foo: "foo",
-    bar: "bar",
-    stuff: 42,
-    thing: 42,
-    name: "uffe",
+    bar: undefined,
   });
 
-  data({ foo: "FOO", bar: "BAR" });
-  console.log("data.data:", data.data);
+  const classes = data.__classes__;
+
+  ////console.log("classes:", classes);////
+
+  console.log("classes.classes:", classes.classes);
+  console.log("classes.defined:", classes.defined);
+  console.log("classes.names:", classes.names);
+  console.log("classes.prototypes:", classes.prototypes);
+
+  console.log("size:", classes.size);
+
+
+  classes.prototypes.clean.clean.call(data);
+  console.log("After clean:", data.data);
+
+  
 })();
 
 /* Enable tests */

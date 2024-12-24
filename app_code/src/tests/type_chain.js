@@ -21,6 +21,6 @@ await (async () => {
     chain.names.has("Data")
   );
   console.log("size:", chain.size);
-  chain.prototypes.data.clean.call(data);
-  console.log("data:", data);
+  chain.prototypes.clean.clean.call(data);
+  console.log("After clean:", data.data);
 })();
