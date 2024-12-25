@@ -13,12 +13,21 @@ await (async () => {
   });
 
   data.on_change = ({ current, previous, owner }) => {
-    console.log(`'current' from on_change:`, current)
-  }
+    console.log(`'previous' from on_change:`, previous);
+    console.log(`'current' from on_change:`, current);
+  };
 
-  data.foo = 'changed foo'
+  data.foo = "changed foo";
+  data({ foo: "changed foo again" });
+
+  
+
+  
 
   data({ foo: "FOO", bar: "BAR" });
+
+  
+
   console.log("data.data:", data.data);
 })();
 

@@ -1,21 +1,14 @@
 /* Implements update method. */
 export const update = (parent, config, ...factories) => {
   return class update extends parent {
-
-
     get on_change() {
-      return this.#on_change
-
+      return this.#on_change;
     }
     set on_change(on_change) {
-      on_change({ current: this.data, previous: this.data, owner: this })
-      this.#on_change = on_change
+      on_change({ current: this.data, previous: null, owner: this });
+      this.#on_change = on_change;
     }
-    #on_change
-
-
-
-
+    #on_change;
 
     /* Mutates items from provided 'update'. Chainable. */
     update(update, ...callbacks) {
@@ -71,8 +64,7 @@ export const update = (parent, config, ...factories) => {
           }
         }
 
-        
-        
+       
 
         /* Update */
         if (v === undefined) {
@@ -84,13 +76,16 @@ export const update = (parent, config, ...factories) => {
         }
       }
       /* Call on_change and callbacks */
-      if (Object.keys(current).length > 1) {
+      if (Object.keys(current).length) {
         if (this.on_change) {
-          this.on_change({ current, previous, owner: this })
+          this.on_change({ current, previous, owner: this });
         }
         for (const callback of callbacks) {
           callback({ current, previous, owner: this });
         }
+
+
+        
       }
 
       return this;
