@@ -9,6 +9,7 @@ import { filter } from "rollo/type/types/data/factories/filter";
 import { for_each } from "rollo/type/types/data/factories/for_each";
 import { freeze } from "rollo/type/types/data/factories/freeze";
 import { items } from "rollo/type/types/data/factories/items";
+import { match } from "rollo/type/types/data/factories/match";
 import { pop } from "rollo/type/types/data/factories/pop";
 import { reduce } from "rollo/type/types/data/factories/reduce";
 import { reset } from "rollo/type/types/data/factories/reset";
@@ -30,6 +31,7 @@ export const Data = (() => {
     for_each,
     freeze,
     items,
+    match,
     owner,
     pop,
     reduce,
