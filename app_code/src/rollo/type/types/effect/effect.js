@@ -15,7 +15,7 @@ export const Effect = (() => {
   );
 
   class Effect extends composition {
-    static create = (source, { condition, transformer } = {}) => {
+    static create = (source, condition, transformer) => {
       const instance = new Effect();
 
       if (condition && typeof condition !== 'function') {

@@ -17,11 +17,9 @@ await (async () => {
       //console.log(`'current' from effect:`, data.current);
       //console.log(`'session' from effect:`, data.session);
     },
-    {
-      condition: (data) => {
-        return true;
-      },
-    }
+    (data) => {
+      return true;
+    },
   );
 
   data.effects.add(effect);
@@ -33,9 +31,7 @@ await (async () => {
         console.log(`'current' from effect:`, data.current);
         console.log(`'session' from effect:`, data.session);
       },
-      {
-        condition: "foo",
-      }
+      "foo",
     )
   );
 
