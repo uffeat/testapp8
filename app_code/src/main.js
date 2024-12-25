@@ -2,19 +2,45 @@ import "./bootstrap.scss";
 import "./main.css";
 
 await (async () => {
-  const { Conditional } = await import(
-    "rollo/type/types/conditional/conditional"
-  );
+  const { Data } = await import("rollo/type/types/data/data");
+  const { Effect } = await import("rollo/type/types/effect/effect");
 
-  const conditional = Conditional.create({
-    source: (arg) => console.log(`Got arg:`, arg),
-    condition: (arg) => typeof arg === 'number',
-    transformer: (arg) => 2*arg,
+  const data = Data.create({
+    foo: "foo",
+    bar: "bar",
+    stuff: 42,
   });
 
-  conditional(42);
-  conditional('foo');
+  const effect = Effect.create(
+    (data) => {
+      //console.log(`'previous' from effect:`, data.previous);
+      //console.log(`'current' from effect:`, data.current);
+      //console.log(`'session' from effect:`, data.session);
+    },
+    {
+      condition: (data) => {
+        return true;
+      },
+    }
+  );
 
+  data.effects.add(effect);
+
+  data.effects.add(
+    Effect.create(
+      (data) => {
+        console.log(`'previous' from effect:`, data.previous);
+        console.log(`'current' from effect:`, data.current);
+        console.log(`'session' from effect:`, data.session);
+      },
+      {
+        condition: "foo",
+      }
+    )
+  );
+
+  data({ foo: "FOO", bar: "BAR" });
+  data({ bar: "BARBAR" });
 })();
 
 /* Enable tests */
