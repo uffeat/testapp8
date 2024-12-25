@@ -1,3 +1,7 @@
+/* TODO
+- Refactor to use update
+*/
+
 /* Implements clone method. */
 export const clone = (parent, config, ...factories) => {
   return class clone extends parent {

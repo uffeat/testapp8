@@ -41,22 +41,22 @@ export class Type {
       This can be useful during chain inspection to signal that a given class 
       was injected into the chain by a factory. */
 
-    const classes = Classes.create();
+    const chain = Chain.create();
     if (is_class(cls)) {
-      classes.add(cls);
+      chain.add(cls);
     }
     for (const factory of factories) {
       cls = factory(cls, config, ...factories);
-      classes.add(cls);
+      chain.add(cls);
     }
-    cls.__classes__ = classes;
+    cls.__chain__ = chain;
     /* NOTE
-    - At this point, 'cls.__classes__' is intentionally an unprotected static 
+    - At this point, 'cls.__chain__' is intentionally an unprotected static 
       data property.
-    - Completion and protection of 'cls.__classes__' takes place in 'register'.
+    - Completion and protection of 'cls.__chain__' takes place in 'register'.
     - While it is possible to subsequently access the prototype chain without 
-      the use of 'Classes', its more efficient to exploit that 'compose' get full
-      access to prototype chain (s it builds it).
+      the use of 'Chain', its more efficient to exploit that 'compose' gets full
+      access to prototype chain (as it builds it).
     */
     return cls;
   }
@@ -111,15 +111,15 @@ export class Type {
   - Use 'registry.add' instead to register without adding meta data. 
   */
   register(tag, cls) {
-    if (cls.__classes__) {
-      cls.__classes__.add(cls);
-      cls.__classes__.freeze();
+    if (cls.__chain__) {
+      cls.__chain__.add(cls);
+      cls.__chain__.freeze();
     } else {
-      cls.__classes__ = Classes.create();
-      cls.__classes__.add(cls);
-      cls.__classes__.freeze();
+      cls.__chain__ = Chain.create();
+      cls.__chain__.add(cls);
+      cls.__chain__.freeze();
     }
-    add_meta(cls.prototype, "classes", cls.__classes__);
+    add_meta(cls.prototype, "chain", cls.__chain__);
     add_meta(cls.prototype, "class", cls);
     add_meta(cls.prototype, "type", tag);
     this.registry.add(tag, cls);
@@ -128,8 +128,8 @@ export class Type {
 }
 
 /* Composition class for providing access to the prototype chain. */
-class Classes {
-  static create = () => new Classes();
+class Chain {
+  static create = () => new Chain();
 
   /* Returns array of classes in prototype chain. */
   get classes() {
@@ -137,12 +137,12 @@ class Classes {
   }
   #classes = [];
 
-  /* Returns set of defined properties in the entire prototype chain.
+  /* Returns a set of defined properties in the entire prototype chain.
   NOTE
   - Corresponds to a bound and prototype chain-wide version of 'Object.hasOwn'. 
   EXAMPLES
   - Check, if 'name' is a defined property:
-      console.log('name is defined:', classes.defined.has('name')); 
+      console.log('name is defined:', instance.__chain__.defined.has('name')); 
   */
   get defined() {
     return this.#defined;
@@ -153,7 +153,7 @@ class Classes {
   in prototype chain.
   EXAMPLES
   - Check, if a class with name 'Data' is in the prototype chain:
-      console.log("A class with the name 'Data' is in the chain:", classes.names.has('Data'));
+      console.log("A class with the name 'Data' is in the chain:", instance.__chain__.names.has('Data'));
   */
   get names() {
     return this.#names;
@@ -163,7 +163,7 @@ class Classes {
   /* Returns an object with name-prototype items for classes in the prototype chain.
   EXAMPLES
   - Get and use the 'clean' method from the 'clean' class in the prototype chain:
-      classes.prototypes.clean.clean.call(data);
+      instance.__chain__.prototypes.clean.clean.call(data);
   */
   get prototypes() {
     return this.#prototypes;

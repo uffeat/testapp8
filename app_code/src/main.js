@@ -1,7 +1,26 @@
 import "./bootstrap.scss";
 import "./main.css";
 
+await (async () => {
+  const { type } = await import("rollo/type/type");
+  await import("rollo/type/types/data/data");
 
+  const data = type.create("data", {
+    foo: "foo",
+    bar: "bar",
+    stuff: 42,
+    thing: 42,
+  });
+
+  data.on_change = ({ current, previous, owner }) => {
+    console.log(`'current' from on_change:`, current)
+  }
+
+  data.foo = 'changed foo'
+
+  data({ foo: "FOO", bar: "BAR" });
+  console.log("data.data:", data.data);
+})();
 
 /* Enable tests */
 if (import.meta.env.DEV) {
