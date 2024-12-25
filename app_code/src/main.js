@@ -2,15 +2,19 @@ import "./bootstrap.scss";
 import "./main.css";
 
 await (async () => {
-  const { Conditional } = await import("rollo/type/types/conditional/conditional");
+  const { Conditional } = await import(
+    "rollo/type/types/conditional/conditional"
+  );
 
-  const conditional = Conditional.create({source: (...args) => console.log(`Got args:`, args)})
+  const conditional = Conditional.create({
+    source: (arg) => console.log(`Got arg:`, arg),
+    condition: (arg) => typeof arg === 'number',
+    transformer: (arg) => 2*arg,
+  });
 
-  conditional(42)
+  conditional(42);
+  conditional('foo');
 
-
-  
-  
 })();
 
 /* Enable tests */

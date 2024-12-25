@@ -48,6 +48,12 @@ export const Conditional = (() => {
       if (typeof this.source !== 'function') {
         throw new Error(`'source' is not a function.`)
       }
+      if (this.condition && !this.condition(...args)) {
+        return
+      }
+      if (this.transformer) {
+        return this.source(this.transformer(...args))
+      }
       return this.source(...args)
     }
 
