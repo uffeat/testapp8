@@ -1,11 +1,17 @@
 /* Implements difference method. */
 export const difference = (parent, config, ...factories) => {
   return class difference extends parent {
-    /* Returns an object with items that represent items in 'data' that are 
-    different from chose in self data items. */
-    difference(data) {
+    /* Returns an object with items that represent items in 'other' that are 
+    different from those in data items. */
+    difference(other) {
       return Object.fromEntries(
-        Object.entries(data).filter(([k, v]) => this[k] !== v)
+        Object.entries(other).filter(([k, v]) => {
+          if (v === undefined) {
+            return true;
+          } else {
+            return this[k] !== v;
+          }
+        })
       );
     }
   };

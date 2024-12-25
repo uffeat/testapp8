@@ -1,10 +1,10 @@
 import { type } from "rollo/type/type";
-import { name } from "rollo/type/factories/name";
-import { clean } from "rollo/type/types/data/factories/clean";
+import { owner } from "rollo/type/factories/owner";
 import { clear } from "rollo/type/types/data/factories/clear";
 import { clone } from "rollo/type/types/data/factories/clone";
 import { condition } from "rollo/type/types/data/factories/condition";
 import { difference } from "rollo/type/types/data/factories/difference";
+import { effects } from "rollo/type/types/data/factories/effects";
 import { filter } from "rollo/type/types/data/factories/filter";
 import { for_each } from "rollo/type/types/data/factories/for_each";
 import { freeze } from "rollo/type/types/data/factories/freeze";
@@ -21,16 +21,16 @@ export const Data = (() => {
   const composition = type.compose(
     Function,
     {},
-    clean,
     clear,
     clone,
     condition,
     difference,
+    effects,
     filter,
     for_each,
     freeze,
     items,
-    name,
+    owner,
     pop,
     reduce,
     reset,
@@ -42,7 +42,7 @@ export const Data = (() => {
 
   class Data extends composition {
     static create = (update) => {
-      const instance = new Data()
+      const instance = new Data();
       instance.update(update);
 
       return new Proxy(instance, {
@@ -55,7 +55,6 @@ export const Data = (() => {
           } else {
             instance.update({ [key]: value });
           }
-
           return true;
         },
         has: (target, key) => {
@@ -69,10 +68,6 @@ export const Data = (() => {
 
     constructor() {
       super();
-    }
-
-    toString() {
-      return this.jsonable ? this.json() : this.text();
     }
   }
 

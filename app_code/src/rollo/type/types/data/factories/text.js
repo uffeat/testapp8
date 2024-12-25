@@ -49,5 +49,9 @@ export const text = (parent, config, ...factories) => {
         .map(([k, v]) => `${k}:${String(v)}`)
         .join(",")}}`;
     }
+
+    toString() {
+      return this.jsonable ? this.json() : this.text();
+    }
   };
 };
