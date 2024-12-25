@@ -64,8 +64,6 @@ export const update = (parent, config, ...factories) => {
           }
         }
 
-       
-
         /* Update */
         if (v === undefined) {
           /* NOTE By convention undefined values deletes. This is critical for other 
@@ -83,9 +81,6 @@ export const update = (parent, config, ...factories) => {
         for (const callback of callbacks) {
           callback({ current, previous, owner: this });
         }
-
-
-        
       }
 
       return this;
