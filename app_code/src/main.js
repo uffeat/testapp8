@@ -12,7 +12,7 @@ await (async () => {
   });
 
   const effect = Effect.create((data) => {
-    console.log(`'previous' from effect:`, data.previous);
+    //console.log(`'previous' from effect:`, data.previous);
     console.log(`'current' from effect:`, data.current);
     //console.log(`'publisher' from effect:`, data.publisher);
     //console.log(`'session' from effect:`, data.session);
@@ -24,6 +24,10 @@ await (async () => {
 
   //data({ foo: "FOO", bar: "BAR" });
   data({ bar: 8, owner: 42 });
+  data.stuff = undefined
+
+  console.log(`data.current:`, data.current);
+  console.log(`data.previous:`, data.previous);
 })();
 
 /* Enable tests */

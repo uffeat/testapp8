@@ -19,3 +19,5 @@ export const clear = (parent, config, ...factories) => {
     }
   };
 };
+
+export { clear as default };

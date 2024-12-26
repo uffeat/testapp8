@@ -5,20 +5,25 @@ import { clone } from "rollo/type/types/data/factories/clone";
 import { condition } from "rollo/type/types/data/factories/condition";
 import { difference } from "rollo/type/types/data/factories/difference";
 import { effects } from "rollo/type/types/data/factories/effects";
+import { empty } from "rollo/type/types/data/factories/empty";
 import { filter } from "rollo/type/types/data/factories/filter";
 import { for_each } from "rollo/type/types/data/factories/for_each";
 import { freeze } from "rollo/type/types/data/factories/freeze";
+import intersection from "rollo/type/types/data/factories/intersection";
 import { items } from "rollo/type/types/data/factories/items";
 import { match } from "rollo/type/types/data/factories/match";
 import { pop } from "rollo/type/types/data/factories/pop";
 import { reduce } from "rollo/type/types/data/factories/reduce";
 import { reset } from "rollo/type/types/data/factories/reset";
 import { text } from "rollo/type/types/data/factories/text";
-import { transform } from "rollo/type/types/data/factories/transform";
+import { map } from "@/rollo/type/types/data/factories/map";
 import { transformer } from "rollo/type/types/data/factories/transformer";
 import { update } from "rollo/type/types/data/factories/update";
 
-export const Data = (() => {
+
+
+
+export const Data = await (async () => {
   const composition = type.compose(
     Function,
     {},
@@ -27,17 +32,19 @@ export const Data = (() => {
     condition,
     difference,
     effects,
+    empty,
     filter,
     for_each,
     freeze,
+    intersection,
     items,
+    map,
     match,
     owner,
     pop,
     reduce,
     reset,
     text,
-    transform,
     transformer,
     update
   );

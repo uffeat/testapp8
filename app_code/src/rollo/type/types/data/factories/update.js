@@ -3,6 +3,25 @@ import { Subscription } from "rollo/type/types/subscription/subscription";
 /* Implements update method. */
 export const update = (parent, config, ...factories) => {
   return class update extends parent {
+
+
+    /* Returns shallow copy of current data items, i.e., not including accessor items. */
+    get current() {
+      return { ...this };
+    }
+
+
+
+    get previous() {
+      return {...this.#previous}
+
+    }
+    #previous = {}
+
+
+
+
+
     /* Mutates items reactively from provided 'update'. Chainable. 
     NOTE
     - By convention, an undefined value is a cue to delete.
@@ -20,7 +39,7 @@ export const update = (parent, config, ...factories) => {
         )
       );
 
-      console.log('update:', update)////
+      //console.log('update:', update)////
 
       /*
       const subscriptions = []
@@ -49,27 +68,20 @@ export const update = (parent, config, ...factories) => {
       let current;
       let previous;
       if (this.effects && this.effects.size) {
-        previous = this.difference(update);
-        current = Object.fromEntries(
-          Object.entries(previous).map(([k, v]) => [k, this[k]])
-        );
+        current = this.difference(update);
+        previous = this.difference(update, true);
       }
       /** Update */
-      Object.entries(update).forEach(([k, v]) => (this[k] = v));
+      Object.assign(this.#previous, this.current)
+      Object.assign(this, update);
       /* Remove items with undefined value */
       [...this.entries].forEach(([k, v]) => {
         if (v === undefined) {
           delete this[k];
         }
       });
-      /* Call effects */
+      /* Call effects, if change */
       if (current) {
-
-        console.log('current:', current)////
-        console.log('previous:', previous)////
-
-
-
         this.effects({ current, previous });
       }
       return this;

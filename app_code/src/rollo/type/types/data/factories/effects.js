@@ -67,7 +67,7 @@ export const effects = (parent, config, ...factories) => {
         }
         this.registry.add(effect);
         effect({
-          current: this.owner.data,
+          current: this.owner.current,
           previous: null,
           publisher: this.owner,
           session: null,
@@ -101,3 +101,5 @@ export const effects = (parent, config, ...factories) => {
     })(this);
   };
 };
+
+export { effects as default };

@@ -1,7 +1,3 @@
-/* TODO
-- Refactor to use update
-*/
-
 /* Implements clone method. */
 export const clone = (parent, config, ...factories) => {
   return class clone extends parent {
@@ -11,3 +7,5 @@ export const clone = (parent, config, ...factories) => {
     }
   };
 };
+
+export { clone as default };

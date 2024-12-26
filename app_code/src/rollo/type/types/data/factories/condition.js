@@ -12,3 +12,5 @@ export const condition = (parent, config, ...factories) => {
     #condition;
   };
 };
+
+export { condition as default };

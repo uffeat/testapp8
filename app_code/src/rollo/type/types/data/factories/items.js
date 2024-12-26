@@ -14,10 +14,7 @@ export const items = (parent, config, ...factories) => {
       return Object.keys(this);
     }
 
-    /* Returns object with current data items, i.e., not including accessor items. */
-    get data() {
-      return { ...this };
-    }
+    
 
     /* Returns length of keys. */
     get size() {
