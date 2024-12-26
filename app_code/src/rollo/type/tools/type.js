@@ -72,11 +72,11 @@ export class Type {
     const cls = this.get(tag, ...args);
     /* Create instance */
     let instance = cls.create ? cls.create(...args) : new cls(...args);
-    /* Call the 'create' lifecycle method */
-    if (instance.create) {
-      instance = instance.create() || instance;
-      /* Prevent 'create' from being used onwards */
-      delete instance.create;
+    /* Call the 'created' lifecycle method */
+    if (instance.created) {
+      instance = instance.created() || instance;
+      /* Prevent 'created' from being used onwards */
+      delete instance.created;
     }
     return instance;
   }

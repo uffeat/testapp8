@@ -18,8 +18,12 @@ export const Effect = (() => {
     static create = (source, condition, transformer) => {
       const instance = new Effect();
 
-      if (condition && typeof condition !== 'function') {
-        condition = interpret_condition(condition)
+      if (condition && typeof condition !== "function") {
+        condition = interpret_condition(condition);
+      }
+
+      if (transformer && typeof transformer !== "function") {
+        transformer = interpret_transformer(transformer);
       }
 
       instance.condition = condition;
@@ -64,13 +68,34 @@ export const Effect = (() => {
   return type.register("effect", Effect);
 })();
 
-
-/* Creates and return condition function from short-hand. */
+/* Creates and returns condition function from short-hand. */
 function interpret_condition(condition) {
+  /* Create condition function from string short-hand */
   if (typeof condition === "string") {
-    /* Create condition function from string short-hand:
-    current must contain a key corresponding to the string short-hand. */
-    return ({ current }) => condition in current;
+    if (condition === condition.toUpperCase()) {
+      condition = condition.toLowerCase();
+
+      ////console.log('condition:', condition)////
+
+
+
+      return ({ current }) => {
+
+        console.log('current:', current)////
+
+
+
+        for (const [k, v] of Object.entries(current)) {
+          if (typeof v !== condition) {
+            return false;
+          }
+        }
+        return true;
+      };
+    } else {
+      /* current must contain a key corresponding to the string short-hand. */
+      return ({ current }) => condition in current;
+    }
   }
 
   if (Array.isArray(condition)) {
@@ -95,3 +120,10 @@ function interpret_condition(condition) {
   throw new Error(`Invalid condition: ${condition}`);
 }
 
+/* Creates and returns transformer function from short-hand. */
+function interpret_transformer(transformer) {
+  /* TODO
+   */
+
+  throw new Error(`Invalid transformer: ${transformer}`);
+}

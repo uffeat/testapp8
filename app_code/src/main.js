@@ -11,32 +11,19 @@ await (async () => {
     stuff: 42,
   });
 
-  const effect = Effect.create(
-    (data) => {
-      //console.log(`'previous' from effect:`, data.previous);
-      //console.log(`'current' from effect:`, data.current);
-      //console.log(`'session' from effect:`, data.session);
-    },
-    (data) => {
-      return true;
-    },
-  );
+  const effect = Effect.create((data) => {
+    console.log(`'previous' from effect:`, data.previous);
+    console.log(`'current' from effect:`, data.current);
+    //console.log(`'publisher' from effect:`, data.publisher);
+    //console.log(`'session' from effect:`, data.session);
+  }, 
+  //"NUMBER"
+);
 
   data.effects.add(effect);
 
-  data.effects.add(
-    Effect.create(
-      (data) => {
-        console.log(`'previous' from effect:`, data.previous);
-        console.log(`'current' from effect:`, data.current);
-        console.log(`'session' from effect:`, data.session);
-      },
-      "foo",
-    )
-  );
-
-  data({ foo: "FOO", bar: "BAR" });
-  data({ bar: "BARBAR" });
+  //data({ foo: "FOO", bar: "BAR" });
+  data({ bar: 8, owner: 42 });
 })();
 
 /* Enable tests */

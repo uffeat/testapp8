@@ -1,5 +1,3 @@
-import { Subscription } from "rollo/type/types/subscription/subscription";
-
 /* Implements update method. */
 export const update = (parent, config, ...factories) => {
   return class update extends parent {
@@ -9,30 +7,6 @@ export const update = (parent, config, ...factories) => {
     */
     update(update) {
       if (!update) return this;
-      /* Update defined properties */
-      Object.entries(update)
-        .filter(([k, v]) => this.__chain__.defined.has(k))
-        .forEach(([k, v]) => (this[k] = v));
-      /* Remove defined from update */
-      update = Object.fromEntries(
-        Object.entries(update).filter(
-          ([k, v]) => !this.__chain__.defined.has(k)
-        )
-      );
-
-      console.log('update:', update)////
-
-      /*
-      const subscriptions = []
-      for (const [k, v] of Object.entries(update)) {
-        if (v instanceof Subscription) {
-          subscriptions.push([k, v])
-          delete update[k]
-        }
-      }
-      console.log('subscriptions:', subscriptions)////
-      */
-
       /* Filter updates as per condition */
       if (this.condition) {
         update = Object.fromEntries(
@@ -64,12 +38,6 @@ export const update = (parent, config, ...factories) => {
       });
       /* Call effects */
       if (current) {
-
-        console.log('current:', current)////
-        console.log('previous:', previous)////
-
-
-
         this.effects({ current, previous });
       }
       return this;

@@ -30,6 +30,16 @@ export const effects = (parent, config, ...factories) => {
         });
       }
 
+      /* Returns limit */
+      get limit() {
+        return this.#limit;
+      }
+      /* Sets limit */
+      set limit(limit) {
+        this.#limit = limit;
+      }
+      #limit = 10;
+
       /* Returns owner */
       get owner() {
         return this.#owner;
@@ -52,12 +62,15 @@ export const effects = (parent, config, ...factories) => {
 
       /* Returns and registers effect. */
       add(effect) {
+        if (this.limit && this.size >= this.limit) {
+          throw new Error(`Cannot register more than ${this.limit} effects.`);
+        }
         this.registry.add(effect);
         effect({
           current: this.owner.data,
           previous: null,
-          owner: this.owner,
-          session: null
+          publisher: this.owner,
+          session: null,
         });
         return effect;
       }
@@ -65,7 +78,12 @@ export const effects = (parent, config, ...factories) => {
       /* Calls registered effects. */
       call({ current, previous }) {
         for (const effect of this.registry.values()) {
-          effect({ current, previous, owner: this.owner, session: ++this.#session });
+          effect({
+            current,
+            previous,
+            publisher: this.owner,
+            session: ++this.#session,
+          });
         }
       }
 
@@ -79,7 +97,7 @@ export const effects = (parent, config, ...factories) => {
         this.registry.delete(effect);
       }
 
-      #session = 0
+      #session = 0;
     })(this);
   };
 };
