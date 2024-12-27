@@ -15,7 +15,7 @@ await (async () => {
 
   data.effects.add(
     ({ current }) => {
-      console.log(current.current);
+      console.log(current);
 
       if (!("foo" in current)) {
         console.error(`No 'foo'!`);
