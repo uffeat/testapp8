@@ -7,11 +7,12 @@ await (async () => {
 
   const data = Data.create();
 
+  /* Set up catch-all effect */
   data.effects.add(({ current }) => {
     console.log(`current from catch-all:`, current.current);
-    
   });
 
+  /* Set up effect that requires 'foo' in current */
   data.effects.add(({ current }) => {
     console.log(`current:`, current.current);
     if (!("foo" in current)) {
@@ -19,13 +20,15 @@ await (async () => {
     }
   }, "foo");
 
+  /* Set up effect that requires 'bar' OR 'foo' in current */
   data.effects.add(({ current }) => {
     console.log(`current:`, current.current);
     if (!("foo" in current) && !("bar" in current)) {
-      console.error(`Neither 'foo', not 'bar!`);
+      console.error(`Neither 'foo', nor 'bar!`);
     }
   }, ['bar', "foo"]);
 
+  /* Set up effect that requires foo=42 in current */
   data.effects.add(({ current }) => {
     console.log(`current:`, current.current);
     if (current.foo !== 42) {
