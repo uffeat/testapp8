@@ -1,7 +1,7 @@
 import "./bootstrap.scss";
 import "./main.css";
 
-/* Purpose: Demonstate and test Data.map */
+/* Purpose: Demonstate and test 'update' */
 await (async () => {
   const { Data } = await import("rollo/type/types/data/data");
 
@@ -9,24 +9,30 @@ await (async () => {
     foo: "foo",
     bar: "bar",
     stuff: 42,
-    thing: 7,
   });
 
-  /* Get sum of all items with number values */
-  const sum = data.reduce(
-    (data) => data.values.filter((v) => typeof v === "number"),
-    (numbers) => {
-      let sum = 0;
-      numbers.forEach((v) => (sum += v));
-      return sum;
+  /* Set up effect to check batch-updates. */
+  data.effects.add(function effect({ current }) {
+    effect._count = effect._count || 0;
+    ++effect._count;
+    if (effect._count > 2) {
+      console.error(
+        `Effect ran more than twice; batch-update does not work correctly!`
+      );
     }
-  );
+  });
 
-  const expected = 49;
-  if (sum === expected) {
-    console.log(`Success! Reduced to: ${sum}`);
+  /* Change data */
+  data.update({ foo: "FOO", bar: "BAR", stuff: undefined });
+  /* Check final result */
+  const expected = {
+    foo: "FOO",
+    bar: "BAR",
+  };
+  if (data.match(expected)) {
+    console.log(`Success! Current data:`, data.current);
   } else {
-    console.error(`Expected: ${expected}. Got: ${sum}`);
+    console.error(`Expected:`, expected, `Actual:`, data.current);
   }
 })();
 

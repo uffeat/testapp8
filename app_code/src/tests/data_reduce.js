@@ -1,25 +1,30 @@
 // data_reduce
 
+/* Purpose: Demonstate and test Data.reduce */
 await (async () => {
-  const { type } = await import("rollo/type/type");
-  await import("rollo/type/types/data/data");
+  const { Data } = await import("rollo/type/types/data/data");
 
-  const data = type.create("data", {
-    foo: "FOO",
-    bar: "BAR",
+  const data = Data.create({
+    foo: "foo",
+    bar: "bar",
     stuff: 42,
-    thing: 42,
+    thing: 7,
   });
 
   /* Get sum of all items with number values */
-  const value = data.reduce(
-    (current) => current.values.filter((v) => typeof v === "number"),
+  const sum = data.reduce(
+    (data) => data.values.filter((v) => typeof v === "number"),
     (numbers) => {
       let sum = 0;
       numbers.forEach((v) => (sum += v));
       return sum;
     }
   );
-  console.log("value:", value);
-  
+
+  const expected = 49;
+  if (sum === expected) {
+    console.log(`Success! Reduced to: ${sum}`);
+  } else {
+    console.error(`Expected: ${expected}. Actual: ${sum}`);
+  }
 })();

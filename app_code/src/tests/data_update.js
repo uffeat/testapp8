@@ -1,32 +1,36 @@
 // data_update
 
+/* Purpose: Demonstate and test 'update' */
 await (async () => {
   const { Data } = await import("rollo/type/types/data/data");
-  /* Create data object */
+
   const data = Data.create({
     foo: "foo",
     bar: "bar",
     stuff: 42,
   });
-  /* Set up catch-all effect */
-  data.effects.add(({ current, previous, publisher, session }) => {
-    console.log(`'previous' from effect:`, previous);
-    console.log(`'current' from effect:`, current);
-    console.log(`'session' from effect:`, session);
+
+  /* Set up effect to check batch-updates. */
+  data.effects.add(function effect({ current }) {
+    effect._count = effect._count || 0;
+    ++effect._count;
+    if (effect._count > 2) {
+      console.error(
+        `Effect ran more than twice; batch-update does not work correctly!`
+      );
+    }
   });
-  /* Change single data item in different ways */
-  data.foo = "changed foo";
-  data({ foo: "changed foo again" });
-  /* Batch-change multipe data items */
-  data({ foo: "FOO", bar: "BAR" });
-  /* Delete single data item in different ways */
-  data.foo = undefined;
-  data({ bar: undefined });
-  /* Check */
-  const expected = { stuff: 42 };
+
+  /* Change data */
+  data.update({ foo: "FOO", bar: "BAR", stuff: undefined });
+  /* Check final result */
+  const expected = {
+    foo: "FOO",
+    bar: "BAR",
+  };
   if (data.match(expected)) {
-    console.log(`All good!`);
+    console.log(`Success! Current data:`, data.current);
   } else {
-    console.error(`Expected:`, expected, `Got:`, data.data);
+    console.error(`Expected:`, expected, `Actual:`, data.current);
   }
 })();

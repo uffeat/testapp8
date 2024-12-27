@@ -28,6 +28,6 @@ await (async () => {
   if (data.match(expected)) {
     console.log(`Success! Current data:`, data.current);
   } else {
-    console.error(`Expected:`, expected, `Got:`, data.current);
+    console.error(`Expected:`, expected, `Actual:`, data.current);
   }
 })();
