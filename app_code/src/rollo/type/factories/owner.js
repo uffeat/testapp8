@@ -1,4 +1,4 @@
-/* . */
+/* Implements 'owner' getter/setter. */
 export const owner = (parent, config, ...factories) => {
   class owner extends parent {
     /* Returns owner. */

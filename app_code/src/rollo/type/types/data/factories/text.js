@@ -1,4 +1,10 @@
-/* Implements features related to text representation. */
+/* Implements features related to text representation.
+Useful for:
+- Serialization before storage.
+- Serialization sending over the wire.
+- Hashing.
+- Logging.
+ */
 export const text = (parent, config, ...factories) => {
   return class text extends parent {
     /* Tests, if items are json-compatible.
@@ -12,14 +18,6 @@ export const text = (parent, config, ...factories) => {
             v === null || ["boolean", "number", "string"].includes(typeof v)
         ).length === Object.values(this.current).length
       );
-      /* Alternative implementation:
-      try {
-        JSON.stringify(this.current);
-        return true
-      } catch {
-        return false
-      }
-      */
     }
 
     /* Retuns json representation of current data.

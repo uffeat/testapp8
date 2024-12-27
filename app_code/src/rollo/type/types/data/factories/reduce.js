@@ -7,7 +7,7 @@ export const reduce = (parent, config, ...factories) => {
     reduce(...funcs) {
       let value = this;
       for (const func of funcs) {
-        value = func(value);
+        value = func.call(this, value);
       }
       return value;
     }

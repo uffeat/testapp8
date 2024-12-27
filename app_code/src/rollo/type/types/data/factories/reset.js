@@ -10,7 +10,8 @@ export const reset = (parent, config, ...factories) => {
         Object.entries(this.current).map(([k, v]) => [k, value])
       );
       if (mutate) {
-        /* Mutate via 'update' to ensure centralized mutation */
+        /* Mutate via 'update' to ensure centralized mutation.
+        Prevents redundant effect calls. */
         this.update(mapped);
         return this;
       }

@@ -1,10 +1,12 @@
 import { type } from "rollo/type/type";
 
+/* Wrapper for registered effects.
+NOTE
+- Tightly coupled with Effects, from which it's used.
+- Can also be used directly and passed into `...effects.add`.
+*/
 export class Effect {
-  static create = (...args) => {
-    const instance = new Effect(...args);
-    return instance;
-  };
+  static create = (...args) => new Effect(...args)
   #source;
 
   constructor(source, condition) {
@@ -31,29 +33,27 @@ export class Effect {
   }
   #disabled;
 
-
-
   call({ current, previous, publisher, session }) {
     if (this.disabled) {
-      return
+      return;
     }
     current = type.create("data", current);
     previous = type.create("data", previous || {});
-    if (this.condition && !this.condition({ current, previous, publisher, session })) {
-      return
+    if (
+      this.condition &&
+      !this.condition({ current, previous, publisher, session })
+    ) {
+      return;
     }
     this.#source({ current, previous, publisher, session });
-
-
-    
   }
 }
 
 /* Creates and returns condition function from short-hand. */
 function interpret(condition) {
-  /* Create condition function from string short-hand */
   if (typeof condition === "string") {
-    /* current must contain a key corresponding to the string short-hand. */
+    /* Create condition function from string short-hand:
+    current must contain a key corresponding to the string short-hand. */
     return ({ current }) => condition in current;
   }
 
@@ -71,14 +71,7 @@ function interpret(condition) {
   if (typeof condition === "object" && Object.keys(condition).length === 1) {
     /* Create condition function from single-item object short-hand:
     current must contain a key-value pair corresponding to the object short-hand. */
-
-    /* TODO
-    - use data methods
-    */
-
-    const key = Object.keys(condition)[0];
-    const value = Object.values(condition)[0];
-    return ({ current }) => current[key] === value;
+    return ({ current }) => current.includes(condition);
   }
 
   throw new Error(`Invalid condition: ${condition}`);

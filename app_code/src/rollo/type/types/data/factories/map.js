@@ -10,7 +10,8 @@ export const map = (parent, config, ...factories) => {
     map(f, mutate = true) {
       const mapped = Object.fromEntries(Object.entries(this.current).map(f));
       if (mutate) {
-        /* Mutate via 'update' to ensure centralized mutation */
+        /* Mutate via 'update' to ensure centralized mutation.
+        Prevents redundant effect calls. */
         this.update(mapped);
         return this;
       }

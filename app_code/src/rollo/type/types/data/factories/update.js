@@ -1,6 +1,17 @@
+import { Effects } from "rollo/type/types/data/tools/effects";
+
 /* Implements 'update' method. */
 export const update = (parent, config, ...factories) => {
   return class update extends parent {
+
+    /* Returns effects controller. */
+    get effects() {
+      return this.#effects;
+    }
+    #effects = Effects.create(this);
+
+
+
     /* Returns current. 
     NOTE
       - Can, but should generally not, be mutated externally. 
@@ -21,7 +32,7 @@ export const update = (parent, config, ...factories) => {
 
     /* Mutates items reactively from provided 'update'. Chainable. 
     NOTE
-    - By convention, an undefined value is a cue to delete.
+    - By convention, undefined value is a cue to delete.
     */
     update(update) {
       if (!update) return this;
@@ -69,7 +80,7 @@ export const update = (parent, config, ...factories) => {
       });
       /* Call effects, if change */
       if (current) {
-        this.effects({ current, previous });
+        this.effects.call({ current, previous });
       }
       return this;
     }

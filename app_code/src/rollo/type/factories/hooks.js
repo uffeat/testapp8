@@ -1,13 +1,12 @@
-/* Factory that calls hook functions bound in 'call'. */
+/* Implements 'hooks' method. */
 export const hooks = (parent, config, ...factories) => {
   return class hooks extends parent {
     constructor() {
       super();
     }
-    /* . */
+    /* Calls hook functions bound to this. Chainable. */
     hooks(...hooks) {
       super.hooks && super.hooks(...hooks);
-      /* Call hooks bound */
       hooks
         .filter((hook) => typeof hook === "function")
         .forEach((hook) => {

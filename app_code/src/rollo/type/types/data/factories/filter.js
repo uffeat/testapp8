@@ -12,16 +12,8 @@ export const filter = (parent, config, ...factories) => {
         const exclude = Object.entries(this.current)
           .filter(([k, v]) => !f([k, v]))
           .map(([k, v]) => [k, undefined]);
-
-
-        ////console.log('update:', Object.fromEntries([...include, ...exclude]))////
-
-
-
-
-
-
-        /* Mutate via 'update' to ensure centralized mutation */
+        /* Mutate via 'update' to ensure centralized mutation.
+        Prevents redundant effect calls. */
         this.update([...include, ...exclude]);
         return this;
       }

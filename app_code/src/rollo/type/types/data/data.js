@@ -4,7 +4,6 @@ import { clear } from "rollo/type/types/data/factories/clear";
 import { clone } from "rollo/type/types/data/factories/clone";
 import { condition } from "rollo/type/types/data/factories/condition";
 import { difference } from "rollo/type/types/data/factories/difference";
-import { effects } from "rollo/type/types/data/factories/effects";
 import { empty } from "rollo/type/types/data/factories/empty";
 import { filter } from "rollo/type/types/data/factories/filter";
 import { for_each } from "rollo/type/types/data/factories/for_each";
@@ -21,6 +20,13 @@ import { map } from "@/rollo/type/types/data/factories/map";
 import { transformer } from "rollo/type/types/data/factories/transformer";
 import { update } from "rollo/type/types/data/factories/update";
 
+/* Reactive key-value store with batch-update, array- and set-like methods,  
+and methods for in-place mutation. 
+NOTE
+- Zero dependencies.
+- Pure JS; does not use browser APIs.
+- Relies on Vite, only for import syntax.
+*/
 export const Data = (() => {
   const composition = type.compose(
     Object,
@@ -29,7 +35,6 @@ export const Data = (() => {
     clone,
     condition,
     difference,
-    effects,
     empty,
     filter,
     for_each,

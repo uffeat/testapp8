@@ -5,43 +5,96 @@ import "./main.css";
 await (async () => {
   const { Data } = await import("rollo/type/types/data/data");
 
-  const data = Data.create();
-
-  /* Set up catch-all effect */
-  data.effects.add(({ current }) => {
-    console.log(`current from catch-all:`, current.current);
+  const data = Data.create({
+    foo: "foo",
+    bar: "bar",
+    stuff: 42,
   });
 
-  /* Set up effect that requires 'foo' in current */
-  data.effects.add(({ current }) => {
-    console.log(`current:`, current.current);
-    if (!("foo" in current)) {
-      console.error(`No 'foo'!`);
-    }
-  }, "foo");
+ 
 
-  /* Set up effect that requires 'bar' OR 'foo' in current */
-  data.effects.add(({ current }) => {
-    console.log(`current:`, current.current);
-    if (!("foo" in current) && !("bar" in current)) {
-      console.error(`Neither 'foo', nor 'bar!`);
-    }
-  }, ['bar', "foo"]);
+  data.effects.add((current) => {
+    console.log('foo:', current.current.foo)
+  }, 'foo')
 
-  /* Set up effect that requires foo=42 in current */
-  data.effects.add(({ current }) => {
-    console.log(`current:`, current.current);
-    if (current.foo !== 42) {
-      console.error(`'foo' not 42!`);
-    }
-  }, {foo: 42});
+  const publisher = Data.create({
+    a: 1,
+    b: 2,
+    c: 3,
+  });
 
-  data.foo = "FOO";
-  data.bar = "BAR";
-  data.stuff = 8;
-  data.foo = 42
+  class Subscription {
+    static create = (...args) => new Subscription(...args);
+    #effect;
+    constructor(subscriber, key, publisher, ...reducers) {
+      this.#key = key;
+      this.#publisher = publisher;
+      this.#reducers = reducers;
+      this.#subscriber = subscriber;
+
+      this.#effect = publisher.effects.add(
+        ({ current, previous, publisher, session }) => {
+
+          
+          
+
+
+
+          subscriber[key] = publisher.reduce(...reducers);
+        }
+      );
+    }
+
+    get disabled() {
+      return this.#disabled;
+    }
+    set disabled(disabled) {
+      /* TODO
+      -
+      */
+      this.#disabled = disabled;
+    }
+    #disabled;
+
+    
+
+    get key() {
+      return this.#key;
+    }
+    #key;
+
+    get publisher() {
+      return this.#publisher;
+    }
+    #publisher;
+
+    get reducers() {
+      return this.#reducers;
+    }
+    #reducers;
+
+    get subscriber() {
+      return this.#subscriber;
+    }
+    #subscriber;
+  }
+
+
+
+  const supscription = Subscription.create(data, "foo", publisher, function() {
+    let sum = 0
+    this.values.forEach(v => sum += v);
+    return sum
+  });
+
+  publisher.a = 10
+
+
+
+
 
 })();
+0;
 
 /* Enable tests */
 if (import.meta.env.DEV) {
