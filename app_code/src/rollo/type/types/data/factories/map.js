@@ -19,4 +19,3 @@ export const map = (parent, config, ...factories) => {
   };
 };
 
-export { map as default };

@@ -4,4 +4,4 @@ export function filter(f) {
   return Object.fromEntries(Object.entries(this).filter(f));
 }
 
-export { filter as default };
+//export { filter as default };

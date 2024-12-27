@@ -11,4 +11,3 @@ export const intersection = (parent, config, ...factories) => {
   };
 };
 
-export { intersection as default };

@@ -1,3 +1,5 @@
+import { type } from "rollo/type/type";
+
 /* Implements effects for reactive updates. */
 export const effects = (parent, config, ...factories) => {
   return class effects extends parent {
@@ -25,20 +27,23 @@ export const effects = (parent, config, ...factories) => {
           },
           /* Enable direct call of 'call' */
           apply: (target, thisArg, args) => {
-            return instance.call.apply(instance, args);
+            return instance.call(...args);
           },
         });
       }
 
-      /* Returns limit */
-      get limit() {
-        return this.#limit;
+      /* Returns max number of effects allowed. */
+      get max() {
+        return this.#max;
       }
-      /* Sets limit */
-      set limit(limit) {
-        this.#limit = limit;
+      /* Sets max number of effects allowed.
+      NOTE
+      - null/undefined removes limit.
+      */
+      set max(max) {
+        this.#max = max;
       }
-      #limit = 10;
+      #max = 10;
 
       /* Returns owner */
       get owner() {
@@ -62,13 +67,16 @@ export const effects = (parent, config, ...factories) => {
 
       /* Returns and registers effect. */
       add(effect) {
-        if (this.limit && this.size >= this.limit) {
-          throw new Error(`Cannot register more than ${this.limit} effects.`);
+        if (![null, undefined].includes(this.max) && this.size >= this.max) {
+          throw new Error(`Cannot register more than ${this.max} effects.`);
         }
         this.registry.add(effect);
+
+        const current = type.create('data', this.owner.current).freeze()
+        
         effect({
-          current: this.owner.current,
-          previous: null,
+          current,
+          previous: current,
           publisher: this.owner,
           session: null,
         });
@@ -77,6 +85,8 @@ export const effects = (parent, config, ...factories) => {
 
       /* Calls registered effects. */
       call({ current, previous }) {
+        current = type.create('data', current).freeze()
+        previous = type.create('data', previous).freeze()
         for (const effect of this.registry.values()) {
           effect({
             current,
@@ -102,4 +112,3 @@ export const effects = (parent, config, ...factories) => {
   };
 };
 
-export { effects as default };

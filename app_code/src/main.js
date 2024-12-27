@@ -3,31 +3,32 @@ import "./main.css";
 
 await (async () => {
   const { Data } = await import("rollo/type/types/data/data");
-  const { Effect } = await import("rollo/type/types/effect/effect");
 
-  const data = Data.create({
-    foo: "foo",
-    bar: "bar",
-    stuff: 42,
-  });
+  if (null instanceof Object) {
+    console.log('Got it')
+  }
 
-  const effect = Effect.create((data) => {
-    //console.log(`'previous' from effect:`, data.previous);
-    console.log(`'current' from effect:`, data.current);
-    //console.log(`'publisher' from effect:`, data.publisher);
-    //console.log(`'session' from effect:`, data.session);
-  }, 
-  //"NUMBER"
-);
+  (() => {
+    const data = Data.create({
+      foo: 4,
+      bar: "bar",
+      stuff: 42,
+      condition: ([k, v]) => typeof v === "number",
+    });
 
-  data.effects.add(effect);
+    data.effects.add(({current, previous}) => {
 
-  //data({ foo: "FOO", bar: "BAR" });
-  data({ bar: 8, owner: 42 });
-  data.stuff = undefined
+      console.log(`'previous' from effect:`, previous.current);
+      console.log(`'current' from effect:`, current.current);
+    });
 
-  console.log(`data.current:`, data.current);
-  console.log(`data.previous:`, data.previous);
+    data({ bar: 8, stuff: "stuff" });
+
+    data.name = 'uffe'
+
+    
+    
+  })();
 })();
 
 /* Enable tests */

@@ -1,4 +1,4 @@
-// data_transform
+// data_map
 
 await (async () => {
   const { type } = await import("rollo/type/type");
@@ -12,7 +12,7 @@ await (async () => {
   });
 
   /* Double the value of all number items */
-  data.transform(([k, v]) => {
+  data.map(([k, v]) => {
     if (typeof v === "number") {
       return [k, 2 * v];
     } else {
@@ -22,3 +22,4 @@ await (async () => {
 
   console.log("data:", data);
 })();
+

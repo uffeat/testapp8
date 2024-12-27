@@ -1,33 +1,27 @@
+import { Subscription } from "rollo/type/types/subscription/subscription";
+import { filter } from "rollo/type/types/data/tools/filter";
+
 /* Implements update method. */
 export const update = (parent, config, ...factories) => {
   return class update extends parent {
-    /* Returns shallow copy of current data items. */
+
+
+    /* Returns shallow copy of current data items, i.e., not including accessor items. */
     get current() {
       return { ...this };
     }
-    /* Sets current data items (non-accessor) reactively */
-    set current(current) {
-      if (current) {
-        this.update(
-          Object.fromEntries([
-            /* Get entries from current that are different from this */
-            ...Object.entries(current).filter(([k, v]) => this[k] !== v),
-            /* Create undefined-value entries for entries that are not in current */
-            ...Object.entries(this)
-              .filter(([k, v]) => !(k in current))
-              .map(([k, v]) => [k, undefined]),
-          ])
-        );
-      } else {
-        this.clear();
-      }
-    }
 
-    /* Returns shallow copy of data items as-were before most recent update. */
+
+
     get previous() {
-      return { ...this.#previous };
+      return {...this.#previous}
+
     }
-    #previous = {};
+    #previous = {}
+
+
+
+
 
     /* Mutates items reactively from provided 'update'. Chainable. 
     NOTE
@@ -45,6 +39,20 @@ export const update = (parent, config, ...factories) => {
           ([k, v]) => !this.__chain__.defined.has(k)
         )
       );
+
+      //console.log('update:', update)////
+
+      /*
+      const subscriptions = []
+      for (const [k, v] of Object.entries(update)) {
+        if (v instanceof Subscription) {
+          subscriptions.push([k, v])
+          delete update[k]
+        }
+      }
+      console.log('subscriptions:', subscriptions)////
+      */
+
       /* Filter updates as per condition */
       if (this.condition) {
         update = Object.fromEntries(
@@ -65,10 +73,10 @@ export const update = (parent, config, ...factories) => {
         previous = this.difference(update, true);
       }
       /** Update */
-      Object.assign(this.#previous, this.current);
+      Object.assign(this.#previous, this.current)
       Object.assign(this, update);
       /* Remove items with undefined value */
-      [...this.items].forEach(([k, v]) => {
+      [...this.entries].forEach(([k, v]) => {
         if (v === undefined) {
           delete this[k];
         }

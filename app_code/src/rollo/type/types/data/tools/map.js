@@ -4,4 +4,4 @@ export function map(f) {
   return Object.fromEntries(Object.entries(this).map(f));
 }
 
-export { map as default };
+

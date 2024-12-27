@@ -1,4 +1,4 @@
-/* Implements match method. */
+/* Implements 'match' method. */
 export const match = (parent, config, ...factories) => {
   return class match extends parent {
     /* Tests, if 'other' contains the same key-value pairs as data. */

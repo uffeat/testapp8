@@ -1,15 +1,20 @@
 /* Implements reset method. */
 export const reset = (parent, config, ...factories) => {
   return class reset extends parent {
-    /* Sets all data items to a provided value. Chainable. */
-    reset(value) {
-      /* NOTE
-      - Mutates via 'update' to ensure centralized mutation.
-      */
-      this.update(
-        Object.fromEntries(Object.entries(this).map(([k, v]) => [k, value]))
+    /* Sets all items to a provided value. 
+    - If 'mutate' is true, mutates in-place. Chainable. 
+    - If 'mutate' is false, returns new object with reset items. 
+    */
+    reset(value, mutate = true) {
+      const mapped = Object.fromEntries(
+        Object.entries(this).map(([k, v]) => [k, value])
       );
-      return this;
+      if (mutate) {
+        /* Mutate via 'update' to ensure centralized mutation */
+        this.update(mapped);
+        return this;
+      }
+      return mapped;
     }
   };
 };

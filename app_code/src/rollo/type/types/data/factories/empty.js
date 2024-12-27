@@ -8,4 +8,3 @@ export const empty = (parent, config, ...factories) => {
   };
 };
 
-export { empty as default };

@@ -8,4 +8,3 @@ export const clone = (parent, config, ...factories) => {
   };
 };
 
-export { clone as default };

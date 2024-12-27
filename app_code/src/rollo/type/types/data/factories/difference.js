@@ -28,4 +28,3 @@ export const difference = (parent, config, ...factories) => {
   };
 };
 
-export { difference as default };
