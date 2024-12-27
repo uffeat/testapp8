@@ -13,14 +13,13 @@ await (async () => {
 
   /* Get sum of all items with number values */
   const value = data.reduce(
-    (data) => data.filter(([k, v]) => typeof v === "number"),
-    (items) => items.values,
-    (values) => {
+    (current) => current.values.filter((v) => typeof v === "number"),
+    (numbers) => {
       let sum = 0;
-      values.forEach((v) => (sum += v));
+      numbers.forEach((v) => (sum += v));
       return sum;
     }
   );
   console.log("value:", value);
-  console.log("data:", data);
+  
 })();

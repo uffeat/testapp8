@@ -11,22 +11,22 @@ export const items = (parent, config, ...factories) => {
 
     /* Returns entries. */
     get items() {
-      return Object.entries(this);
+      return Object.entries(this.current);
     }
 
     /* Returns keys. */
     get keys() {
-      return Object.keys(this);
+      return Object.keys(this.current);
     }
 
     /* Returns length of keys. */
     get size() {
-      return Object.keys(this).length;
+      return Object.keys(this.current).length;
     }
 
     /* Returns values. */
     get values() {
-      return Object.values(this);
+      return Object.values(this.current);
     }
   };
 };

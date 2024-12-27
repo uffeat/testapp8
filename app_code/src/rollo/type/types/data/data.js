@@ -9,6 +9,7 @@ import { empty } from "rollo/type/types/data/factories/empty";
 import { filter } from "rollo/type/types/data/factories/filter";
 import { for_each } from "rollo/type/types/data/factories/for_each";
 import { freeze } from "rollo/type/types/data/factories/freeze";
+import { includes } from "rollo/type/types/data/factories/includes";
 import { intersection } from "rollo/type/types/data/factories/intersection";
 import { items } from "rollo/type/types/data/factories/items";
 import { match } from "rollo/type/types/data/factories/match";
@@ -33,6 +34,7 @@ export const Data = (() => {
     filter,
     for_each,
     freeze,
+    includes,
     intersection,
     items,
     map,
@@ -50,16 +52,20 @@ export const Data = (() => {
     static create = (update) => {
       const instance = new Data();
       instance.update(update);
+
       /* Return proxy to
-      - Channel setting of data properties via 'update'
-      - Make the 'in' operator apply to data properties only
+      - delegate setting of data properties to 'update'
+      - make the 'in' operator apply to current
       */
       return new Proxy(instance, {
         get: (target, key) => {
-          return instance[key];
+          if (key in instance) {
+            return instance[key];
+          }
+          return instance.current[key];
         },
         set: (target, key, value) => {
-          if (instance.__chain__.defined.has(key)) {
+          if (key in instance) {
             instance[key] = value;
           } else {
             instance.update({ [key]: value });

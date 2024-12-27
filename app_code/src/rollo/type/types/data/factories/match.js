@@ -7,8 +7,8 @@ export const match = (parent, config, ...factories) => {
       if (entries.length !== this.size) {
         return false;
       }
-      for (const [key, value] of entries) {
-        if (this[key] !== value) {
+      for (const [k, v] of entries) {
+        if (this.current[k] !== v) {
           return false;
         }
       }

@@ -1,36 +1,21 @@
 /* Implements 'update' method. */
 export const update = (parent, config, ...factories) => {
   return class update extends parent {
-    /* Returns shallow copy of current data items. */
+    /* Returns current. 
+    NOTE
+      - Can, but should generally not, be mutated externally. 
+    */
     get current() {
-      return { ...this };
+      return this.#current;
     }
-    /* Sets current data items (non-accessor) reactively */
-    set current(current) {
-      if (current) {
-        this.update(
-          Object.fromEntries([
-            /* Get entries from current that are different from this */
-            ...Object.entries(current).filter(([k, v]) => this[k] !== v),
-            /* Create undefined-value entries for entries that are not in current */
-            ...Object.entries(this)
-              .filter(([k, v]) => !(k in current))
-              .map(([k, v]) => [k, undefined]),
-          ])
-        );
-      } else {
-        this.clear();
-      }
-    }
+    #current = {};
 
-    /* Returns shallow copy of data items as-were before most recent update. */
+    /* Returns current as-was before most recent update. 
+    NOTE
+      - Can, but should generally not, be mutated externally. 
+    */
     get previous() {
-      return { ...this.#previous };
-    }
-    /* Can, but should generally not, be set externally. */
-    set previous(previous) {
-      this.#previous = previous
-
+      return this.#previous;
     }
     #previous = {};
 
@@ -40,9 +25,9 @@ export const update = (parent, config, ...factories) => {
     */
     update(update) {
       if (!update) return this;
-      /* Allow update from entries array */
+      /* Allow 'update' to be passed in as entries array */
       if (Array.isArray(update)) {
-        update = Object.fromEntries(update)
+        update = Object.fromEntries(update);
       }
       /* Update defined properties */
       Object.entries(update)
@@ -60,7 +45,7 @@ export const update = (parent, config, ...factories) => {
           Object.entries(update).filter(this.condition)
         );
       }
-      /* Transform updates as per transformer */
+      /* Transform update as per transformer */
       if (this.transformer) {
         update = Object.fromEntries(
           Object.entries(update).map(this.transformer)
@@ -73,13 +58,13 @@ export const update = (parent, config, ...factories) => {
         current = this.difference(update);
         previous = this.difference(update, true);
       }
-      /** Update */
+      /* Update */
       Object.assign(this.previous, this.current);
-      Object.assign(this, update);
+      Object.assign(this.current, update);
       /* Remove items with undefined value */
-      [...this.items].forEach(([k, v]) => {
+      [...Object.entries(this.current)].forEach(([k, v]) => {
         if (v === undefined) {
-          delete this[k];
+          delete this.current[k];
         }
       });
       /* Call effects, if change */

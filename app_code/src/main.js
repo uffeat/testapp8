@@ -1,30 +1,32 @@
 import "./bootstrap.scss";
 import "./main.css";
 
-/* Purpose: Demonstate and test Data.filter */
+/* Purpose: Demonstate and test Data.map */
 await (async () => {
   const { Data } = await import("rollo/type/types/data/data");
 
- 
   const data = Data.create({
     foo: "foo",
     bar: "bar",
     stuff: 42,
-    
+    thing: 7,
   });
 
- 
+  /* Get sum of all items with number values */
+  const sum = data.reduce(
+    (data) => data.values.filter((v) => typeof v === "number"),
+    (numbers) => {
+      let sum = 0;
+      numbers.forEach((v) => (sum += v));
+      return sum;
+    }
+  );
 
-  /* Change data */
-  data.filter(([k, v]) => typeof v === "number");
-  
-
-  /* Check final result */
-  const expected = { stuff: 42 };
-  if (data.match(expected)) {
-    console.log(`Success! Current data:`, data.current);
+  const expected = 49;
+  if (sum === expected) {
+    console.log(`Success! Reduced to: ${sum}`);
   } else {
-    console.error(`Expected:`, expected, `Got:`, data.current);
+    console.error(`Expected: ${expected}. Got: ${sum}`);
   }
 })();
 

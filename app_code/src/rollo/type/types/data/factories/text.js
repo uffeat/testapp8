@@ -4,14 +4,14 @@ export const text = (parent, config, ...factories) => {
     /* Tests, if items are json-compatible */
     get jsonable() {
       return (
-        Object.values(this).filter(
+        Object.values(this.current).filter(
           (v) =>
             v === null || ["boolean", "number", "string"].includes(typeof v)
-        ).length === Object.values(this).length
+        ).length === Object.values(this.current).length
       );
       /* Alternative implementation:
       try {
-        JSON.stringify(this);
+        JSON.stringify(this.current);
         return true
       } catch {
         return false
@@ -30,13 +30,13 @@ export const text = (parent, config, ...factories) => {
       }
       if (sort) {
         const parts = [];
-        for (const key of Object.keys(this).sort()) {
-          const part = JSON.stringify({ [key]: this[key] });
+        for (const key of Object.keys(this.current).sort()) {
+          const part = JSON.stringify({ [key]: this.current[key] });
           parts.push(part.slice(1, -1));
         }
         return `{${parts.join(",")}}`;
       }
-      return JSON.stringify(this);
+      return JSON.stringify(this.current);
     }
 
     /* Retuns text representation of items.
@@ -45,7 +45,7 @@ export const text = (parent, config, ...factories) => {
     - Result may not be fully human-readable.
     - Use when items may not be json-compatible; otherwise, use 'json()'. */
     text() {
-      return `{${Object.entries(this)
+      return `{${Object.entries(this.current)
         .map(([k, v]) => `${k}:${String(v)}`)
         .join(",")}}`;
     }

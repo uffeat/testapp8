@@ -4,9 +4,7 @@ export const clear = (parent, config, ...factories) => {
     /* Deletes all items. Chainable. */
     clear() {
       /* Mutate via 'update' to ensure centralized mutation */
-      this.update(
-        Object.fromEntries(Object.entries(this).map(([k, v]) => [k, undefined]))
-      );
+      this.update(Object.entries(this.current).map(([k, v]) => [k, undefined]));
       return this;
     }
   };

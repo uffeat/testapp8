@@ -10,7 +10,7 @@ export const difference = (parent, config, ...factories) => {
     difference(other, reverse = false) {
       if (reverse) {
         return Object.fromEntries(
-          Object.entries(other).filter(([k, v]) => this[k] !== v).map(([k, v]) => [k, this[k]])
+          Object.entries(other).filter(([k, v]) => this.current[k] !== v).map(([k, v]) => [k, this.current[k]])
         );
       } else {
         return Object.fromEntries(
@@ -18,7 +18,7 @@ export const difference = (parent, config, ...factories) => {
             if (v === undefined) {
               return true;
             } else {
-              return this[k] !== v;
+              return this.current[k] !== v;
             }
           })
         );
