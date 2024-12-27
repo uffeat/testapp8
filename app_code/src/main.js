@@ -8,6 +8,11 @@ await (async () => {
   const data = Data.create();
 
   data.effects.add(({ current }) => {
+    console.log(`current from catch-all:`, current.current);
+    
+  });
+
+  data.effects.add(({ current }) => {
     console.log(`current:`, current.current);
     if (!("foo" in current)) {
       console.error(`No 'foo'!`);

@@ -71,25 +71,15 @@ export const effects = (parent, config, ...factories) => {
           throw new Error(`Cannot register more than ${this.max} effects.`);
         }
 
-        if (condition) {
-          effect = Effect.create(effect, condition);
-
-         
-
+        effect = Effect.create(effect, condition);
           effect.call({
             current: this.owner.current,
             previous: null,
             publisher: this.owner,
             session: null,
           });
-        } else {
-          effect({
-            current: this.owner.current,
-            previous: null,
-            publisher: this.owner,
-            session: null,
-          });
-        }
+
+        
 
         this.registry.add(effect);
 
@@ -99,21 +89,12 @@ export const effects = (parent, config, ...factories) => {
       /* Calls registered effects. */
       call({ current, previous }) {
         for (const effect of this.registry.values()) {
-          if (effect instanceof Effect) {
-            effect.call({
-              current,
-              previous,
-              publisher: this.owner,
-              session: ++this.#session,
-            });
-          } else {
-            effect({
-              current,
-              previous,
-              publisher: this.owner,
-              session: ++this.#session,
-            });
-          }
+          effect.call({
+            current,
+            previous,
+            publisher: this.owner,
+            session: ++this.#session,
+          });
         }
       }
 
@@ -135,14 +116,13 @@ export const effects = (parent, config, ...factories) => {
 class Effect {
   static create = (...args) => {
     const instance = new Effect(...args);
-    return instance
+    return instance;
   };
   #source;
 
   constructor(source, condition) {
     this.#source = source;
-    this.condition = condition
-    
+    this.condition = condition;
   }
 
   get condition() {
@@ -157,24 +137,16 @@ class Effect {
   #condition;
 
   call({ current, previous, publisher, session }) {
-
-   
-   
-
     current = type.create("data", current);
     previous = type.create("data", previous || {});
     if (
       !this.condition ||
       this.condition({ current, previous, publisher, session })
     ) {
-    
-
       this.#source({ current, previous, publisher, session });
     }
   }
 }
-
-
 
 /* Creates and returns condition function from short-hand. */
 function interpret(condition) {
@@ -202,8 +174,6 @@ function interpret(condition) {
     /* TODO
     - use data methods
     */
-
-
 
     const key = Object.keys(condition)[0];
     const value = Object.values(condition)[0];
