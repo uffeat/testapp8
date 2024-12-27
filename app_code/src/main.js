@@ -80,7 +80,8 @@ await (async () => {
     #subscriber;
   }
 
-
+  /* Perhaps the passed in function should decide, which key in subscriber should be targetted?
+  This could handle multiple keys and would slim-down the Subscription.create signature */
 
   const supscription = Subscription.create(data, "foo", publisher, function() {
     let sum = 0
