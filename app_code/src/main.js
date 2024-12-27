@@ -36,7 +36,8 @@ await (async () => {
         ({ current, previous, publisher, session }) => {
 
           
-          
+          /* Perhaps do not use 'reduce', but rely on passed-in unbound func, 
+          to which publisher and subscriber are passed in??? */
 
 
 
