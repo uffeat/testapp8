@@ -1,5 +1,3 @@
-import { type } from "rollo/type/type";
-
 /* Implements effects for reactive updates. */
 export const effects = (parent, config, ...factories) => {
   return class effects extends parent {
@@ -72,11 +70,9 @@ export const effects = (parent, config, ...factories) => {
         }
         this.registry.add(effect);
 
-        const current = type.create('data', this.owner.current).freeze()
-        
         effect({
-          current,
-          previous: current,
+          current: this.owner.current,
+          previous: null,
           publisher: this.owner,
           session: null,
         });
@@ -85,8 +81,6 @@ export const effects = (parent, config, ...factories) => {
 
       /* Calls registered effects. */
       call({ current, previous }) {
-        current = type.create('data', current).freeze()
-        previous = type.create('data', previous).freeze()
         for (const effect of this.registry.values()) {
           effect({
             current,
@@ -111,4 +105,3 @@ export const effects = (parent, config, ...factories) => {
     })(this);
   };
 };
-

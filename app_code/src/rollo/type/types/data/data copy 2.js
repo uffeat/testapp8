@@ -20,7 +20,14 @@ import { map } from "@/rollo/type/types/data/factories/map";
 import { transformer } from "rollo/type/types/data/factories/transformer";
 import { update } from "rollo/type/types/data/factories/update";
 
-export const Data = (() => {
+export const Data = await (async () => {
+
+  
+
+  //Function
+  //Object
+  //class Base {},
+
   const composition = type.compose(
     Object,
     {},
@@ -50,10 +57,9 @@ export const Data = (() => {
     static create = (update) => {
       const instance = new Data();
       instance.update(update);
-      /* Return proxy to
-      - Channel setting of data properties via 'update'
-      - Make the 'in' operator apply to data properties only
-      */
+
+      //return instance
+
       return new Proxy(instance, {
         get: (target, key) => {
           return instance[key];
@@ -61,6 +67,7 @@ export const Data = (() => {
         set: (target, key, value) => {
           if (instance.__chain__.defined.has(key)) {
             instance[key] = value;
+            
           } else {
             instance.update({ [key]: value });
           }
@@ -69,11 +76,14 @@ export const Data = (() => {
         has: (target, key) => {
           return key in instance.current;
         },
+        
       });
     };
 
     constructor() {
       super();
+      const instance = this
+      return instance
     }
   }
 

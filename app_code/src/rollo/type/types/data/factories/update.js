@@ -27,6 +27,11 @@ export const update = (parent, config, ...factories) => {
     get previous() {
       return { ...this.#previous };
     }
+    /* Can, but should generally not, be set externally. */
+    set previous(previous) {
+      this.#previous = previous
+
+    }
     #previous = {};
 
     /* Mutates items reactively from provided 'update'. Chainable. 
@@ -65,7 +70,7 @@ export const update = (parent, config, ...factories) => {
         previous = this.difference(update, true);
       }
       /** Update */
-      Object.assign(this.#previous, this.current);
+      Object.assign(this.previous, this.current);
       Object.assign(this, update);
       /* Remove items with undefined value */
       [...this.items].forEach(([k, v]) => {
