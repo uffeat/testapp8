@@ -5,27 +5,34 @@ import "./main.css";
 await (async () => {
   const { Data } = await import("rollo/type/types/data/data");
 
-  const data = Data.create({
-    foo: "foo",
-    bar: "bar",
-    stuff: 42,
-  });
+  const data = Data.create();
 
- 
+  data.effects.add(({ current }) => {
+    console.log(`current:`, current.current);
+    if (!("foo" in current)) {
+      console.error(`No 'foo'!`);
+    }
+  }, "foo");
 
-  data.effects.add(
-    ({ current }) => {
-      console.log(current.current);
+  data.effects.add(({ current }) => {
+    console.log(`current:`, current.current);
+    if (!("foo" in current) && !("bar" in current)) {
+      console.error(`Neither 'foo', not 'bar!`);
+    }
+  }, ['bar', "foo"]);
 
-      if (!("foo" in current)) {
-        console.error(`No 'foo'!`);
-      }
-    },
-    ({ current }) => "foo" in current
-  );
+  data.effects.add(({ current }) => {
+    console.log(`current:`, current.current);
+    if (current.foo !== 42) {
+      console.error(`'foo' not 42!`);
+    }
+  }, {foo: 42});
 
   data.foo = "FOO";
   data.bar = "BAR";
+  data.stuff = 8;
+  data.foo = 42
+
 })();
 
 /* Enable tests */
