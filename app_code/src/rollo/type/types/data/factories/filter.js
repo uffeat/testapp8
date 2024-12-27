@@ -7,13 +7,14 @@ export const filter = (parent, config, ...factories) => {
     - Corresponds to the 'filter' array method.
     */
     filter(f, mutate = true) {
-      const filtered = Object.fromEntries(Object.entries(this).filter(f));
+      const include = Object.entries(this).filter(f);
       if (mutate) {
+        const exclude = Object.entries(this).filter(([k, v]) => !f([k, v])).map(([k, v]) => [k, undefined])
         /* Mutate via 'update' to ensure centralized mutation */
-        this.update(filtered);
+        this.update([...include, ...exclude]);
         return this;
       }
-      return filtered;
+      return Object.fromEntries(include);
     }
   };
 };

@@ -1,18 +1,36 @@
 // data_clone
 
+/* Purpose: Demonstate and test Data.clone */
 await (async () => {
-  const { type } = await import("rollo/type/type");
-  await import("rollo/type/types/data/data");
+  const { Data } = await import("rollo/type/types/data/data");
 
-  const data = type.create("data", {
-    foo: "FOO",
-    bar: "BAR",
+  const original = Data.create({
+    foo: "foo",
+    bar: "bar",
   });
+  const clone = original.clone();
 
-  const data_clone = data.clone();
-  data.foo = "foo in data";
-  data_clone.foo = "foo in clone";
+  /* Change original and clone */
+  original.clear();
+  clone.stuff = 42;
 
-  console.log("data:", data);
-  console.log("data_clone:", data_clone);
+  /* Check that original has been changed independently of clone */
+  if (original.empty) {
+    console.log(`Success! Original:`, original.current);
+  } else {
+    console.error(`Something went wrong! Original:`, original.current);
+  }
+
+  /* Check that clone 
+  - has the items of original as-were at cloning
+  - has been changed independently of original 
+  */
+  (() => {
+    const expected = { foo: "foo", bar: "bar", stuff: 42 };
+    if (clone.match(expected)) {
+      console.log(`Success! Clone:`, clone.current);
+    } else {
+      console.error(`Expected:`, expected, `Got:`, clone.current);
+    }
+  })();
 })();

@@ -1,4 +1,4 @@
-/* Implements update method. */
+/* Implements 'update' method. */
 export const update = (parent, config, ...factories) => {
   return class update extends parent {
     /* Returns shallow copy of current data items. */
@@ -40,6 +40,10 @@ export const update = (parent, config, ...factories) => {
     */
     update(update) {
       if (!update) return this;
+      /* Allow update from entries array */
+      if (Array.isArray(update)) {
+        update = Object.fromEntries(update)
+      }
       /* Update defined properties */
       Object.entries(update)
         .filter(([k, v]) => this.__chain__.defined.has(k))

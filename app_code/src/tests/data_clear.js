@@ -1,18 +1,18 @@
 // data_clear
 
+/* Purpose: Demonstate and test Data.clear */
 await (async () => {
-  const { type } = await import("rollo/type/type");
-  await import("rollo/type/types/data/data");
+  const { Data } = await import("rollo/type/types/data/data");
 
-  const data = type.create("data", {
+  const data = Data.create({
     foo: "foo",
     bar: "bar",
-    stuff: 42,
-    thing: 42,
   });
 
-  console.log("Before clear:", data.data);
-  /* Delete all items */
   data.clear();
-  console.log("After clear:", data.data);
+  if (data.size) {
+    console.error(`Did not clear... Current:`, data.current);
+  } else {
+    console.log(`Cleared successfully... Current:`, data.current);
+  }
 })();

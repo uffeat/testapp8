@@ -1,44 +1,28 @@
 import "./bootstrap.scss";
 import "./main.css";
 
+/* Purpose: Demonstate and test Data.filter */
 await (async () => {
   const { Data } = await import("rollo/type/types/data/data");
 
-  /* Create data that silently ignores attempts to set an item to a 
-  non-number value. */
+ 
   const data = Data.create({
     foo: "foo",
     bar: "bar",
     stuff: 42,
-    condition: ([k, v]) => {
-      if (typeof v === "number") {
-        return true;
-      }
-      /* NOTE
-      - A more restrictive implementation could throw an error here.
-      */
-      console.log(`Ignoring attempt to set '${k}' to ${v}`);
-      return false;
-    },
+    
   });
 
-  /* Set up effect to watch that the condition works. */
-  data.effects.add(({ current }) => {
-    Object.values(current).forEach((v) => {
-      if (typeof v !== "number") {
-        throw new Error(`Got an item with non-number value: ${v}`);
-      }
-    });
-  });
+ 
 
   /* Change data */
-  data.update({ bar: 8, stuff: undefined });
-  data.name = "uffe";
+  data.filter(([k, v]) => typeof v === "number");
+  
 
   /* Check final result */
-  const expected = { bar: 8, stuff: 42 };
+  const expected = { stuff: 42 };
   if (data.match(expected)) {
-    console.log(`All good! Current data:`, data.current);
+    console.log(`Success! Current data:`, data.current);
   } else {
     console.error(`Expected:`, expected, `Got:`, data.current);
   }

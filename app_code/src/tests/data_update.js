@@ -9,7 +9,7 @@ await (async () => {
     stuff: 42,
   });
   /* Set up catch-all effect */
-  data.effects.add(({ current, previous, owner, session }) => {
+  data.effects.add(({ current, previous, publisher, session }) => {
     console.log(`'previous' from effect:`, previous);
     console.log(`'current' from effect:`, current);
     console.log(`'session' from effect:`, session);
