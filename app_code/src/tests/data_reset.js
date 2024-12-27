@@ -10,12 +10,10 @@ await (async () => {
   });
 
   /* Set up effect to check that reset batch-updates. */
-  data.effects.add(function effect({ current }) {
-    effect._count = effect._count || 0;
-    ++effect._count;
-    if (effect._count > 2) {
+  data.effects.add(function effect({ session }) {
+    if (session > 1) {
       console.error(
-        `Effect ran more than twice; batch-update does not work correctly!`
+        `Effect ran ${session + 1} times; batch-update does not work correctly!`
       );
     }
   });

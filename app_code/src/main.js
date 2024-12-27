@@ -1,7 +1,7 @@
 import "./bootstrap.scss";
 import "./main.css";
 
-/* Purpose: Demonstate and test 'update' */
+/* Purpose: Demonstate and test reactive getters */
 await (async () => {
   const { Data } = await import("rollo/type/types/data/data");
 
@@ -11,19 +11,16 @@ await (async () => {
     stuff: 42,
   });
 
-  /* Set up effect to check batch-updates. */
+  /* Check effect. */
   data.effects.add(function effect({ current }) {
-    effect._count = effect._count || 0;
-    ++effect._count;
-    if (effect._count > 2) {
-      console.error(
-        `Effect ran more than twice; batch-update does not work correctly!`
-      );
-    }
+    console.log(`current:`, current);
   });
 
   /* Change data */
-  data.update({ foo: "FOO", bar: "BAR", stuff: undefined });
+  data.foo = 'FOO'
+  data.bar = 'BAR'
+  data.stuff = undefined
+  
   /* Check final result */
   const expected = {
     foo: "FOO",
