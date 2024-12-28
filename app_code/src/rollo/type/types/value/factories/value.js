@@ -3,7 +3,6 @@ import { Effects } from "rollo/type/types/data/tools/effects";
 /* Implements 'value' getter/setter. */
 export const value = (parent, config, ...factories) => {
   return class value extends parent {
-    
     /* Returns current value. 
     NOTE
     - Alias for compatibility with Effects and Effect
@@ -18,9 +17,29 @@ export const value = (parent, config, ...factories) => {
     }
     /* Sets current. */
     set current(current) {
-      if (this.#current === current) {
+      /* Abort as per condition */
+      if (this.condition && !this.condition(current)) {
         return;
       }
+      /* Transform  as per transformer */
+      if (this.transformer) {
+        current = this.transformer(current);
+      }
+      /* By convention, current can never be undefined */
+      if (current === undefined) {
+        return;
+      }
+      /* Abort, if no change */
+      if (current.match) {
+        if (current.match(this.#current)) {
+          return;
+        }
+      } else {
+        if (this.#current === current) {
+          return;
+        }
+      }
+      /* Update */
       this.#previous = this.#current;
       this.#current = current;
       /* Call effects */
@@ -28,13 +47,13 @@ export const value = (parent, config, ...factories) => {
         this.effects.call({ current: this.current, previous: this.previous });
       }
     }
-    #current;
-    
+    #current = null;
 
+    /* Returns previous value */
     get previous() {
-      return this.#previous
+      return this.#previous;
     }
-    #previous
+    #previous;
 
     /* Returns effects controller. */
     get effects() {
@@ -48,7 +67,11 @@ export const value = (parent, config, ...factories) => {
     }
     #type = typeof this.current;
 
-    /* . */
+    /* Set current value. Chainable. 
+    NOTE
+    - Syntactical alternative to current setter.
+    - Also provided for alignment with other types.
+    */
     update(current) {
       this.current = current;
       return this;

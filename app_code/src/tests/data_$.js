@@ -1,11 +1,24 @@
-import "./bootstrap.scss";
-import "./main.css";
+// data_$
 
-/* Purpose: Demonstate and test Value.bind */
+
+/* Purpose: Demonstate and test Data.$ */
 await (async () => {
+ 
   const { Data } = await import("rollo/type/types/data/data");
   const { Value } = await import("rollo/type/types/value/value");
-  
+
+  const data = Data.create({
+    foo: "foo",
+    bar: "bar",
+    stuff: 42,
+    thing: 7,
+    __name__: "uffe",
+  });
+
+  /*  */
+  data.effects.add((change) => {
+    console.log(`current:`, change.current);
+  });
 
   const state = Data.create({
     a: 1,
@@ -13,7 +26,12 @@ await (async () => {
     c: 3,
   });
 
+  
+  data.$.foo = 42;
+ 
+
   const foo = Value.create("foo");
+  console.log(`current:`, foo.current);
 
   /*  */
   foo.effects.add((change) => {
@@ -21,32 +39,15 @@ await (async () => {
     console.log(`previous:`, change.previous);
   });
 
-  foo.reducer = (change) => {
+  foo.current = "FOO";
+
+  foo.subscriptions.add(state, (change) => {
     let sum = 0;
     for (const v of Object.values(change.current)) {
       sum += v;
     }
     return sum;
-  }
-
-  foo.bind(state)
-
-  
-
-  state.$.a = 10
-
-
+  });
 
   
 })();
-
-/* Enable tests */
-if (import.meta.env.DEV) {
-  let path = "";
-  window.addEventListener("keydown", async (event) => {
-    if (event.code === "KeyT" && event.shiftKey) {
-      path = prompt("Path:", path);
-      await import(`@/tests/${path}.js`);
-    }
-  });
-}
