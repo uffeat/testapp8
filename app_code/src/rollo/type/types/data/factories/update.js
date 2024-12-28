@@ -1,3 +1,4 @@
+const { Value } = await import("rollo/type/types/value/value");
 import { Effects } from "rollo/type/types/data/tools/effects";
 
 /* Implements 'update' method. */
@@ -14,7 +15,17 @@ export const update = (parent, config, ...factories) => {
         if (target.__chain__.defined.has(key)) {
           target[key] = value;
         } else {
-          target.update({ [key]: value });
+          if (value instanceof Value) {
+            /* TODO
+            - set up effect
+            */
+          } else {
+            target.update({ [key]: value });
+          }
+
+
+
+         
         }
         return true;
       },
