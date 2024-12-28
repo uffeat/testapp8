@@ -18,7 +18,7 @@ export class Effects {
   - Primarily used to catch memory leaks, e.g., when effects are to be added and 
     removed frequently, but fails to be removed. The default max of 10 is a judgement 
     call - based on the assumption that a data object with more than 10 concurrent
-    effects csn be difficult to manage and should perhaps be broken up into smaller
+    effects can be difficult to manage and should perhaps be broken up into smaller
     "state islands".
   */
   set max(max) {
@@ -59,9 +59,11 @@ export class Effects {
     this.registry.add(effect);
     /* Call effect */
     effect.call({
-      current: this.owner,
+      current: this.owner.data,
+      index: null,
       previous: null,
       publisher: this.owner,
+      session: null,
     });
     /* Return effect, e.g., for control and later removal */
     return effect;
@@ -72,23 +74,19 @@ export class Effects {
   - Can, but should generally not, be called externally. 
   */
   call({ current, previous }) {
-
+    ++this.#session
     for (const [index, effect] of [...this.registry].entries()) {
       const result = effect.call({
         current,
         index,
         previous,
         publisher: this.owner,
-        session: ++this.#session,
+        session: this.#session,
       });
       if (result === false) {
-        break
+        break;
       }
     }
-
-
-
-    
   }
 
   /* Tests, if effect is registered. */

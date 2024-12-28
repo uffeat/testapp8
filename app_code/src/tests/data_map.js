@@ -35,9 +35,9 @@ await (async () => {
     thing: 14,
   };
   if (data.match(expected)) {
-    console.log(`Success! Current data:`, data.current);
+    console.log(`Success! Data:`, data.data);
   } else {
-    console.error(`Expected:`, expected, `Actual:`, data.current);
+    console.error(`Expected:`, expected, `Actual:`, data.data);
   }
 })();
 

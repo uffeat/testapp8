@@ -1,9 +1,7 @@
 /* Implements 'hooks' method. */
 export const hooks = (parent, config, ...factories) => {
   return class hooks extends parent {
-    constructor() {
-      super();
-    }
+    
     /* Calls hook functions bound to this. Chainable. */
     hooks(...hooks) {
       super.hooks && super.hooks(...hooks);

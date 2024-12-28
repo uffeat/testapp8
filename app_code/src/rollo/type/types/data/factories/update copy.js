@@ -3,23 +3,6 @@ import { Effects } from "rollo/type/types/data/tools/effects";
 /* Implements 'update' method. */
 export const update = (parent, config, ...factories) => {
   return class update extends parent {
-    get $() {
-      return this.#$;
-    }
-    #$ = new Proxy(this, {
-      get: (target, key) => {
-        return target[key];
-      },
-      set: (target, key, value) => {
-        if (target.__chain__.defined.has(key)) {
-          target[key] = value;
-        } else {
-          target.update({ [key]: value });
-        }
-        return true;
-      },
-    });
-
     /* Returns effects controller. */
     get effects() {
       return this.#effects;
@@ -58,24 +41,39 @@ export const update = (parent, config, ...factories) => {
           Object.entries(update).map(this.transformer)
         );
       }
-      /* Infer changes */
-      const current = this.difference(update);
-      const previous = this.difference(update, true);
-      const changed_entries = Object.entries(current);
-      if (changed_entries.length) {
-        /* Update */
-        changed_entries
-          .filter(([k, v]) => v === undefined)
-          .forEach(([k, v]) => delete this[k]);
-        changed_entries
-          .filter(([k, v]) => v !== undefined)
-          .forEach(([k, v]) => (this[k] = v));
-        /* Call effects */
-        if (this.effects.size) {
-          this.effects.call({ current, previous });
-        }
-      }
 
+
+      console.log('update:', update)////
+      console.log('current:', this.difference(update))////
+
+
+
+      /* Infer changes */
+      let current;
+      let previous;
+      if (this.effects && this.effects.size) {
+        current = this.difference(update);
+        previous = this.difference(update, true);
+      }
+      /* Update */
+      Object.assign(this, update);
+      /* Remove items with undefined value */
+      [...Object.entries(this)].forEach(([k, v]) => {
+        if (v === undefined) {
+          delete this[k];
+        }
+      });
+      /* Call effects, if change */
+      if (current) {
+
+
+        console.log('Calling effects')////
+
+
+
+
+        this.effects.call({ current, previous });
+      }
       return this;
     }
   };

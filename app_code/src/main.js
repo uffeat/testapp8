@@ -1,57 +1,60 @@
 import "./bootstrap.scss";
 import "./main.css";
 
-
-/* Purpose: Demonstate and test effects */
+/* Purpose: Demonstate and test Data.map */
 await (async () => {
   const { Data } = await import("rollo/type/types/data/data");
+  const { Value } = await import("rollo/type/types/value/value");
+  const { Effect } = await import("rollo/type/types/data/tools/effect");
 
-  const data = Data.create();
-
-  /* Set up catch-all effect */
-  const catch_all = data.effects.add(({ current }) => {
-    console.log(`current from catch-all:`, current.data);
+  const data = Data.create({
+    foo: "foo",
+    bar: "bar",
+    stuff: 42,
+    thing: 7,
+    __name__: "uffe",
   });
 
-  catch_all.disabled = true;
+  /*  */
+  data.effects.add((change) => {
+    console.log(`current:`, change.current);
+  });
 
-  /* Set up effect that requires 'foo' in current */
-  data.effects.add(({ current }) => {
-    console.log(`current:`, current.data);
-    if (!("foo" in current)) {
-      console.error(`No 'foo'!`);
+  const state = Data.create({
+    a: 1,
+    b: 2,
+    c: 3,
+  });
+
+  const effect = Effect.create(null, null, (change) => {}).register(state);
+  data.$.foo = 42;
+  console.log(`data:`, data.data);
+
+  const foo = Value.create("foo");
+  console.log(`current:`, foo.current);
+
+  /*  */
+  foo.effects.add((change) => {
+    console.log(`current:`, change.current);
+    console.log(`previous:`, change.previous);
+  });
+
+  foo.current = "FOO";
+
+  foo.subscriptions.add(state, (change) => {
+    let sum = 0
+    for (const v of Object.values(change.current)) {
+      sum += v
     }
-  }, "foo");
+    return sum
 
-  /* Set up effect that requires 'bar' OR 'foo' in current */
-  data.effects.add(
-    ({ current }) => {
-      console.log(`current:`, current.data);
-      if (!("foo" in current) && !("bar" in current)) {
-        console.error(`Neither 'foo', nor 'bar!`);
-      }
-    },
-    ["bar", "foo"]
-  );
+  })
 
-  /* Set up effect that requires foo=42 in current */
-  data.effects.add(
-    ({ current }) => {
-      console.log(`current:`, current.data);
-      if (current.foo !== 42) {
-        console.error(`'foo' not 42!`);
-      }
-    },
-    { foo: 42 }
-  );
 
-  data.foo = "FOO";
-  data.bar = "BAR";
-  data.stuff = 8;
-  catch_all.disabled = false;
-  data.foo = 42;
+
+
+
 })();
-
 
 /* Enable tests */
 if (import.meta.env.DEV) {

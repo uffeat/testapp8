@@ -1,4 +1,5 @@
 import { type } from "rollo/type/type";
+import { Change } from "rollo/type/types/data/tools/change";
 
 /* Wrapper for registered effects.
 NOTE
@@ -21,7 +22,7 @@ export class Effect {
   /* Sets condition. 
   NOTE
   - 'condition' can be changed dynamically, i.e., after effect registration.
-    While this can be powerful, take care not to loose track!
+    While this can be powerful, it can also add complexity!
   */
   set condition(condition) {
     if (condition && typeof condition !== "function") {
@@ -51,7 +52,7 @@ export class Effect {
   /* Sets source. 
   NOTE
   - 'source' can be changed dynamically, i.e., after effect registration.
-    While this can be powerful, take care not to loose track!
+    While this can be powerful, it can also add complexity!
   */
   set source(source) {
     this.#source = source;
@@ -81,9 +82,6 @@ export class Effect {
     }
     /* Check source */
     if (!this.source) {
-      if (import.meta.env.DEV) {
-        console.warn(`'source' not set.`);
-      }
       return;
     }
 
@@ -104,7 +102,7 @@ export class Effect {
     NOTE
     - 'source' should generally not return anything explicitly. However,
       for special cases, if 'source' returns false, subsequent effects in
-      the session are not called; similar to `event.stopPropagation`.
+      the session are not called; similar to `event.stopPropagation()`.
     */
     return this.source(change);
   }
@@ -117,7 +115,8 @@ export class Effect {
     publisher.effects.add(this);
     /* Call effect */
     this.call({
-      current: publisher,
+      current: publisher.data,
+      index: null,
       previous: null,
       publisher: publisher,
       session: null,
@@ -129,74 +128,10 @@ export class Effect {
   NOTE
   - Alternative to deregistering effect from publisher.
   */
-  unregister(publisher) {
+  deregister(publisher) {
     publisher.effects.remove(this);
     return this;
   }
-}
-
-/* Argument for effect sources and effect conditions. */
-class Change {
-  static create = (...args) => new Change(...args);
-
-  constructor({ current, effect, index, previous, publisher, session }) {
-    this.#effect = effect;
-    this.#index = index;
-    /* Convert current and pervious to Data instances */
-    this.#current = type.create("data", current);
-    this.#previous = type.create("data", previous || {});
-
-    this.#publisher = publisher;
-    this.#session = session;
-
-    this.#time = Date.now();
-  }
-
-  /* Returns current data. */
-  get current() {
-    return this.#current;
-  }
-  #current;
-
-  /* Returns effect.
-  NOTE
-  - Provides easy access to the effect itself from inside the effect 
-    source/condition.
-  */
-  get effect() {
-    return this.#effect;
-  }
-  #effect;
-
-  /* Returns effect index for the current session. */
-  get index() {
-    return this.#index;
-  }
-  #index;
-
-  /* Returns previous data. */
-  get previous() {
-    return this.#previous;
-  }
-  #previous;
-
-  /* Returns publisher. */
-  get publisher() {
-    return this.#publisher;
-  }
-  #publisher;
-
-  /* Returns session id. */
-  get session() {
-    return this.#session;
-  }
-  #session;
-
-  /* Returns timestamp. */
-  get time() {
-    return this.#time;
-  }
-  #time;
 }
 
 /* Creates and returns condition function from short-hand. */
@@ -221,7 +156,8 @@ function interpret(condition) {
   if (typeof condition === "object" && Object.keys(condition).length === 1) {
     /* Create condition function from single-item object short-hand:
     current must contain a key-value pair corresponding to the object short-hand. */
-    return ({ current }) => current.includes(condition);
+    return ({ current }) =>
+      type.create("data", { ...current }).includes(condition);
   }
 
   throw new Error(`Invalid condition: ${condition}`);

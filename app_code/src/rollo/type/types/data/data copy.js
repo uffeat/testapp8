@@ -1,6 +1,4 @@
 import { type } from "rollo/type/type";
-import { __name__ } from "rollo/type/factories/__name__";
-import { __owner__ } from "rollo/type/factories/__owner__";
 import { clear } from "rollo/type/types/data/factories/clear";
 import { clone } from "rollo/type/types/data/factories/clone";
 import { condition } from "rollo/type/types/data/factories/condition";
@@ -32,8 +30,6 @@ export const Data = (() => {
   const composition = type.compose(
     Object,
     {},
-    __name__,
-    __owner__,
     clear,
     clone,
     condition,
@@ -59,12 +55,60 @@ export const Data = (() => {
     static create = (update) => {
       const instance = new Data();
       instance.update(update);
-      return instance;
+
+
+
+      //return instance
+
+      /* Return proxy to
+      - delegate setting of data properties to 'update'
+      - make the 'in' operator work with respect to data properties only,
+        i.e., NOT accessor properties
+      */
+      return new Proxy(instance, {
+        get: (target, key) => {
+          return instance[key];
+         
+        },
+        set: (target, key, value) => {
+          if (instance.__chain__.defined.has(key)) {
+            instance[key] = value;
+          } else {
+            instance.update({ [key]: value });
+          }
+          return true;
+        },
+        
+        has: (target, key) => {
+          return key in instance && !instance.__chain__.defined.has(key);
+        },
+        
+      });
     };
 
     constructor() {
       super();
     }
+
+    /* Returns __name__. */
+    get __name__() {
+      return this.#__name__;
+    }
+    /* Sets __name__. */
+    set __name__(__name__) {
+      this.#__name__ = __name__;
+    }
+    #__name__;
+
+    /* Returns __owner__. */
+    get __owner__() {
+      return this.#__owner__;
+    }
+    /* Sets __owner__. */
+    set __owner__(__owner__) {
+      this.#__owner__ = __owner__;
+    }
+    #__owner__;
   }
 
   return type.register("data", Data);
