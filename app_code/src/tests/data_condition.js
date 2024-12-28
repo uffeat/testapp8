@@ -38,8 +38,8 @@ await (async () => {
   /* Check final result */
   const expected = { bar: 8, stuff: 42 };
   if (data.match(expected)) {
-    console.log(`Success! Current data:`, data.current);
+    console.log(`Success! Data:`, data.data);
   } else {
-    console.error(`Expected:`, expected, `Got:`, data.current);
+    console.error(`Expected:`, expected, `Actual:`, data.data);
   }
 })();

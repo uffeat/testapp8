@@ -5,7 +5,7 @@ export const pop = (parent, config, ...factories) => {
     pop(key) {
       /* Mutate via 'update' to ensure centralized mutation.
       Prevents redundant effect calls. */
-      const value = this.current[key];
+      const value = this[key];
       this.update({ [key]: undefined });
       return value;
     }

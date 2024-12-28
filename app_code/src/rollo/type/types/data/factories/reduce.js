@@ -1,3 +1,6 @@
+/* */
+
+
 /* Implements reduce method. */
 export const reduce = (parent, config, ...factories) => {
   return class reduce extends parent {

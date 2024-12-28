@@ -3,32 +3,11 @@ import { Effects } from "rollo/type/types/data/tools/effects";
 /* Implements 'update' method. */
 export const update = (parent, config, ...factories) => {
   return class update extends parent {
-
     /* Returns effects controller. */
     get effects() {
       return this.#effects;
     }
     #effects = Effects.create(this);
-
-
-
-    /* Returns current. 
-    NOTE
-      - Can, but should generally not, be mutated externally. 
-    */
-    get current() {
-      return this.#current;
-    }
-    #current = {};
-
-    /* Returns current as-was before most recent update. 
-    NOTE
-      - Can, but should generally not, be mutated externally. 
-    */
-    get previous() {
-      return this.#previous;
-    }
-    #previous = {};
 
     /* Mutates items reactively from provided 'update'. Chainable. 
     NOTE
@@ -70,12 +49,11 @@ export const update = (parent, config, ...factories) => {
         previous = this.difference(update, true);
       }
       /* Update */
-      Object.assign(this.previous, this.current);
-      Object.assign(this.current, update);
+      Object.assign(this, update);
       /* Remove items with undefined value */
-      [...Object.entries(this.current)].forEach(([k, v]) => {
+      [...Object.entries(this)].forEach(([k, v]) => {
         if (v === undefined) {
-          delete this.current[k];
+          delete this[k];
         }
       });
       /* Call effects, if change */

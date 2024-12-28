@@ -1,5 +1,4 @@
 import { type } from "rollo/type/type";
-import { owner } from "rollo/type/factories/owner";
 import { clear } from "rollo/type/types/data/factories/clear";
 import { clone } from "rollo/type/types/data/factories/clone";
 import { condition } from "rollo/type/types/data/factories/condition";
@@ -44,7 +43,6 @@ export const Data = (() => {
     items,
     map,
     match,
-    owner,
     pop,
     reduce,
     reset,
@@ -60,17 +58,16 @@ export const Data = (() => {
 
       /* Return proxy to
       - delegate setting of data properties to 'update'
-      - make the 'in' operator apply to current
+      - make the 'in' operator work with respect to data properties only,
+        i.e., NOT accessor properties
       */
       return new Proxy(instance, {
         get: (target, key) => {
-          if (key in instance) {
-            return instance[key];
-          }
-          return instance.current[key];
+          return instance[key];
+         
         },
         set: (target, key, value) => {
-          if (key in instance) {
+          if (instance.__chain__.defined.has(key)) {
             instance[key] = value;
           } else {
             instance.update({ [key]: value });
@@ -78,7 +75,7 @@ export const Data = (() => {
           return true;
         },
         has: (target, key) => {
-          return key in instance.current;
+          return key in instance && !instance.__chain__.defined.has(key);
         },
       });
     };
@@ -86,6 +83,26 @@ export const Data = (() => {
     constructor() {
       super();
     }
+
+    /* Returns __name__. */
+    get __name__() {
+      return this.#__name__;
+    }
+    /* Sets __name__. */
+    set __name__(__name__) {
+      this.#__name__ = __name__;
+    }
+    #__name__;
+
+    /* Returns __owner__. */
+    get __owner__() {
+      return this.#__owner__;
+    }
+    /* Sets __owner__. */
+    set __owner__(__owner__) {
+      this.#__owner__ = __owner__;
+    }
+    #__owner__;
   }
 
   return type.register("data", Data);

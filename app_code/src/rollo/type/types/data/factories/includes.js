@@ -7,7 +7,7 @@ export const includes = (parent, config, ...factories) => {
         if (v === undefined) {
           return false;
         }
-        if (this.current[k] !== v) {
+        if (this[k] !== v) {
           return false;
         }
       }

@@ -13,10 +13,10 @@ export const text = (parent, config, ...factories) => {
     */
     get jsonable() {
       return (
-        Object.values(this.current).filter(
+        Object.values(this).filter(
           (v) =>
             v === null || ["boolean", "number", "string"].includes(typeof v)
-        ).length === Object.values(this.current).length
+        ).length === Object.values(this).length
       );
     }
 
@@ -33,10 +33,10 @@ export const text = (parent, config, ...factories) => {
       if (sort) {
         return `{${Object.keys(this.current)
           .sort()
-          .map((k) => JSON.stringify({ [k]: this.current[k] }).slice(1, -1))
+          .map((k) => JSON.stringify({ [k]: this[k] }).slice(1, -1))
           .join(",")}}`;
       }
-      return JSON.stringify(this.current);
+      return JSON.stringify(this);
     }
 
     /* Retuns json-like text representation of current data.
@@ -48,10 +48,10 @@ export const text = (parent, config, ...factories) => {
     */
     text(sort = false) {
       if (sort) {
-        return `{${Object.keys(this.current)
+        return `{${Object.keys(this)
           .sort()
           .map((k) => {
-            const v = this.current[k];
+            const v = this[k];
             if (["string"].includes(typeof v)) {
               return `"${k}":"${String(v)}"`;
             }
@@ -59,7 +59,7 @@ export const text = (parent, config, ...factories) => {
           })
           .join(",")}}`;
       }
-      return `{${Object.entries(this.current)
+      return `{${Object.entries(this)
         .map(([k, v]) => {
           if (["string"].includes(typeof v)) {
             return `"${k}":"${String(v)}"`;

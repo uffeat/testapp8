@@ -1,102 +1,57 @@
 import "./bootstrap.scss";
 import "./main.css";
 
+
 /* Purpose: Demonstate and test effects */
 await (async () => {
   const { Data } = await import("rollo/type/types/data/data");
 
-  const data = Data.create({
-    foo: "foo",
-    bar: "bar",
-    stuff: 42,
+  const data = Data.create();
+
+  /* Set up catch-all effect */
+  const catch_all = data.effects.add(({ current }) => {
+    console.log(`current from catch-all:`, current.data);
   });
 
- 
+  catch_all.disabled = true;
 
-  data.effects.add((current) => {
-    console.log('foo:', current.current.foo)
-  }, 'foo')
-
-  const publisher = Data.create({
-    a: 1,
-    b: 2,
-    c: 3,
-  });
-
-  class Subscription {
-    static create = (...args) => new Subscription(...args);
-    #effect;
-    constructor(subscriber, key, publisher, ...reducers) {
-      this.#key = key;
-      this.#publisher = publisher;
-      this.#reducers = reducers;
-      this.#subscriber = subscriber;
-
-      this.#effect = publisher.effects.add(
-        ({ current, previous, publisher, session }) => {
-
-          
-          /* Perhaps do not use 'reduce', but rely on passed-in unbound func, 
-          to which publisher and subscriber are passed in??? */
-
-
-
-          subscriber[key] = publisher.reduce(...reducers);
-        }
-      );
+  /* Set up effect that requires 'foo' in current */
+  data.effects.add(({ current }) => {
+    console.log(`current:`, current.data);
+    if (!("foo" in current)) {
+      console.error(`No 'foo'!`);
     }
+  }, "foo");
 
-    get disabled() {
-      return this.#disabled;
-    }
-    set disabled(disabled) {
-      /* TODO
-      -
-      */
-      this.#disabled = disabled;
-    }
-    #disabled;
+  /* Set up effect that requires 'bar' OR 'foo' in current */
+  data.effects.add(
+    ({ current }) => {
+      console.log(`current:`, current.data);
+      if (!("foo" in current) && !("bar" in current)) {
+        console.error(`Neither 'foo', nor 'bar!`);
+      }
+    },
+    ["bar", "foo"]
+  );
 
-    
+  /* Set up effect that requires foo=42 in current */
+  data.effects.add(
+    ({ current }) => {
+      console.log(`current:`, current.data);
+      if (current.foo !== 42) {
+        console.error(`'foo' not 42!`);
+      }
+    },
+    { foo: 42 }
+  );
 
-    get key() {
-      return this.#key;
-    }
-    #key;
-
-    get publisher() {
-      return this.#publisher;
-    }
-    #publisher;
-
-    get reducers() {
-      return this.#reducers;
-    }
-    #reducers;
-
-    get subscriber() {
-      return this.#subscriber;
-    }
-    #subscriber;
-  }
-
-  /* Perhaps the passed in function should decide, which key in subscriber should be targetted?
-  This could handle multiple keys and would slim-down the Subscription.create signature */
-
-  const supscription = Subscription.create(data, "foo", publisher, function() {
-    let sum = 0
-    this.values.forEach(v => sum += v);
-    return sum
-  });
-
-  publisher.a = 10
-
-
-
-
-
+  data.foo = "FOO";
+  data.bar = "BAR";
+  data.stuff = 8;
+  catch_all.disabled = false;
+  data.foo = 42;
 })();
-0;
+
 
 /* Enable tests */
 if (import.meta.env.DEV) {

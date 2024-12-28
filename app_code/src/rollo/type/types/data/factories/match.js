@@ -8,7 +8,7 @@ export const match = (parent, config, ...factories) => {
         return false;
       }
       for (const [k, v] of entries) {
-        if (this.current[k] !== v) {
+        if (this[k] !== v) {
           return false;
         }
       }

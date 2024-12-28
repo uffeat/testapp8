@@ -47,24 +47,22 @@ export class Effects {
   }
 
   /* Returns and registers effect. */
-  add(effect, condition) {
+  add(effect, condition, tag) {
     if (![null, undefined].includes(this.max) && this.size >= this.max) {
       throw new Error(`Cannot register more than ${this.max} effects.`);
     }
     /* Create effect */
     if (!(effect instanceof Effect)) {
-      effect = Effect.create(effect, condition);
+      effect = Effect.create(effect, condition, tag);
     }
-
-    /* Call effect */
-    effect.call({
-      current: this.owner.current,
-      previous: null,
-      publisher: this.owner,
-      session: null,
-    });
     /* Register effect */
     this.registry.add(effect);
+    /* Call effect */
+    effect.call({
+      current: this.owner,
+      previous: null,
+      publisher: this.owner,
+    });
     /* Return effect, e.g., for control and later removal */
     return effect;
   }
@@ -74,14 +72,23 @@ export class Effects {
   - Can, but should generally not, be called externally. 
   */
   call({ current, previous }) {
-    for (const effect of this.registry.values()) {
-      effect.call({
+
+    for (const [index, effect] of [...this.registry].entries()) {
+      const result = effect.call({
         current,
+        index,
         previous,
         publisher: this.owner,
         session: ++this.#session,
       });
+      if (result === false) {
+        break
+      }
     }
+
+
+
+    
   }
 
   /* Tests, if effect is registered. */

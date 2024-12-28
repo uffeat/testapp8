@@ -4,29 +4,34 @@
 */
 export const items = (parent, config, ...factories) => {
   return class items extends parent {
+    /* Returns object with shallow copy of data properties. */
+    get data() {
+      return { ...this };
+    }
+
     /* Returns entries ('items' alias). */
     get entries() {
-      return this.items;
+      return Object.entries(this);
     }
 
     /* Returns entries. */
     get items() {
-      return Object.entries(this.current);
+      return Object.entries(this);
     }
 
     /* Returns keys. */
     get keys() {
-      return Object.keys(this.current);
+      return Object.keys(this);
     }
 
     /* Returns length of keys. */
     get size() {
-      return Object.keys(this.current).length;
+      return Object.keys(this).length;
     }
 
     /* Returns values. */
     get values() {
-      return Object.values(this.current);
+      return Object.values(this);
     }
   };
 };

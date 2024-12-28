@@ -5,7 +5,7 @@ export const intersection = (parent, config, ...factories) => {
     are also in data items. */
     intersection(other) {
       return Object.fromEntries(
-        Object.entries(other).filter(([k, v]) => this.current[k] == v)
+        Object.entries(other).filter(([k, v]) => this[k] == v)
       );
     }
   };

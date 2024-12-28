@@ -5,7 +5,7 @@ export const clear = (parent, config, ...factories) => {
     clear() {
       /* Mutate via 'update' to ensure centralized mutation.
       Prevents redundant effect calls. */
-      this.update(Object.entries(this.current).map(([k, v]) => [k, undefined]));
+      this.update(Object.entries(this).map(([k, v]) => [k, undefined]));
       return this;
     }
   };
