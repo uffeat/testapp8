@@ -1,6 +1,7 @@
 /* Implements 'includes' method. */
 export const includes = (parent, config, ...factories) => {
   return class includes extends parent {
+    static name = 'includes'
     /* Tests, if all items in 'other' are also in current data. */
     includes(other) {
       for (const [k, v] of Object.entries(other)) {

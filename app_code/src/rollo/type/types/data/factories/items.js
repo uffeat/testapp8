@@ -4,6 +4,7 @@
 */
 export const items = (parent, config, ...factories) => {
   return class items extends parent {
+    static name = 'items'
     /* Returns object with shallow copy of data properties. */
     get data() {
       return { ...this };

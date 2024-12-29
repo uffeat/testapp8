@@ -1,6 +1,7 @@
 /* Implements clear method. */
 export const clear = (parent, config, ...factories) => {
   return class clear extends parent {
+    static name = 'clear'
     /* Deletes all items. Chainable. */
     clear() {
       /* Mutate via 'update' to ensure centralized mutation.

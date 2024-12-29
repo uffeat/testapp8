@@ -4,6 +4,7 @@
 /* Implements reduce method. */
 export const reduce = (parent, config, ...factories) => {
   return class reduce extends parent {
+    static name = 'reduce'
     /* Calls a series of functions with one function's result passed into the next 
     function. this is passed into the first function. Returns 
     the result of the last function. */

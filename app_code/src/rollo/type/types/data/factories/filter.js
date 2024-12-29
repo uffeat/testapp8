@@ -1,6 +1,7 @@
 /* Implements filter method. */
 export const filter = (parent, config, ...factories) => {
   return class filter extends parent {
+    static name = 'filter'
     /* Filters as per provided function. 
     - If mutate is true, mutates in-place. Chainable. 
     - If mutate is false, returns new object with filtered items. 

@@ -1,6 +1,7 @@
 /* Implements '__owner__' getter/setter. */
 export const __owner__ = (parent, config, ...factories) => {
   return class __owner__ extends parent {
+    static name = '__owner__'
     /* Returns __owner__. */
     get __owner__() {
       return this.#__owner__;

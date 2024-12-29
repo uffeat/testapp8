@@ -1,6 +1,7 @@
 /* Implements 'map' method. */
 export const map = (parent, config, ...factories) => {
   return class map extends parent {
+    static name = 'map'
     /* Transforms items as per provided function. 
     - If 'mutate' is true, mutates in-place. Chainable. 
     - If 'mutate' is false, returns new object with transformed items. 

@@ -1,6 +1,7 @@
 /* Implements '$' getter. */
 export const $ = (parent, config, ...factories) => {
   return class $ extends parent {
+     static name = '$'
     get $() {
       return this.#$;
     }

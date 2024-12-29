@@ -7,7 +7,7 @@ export default defineConfig(({ mode }) => {
     base: mode === "production" ? "./" : "",
     plugins: [],
     build: {
-      minify: false, //
+      //minify: false, //
       emptyOutDir: true,
       // Allow top-level await
       target: ["es2022", "edge89", "firefox89", "chrome89", "safari15"],

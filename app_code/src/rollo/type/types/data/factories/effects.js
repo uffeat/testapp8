@@ -3,6 +3,7 @@ import { Effects } from "rollo/type/types/data/tools/effects";
 /* Implements 'effects' getter. */
 export const effects = (parent, config, ...factories) => {
   return class effects extends parent {
+    static name = 'effects'
     /* Returns effects controller. */
     get effects() {
       return this.#effects;

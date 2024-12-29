@@ -1,6 +1,7 @@
 /* Implements 'pop' method. */
 export const pop = (parent, config, ...factories) => {
   return class pop extends parent {
+    static name = 'pop'
     /* Deletes item by key and returns value of deleted item. */
     pop(key) {
       /* Mutate via 'update' to ensure centralized mutation.
