@@ -58,8 +58,9 @@ export class Effects {
     /* Register effect */
     this.registry.add(effect);
     /* Call effect */
+
     effect.call({
-      current: this.owner.data,
+      current: this.owner[this.owner.__class__.reactive],
       index: null,
       previous: null,
       publisher: this.owner,
@@ -74,7 +75,7 @@ export class Effects {
   - Can, but should generally not, be called externally. 
   */
   call({ current, previous }) {
-    ++this.#session
+    ++this.#session;
     for (const [index, effect] of [...this.registry].entries()) {
       const result = effect.call({
         current,

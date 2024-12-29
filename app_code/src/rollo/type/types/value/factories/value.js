@@ -1,15 +1,9 @@
 import { Effects } from "rollo/type/types/data/tools/effects";
 
-/* Implements 'value' getter/setter. */
+/* Implements reative features. */
 export const value = (parent, config, ...factories) => {
   return class value extends parent {
-    /* Returns current value. 
-    NOTE
-    - Alias for compatibility with Effects and Effect
-    */
-    get data() {
-      return this.current;
-    }
+    
 
     /* Returns current value. */
     get current() {
@@ -67,13 +61,20 @@ export const value = (parent, config, ...factories) => {
     }
     #type = typeof this.current;
 
-    /* Set current value. Chainable. 
+    /* Updates properties. Chainable. 
     NOTE
-    - Syntactical alternative to current setter.
-    - Also provided for alignment with other types.
+    - By convention, undefined value is a cue to delete.
     */
-    update(current) {
-      this.current = current;
+    update(update) {
+      if (!update) return this;
+      for (const [k, v] of Object.entries(update)) {
+        if (v === undefined) {
+          delete this[k];
+        } else {
+          this[k] = v;
+        }
+      }
+
       return this;
     }
   };

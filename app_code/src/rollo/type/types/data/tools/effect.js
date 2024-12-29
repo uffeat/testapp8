@@ -115,7 +115,7 @@ export class Effect {
     publisher.effects.add(this);
     /* Call effect */
     this.call({
-      current: publisher.data,
+      current: publisher[publisher.__class__.reactive],
       index: null,
       previous: null,
       publisher: publisher,

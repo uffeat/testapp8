@@ -1,6 +1,7 @@
 import { type } from "rollo/type/type";
 import { __name__ } from "rollo/type/factories/__name__";
 import { __owner__ } from "rollo/type/factories/__owner__";
+import { bind } from "rollo/type/types/data/factories/bind";
 import { clear } from "rollo/type/types/data/factories/clear";
 import { clone } from "rollo/type/types/data/factories/clone";
 import { condition } from "rollo/type/types/data/factories/condition";
@@ -17,7 +18,8 @@ import { pop } from "rollo/type/types/data/factories/pop";
 import { reduce } from "rollo/type/types/data/factories/reduce";
 import { reset } from "rollo/type/types/data/factories/reset";
 import { text } from "rollo/type/types/data/factories/text";
-import { map } from "@/rollo/type/types/data/factories/map";
+import { map } from "rollo/type/types/data/factories/map";
+import { subscriptions } from "rollo/type/types/data/factories/subscriptions";
 import { transformer } from "rollo/type/types/data/factories/transformer";
 import { update } from "rollo/type/types/data/factories/update";
 
@@ -34,6 +36,7 @@ export const Data = (() => {
     {},
     __name__,
     __owner__,
+    bind,
     clear,
     clone,
     condition,
@@ -50,20 +53,20 @@ export const Data = (() => {
     pop,
     reduce,
     reset,
+    subscriptions,
     text,
     transformer,
     update
   );
 
   class Data extends composition {
-    static create = (update) => {
-      const instance = new Data();
-      instance.update(update);
-      return instance;
-    };
+    /* Declare reactive target */
+    static reactive = 'data'
+    static create = (...args) => new Data(...args)
 
-    constructor() {
+    constructor(update) {
       super();
+      this.update(update)
     }
   }
 

@@ -3,7 +3,8 @@ export const match = (parent, config, ...factories) => {
   return class match extends parent {
     /* Tests, if 'other' contains the same key-value pairs as data. */
     match(other) {
-      const entries = Object.entries(other);
+      try {
+        const entries = Object.entries(other);
       if (entries.length !== this.size) {
         return false;
       }
@@ -13,6 +14,12 @@ export const match = (parent, config, ...factories) => {
         }
       }
       return true;
+      } catch {
+        return false;
+      }
+
+
+      
     }
   };
 };

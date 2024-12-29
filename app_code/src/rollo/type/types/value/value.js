@@ -1,9 +1,11 @@
 import { type } from "rollo/type/type";
 import { __owner__ } from "rollo/type/factories/__owner__";
 import { condition } from "rollo/type/types/data/factories/condition";
+import { freeze } from "rollo/type/types/data/factories/freeze";
+import { items } from "rollo/type/types/data/factories/items";
 import { transformer } from "rollo/type/types/data/factories/transformer";
 import { bind } from "rollo/type/types/value/factories/bind";
-import { subscriptions } from "rollo/type/types/value/factories/subscriptions";
+import { subscriptions } from "rollo/type/types/data/factories/subscriptions";
 import { value } from "rollo/type/types/value/factories/value";
 
 /* Reactive single-value store. 
@@ -19,32 +21,25 @@ export const Value = (() => {
     __owner__,
     bind,
     condition,
+    freeze,
+    items,
     subscriptions,
     transformer,
     value
   );
 
   class Value extends composition {
-    static create = (current, update = {}) => {
-      const instance = new Value();
-      if (current) {
-        instance.current = current;
-      }
-      for (const [k, v] of Object.entries(update)) {
-        if (k.startsWith("_")) {
-          this[k] = v;
-          continue;
-        }
-        if (!(k in this)) {
-          throw new Error(`Invalid key: ${k}`);
-        }
-        this[k] = v;
-      }
-      return instance;
-    };
+    /* Declare reactive target */
+    static reactive = "current";
+    static create = (...args) => new Value(...args);
 
-    constructor() {
+    constructor(current, update = {}) {
       super();
+
+      if (current !== undefined) {
+        this.current = current;
+      }
+      this.update(update);
     }
 
     /* Returns name. */

@@ -1,76 +1,51 @@
-import { Effect } from "rollo/type/types/data/tools/effect";
+/* TODO
+- Refactor, so can bind to multiple. OK, to still have a reducer, but as default! 
+*/
 
 /* Implements features for binding value reactively to a single 
 multi-value reactive object. */
 export const bind = (parent, config, ...factories) => {
   return class bind extends parent {
-    /* Returns effect. */
-    get effect() {
-      return this.#effect;
-    }
-    #effect;
-
-    /* Returns subscription. */
-    get subscription() {
-      return this.#subscription;
-    }
-    /* Sets subscription. */
-    set subscription(subscription) {
-      if (subscription) {
-        if (this.subscription !== subscription) {
-          this.bind(subscription);
-        }
-      } else {
-        this.unbind();
-      }
-    }
-    #subscription;
-
-    /* Returns reducer. */
+    /* Returns default reducer. */
     get reducer() {
       return this.#reducer;
     }
-    /* Sets reducer. */
+    /* Sets default reducer. */
     set reducer(reducer) {
       this.#reducer = reducer;
     }
     #reducer;
 
-    /* Creates and registers effect on reactive subscription. */
-    bind(subscription, reducer, condition) {
-      /* Cancel any existing subscription */
-      if (this.subscription && this.subscription !== subscription) {
-        this.unbind();
-      }
-      this.#subscription = subscription;
+    /* Short-hand for 'subscriptions.add'. Chainable */
+    bind(publisher, reducer, condition) {
       /* Check reducer */
-      if (reducer) {
-        this.#reducer = reducer;
-      }
-      if (!this.reducer) {
-        throw new Error(`'reducer' not set.`);
-      }
-      /* Create effect */
-      this.#effect = Effect.create((change) => {
-        const result = this.reducer(change);
-        /* Only update non-undefined result; 
-        this mechanism can be used to update selectively */
-        if (result !== undefined) {
-          this.current = result;
+      if (!reducer) {
+        if (!this.reducer) {
+          throw new Error(`'reducer' not set.`);
         }
-      }, condition);
+        reducer = this.reducer;
+      }
 
-      this.#effect.register(subscription);
+      /* Register */
+      this.subscriptions.add(
+        publisher,
+        (change) => {
+          const result = reducer(change);
+          /* Only update non-undefined result; 
+          this mechanism can be used to update selectively */
+          if (result !== undefined) {
+            this.current = result;
+          }
+        },
+        condition
+      );
 
       return this;
     }
 
-    unbind() {
-      if (this.subscription) {
-        this.effect.deregister(this.subscription);
-        this.#effect = null;
-        this.#subscription = null;
-      }
+    /* Short-hand for 'subscriptions.remove'. Chainable */
+    unbind(publisher) {
+      this.subscriptions.remove(publisher);
       return this;
     }
   };

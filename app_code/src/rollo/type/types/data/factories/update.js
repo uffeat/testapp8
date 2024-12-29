@@ -7,6 +7,22 @@ export const update = (parent, config, ...factories) => {
     get $() {
       return this.#$;
     }
+    /* Reactively binds to other Data object.
+    NOTE
+    - Provides a clean declarative syntax, e.g.,
+        data.$ = state
+    - Use 'condition' and/or 'transformer' props to avoid binding 1:1
+    */
+    set $(publisher) {
+      if (publisher.__type__ === "data") {
+        this.subscriptions.add(publisher, (change) => {
+          this.update(change.current);
+        });
+      } else {
+        console.error(`Invalid type:`, publisher);
+        throw new TypeError(`Invalid type.`);
+      }
+    }
     #$ = new Proxy(this, {
       get: (target, key) => {
         return target[key];
@@ -16,16 +32,12 @@ export const update = (parent, config, ...factories) => {
           target[key] = value;
         } else {
           if (value instanceof Value) {
-            /* TODO
-            - set up effect
-            */
+            target.subscriptions.add(value, (change) => {
+              target.update({ [key]: change.current });
+            });
           } else {
             target.update({ [key]: value });
           }
-
-
-
-         
         }
         return true;
       },
