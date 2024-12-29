@@ -33,13 +33,5 @@ export function snake_to_camel(snake) {
   return this.kebab_to_camel(kebab);
 }
 
-export function capitalize(text) {
-  if (text.length > 0) {
-    text = text[0].toUpperCase() + text.slice(1);
-  }
-  return text;
-}
 
-export function starts_with_upper(text) {
-  return /^[A-Z]/.test(text.charAt(0));
-}
+

@@ -27,7 +27,7 @@ export default defineConfig(({ mode }) => {
         components: resolve(__dirname, "src/components"),
         rollo: resolve(__dirname, "src/rollo"),
         rolloui: resolve(__dirname, "src/rolloui"),
-        utils: resolve(__dirname, "src/utils"),
+        
       },
     },
   };

@@ -18,7 +18,7 @@ import {
   text,
   uid,
 } from "rollo/factories/__factories__";
-import { assign } from "rollo/utils/assign";
+import { assign } from "@/rollo/tools/obj/assign";
 
 /* Utility for authoring web components and instantiating elements. */
 export const Component = new (class Component {

@@ -5,8 +5,7 @@
       "@/*": ["src/*"],
       "components/*": ["src/components/*"],
       "rollo/*": ["src/rollo/*"],
-      "rolloui/*": ["src/rolloui/*"],
-      "utils/*": ["src/utils/*"]
+      "rolloui/*": ["src/rolloui/*"]
     }
   }
 }

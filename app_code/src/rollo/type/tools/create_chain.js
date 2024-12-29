@@ -1,4 +1,4 @@
-import { is_class } from "rollo/type/tools/is_class";
+import { is_class } from "@/rollo/tools/type/is_class";
 
 /* Creates and returns an array of classes in the prototype chain of a class 
 instance. */

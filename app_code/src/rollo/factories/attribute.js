@@ -1,5 +1,5 @@
 import { Data } from "rollo/types/data";
-import { camel_to_kebab } from "rollo/utils/case";
+import { camel_to_kebab } from "@/rollo/tools/str/case";
 
 /* Factory for enhanced attribute control. */
 export const attribute = (parent, config, ...factories) => {

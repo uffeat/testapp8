@@ -1,5 +1,5 @@
 import { Data } from "rollo/types/data";
-import { camel_to_kebab } from "rollo/utils/case";
+import { camel_to_kebab } from "@/rollo/tools/str/case";
 import { Component } from "rollo/component";
 import {
   attribute,

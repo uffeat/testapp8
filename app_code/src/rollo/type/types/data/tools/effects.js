@@ -1,4 +1,4 @@
-import { Callable } from "@/rollo/type/tools/callable";
+import { Callable } from "rollo/type/types/callable/callable";
 
 /* Effects controller. */
 export class Effects {
@@ -58,11 +58,9 @@ export class Effects {
     if (![null, undefined].includes(this.max) && this.size >= this.max) {
       throw new Error(`Cannot register more than ${this.max} effects.`);
     }
-
     if (condition && typeof condition !== "function") {
       condition = interpret(condition);
     }
-
     /* Create effect */
     let effect
     if ((source instanceof Callable)) {
@@ -70,7 +68,7 @@ export class Effects {
     } else {
       effect = Callable.create({ source, condition, tag });
     }
-    effect.transform = (argument) =>
+    effect.transformer = (argument) =>
       Change.create({
         effect,
         ...argument,
