@@ -1,6 +1,6 @@
 /* Implements 'match' method. */
 export const match = (parent, config, ...factories) => {
-  return class match extends parent {
+  return class extends parent {
     static name = 'match'
     /* Tests, if 'other' contains the same key-value pairs as data. */
     match(other) {

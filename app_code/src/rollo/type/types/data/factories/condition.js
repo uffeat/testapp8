@@ -1,6 +1,6 @@
 /* Implements condition getter/setter. */
 export const condition = (parent, config, ...factories) => {
-  return class condition extends parent {
+  return class extends parent {
     static name = 'condition'
     /* Returns condition. */
     get condition() {

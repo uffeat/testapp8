@@ -1,6 +1,6 @@
 /* Implements transformer getter/setter. */
 export const transformer = (parent, config, ...factories) => {
-  return class transformer extends parent {
+  return class extends parent {
     static name = 'transformer'
     /* Returns transformer. */
     get transformer() {

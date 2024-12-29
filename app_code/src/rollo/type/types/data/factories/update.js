@@ -1,6 +1,6 @@
 /* Implements 'update' method. */
 export const update = (parent, config, ...factories) => {
-  return class update extends parent {
+  return class extends parent {
     static name = 'update'
     /* Mutates items reactively from provided 'update'. Chainable. 
     NOTE

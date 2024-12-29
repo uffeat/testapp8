@@ -1,6 +1,6 @@
 /* Implements reset method. */
 export const reset = (parent, config, ...factories) => {
-  return class reset extends parent {
+  return class extends parent {
     static name = 'reset'
     /* Sets all items to a provided value. 
     - If 'mutate' is true, mutates in-place. Chainable. 

@@ -3,7 +3,7 @@
 - 'size' as a normalized property for length of keys.
 */
 export const items = (parent, config, ...factories) => {
-  return class items extends parent {
+  return class extends parent {
     static name = 'items'
     /* Returns object with shallow copy of data properties. */
     get data() {

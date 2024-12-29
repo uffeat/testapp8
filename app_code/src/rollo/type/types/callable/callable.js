@@ -20,6 +20,7 @@ export const Callable = (() => {
 
   class Callable extends composition {
     static create = (...args) => new Callable(...args);
+    static name = 'Callable'
 
     constructor({ condition, transformer, owner, source, tag } = {}) {
       super()

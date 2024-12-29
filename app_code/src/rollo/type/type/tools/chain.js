@@ -1,6 +1,5 @@
 import { is_class } from "@/rollo/tools/type/is_class";
 
-
 /* Composition class for providing access to the prototype chain. */
 export class Chain {
   static create = () => new Chain();
@@ -66,6 +65,9 @@ export class Chain {
     }
     /* Build names */
     if (this.#names.includes(cls.name)) {
+      console.warn(
+        `Bundlers may obfuscate declared class names. Provide a static 'name' property instead.`
+      );
       throw new Error(`Duplicate class name: ${cls.name}.`);
     }
     this.#names.unshift(cls.name);

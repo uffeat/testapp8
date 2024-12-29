@@ -1,6 +1,6 @@
 /* Implements difference method. */
 export const difference = (parent, config, ...factories) => {
-  return class difference extends parent {
+  return class extends parent {
     static name = 'difference'
     /* Returns an object with items that represent
     - if reverse is false, items in 'other' that are different from those 

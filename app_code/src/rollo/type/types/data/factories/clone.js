@@ -1,6 +1,6 @@
 /* Implements clone method. */
 export const clone = (parent, config, ...factories) => {
-  return class clone extends parent {
+  return class extends parent {
     static name = 'clone'
     /* Returns shallow clone. */
     clone() {

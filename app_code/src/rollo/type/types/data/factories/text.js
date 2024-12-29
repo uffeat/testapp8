@@ -6,7 +6,7 @@ Useful for:
 - Logging.
  */
 export const text = (parent, config, ...factories) => {
-  return class text extends parent {
+  return class extends parent {
     static name = 'text'
     /* Tests, if items are json-compatible.
     NOTE

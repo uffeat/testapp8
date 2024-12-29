@@ -1,6 +1,6 @@
 /* Implements 'intersection' method. */
 export const intersection = (parent, config, ...factories) => {
-  return class intersection extends parent {
+  return class extends parent {
     static name = 'intersection'
     /* Returns an object with items that represent items in 'other' that 
     are also in data items. */

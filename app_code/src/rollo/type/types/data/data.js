@@ -61,6 +61,7 @@ export const Data = (() => {
 
   class Data extends composition {
     static create = (...args) => new Data(...args);
+    static name = 'Data'
     
 
     constructor(update) {

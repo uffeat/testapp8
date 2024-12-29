@@ -1,6 +1,6 @@
 /* Implements '__name__' getter/setter. */
 export const __name__ = (parent, config, ...factories) => {
-  return class __name__ extends parent {
+  return class extends parent {
     static name = '__name__'
     /* Returns __name__. */
     get __name__() {
