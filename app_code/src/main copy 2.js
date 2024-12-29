@@ -1,18 +1,19 @@
 import "./bootstrap.scss";
 import "./main.css";
 
-import foo from '@/test/test.html?raw'
-
-console.log(foo)
-
-function construct_module(path) {
-  const url = new URL(path, import.meta.url).href;
+function construct_module(url) {
+ 
+  //const url = new URL(`public/test.js`, import.meta.url).href;
   return new Function(`return import("${url}")`)();
 }
 
-//const js_module = await construct_module(`public/test.js`);
-//const { test } = js_module;
-//test();
+
+
+
+const js_module = await construct_module(new URL(`public/test.js`, import.meta.url).href);
+
+const { test } = js_module;
+test();
 
 /* Enable tests */
 /*

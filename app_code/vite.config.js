@@ -15,7 +15,6 @@ export default defineConfig(({ mode }) => {
       alias: {
         "@": resolve(__dirname, "src"),
         components: resolve(__dirname, "src/components"),
-        htmlx: resolve(__dirname, "src/built"),
         rollo: resolve(__dirname, "src/rollo"),
         rolloui: resolve(__dirname, "src/rolloui"),
         utils: resolve(__dirname, "src/utils"),
