@@ -1,6 +1,6 @@
 // data_condition
 
-/* Purpose: Demonstate and test Data.conditional */
+//* Purpose: Demonstate and test Data.conditional */
 await (async () => {
   const { Data } = await import("rollo/type/types/data/data");
 
@@ -33,7 +33,7 @@ await (async () => {
 
   /* Change data */
   data.update({ bar: 8, stuff: undefined });
-  data.name = "uffe";
+  data.__name__ = "uffe";
 
   /* Check final result */
   const expected = { bar: 8, stuff: 42 };

@@ -4,7 +4,7 @@ export const empty = (parent, config, ...factories) => {
     static name = 'empty'
     /* Test, if data has items. */
     get empty() {
-      return Object.keys(this).length === 0
+      return this.keys.length === 0
     }
     
   };

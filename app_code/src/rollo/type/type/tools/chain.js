@@ -1,4 +1,4 @@
-import { is_class } from "@/rollo/tools/type/is_class";
+import { is_class } from "rollo/tools/type/is_class";
 
 /* Composition class for providing access to the prototype chain. */
 export class Chain {

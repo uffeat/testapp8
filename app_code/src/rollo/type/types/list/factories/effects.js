@@ -3,52 +3,41 @@ import { Effects } from "rollo/type/types/data/tools/effects";
 /* Implements 'effects' getter. */
 export const effects = (parent, config, ...factories) => {
   return class extends parent {
-    static name = "effects";
+    static name = 'effects'
     /* Returns effects controller. */
     get effects() {
       return this.#effects;
     }
-    #effects = Effects.create({
-      owner: this,
-      interpret_condition,
-      create_argument: ({ change, effect, index, publisher, session }) => {
-        if (change === undefined) {
-          return Change.create({
-            change: { current: this.data, previous: null },
-            effect,
-            index: null,
-            publisher,
-            session: null,
-          });
-        } else {
-          return Change.create({ change, effect, index, publisher, session });
-        }
-      },
-    });
+    #effects = Effects.create({owner: this, current: () => this.values, transformer: (effect) => (argument) =>
+      Change.create({
+        effect,
+        ...argument,
+      })});
   };
 };
 
-/* Argument for effects. */
+
+/* Argument for effect sources and effect conditions. */
 class Change {
   static create = (...args) => new Change(...args);
 
-  constructor({ change, effect, index, publisher, session }) {
+  constructor({ added, effect, index, removed, publisher, session }) {
     this.#effect = effect;
     this.#index = index;
 
-    this.#current = change.current;
-    this.#previous = change.previous;
+    this.#added = added;
+    this.#removed = removed;
 
     this.#publisher = publisher;
     this.#session = session;
     this.#time = Date.now();
   }
 
-  /* Returns current data. */
-  get current() {
-    return this.#current;
+  /* Returns added values. */
+  get added() {
+    return this.#added;
   }
-  #current;
+  #added;
 
   /* Returns effect.
   NOTE
@@ -66,11 +55,11 @@ class Change {
   }
   #index;
 
-  /* Returns previous data. */
-  get previous() {
-    return this.#previous;
+  /* Returns removed values. */
+  get removed() {
+    return this.#removed;
   }
-  #previous;
+  #removed;
 
   /* Returns publisher. */
   get publisher() {
@@ -92,11 +81,7 @@ class Change {
 }
 
 /* Creates and returns condition function from short-hand. */
-function interpret_condition(condition) {
-  if (!condition || typeof condition === "function") {
-    return condition;
-  }
-
+function interpret(condition) {
   if (typeof condition === "string") {
     /* Create condition function from string short-hand:
     current must contain a key corresponding to the string short-hand. */

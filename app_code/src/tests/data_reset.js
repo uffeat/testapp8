@@ -25,8 +25,8 @@ await (async () => {
     bar: true,
   };
   if (data.match(expected)) {
-    console.log(`Success! Current data:`, data.current);
+    console.log(`Success! Current data:`, data.data);
   } else {
-    console.error(`Expected:`, expected, `Actual:`, data.current);
+    console.error(`Expected:`, expected, `Actual:`, data.data);
   }
 })();

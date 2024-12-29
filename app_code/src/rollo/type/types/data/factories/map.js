@@ -9,7 +9,7 @@ export const map = (parent, config, ...factories) => {
     - Corresponds to the 'map' array method.
     */
     map(f, mutate = true) {
-      const mapped = Object.fromEntries(Object.entries(this).map(f));
+      const mapped = Object.fromEntries(this.entries.map(f));
       if (mutate) {
         /* Mutate via 'update' to ensure centralized mutation.
         Prevents redundant effect calls. */

@@ -2,7 +2,7 @@ import { Chain } from "rollo/type/type/tools/chain";
 import { Macro } from "rollo/type/type/tools/macro";
 import { Registry } from "rollo/type/type/tools/registry";
 import { add_meta } from "rollo/type/type/tools/add_meta";
-import { is_class } from "@/rollo/tools/type/is_class";
+import { is_class } from "rollo/tools/type/is_class";
 
 /* Utility for composing and instantiating classes. 
 Provides a touch of Python-flavor to class usage.

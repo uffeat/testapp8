@@ -14,10 +14,10 @@ export const text = (parent, config, ...factories) => {
     */
     get jsonable() {
       return (
-        Object.values(this).filter(
+        this.values.filter(
           (v) =>
             v === null || ["boolean", "number", "string"].includes(typeof v)
-        ).length === Object.values(this).length
+        ).length === this.values.length
       );
     }
 
@@ -32,7 +32,7 @@ export const text = (parent, config, ...factories) => {
         throw TypeError(`Cannot convert to json.`);
       }
       if (sort) {
-        return `{${Object.keys(this.current)
+        return `{${this.keys
           .sort()
           .map((k) => JSON.stringify({ [k]: this[k] }).slice(1, -1))
           .join(",")}}`;
@@ -49,7 +49,7 @@ export const text = (parent, config, ...factories) => {
     */
     text(sort = false) {
       if (sort) {
-        return `{${Object.keys(this)
+        return `{${this.keys
           .sort()
           .map((k) => {
             const v = this[k];
@@ -60,7 +60,7 @@ export const text = (parent, config, ...factories) => {
           })
           .join(",")}}`;
       }
-      return `{${Object.entries(this)
+      return `{${this.entries
         .map(([k, v]) => {
           if (["string"].includes(typeof v)) {
             return `"${k}":"${String(v)}"`;

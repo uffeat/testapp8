@@ -8,7 +8,7 @@ export const reset = (parent, config, ...factories) => {
     */
     reset(value, mutate = true) {
       const mapped = Object.fromEntries(
-        Object.entries(this).map(([k, v]) => [k, value])
+        this.entries.map(([k, v]) => [k, value])
       );
       if (mutate) {
         /* Mutate via 'update' to ensure centralized mutation.

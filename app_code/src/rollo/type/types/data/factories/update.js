@@ -1,7 +1,7 @@
 /* Implements 'update' method. */
 export const update = (parent, config, ...factories) => {
   return class extends parent {
-    static name = 'update'
+    static name = "update";
     /* Mutates items reactively from provided 'update'. Chainable. 
     NOTE
     - By convention, undefined value is a cue to delete.
@@ -38,6 +38,7 @@ export const update = (parent, config, ...factories) => {
       const current = this.difference(update);
       const previous = this.difference(update, true);
       const changed_entries = Object.entries(current);
+
       if (changed_entries.length) {
         /* Update */
         changed_entries
@@ -51,7 +52,6 @@ export const update = (parent, config, ...factories) => {
           this.effects.call({ current, previous });
         }
       }
-
       return this;
     }
   };
