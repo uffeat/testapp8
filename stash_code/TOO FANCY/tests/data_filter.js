@@ -1,6 +1,6 @@
-// data_update
+// data_filter
 
-/* Purpose: Demonstate and test 'update' */
+/* Purpose: Demonstate and test Data.filter */
 await (async () => {
   const { Data } = await import("rollo/type/types/data/data");
 
@@ -8,33 +8,24 @@ await (async () => {
     foo: "foo",
     bar: "bar",
     stuff: 42,
+    thing: 7,
   });
 
-  /* Set up effect to check batch-updates. */
-  data.effects.add((change) => {
-
-    console.log('change:', change)////
-
-    const session = change.session || 0
+  /* Set up effect to check that filtering batch-updates. */
+  data.effects.add(function effect({ session }) {
     if (session > 1) {
       console.error(
         `Effect ran ${session + 1} times; batch-update does not work correctly!`
       );
     }
   });
-
   /* Change data */
-  data.update({ foo: "FOO", bar: "BAR", stuff: undefined });
+  data.filter(([k, v]) => typeof v === "number");
   /* Check final result */
-  const expected = {
-    foo: "FOO",
-    bar: "BAR",
-  };
+  const expected = { stuff: 42, thing: 7 };
   if (data.match(expected)) {
-    console.log(`Success! Current data:`, data.data);
+    console.log(`Success! Data:`, data.data);
   } else {
     console.error(`Expected:`, expected, `Actual:`, data.data);
   }
-
-  console.log('data.data:',data.data)
 })();

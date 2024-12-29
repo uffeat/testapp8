@@ -11,11 +11,7 @@ await (async () => {
   });
 
   /* Set up effect to check batch-updates. */
-  data.effects.add((change) => {
-
-    console.log('change:', change)////
-
-    const session = change.session || 0
+  data.effects.add(function effect({ session }) {
     if (session > 1) {
       console.error(
         `Effect ran ${session + 1} times; batch-update does not work correctly!`
@@ -31,10 +27,8 @@ await (async () => {
     bar: "BAR",
   };
   if (data.match(expected)) {
-    console.log(`Success! Current data:`, data.data);
+    console.log(`Success! Current data:`, data.current);
   } else {
-    console.error(`Expected:`, expected, `Actual:`, data.data);
+    console.error(`Expected:`, expected, `Actual:`, data.current);
   }
-
-  console.log('data.data:',data.data)
 })();

@@ -5,18 +5,21 @@ export const match = (parent, config, ...factories) => {
     match(other) {
       try {
         const entries = Object.entries(other);
-        if (entries.length !== this.size) {
+      if (entries.length !== this.size) {
+        return false;
+      }
+      for (const [k, v] of entries) {
+        if (this[k] !== v) {
           return false;
         }
-        for (const [k, v] of entries) {
-          if (this[k] !== v) {
-            return false;
-          }
-        }
-        return true;
+      }
+      return true;
       } catch {
         return false;
       }
+
+
+      
     }
   };
 };

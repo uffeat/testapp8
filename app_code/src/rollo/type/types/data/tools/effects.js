@@ -1,12 +1,19 @@
-import { Effect } from "rollo/type/types/data/tools/effect";
+import { Callable } from "@/rollo/type/types/data/tools/callable";
 
 /* Composition class for Data. */
 export class Effects {
   static create = (...args) => new Effects(...args);
 
-  constructor(owner) {
+  constructor(owner, get_current) {
     this.#owner = owner;
+    this.#get_current = get_current;
   }
+
+  /* Returns get_current */
+  get get_current() {
+    return this.#get_current;
+  }
+  #get_current;
 
   /* Returns max number of effects allowed. */
   get max() {
@@ -47,20 +54,33 @@ export class Effects {
   }
 
   /* Returns and registers effect. */
-  add(effect, condition, tag) {
+  add(source, condition, tag) {
     if (![null, undefined].includes(this.max) && this.size >= this.max) {
       throw new Error(`Cannot register more than ${this.max} effects.`);
     }
-    /* Create effect */
-    if (!(effect instanceof Effect)) {
-      effect = Effect.create(effect, condition, tag);
+
+    if (condition && typeof condition !== "function") {
+      condition = interpret(condition);
     }
+
+    /* Create effect */
+    let effect
+    if ((source instanceof Callable)) {
+      effect = source
+    } else {
+      effect = Callable.create({ source, condition, tag });
+    }
+    effect.transform = (argument) =>
+      Change.create({
+        effect,
+        ...argument,
+      });
+    
     /* Register effect */
     this.registry.add(effect);
     /* Call effect */
-
-    effect.call({
-      current: this.owner[this.owner.__class__.reactive],
+    effect.call(null, {
+      current: this.get_current ? this.get_current() : null,
       index: null,
       previous: null,
       publisher: this.owner,
@@ -73,11 +93,14 @@ export class Effects {
   /* Calls registered effects.
   NOTE
   - Can, but should generally not, be called externally. 
+  - 'effect.call' should generally not return anything explicitly. However,
+    for special cases, if 'effect.call' returns false, subsequent effects in
+    the session are not called; similar to `event.stopPropagation()`.
   */
   call({ current, previous }) {
     ++this.#session;
     for (const [index, effect] of [...this.registry].entries()) {
-      const result = effect.call({
+      const result = effect.call(null,{
         current,
         index,
         previous,
@@ -101,4 +124,96 @@ export class Effects {
   }
 
   #session = 0;
+}
+
+/* Argument for effect sources and effect conditions. */
+class Change {
+  static create = (...args) => new Change(...args);
+
+  constructor({ current, effect, index, previous, publisher, session }) {
+    this.#effect = effect;
+    this.#index = index;
+
+    this.#current = current;
+    this.#previous = previous;
+
+    this.#publisher = publisher;
+    this.#session = session;
+    this.#time = Date.now();
+  }
+
+  /* Returns current data. */
+  get current() {
+    return this.#current;
+  }
+  #current;
+
+  /* Returns effect.
+  NOTE
+  - Provides easy access to the effect itself from inside the effect 
+    source/condition.
+  */
+  get effect() {
+    return this.#effect;
+  }
+  #effect;
+
+  /* Returns effect index for the current session. */
+  get index() {
+    return this.#index;
+  }
+  #index;
+
+  /* Returns previous data. */
+  get previous() {
+    return this.#previous;
+  }
+  #previous;
+
+  /* Returns publisher. */
+  get publisher() {
+    return this.#publisher;
+  }
+  #publisher;
+
+  /* Returns session id. */
+  get session() {
+    return this.#session;
+  }
+  #session;
+
+  /* Returns timestamp. */
+  get time() {
+    return this.#time;
+  }
+  #time;
+}
+
+/* Creates and returns condition function from short-hand. */
+function interpret(condition) {
+  if (typeof condition === "string") {
+    /* Create condition function from string short-hand:
+    current must contain a key corresponding to the string short-hand. */
+    return ({ current }) => condition in current;
+  }
+
+  if (Array.isArray(condition)) {
+    /* Create condition function from array short-hand:
+    current must contain a key that is present in the array short-hand. */
+    return ({ current }) => {
+      for (const key of condition) {
+        if (key in current) return true;
+      }
+      return false;
+    };
+  }
+
+  if (typeof condition === "object" && Object.keys(condition).length === 1) {
+    /* Create condition function from single-item object short-hand:
+    current must contain a key-value pair corresponding to the object short-hand. */
+    return ({ current }) =>
+      type.create("data", { ...current }).includes(condition);
+  }
+
+  throw new Error(`Invalid condition: ${condition}`);
 }

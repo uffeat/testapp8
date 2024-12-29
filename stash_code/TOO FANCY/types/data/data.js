@@ -1,12 +1,11 @@
 import { type } from "rollo/type/type";
 import { __name__ } from "rollo/type/factories/__name__";
 import { __owner__ } from "rollo/type/factories/__owner__";
-import { $ } from "rollo/type/types/data/factories/$";
+import { bind } from "rollo/type/types/data/factories/bind";
 import { clear } from "rollo/type/types/data/factories/clear";
 import { clone } from "rollo/type/types/data/factories/clone";
 import { condition } from "rollo/type/types/data/factories/condition";
 import { difference } from "rollo/type/types/data/factories/difference";
-import { effects } from "rollo/type/types/data/factories/effects";
 import { empty } from "rollo/type/types/data/factories/empty";
 import { filter } from "rollo/type/types/data/factories/filter";
 import { for_each } from "rollo/type/types/data/factories/for_each";
@@ -20,6 +19,7 @@ import { reduce } from "rollo/type/types/data/factories/reduce";
 import { reset } from "rollo/type/types/data/factories/reset";
 import { text } from "rollo/type/types/data/factories/text";
 import { map } from "rollo/type/types/data/factories/map";
+import { subscriptions } from "rollo/type/types/data/factories/subscriptions";
 import { transformer } from "rollo/type/types/data/factories/transformer";
 import { update } from "rollo/type/types/data/factories/update";
 
@@ -36,12 +36,11 @@ export const Data = (() => {
     {},
     __name__,
     __owner__,
-    $,
+    bind,
     clear,
     clone,
     condition,
     difference,
-    effects,
     empty,
     filter,
     for_each,
@@ -54,17 +53,20 @@ export const Data = (() => {
     pop,
     reduce,
     reset,
+    subscriptions,
     text,
     transformer,
     update
   );
 
   class Data extends composition {
-    static create = (...args) => new Data(...args);
+    /* Declare reactive target */
+    static reactive = 'data'
+    static create = (...args) => new Data(...args)
 
     constructor(update) {
       super();
-      this.update(update);
+      this.update(update)
     }
   }
 

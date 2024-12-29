@@ -1,6 +1,54 @@
+const { Value } = await import("rollo/type/types/value/value");
+import { Effects } from "rollo/type/types/data/tools/effects";
+
 /* Implements 'update' method. */
 export const update = (parent, config, ...factories) => {
   return class update extends parent {
+    get $() {
+      return this.#$;
+    }
+    /* Reactively binds to other Data object.
+    NOTE
+    - Provides a clean declarative syntax, e.g.,
+        data.$ = state
+    - Use 'condition' and/or 'transformer' props to avoid binding 1:1
+    */
+    set $(publisher) {
+      if (publisher.__type__ === "data") {
+        this.subscriptions.add(publisher, (change) => {
+          this.update(change.current);
+        });
+      } else {
+        console.error(`Invalid type:`, publisher);
+        throw new TypeError(`Invalid type.`);
+      }
+    }
+    #$ = new Proxy(this, {
+      get: (target, key) => {
+        return target[key];
+      },
+      set: (target, key, value) => {
+        if (target.__chain__.defined.has(key)) {
+          target[key] = value;
+        } else {
+          if (value instanceof Value) {
+            target.subscriptions.add(value, (change) => {
+              target.update({ [key]: change.current });
+            });
+          } else {
+            target.update({ [key]: value });
+          }
+        }
+        return true;
+      },
+    });
+
+    /* Returns effects controller. */
+    get effects() {
+      return this.#effects;
+    }
+    #effects = Effects.create(this);
+
     /* Mutates items reactively from provided 'update'. Chainable. 
     NOTE
     - By convention, undefined value is a cue to delete.
