@@ -7,7 +7,7 @@ export default defineConfig(({ mode }) => {
     base: mode === "production" ? "./" : "",
     plugins: [],
     build: {
-      //minify: false, // Only use for debug
+      minify: false, //
       emptyOutDir: true,
       // Allow top-level await
       target: ["es2022", "edge89", "firefox89", "chrome89", "safari15"],
@@ -18,7 +18,6 @@ export default defineConfig(({ mode }) => {
             warnOnError: false,
           }),
         ],
-       
       },
     },
     resolve: {
@@ -27,12 +26,10 @@ export default defineConfig(({ mode }) => {
         components: resolve(__dirname, "src/components"),
         rollo: resolve(__dirname, "src/rollo"),
         rolloui: resolve(__dirname, "src/rolloui"),
-        
       },
     },
   };
 });
-
 
 /*
 npm i @rollup/plugin-dynamic-import-vars
