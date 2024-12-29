@@ -1,4 +1,4 @@
-import { type } from "rollo/type/type";
+import { type } from "@/rollo/type/type/type";
 import { Effect } from "@/rollo/type/types/state/tools/effect";
 import { Message } from "@/rollo/type/types/state/tools/message";
 

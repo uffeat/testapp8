@@ -1,4 +1,4 @@
-import { type } from "rollo/type/type";
+import { type } from "@/rollo/type/type/type";
 import { list } from "rollo/type/types/list/factories/list";
 
 /* . */

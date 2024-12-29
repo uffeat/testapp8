@@ -1,4 +1,4 @@
-import { type } from "rollo/type/type";
+import { type } from "@/rollo/type/type/type";
 import { owner } from "rollo/type/factories/owner";
 import { condition } from "rollo/type/types/data/factories/condition";
 import { transformer } from "rollo/type/types/data/factories/transformer";

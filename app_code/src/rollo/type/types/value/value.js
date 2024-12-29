@@ -1,5 +1,5 @@
-import { type } from "rollo/type/type";
-import { __owner__ } from "rollo/type/factories/__owner__";
+import { type } from "@/rollo/type/type/type";
+import { __owner__ } from "@/rollo/type/types/data/factories/__owner__";
 import { condition } from "rollo/type/types/data/factories/condition";
 import { freeze } from "rollo/type/types/data/factories/freeze";
 import { items } from "rollo/type/types/data/factories/items";

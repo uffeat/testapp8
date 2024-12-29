@@ -1,6 +1,6 @@
-import { Callable } from "@/rollo/type/types/data/tools/callable";
+import { Callable } from "@/rollo/type/tools/callable";
 
-/* Composition class for Data. */
+/* Effects controller. */
 export class Effects {
   static create = (...args) => new Effects(...args);
 

@@ -1,4 +1,4 @@
-import { type } from "rollo/type/type";
+import { type } from "@/rollo/type/type/type";
 
 /* Utility for binding a state item to another state. 
 NOTE

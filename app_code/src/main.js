@@ -1,21 +1,27 @@
 import "./bootstrap.scss";
 import "./main.css";
 
-import foo from '@/test/test.html?raw'
+/* Purpose: Demonstate and test Data.$ */
+await (async () => {
+  const { Data } = await import("rollo/type/types/data/data");
 
-console.log(foo)
+  const data = Data.create({
+    foo: "foo",
+  });
 
-function construct_module(path) {
-  const url = new URL(path, import.meta.url).href;
-  return new Function(`return import("${url}")`)();
-}
+  /* Set up effect to watch changes */
+  data.effects.add((change) => {
+    console.log(`current:`, change.current);
+  });
 
-//const js_module = await construct_module(`public/test.js`);
-//const { test } = js_module;
-//test();
+  data.$.foo = 42;
+  data.$.foo = 42;
+  data.$.foo = undefined;
 
-/* Enable tests */
-/*
+  console.log("data.data:", data.data);
+})();
+
+
 if (import.meta.env.DEV) {
   let path = "";
   window.addEventListener("keydown", async (event) => {
@@ -25,4 +31,3 @@ if (import.meta.env.DEV) {
     }
   });
 }
-  */

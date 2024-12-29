@@ -1,5 +1,5 @@
 import "rollo/type/types/data/data";
-import { type } from "rollo/type/type";
+import { type } from "@/rollo/type/type/type";
 import { Message } from "rollo/type/types/state/tools/message";
 import { Effects } from "rollo/type/types/state/tools/effects";
 
