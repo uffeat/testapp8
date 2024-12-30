@@ -14,15 +14,25 @@ export const effects = (parent, config, ...factories) => {
 
 class Effect {
   static create = (...args) => new Effect(...args);
-  constructor({ condition, owner, source }) {
+  constructor({ condition, owner, source, tag, transformer }) {
     this.#condition = condition;
     this.#owner = owner;
     this.#source = source;
+    this.#tag = tag;
+    this.#transformer = transformer;
   }
 
   /* Returns condition */
   get condition() {
     return this.#condition;
+  }
+  /* Sets condition. 
+  NOTE
+  - Can be changed dynamically.
+    While this can be powerful, it can also add complexity!
+  */
+  set condition(condition) {
+    this.#condition = condition;
   }
   #condition;
 
@@ -39,9 +49,24 @@ class Effect {
   }
   #disabled;
 
+  /* Returns name of source */
+  get name() {
+    if (this.source) {
+      return this.source.name;
+    }
+  }
+
   /* Returns owner */
   get owner() {
     return this.#owner;
+  }
+  /* Sets owner. 
+  NOTE
+  - Can be changed dynamically.
+    While this can be powerful, it can also add complexity!
+  */
+  set owner(owner) {
+    this.#owner = owner;
   }
   #owner;
 
@@ -49,7 +74,42 @@ class Effect {
   get source() {
     return this.#source;
   }
+  /* Sets source. 
+  NOTE
+  - Can be changed dynamically.
+    While this can be powerful, it can also add complexity!
+  */
+  set source(source) {
+    this.#source = source;
+  }
   #source;
+
+  /* Returns tag. */
+  get tag() {
+    return this.#tag;
+  }
+  /* Sets tag. 
+  NOTE
+  - General purpose property for providing additional information 
+  */
+  set tag(tag) {
+    this.#tag = tag;
+  }
+  #tag;
+
+  /* Returns transformer */
+  get transformer() {
+    return this.#transformer;
+  }
+  /* Sets transformer. 
+  NOTE
+  - Can be changed dynamically.
+    While this can be powerful, it can also add complexity!
+  */
+  set transformer(transformer) {
+    this.#transformer = transformer;
+  }
+  #transformer;
 
   /* Calls source and return result. */
   call(change) {
@@ -62,14 +122,31 @@ class Effect {
       return;
     }
 
-    /* Check condition */
+    /* If no change argument, create change argument based on owner's data */
+    if (!change) {
+      change = Change.create({
+        current: this.owner.data,
+        effect: this,
+        index: null,
+        owner: this.owner,
+        previous: null,
+        session: null,
+      });
+    }
+
+    /* Test condition */
     if (this.condition) {
       if (!this.condition(change)) {
         return;
       }
     }
+    /* Transform */
+    if (this.transformer) {
+      /* Ignore falsy results */
+      change = this.transformer(change) || change;
+    }
     /* Call source and return result */
-    return this.source.call(this, change);
+    return this.source(change);
   }
 }
 
@@ -120,25 +197,23 @@ class Effects {
   }
 
   /* Returns and registers effect. */
-  add(source, condition) {
+  add(source, condition, transformer, tag) {
     if (![null, undefined].includes(this.max) && this.size >= this.max) {
       throw new Error(`Cannot register more than ${this.max} effects.`);
     }
     condition = interpret_condition(condition);
     /* Create effect */
-    const effect = Effect.create({ condition, owner: this.owner, source });
+    const effect = Effect.create({
+      condition,
+      owner: this.owner,
+      source,
+      tag,
+      transformer,
+    });
     /* Register effect */
     this.registry.add(effect);
     /* Call effect */
-    const change = Change.create({
-      current: this.owner.data,
-      effect,
-      index: null,
-      owner: this.owner,
-      previous: null,
-      session: null,
-    });
-    effect.call(change);
+    effect.call();
     /* Return effect, e.g., for control and later removal */
     return effect;
   }
@@ -187,13 +262,11 @@ class Change {
   static create = (...args) => new Change(...args);
 
   constructor({ current, effect, index, owner, previous, session }) {
+    this.#current = current;
     this.#effect = effect;
     this.#index = index;
-
-    this.#current = current;
-    this.#previous = previous;
-
     this.#owner = owner;
+    this.#previous = previous;
     this.#session = session;
     this.#time = Date.now();
   }

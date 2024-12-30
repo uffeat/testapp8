@@ -77,7 +77,8 @@ export const Callable = (() => {
     }
     /* Sets tag. 
     NOTE
-    - General purpose property for providing additional information */
+    - General purpose property for providing additional information 
+    */
     set tag(tag) {
       this.#tag = tag;
     }
