@@ -1,3 +1,5 @@
+import { type } from "@/rollo/type/type/type";
+
 /* Implements 'effects' getter. */
 export const effects = (parent, config, ...factories) => {
   return class extends parent {
@@ -62,7 +64,7 @@ class Effect {
 
     /* Check condition */
     if (this.condition) {
-      if (this.condition(change)) {
+      if (!this.condition(change)) {
         return;
       }
     }
