@@ -14,9 +14,10 @@ export const effects = (parent, config, ...factories) => {
 
 class Effect {
   static create = (...args) => new Effect(...args);
-  constructor({ condition, owner, source, tag, transformer }) {
+  constructor({ condition, disabled, name, source, tag, transformer }) {
     this.#condition = condition;
-    this.#owner = owner;
+    this.#disabled = disabled;
+    this.#name = name;
     this.#source = source;
     this.#tag = tag;
     this.#transformer = transformer;
@@ -49,26 +50,23 @@ class Effect {
   }
   #disabled;
 
-  /* Returns name of source */
+  /* Returns name. 
+  NOTE
+  - Returns name of source, if name not explicitly set.
+  */
   get name() {
+    if (this.#name) {
+      return this.#name;
+    }
     if (this.source) {
       return this.source.name;
     }
   }
-
-  /* Returns owner */
-  get owner() {
-    return this.#owner;
+  /* Sets name. */
+  set name(name) {
+    this.#name = name;
   }
-  /* Sets owner. 
-  NOTE
-  - Can be changed dynamically.
-    While this can be powerful, it can also add complexity!
-  */
-  set owner(owner) {
-    this.#owner = owner;
-  }
-  #owner;
+  #name;
 
   /* Returns source. */
   get source() {
@@ -122,18 +120,6 @@ class Effect {
       return;
     }
 
-    /* If no change argument, create change argument based on owner's data */
-    if (!change) {
-      change = Change.create({
-        current: this.owner.data,
-        effect: this,
-        index: null,
-        owner: this.owner,
-        previous: null,
-        session: null,
-      });
-    }
-
     /* Test condition */
     if (this.condition) {
       if (!this.condition(change)) {
@@ -147,6 +133,31 @@ class Effect {
     }
     /* Call source and return result */
     return this.source(change);
+  }
+
+  /* Creates and returns clone. */
+  clone() {
+    return Effect.create({
+      condition: this.#condition,
+      disabled: this.#disabled,
+      name: this.#name,
+      source: this.#source,
+      tag: this.#tag,
+      transformer: this.#transformer,
+    });
+  }
+
+  update(update) {
+    for (const [k, v] of Object.entries(update)) {
+      if (v === undefined) {
+        continue;
+      }
+      if (!(k in this)) {
+        throw new Error(`Invalid key: ${k}`);
+      }
+      this[k] = v;
+    }
+    return this;
   }
 }
 
@@ -184,7 +195,7 @@ class Effects {
 
   /* Returns effects registry.
   NOTE
-  - Can, but should generally not, be changed outside the Effects class. 
+  - Can, but should generally not, be used externally. 
   */
   get registry() {
     return this.#registry;
@@ -196,25 +207,32 @@ class Effects {
     return this.registry.size;
   }
 
-  /* Returns and registers effect. */
+  /* Creates, registers and returns effect. */
   add(source, condition, transformer, tag) {
+    /* Check max limit */
     if (![null, undefined].includes(this.max) && this.size >= this.max) {
       throw new Error(`Cannot register more than ${this.max} effects.`);
     }
-    condition = interpret_condition(condition);
-    /* Create effect */
-    const effect = Effect.create({
-      condition,
-      owner: this.owner,
-      source,
-      tag,
-      transformer,
-    });
+    let effect;
+    if (source instanceof Effect) {
+      /* Update effect */
+      effect = source.update({ condition, transformer, tag });
+    } else {
+      /* Create effect */
+      effect = this.create({ source, condition, transformer, tag });
+    }
     /* Register effect */
     this.registry.add(effect);
     /* Call effect */
-    effect.call();
-    /* Return effect, e.g., for control and later removal */
+    effect.call(Change.create({
+      current: this.owner.data,
+      effect: this,
+      index: null,
+      owner: this.owner,
+      previous: null,
+      session: null,
+    }));
+    /* Return effect for control and later removal */
     return effect;
   }
 
@@ -228,6 +246,16 @@ class Effects {
   call({ current, previous }) {
     const session = ++this.#session;
     for (const [index, effect] of [...this.registry].entries()) {
+
+      /* TODO
+      - Declare change above loop and modify effect and index in loop
+      
+      
+      */
+
+
+
+
       const change = Change.create({
         current,
         effect,
@@ -236,12 +264,24 @@ class Effects {
         previous,
         session,
       });
-
       const result = effect.call(change);
       if (result === false) {
         break;
       }
     }
+  }
+
+  /* Creates and returns effect without 
+  - calling the effect
+  - registering the effect. 
+  */
+  create(source, condition, transformer, tag) {
+    return Effect.create({
+      condition: interpret_condition(condition),
+      source,
+      tag,
+      transformer,
+    });
   }
 
   /* Tests, if effect is registered. */
@@ -285,6 +325,7 @@ class Change {
   get effect() {
     return this.#effect;
   }
+  
   #effect;
 
   /* Returns effect index for the current session. */
