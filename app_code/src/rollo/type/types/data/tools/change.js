@@ -97,6 +97,6 @@ export class Change {
   - Conceptually similar to 'event.stopPropagation'.
   */
   stop() {
-    StopError.raise();
+    Change.StopException.raise();
   }
 }

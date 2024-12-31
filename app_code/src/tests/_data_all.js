@@ -2,6 +2,7 @@
 // import "@/tests/_data_all"
 
 await import("@/tests/data_$");
+await import("@/tests/data_change");
 await import("@/tests/data_clear");
 await import("@/tests/data_clone");
 await import("@/tests/data_condition");

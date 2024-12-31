@@ -1,7 +1,7 @@
 import "./bootstrap.scss";
 import "./main.css";
 
-import "@/tests/_data_all"
+//import "@/tests/_data_all"
 
 
 
