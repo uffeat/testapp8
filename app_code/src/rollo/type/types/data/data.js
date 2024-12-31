@@ -23,6 +23,8 @@ import { map } from "rollo/type/types/data/factories/map";
 import { transformer } from "rollo/type/types/data/factories/transformer";
 import { update } from "rollo/type/types/data/factories/update";
 
+import { Effect } from "rollo/type/types/data/tools/effect";
+
 /* Reactive key-value store with batch-update, array- and set-like methods,  
 and methods for in-place mutation. 
 NOTE
@@ -62,12 +64,17 @@ export const Data = (() => {
   class Data extends composition {
     static create = (...args) => new Data(...args);
     static name = "Data";
+    /* Expose Effect to provide a more natural home for Effect.
+    Relevant for direct effect creation. */
+    static Effect = Effect
 
     constructor(update) {
       super();
       this.update(update);
     }
   }
+
+ 
 
   return type.register("data", Data);
 })();

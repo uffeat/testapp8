@@ -12,7 +12,7 @@ await (async () => {
 
   /* Change original and clone */
   original.clear();
-  clone.stuff = 42;
+  clone.$.stuff = 42;
 
   /* Check that original has been changed independently of clone */
   if (original.empty) {

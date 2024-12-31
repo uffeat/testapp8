@@ -43,9 +43,9 @@ await (async () => {
     { foo: 42 }
   );
 
-  data.foo = "FOO";
-  data.bar = "BAR";
-  data.stuff = 8;
+  data.$.foo = "FOO";
+  data.$.bar = "BAR";
+  data.$.stuff = 8;
   catch_all.disabled = false;
-  data.foo = 42;
+  data.$.foo = 42;
 })();

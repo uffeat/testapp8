@@ -5,6 +5,7 @@ await import("@/tests/data_$");
 await import("@/tests/data_clear");
 await import("@/tests/data_clone");
 await import("@/tests/data_condition");
+await import("@/tests/data_effect");
 await import("@/tests/data_effects");
 await import("@/tests/data_filter");
 await import("@/tests/data_map");
