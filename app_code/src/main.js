@@ -1,14 +1,16 @@
 import "./bootstrap.scss";
 import "./main.css";
 
-import { type } from "rollo/type/type/type";
+
 
 //import "@/tests/_data_all"
 
 /* Purpose: Demonstate and test ... */
 await (async () => {
+  const { type } = await import("rollo/type/type/type");
   const { Data } = await import("rollo/type/types/data/data");
-  const { Computed } = await import("rollo/type/types/computed/computed");
+  //const { Computed } = await import("rollo/type/types/computed/computed");
+  await import("rollo/type/types/computed/computed");
 
   const data = Data.create({
     foo: "foo",
