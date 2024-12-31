@@ -1,6 +1,8 @@
 import "./bootstrap.scss";
 import "./main.css";
 
+import { type } from "rollo/type/type/type";
+
 //import "@/tests/_data_all"
 
 /* Purpose: Demonstate and test ... */
@@ -13,7 +15,8 @@ await (async () => {
     bar: "bar",
   });
 
-  const computed = Computed.create()
+  //const computed = Computed.create()
+  const computed = type.create('computed');
 
   console.dir(computed)
 

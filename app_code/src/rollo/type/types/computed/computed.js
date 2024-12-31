@@ -13,12 +13,16 @@ export const Computed = (() => {
 
   class Computed extends composition {
     static create = (...args) => new Computed(...args);
+   
     static name = "Computed";
    
 
     constructor() {
       super();
-      
+    }
+
+    created() {
+      console.log(`created`)
     }
   }
 
@@ -26,3 +30,5 @@ export const Computed = (() => {
 
   return type.register("computed", Computed);
 })();
+
+
