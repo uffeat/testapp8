@@ -3,6 +3,23 @@ import "./main.css";
 
 //import "@/tests/_data_all"
 
+/* Purpose: Demonstate and test ... */
+await (async () => {
+  const { Data } = await import("rollo/type/types/data/data");
+  const { Computed } = await import("rollo/type/types/computed/computed");
+
+  const data = Data.create({
+    foo: "foo",
+    bar: "bar",
+  });
+
+  const computed = Computed.create()
+
+  console.dir(computed)
+
+  
+})();
+
 
 
 if (import.meta.env.DEV) {
