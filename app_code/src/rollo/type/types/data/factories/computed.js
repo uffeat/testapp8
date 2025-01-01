@@ -40,8 +40,8 @@ class Computed {
     return this.registry.size;
   }
 
-  /* Creates Value instance, creates effect to update the Value instance from reducer, 
-  and returns effect controller of the Value instance. 
+  /* Creates Value instance, creates effect to update the Value instance from 
+  reducer, and returns effect controller of the Value instance. 
   NOTE
   - The idea is to create a reactive value that
     - is updated as per reducer and dependencies
@@ -50,9 +50,11 @@ class Computed {
     As such the computed' concept is a "higher-order" effect.
   - It's the reducer's resposibility to return a meaningful result, given any
     dependencies (condition keys).
-  - Since the condition for the effect set up, cab only be specified as required keys,
-    these should be provided as trailing args, and NOT as an array (as is the case for effects).
-  - If a condition beyond required keys is needed, this should be handled in the reducer.
+  - Since the condition for the effect set up, can only be specified as 
+    required keys, these should be provided as trailing args, and NOT as an 
+    array (as is the case for effects).
+  - If a condition beyond required keys is needed, this should be handled in 
+    the reducer.
   - 'add' only accept a single reducer, but the reducer can itelf be composed,
     e.g., with the 'pipe' tool.
   */

@@ -17,7 +17,7 @@ await (async () => {
       /* NOTE
       - A more restrictive implementation could throw an error here.
       */
-      console.log(`Ignoring attempt to set '${k}' to ${v}`);
+      ////console.log(`Ignoring attempt to set '${k}' to ${v}`);
       return false;
     },
   });

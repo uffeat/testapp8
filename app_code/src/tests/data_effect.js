@@ -15,9 +15,8 @@ await (async () => {
   const effect = Effect({
     source: (change) => {
       const current = Data(change.current);
-      console.log(`current:`, current.data);
+      ////console.log(`current:`, current.data);
       /* Check that initial condition works */
-
       for (const key of current.keys) {
         if (!["foo", "bar"].includes(key)) {
           console.error(`Unexpected key:`, key);

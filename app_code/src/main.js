@@ -1,7 +1,7 @@
 import "./bootstrap.scss";
 import "./main.css";
 
-//import "@/tests/_data_all"
+import "@/tests/_data_all"
 
 /* Purpose: Demonstate and test Data.computed. */
 await (async () => {
@@ -13,48 +13,7 @@ await (async () => {
     stuff: "stuff",
   });
 
-  const effects = data.computed.add(
-    /* Reducer */
-    (current) => {
-      let sum = 0;
-      for (const v of Object.values(current)) {
-        sum += v;
-      }
-      return sum;
-    },
-    "foo",
-    "bar"
-  );
-
-  let result;
-
-  effects.add(({ current }) => {
-    console.log("current:", current);
-    result = current;
-  });
-
-  (() => {
-    const expected = 50;
-    const message = `Expected ${expected}. Actual: ${result}`;
-    if (result === expected) {
-      console.log(`Success! ${message}`);
-    } else {
-      console.error(message);
-    }
-  })();
-
-  data.$.foo = 60;
-  data.$stuff = "STUFF";
-
-  (() => {
-    const expected = 68;
-    const message = `Expected ${expected}. Actual: ${result}`;
-    if (result === expected) {
-      console.log(`Success! ${message}`);
-    } else {
-      console.error(message);
-    }
-  })();
+  
 })();
 
 if (import.meta.env.DEV) {

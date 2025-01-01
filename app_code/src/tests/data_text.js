@@ -13,7 +13,7 @@ await (async () => {
 
   /* Test jsonable */
   (() => {
-    console.log(`Testing 'jsonable'...`);
+    ////console.log(`Testing 'jsonable'...`);
     const expected = true;
     const actual = data.jsonable;
     const message = `Expected: ${expected}. Actual: ${actual}`;
@@ -26,7 +26,7 @@ await (async () => {
 
   /* Test unsorted json */
   (() => {
-    console.log(`Testing unsorted json...`);
+    ////console.log(`Testing unsorted json...`);
     const json = data.json();
     const parsed = JSON.parse(json);
     if (data.match(parsed)) {
@@ -38,7 +38,7 @@ await (async () => {
 
   /* Test sorted json */
   (() => {
-    console.log(`Testing sorted json...`);
+    ////console.log(`Testing sorted json...`);
     const expected = '{"bar":"bar","foo":"foo","stuff":42,"thing":true}';
     const actual = data.json(true);
     const message = `Expected: ${expected}. Actual: ${actual}`;
@@ -51,7 +51,7 @@ await (async () => {
 
   /* Test unsorted text */
   (() => {
-    console.log(`Testing unsorted text...`);
+    ////console.log(`Testing unsorted text...`);
     const text = data.text();
     const parsed = JSON.parse(text);
     if (data.match(parsed)) {
@@ -63,7 +63,7 @@ await (async () => {
 
   /* Test sorted text */
   (() => {
-    console.log(`Testing sorted text...`);
+    ////console.log(`Testing sorted text...`);
     const expected = '{"bar":"bar","foo":"foo","stuff":42,"thing":true}';
     const actual = data.text(true);
     const message = `Expected: ${expected}. Actual: ${actual}`;
@@ -76,7 +76,7 @@ await (async () => {
 
   /* Test toString for json-compatible data */
   (() => {
-    console.log(`Testing toString for json-compatible data...`);
+    ////console.log(`Testing toString for json-compatible data...`);
     const text = String(data);
     const parsed = JSON.parse(text);
     if (data.match(parsed)) {
