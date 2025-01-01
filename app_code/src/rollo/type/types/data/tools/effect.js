@@ -1,4 +1,3 @@
-import { type } from "rollo/type/type/type";
 import { Change, ChangeType } from "rollo/type/types/data/tools/change";
 
 export function Effect(...args) {
@@ -9,7 +8,7 @@ export function Effect(...args) {
 NOTE
 - Effect can be created
   - indirectly via 'Data.effects.add'; also registers the effect.
-  - directly via 'Effect.create' or 'Data.Effect.create'; does NOT
+  - directly via 'Effect' or 'Data.Effect'; does NOT
     register the effect.
   Use the direct approach, when the effect should not be registered
   immediately.
@@ -33,7 +32,7 @@ export class EffectType {
     While this can be powerful, it can also add complexity!
   */
   set condition(condition) {
-    condition = interpret_condition(condition);
+   
     this.#condition = condition;
   }
   #condition;
@@ -116,26 +115,20 @@ export class EffectType {
       throw new Error(`Cannot call unbound effect without augument.`);
     }
     change = Change({
-      current: this.owner.data,
+      current: this.owner.current,
       effect: this,
       owner: this.owner,
     });
     /* Test condition */
     if (this.condition && !this.condition(change)) return;
-   
+
     try {
       return this.source(change);
     } catch (error) {
       if (!(error instanceof ChangeType.StopException)) {
         throw error;
       }
-     
     }
-
-
-
-
-
   }
 
   /* Creates and returns clone. */
@@ -149,6 +142,7 @@ export class EffectType {
     });
   }
 
+  /* */
   update(update) {
     for (const [k, v] of Object.entries(update)) {
       if (v === undefined) {
@@ -183,8 +177,8 @@ export class EffectType {
     if (this.owner && owner !== this.owner) {
       throw new Error(`Already bound.`);
     }
-    if (owner.__type__ !== "data") {
-      throw new Error(`'owner' should be a Data instance.`);
+    if (!owner.effects) {
+      throw new Error(`'owner' does not support effects.`);
     }
     this.#owner = owner;
     this.#owner.effects.add(this);
@@ -197,7 +191,7 @@ export class EffectType {
     if (!this.owner) {
       return this;
     }
-    this.#owner.effects.remove(this);
+    this.owner.effects.remove(this);
     this.#owner = null;
     return this;
   }
@@ -207,35 +201,4 @@ export class EffectType {
   #owner;
 }
 
-/* Creates and returns condition function from short-hand. */
-function interpret_condition(condition) {
-  if (!condition || typeof condition === "function") {
-    return condition;
-  }
 
-  if (typeof condition === "string") {
-    /* Create condition function from string short-hand:
-    current must contain a key corresponding to the string short-hand. */
-    return ({ current }) => condition in current;
-  }
-
-  if (Array.isArray(condition)) {
-    /* Create condition function from array short-hand:
-    current must contain a key that is present in the array short-hand. */
-    return ({ current }) => {
-      for (const key of condition) {
-        if (key in current) return true;
-      }
-      return false;
-    };
-  }
-
-  if (typeof condition === "object" && Object.keys(condition).length === 1) {
-    /* Create condition function from single-item object short-hand:
-    current must contain a key-value pair corresponding to the object short-hand. */
-    return ({ current }) =>
-      type.create("data", { ...current }).includes(condition);
-  }
-
-  throw new Error(`Invalid condition: ${condition}`);
-}

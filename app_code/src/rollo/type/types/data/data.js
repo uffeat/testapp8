@@ -4,7 +4,9 @@ import { __owner__ } from "@/rollo/type/types/data/factories/__owner__";
 import { $ } from "rollo/type/types/data/factories/$";
 import { clear } from "rollo/type/types/data/factories/clear";
 import { clone } from "rollo/type/types/data/factories/clone";
+import { computed } from "rollo/type/types/data/factories/computed";
 import { condition } from "rollo/type/types/data/factories/condition";
+import { create_condition } from "rollo/type/types/data/factories/create_condition";
 import { difference } from "rollo/type/types/data/factories/difference";
 import { effects } from "rollo/type/types/data/factories/effects";
 import { empty } from "rollo/type/types/data/factories/empty";
@@ -22,7 +24,6 @@ import { text } from "rollo/type/types/data/factories/text";
 import { map } from "rollo/type/types/data/factories/map";
 import { transformer } from "rollo/type/types/data/factories/transformer";
 import { update } from "rollo/type/types/data/factories/update";
-import { Effect } from "rollo/type/types/data/tools/effect";
 
 const cls = (() => {
   const composition = type.compose(
@@ -33,7 +34,9 @@ const cls = (() => {
     $,
     clear,
     clone,
+    computed,
     condition,
+    create_condition,
     difference,
     effects,
     empty,
@@ -75,10 +78,5 @@ NOTE
 export function Data(update) {
   return type.create("data", update);
 }
-/* Expose Effect to provide a more natural home for Effect.
-Relevant for direct effect creation. */
-Data.Effect = Effect;
 
-export const DataType = cls
-
-
+export const DataType = cls;

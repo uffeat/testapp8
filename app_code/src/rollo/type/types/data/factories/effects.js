@@ -15,8 +15,6 @@ export const effects = (parent, config, ...factories) => {
 
 /* Effects controller. */
 class Effects {
- 
-
   constructor(owner) {
     this.#owner = owner;
   }
@@ -65,9 +63,13 @@ class Effects {
     if (![null, undefined].includes(this.max) && this.size >= this.max) {
       throw new Error(`Cannot register more than ${this.max} effects.`);
     }
+    if (this.owner.create_condition) {
+      condition = this.owner.create_condition(condition);
+    }
     let effect;
     if (source instanceof EffectType) {
       /* Update effect */
+
       effect = source.update({ condition, tag });
     } else {
       /* Create effect */
@@ -83,7 +85,7 @@ class Effects {
     try {
       effect.call(
         Change({
-          current: this.owner.data,
+          current: this.owner.current,
           effect,
           owner: this.owner,
         })
@@ -129,6 +131,14 @@ class Effects {
     }
   }
   #session = 0;
+
+  /* Removes all effects.
+  NOTE
+  - Reserved for special cases. Use with caution; risk of memory leaks!
+  */
+  clear() {
+    this.registry.clear();
+  }
 
   /* Tests, if effect is registered. */
   has(effect) {

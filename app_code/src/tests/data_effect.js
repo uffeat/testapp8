@@ -3,13 +3,16 @@
 /* Purpose: Demonstate and test effect */
 await (async () => {
   const { Data } = await import("rollo/type/types/data/data");
+  const { Effect } = await import("rollo/type/types/data/tools/effect");
+  const { create_condition } = await import("rollo/type/types/data/tools/create_condition");
+
 
   const data = Data({
     foo: "foo",
     bar: "bar",
   });
 
-  const effect = Data.Effect({
+  const effect = Effect({
     source: (change) => {
       const current = Data(change.current);
       console.log(`current:`, current.data);
@@ -33,7 +36,7 @@ await (async () => {
         );
       }
     },
-    condition: ["foo", "bar"],
+    condition: create_condition(["foo", "bar"]),
   });
 
   data.effects.add(effect);

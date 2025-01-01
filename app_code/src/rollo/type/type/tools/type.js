@@ -104,6 +104,11 @@ export class Type {
     throw new Error(`Type '${tag}' not registered.`);
   }
 
+  /* */
+  has(tag) {
+    return this.registry.has(tag);
+  }
+
   /* Adds meta data to, registers, and returns a class. */
   register(cls, tag) {
     /* Infer tag, if not explicitly provided */

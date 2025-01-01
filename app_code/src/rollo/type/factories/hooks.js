@@ -1,6 +1,7 @@
 /* Implements 'hooks' method. */
 export const hooks = (parent, config, ...factories) => {
-  return class hooks extends parent {
+  return class extends parent {
+    static name = "hooks";
     
     /* Calls hook functions bound to this. Chainable. */
     hooks(...hooks) {

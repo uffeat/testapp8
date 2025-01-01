@@ -21,10 +21,13 @@ export class ChangeType {
       }
     })();
 
-  constructor({ current, effect, index, owner, previous, session }) {
-    if (!current) {
+  constructor(argument) {
+    if (!('current' in argument)) {
       throw new Error(`'current' required.`)
     }
+
+    const { current, effect, index, owner, previous, session } = argument
+
     if (!owner) {
       throw new Error(`'owner' required.`)
     }

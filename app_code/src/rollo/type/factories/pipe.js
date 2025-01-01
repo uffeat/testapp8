@@ -1,7 +1,7 @@
 /* Implements 'pipe' method. */
 export const hooks = (parent, config, ...factories) => {
-  return class hooks extends parent {
-    
+  return class extends parent {
+    static name = "pipe";
 
     /* Calls pipe functions bound to this with result from one function passed 
     into the next. First function receives undefined (or result from an 

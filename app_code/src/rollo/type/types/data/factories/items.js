@@ -5,19 +5,33 @@
 export const items = (parent, config, ...factories) => {
   return class extends parent {
     static name = 'items'
-    /* Returns object with shallow copy of data properties. */
+
+
+
+    /* Returns object with shallow copy of data properties.
+    NOTE
+    - 'current' alias; provided for shorter syntax.
+    */
     get data() {
+      return this.current;
+    }
+
+     /* Returns object with shallow copy of data properties. */
+    get current() {
       return { ...this };
     }
 
-    /* Returns entries ('items' alias). */
+    /* Returns entries. */
     get entries() {
       return Object.entries(this);
     }
 
-    /* Returns entries. */
+    /* Returns entries. 
+    NOTE
+    - 'entries' alias; provided for shorter syntax.
+    */
     get items() {
-      return Object.entries(this);
+      return this.entries;
     }
 
     /* Returns keys. */
