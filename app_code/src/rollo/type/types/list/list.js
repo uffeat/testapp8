@@ -1,58 +1,45 @@
 import { type } from "rollo/type/type/type";
 import { effects } from "rollo/type/types/list/list/factories/effects";
-import { update } from "rollo/type/types/list/list/factories/update";
-
-
+//import { update } from "rollo/type/types/list/list/factories/update";
 
 /*
 TODO 
 $.foo -> adds foo */
 
-
-
-/* 
-*/
-export const List = (() => {
-  const composition = type.compose(
-    Object,
-    {},
-    effects,
-    update,
-  );
+const cls = (() => {
+  const composition = type.compose(Array, {}, effects);
 
   class List extends composition {
-    static create = (...args) => new List(...args);
     static name = "List";
 
-    constructor(update, ...items) {
+    constructor(...values) {
       super();
-      this.update(update);
     }
-
-    get values() {
-      return [...this.#values.values()]
-    }
-    #values = new Set()
 
     add(...values) {
+      const added = values.filter(
+        (v) => !this.includes(v) && v !== undefined
+      );
+      const removed = values.filter(
+        (v) => this.includes(v) && v === undefined
+      );
+      /* Update */
+      /* TODO
+      */
+      
 
-      const added = values.filter((v) => !this.#values.has(v) && v !== undefined)
-      const removed = values.filter((v) => this.#values.has(v) && v === undefined)
-      removed.forEach((item) => this.#values.delete(item))
-      added.forEach((item) => this.#values.add(item))
+      this.effects.call({});
 
-      this.effects.call()
-
-
-
-     
-      return this
+      return this;
     }
-
-    
-
-
   }
 
-  return type.register("list", List);
+  return type.register(List);
 })();
+
+/* .*/
+export function Value(...values) {
+  return type.create("list", ...values);
+}
+
+export const ListType = cls;
