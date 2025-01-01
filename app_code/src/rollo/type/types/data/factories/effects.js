@@ -1,5 +1,5 @@
-import { Effect } from "rollo/type/types/data/tools/effect";
-import { Change } from "rollo/type/types/data/tools/change";
+import { Effect, EffectType } from "rollo/type/types/data/tools/effect";
+import { Change, ChangeType } from "rollo/type/types/data/tools/change";
 
 /* Implements 'effects' getter. */
 export const effects = (parent, config, ...factories) => {
@@ -9,13 +9,13 @@ export const effects = (parent, config, ...factories) => {
     get effects() {
       return this.#effects;
     }
-    #effects = Effects.create(this);
+    #effects = new Effects(this);
   };
 };
 
 /* Effects controller. */
 class Effects {
-  static create = (...args) => new Effects(...args);
+ 
 
   constructor(owner) {
     this.#owner = owner;
@@ -66,12 +66,12 @@ class Effects {
       throw new Error(`Cannot register more than ${this.max} effects.`);
     }
     let effect;
-    if (source instanceof Effect) {
+    if (source instanceof EffectType) {
       /* Update effect */
       effect = source.update({ condition, tag });
     } else {
       /* Create effect */
-      effect = Effect.create({
+      effect = Effect({
         condition,
         source,
         tag,
@@ -82,14 +82,14 @@ class Effects {
     /* Call effect */
     try {
       effect.call(
-        Change.create({
+        Change({
           current: this.owner.data,
           effect,
           owner: this.owner,
         })
       );
     } catch (error) {
-      if (!(error instanceof Change.StopException)) {
+      if (!(error instanceof ChangeType.StopException)) {
         throw error;
       }
     }
@@ -105,7 +105,7 @@ class Effects {
     the session are not called; similar to `event.stopPropagation()`.
   */
   call({ current, previous }) {
-    const change = Change.create({
+    const change = Change({
       current,
       owner: this.owner,
       previous,
@@ -120,7 +120,7 @@ class Effects {
           break;
         }
       } catch (error) {
-        if (error instanceof Change.StopException) {
+        if (error instanceof ChangeType.StopException) {
           break;
         } else {
           throw error;

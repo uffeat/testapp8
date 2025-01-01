@@ -2,7 +2,7 @@
 export const difference = (parent, config, ...factories) => {
   return class extends parent {
     static name = 'difference'
-    /* Returns an object with items that represent
+    /* Returns an object with items that represent,
     - if reverse is false, items in 'other' that are different from those 
       in data items. 
     - if reverse is true, data items that are in 'other' and are different 
@@ -19,7 +19,17 @@ export const difference = (parent, config, ...factories) => {
             if (v === undefined) {
               return true;
             } else {
-              return this[k] !== v;
+
+
+              if (this[k] && this[k].match) {
+                return !this[k].match(v)
+              } else {
+                return this[k] !== v;
+              }
+
+
+
+              
             }
           })
         );

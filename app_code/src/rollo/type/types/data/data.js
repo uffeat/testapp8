@@ -22,17 +22,9 @@ import { text } from "rollo/type/types/data/factories/text";
 import { map } from "rollo/type/types/data/factories/map";
 import { transformer } from "rollo/type/types/data/factories/transformer";
 import { update } from "rollo/type/types/data/factories/update";
-
 import { Effect } from "rollo/type/types/data/tools/effect";
 
-/* Reactive key-value store with batch-update, array- and set-like methods,  
-and methods for in-place mutation. 
-NOTE
-- Zero dependencies.
-- Pure JS; does not use browser APIs.
-- Relies on Vite, only for import syntax.
-*/
-export const Data = (() => {
+const cls = (() => {
   const composition = type.compose(
     Object,
     {},
@@ -62,11 +54,7 @@ export const Data = (() => {
   );
 
   class Data extends composition {
-    static create = (...args) => new Data(...args);
     static name = "Data";
-    /* Expose Effect to provide a more natural home for Effect.
-    Relevant for direct effect creation. */
-    static Effect = Effect
 
     constructor(update) {
       super();
@@ -74,7 +62,23 @@ export const Data = (() => {
     }
   }
 
- 
-
-  return type.register("data", Data);
+  return type.register(Data);
 })();
+
+/* Reactive key-value store with batch-update, array- and set-like methods,  
+and methods for in-place mutation. 
+NOTE
+- Zero dependencies.
+- Pure JS; does not use browser APIs.
+- Relies on Vite, only for import syntax.
+*/
+export function Data(update) {
+  return type.create("data", update);
+}
+/* Expose Effect to provide a more natural home for Effect.
+Relevant for direct effect creation. */
+Data.Effect = Effect;
+
+export const DataType = cls
+
+

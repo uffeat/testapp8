@@ -4,14 +4,14 @@
 await (async () => {
   const { Data } = await import("rollo/type/types/data/data");
 
-  const data = Data.create({
+  const data = Data({
     foo: "foo",
     bar: "bar",
   });
 
-  const effect = Data.Effect.create({
+  const effect = Data.Effect({
     source: (change) => {
-      const current = Data.create(change.current);
+      const current = Data(change.current);
       console.log(`current:`, current.data);
       /* Check that initial condition works */
 
@@ -44,7 +44,7 @@ await (async () => {
   /* Change condition so that that it replicates original condition, 
   but also does not accept {foo: 42} */
   effect.condition = (change) => {
-    const current = Data.create(change.current);
+    const current = Data(change.current);
     const keys = ["foo", "bar"];
     for (const [k, v] of current.entries) {
       if (!keys.includes(k)) {

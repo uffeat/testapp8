@@ -1,5 +1,9 @@
 import { type } from "rollo/type/type/type";
-import { Change } from "rollo/type/types/data/tools/change";
+import { Change, ChangeType } from "rollo/type/types/data/tools/change";
+
+export function Effect(...args) {
+  return new EffectType(...args);
+}
 
 /* Utility for creating reactivity watcher.
 NOTE
@@ -10,8 +14,7 @@ NOTE
   Use the direct approach, when the effect should not be registered
   immediately.
 - Tightly coupled with Data.effects. */
-export class Effect {
-  static create = (...args) => new Effect(...args);
+export class EffectType {
   constructor({ condition, disabled, name, source, tag }) {
     this.condition = condition;
     this.#disabled = disabled;
@@ -102,34 +105,42 @@ export class Effect {
     if (!this.source) {
       return;
     }
-    /* Check argument */
-    if (!change) {
-      if (!this.owner) {
-        throw new Error(`Cannot call unbound effect without augument.`);
-      }
-      change = Change.create({
-        current: this.owner.data,
-        effect: this,
-        owner: this.owner,
-      });
-      /* XXX 
-      Self-calling effects cannot use `change.stop()` 
-      */
+    if (change) {
+      /* Test condition */
+      if (this.condition && !this.condition(change)) return;
+      /* Call source and return result */
+      return this.source(change);
     }
+    /* Handle direct call (no change argument) */
+    if (!this.owner) {
+      throw new Error(`Cannot call unbound effect without augument.`);
+    }
+    change = Change({
+      current: this.owner.data,
+      effect: this,
+      owner: this.owner,
+    });
     /* Test condition */
-    if (this.condition) {
-      if (!this.condition(change)) {
-        return;
+    if (this.condition && !this.condition(change)) return;
+   
+    try {
+      return this.source(change);
+    } catch (error) {
+      if (!(error instanceof ChangeType.StopException)) {
+        throw error;
       }
+     
     }
 
-    /* Call source and return result */
-    return this.source(change);
+
+
+
+
   }
 
   /* Creates and returns clone. */
   clone() {
-    return Effect.create({
+    return Effect({
       condition: this.#condition,
       disabled: this.#disabled,
       name: this.#name,

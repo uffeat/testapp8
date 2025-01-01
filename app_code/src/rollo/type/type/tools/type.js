@@ -3,6 +3,7 @@ import { Macro } from "rollo/type/type/tools/macro";
 import { Registry } from "rollo/type/type/tools/registry";
 import { add_meta } from "rollo/type/type/tools/add_meta";
 import { is_class } from "rollo/tools/type/is_class";
+import { pascal_to_kebab } from "rollo/tools/str/case";
 
 /* Utility for composing and instantiating classes. 
 Provides a touch of Python-flavor to class usage.
@@ -72,7 +73,11 @@ export class Type {
     /* Get class from registry */
     const cls = this.get(tag, ...args);
     /* Create instance */
-    let instance = cls.create ? cls.create(...args) : new cls(...args);
+
+    let instance = Object.hasOwn(cls, "create")
+      ? cls.create(...args)
+      : new cls(...args);
+
     /* Call the 'created' lifecycle method */
     if (instance.created) {
       instance = instance.created() || instance;
@@ -99,19 +104,13 @@ export class Type {
     throw new Error(`Type '${tag}' not registered.`);
   }
 
-  /* Adds meta data to, registers, and returns a class. 
-  NOTE
-  - Typical use pattern: In a dedicated JS module,
-    - Create a composed class with 'compose'
-    - Create a registation class that extends the composed class
-    - Typically, give the registation class a static 'create' method for 
-      flexibility.
-    - Register the registation class with 'register'.
-    - Optionally, expose the result of 'register' for export to provide a 
-      syntactical alternative to 'type.create'
-  - Use 'registry.add' instead to register without adding meta data. 
-  */
-  register(tag, cls) {
+  /* Adds meta data to, registers, and returns a class. */
+  register(cls, tag) {
+    /* Infer tag, if not explicitly provided */
+    if (!tag) {
+      tag = pascal_to_kebab(cls.name);
+    }
+    /* Handle static '__chain__' prop */
     if (cls.__chain__) {
       cls.__chain__.add(cls);
       cls.__chain__.freeze();
@@ -120,12 +119,15 @@ export class Type {
       cls.__chain__.add(cls);
       cls.__chain__.freeze();
     }
+    /* Make static '__chain__' prop available as instance prop */
     add_meta(cls.prototype, "chain", cls.__chain__);
+    /* Create __class__ instance prop for easy access to cls */
     add_meta(cls.prototype, "class", cls);
+    /* Create __type__ instance prop as an alternative to 'instanceof' */
     add_meta(cls.prototype, "type", tag);
+    /* Register cls */
     this.registry.add(tag, cls);
+    /* Return cls, so that its home module can do additional work */
     return cls;
   }
 }
-
-

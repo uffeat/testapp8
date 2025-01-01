@@ -6,7 +6,7 @@ await (async () => {
 
   /* Create data that silently ignores attempts to set an item to a 
   non-number value. */
-  const data = Data.create({
+  const data = Data({
     foo: "foo",
     bar: "bar",
     stuff: 42,

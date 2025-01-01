@@ -1,9 +1,14 @@
+/* changeType constructor */
+export function Change(...args) {
+  return new ChangeType(...args);
+}
+
+
 /* Argument for effect. 
 NOTE
 - Should generally not be used externally.
 */
-export class Change {
-  static create = (...args) => new Change(...args);
+export class ChangeType {
   /* Non-error exception to signal break of effects execution loop. */
   static StopException = (() =>
     class StopException extends Error {
@@ -97,6 +102,6 @@ export class Change {
   - Conceptually similar to 'event.stopPropagation'.
   */
   stop() {
-    Change.StopException.raise();
+    ChangeType.StopException.raise();
   }
 }

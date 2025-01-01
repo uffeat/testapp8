@@ -4,7 +4,7 @@
 await (async () => {
   const { Data } = await import("rollo/type/types/data/data");
 
-  const data = Data.create({
+  const data = Data({
     foo: "foo",
     bar: "bar",
     stuff: 42,
