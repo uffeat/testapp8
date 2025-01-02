@@ -3,35 +3,29 @@ import "./main.css";
 
 //import "@/tests/_all"
 
-/* Purpose: Demonstate and test List.$ */
+/* Purpose: Demonstate and test List.clear */
 await (async () => {
   const { List } = await import("rollo/type/types/list/list");
 
-  const list = List();
+  const list = List(1, 2, 3);
 
-  /* NOTE
-  - The '$' Can only be used for json-compatible values
-  - Fails silently otherwise!!!
-  */
-  list.$[4.45];
-  list.$.uffe;
-  list.$.true;
-  list.$.false;
-  list.$.null;
-  list.$[4.45];
-  list.$['foo-bar'];
+  list.clear();
 
-  list.json();
+  /* Prepare test */
+  let actual = "";
 
-  const actual = JSON.stringify(list.current);
-  const expected = `[4.45,"uffe",true,false,null,"foo-bar"]`;
-  if (actual === expected) {
-    console.log(`Success!`);
-  } else {
-    console.error(`Expected:`, expected, ` Actual:`, actual);
-  }
+  /* Verify */
+  (() => {
+    const expected = "42";
+    const message = `Expected ${expected}. Actual: ${actual}`;
+    if (actual === expected) {
+      console.log(`Success! ${message}`);
+    } else {
+      //console.error(message);
+    }
+  })();
 
-  console.log("current:", list.current);
+  ////console.log("current:", list.current);
   ////console.log("current:", list.values);
 })();
 

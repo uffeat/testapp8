@@ -4,23 +4,30 @@
 await (async () => {
   const { List } = await import("rollo/type/types/list/list");
 
-  const list = List(1, 2, 3);
+  const list = List();
 
- 
-  /* Prepare test */
-  let actual = list.text()
+  /* NOTE
+  - The '$' Can only be used for json-compatible values
+  - Fails silently otherwise!!!
+  */
+  list.$[4.45];
+  list.$.uffe;
+  list.$.true;
+  list.$.false;
+  list.$.null;
+  list.$[4.45];
+  list.$["foo-bar"];
 
-  /* Verify */
-  (() => {
-    const expected = "42";
-    const message = `Expected ${expected}. Actual: ${actual}`;
-    if (actual === expected) {
-      console.log(`Success! ${message}`);
-    } else {
-      //console.error(message);
-    }
-  })();
+  list.json();
 
-  ////console.log("current:", list.current);
+  const actual = JSON.stringify(list.current);
+  const expected = `[4.45,"uffe",true,false,null,"foo-bar"]`;
+  if (actual === expected) {
+    console.log(`Success!`);
+  } else {
+    console.error(`Expected:`, expected, ` Actual:`, actual);
+  }
+
+  console.log("current:", list.current);
   ////console.log("current:", list.values);
 })();
