@@ -1,14 +1,27 @@
 /* Purpose: Demonstate and Value.effects */
 await (async () => {
   const { Value } = await import("rollo/type/types/value/value");
-  
+
   const value = Value(42);
 
-  value.effects.add((change) => {
-    console.log('curernt:', change.current)
-  })
+  let result = "";
 
-  value.$ = 'foo'
-  
+  value.effects.add(({ data: { current } }) => {
+    console.log("current:", current);
+    result += String(current);
+  });
 
+  value.$ = "foo";
+
+  /* Test */
+
+  (() => {
+    const expected = "42foo";
+    const message = `Expected ${expected}. Actual: ${result}`;
+    if (result === expected) {
+      console.log(`Success! ${message}`);
+    } else {
+      console.error(message);
+    }
+  })();
 })();

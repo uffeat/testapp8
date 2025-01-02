@@ -7,7 +7,7 @@ await (async () => {
   const data = Data();
 
   data.effects.add((change) => {
-    ////console.log(`current:`, change.current);
+    ////console.log(`change:`, change);
   });
 
   data.effects.add((change) => {

@@ -11,8 +11,9 @@ await (async () => {
   const result = []
   /* Set up effect to watch changes */
   data.effects.add((change) => {
-    ////console.log(`current:`, change.current);
-    result.push(change.current.foo)
+    ////console.log(`change:`, change);
+    const {data: {current}} = change
+    result.push(current.foo)
   });
 
   data.$.foo = 42;

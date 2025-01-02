@@ -12,7 +12,8 @@ await (async () => {
   });
 
   /* Set up effect to check that map batch-updates. */
-  data.effects.add(function effect({ session }) {
+  data.effects.add(function effect(change) {
+    const session = change.session || 0;
     if (session > 1) {
       console.error(
         `Effect ran ${session + 1} times; batch-update does not work correctly!`
@@ -35,9 +36,9 @@ await (async () => {
     thing: 14,
   };
   if (data.match(expected)) {
-    console.log(`Success! Data:`, data.data);
+    console.log(`Success!`);
   } else {
-    console.error(`Expected:`, expected, `Actual:`, data.data);
+    console.error(`Expected:`, expected, `Actual:`, data.current);
   }
 })();
 

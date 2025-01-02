@@ -23,7 +23,7 @@ await (async () => {
   });
 
   /* Set up effect to watch that the condition works. */
-  data.effects.add(({ current }) => {
+  data.effects.add(({data: {current}}) => {
     Object.values(current).forEach((v) => {
       if (typeof v !== "number") {
         throw new Error(`Got an item with non-number value: ${v}`);
@@ -38,8 +38,8 @@ await (async () => {
   /* Check final result */
   const expected = { bar: 8, stuff: 42 };
   if (data.match(expected)) {
-    console.log(`Success! Data:`, data.data);
+    console.log(`Success!`);
   } else {
-    console.error(`Expected:`, expected, `Actual:`, data.data);
+    console.error(`Expected:`, expected, `Actual:`, data.current);
   }
 })();

@@ -14,8 +14,8 @@ await (async () => {
 
   const effect = Effect({
     source: (change) => {
-      const current = Data(change.current);
-      ////console.log(`current:`, current.data);
+      const current = Data(change.data.current);
+      ////console.log(`current:`, current);
       /* Check that initial condition works */
       for (const key of current.keys) {
         if (!["foo", "bar"].includes(key)) {
@@ -46,7 +46,7 @@ await (async () => {
   /* Change condition so that that it replicates original condition, 
   but also does not accept {foo: 42} */
   effect.condition = (change) => {
-    const current = Data(change.current);
+    const current = Data(change.data.current);
     const keys = ["foo", "bar"];
     for (const [k, v] of current.entries) {
       if (!keys.includes(k)) {

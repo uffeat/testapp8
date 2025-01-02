@@ -40,7 +40,6 @@ export const update = (parent, config, ...factories) => {
       const changed_entries = Object.entries(current);
 
       if (changed_entries.length) {
-       
         /* Update */
         changed_entries
           .filter(([k, v]) => v === undefined)
@@ -50,10 +49,6 @@ export const update = (parent, config, ...factories) => {
           .forEach(([k, v]) => (this[k] = v));
         /* Call effects */
         if (this.effects.size) {
-
-          
-
-
           this.effects.call({ current, previous });
         }
       }

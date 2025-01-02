@@ -7,7 +7,7 @@ TODO
 $.foo -> adds foo */
 
 const cls = (() => {
-  const composition = type.compose(Array, {}, effects);
+  const composition = type.compose(Object, {}, effects);
 
   class List extends composition {
     static name = "List";
@@ -15,6 +15,11 @@ const cls = (() => {
     constructor(...values) {
       super();
     }
+
+    /* TODO
+    - Start with non-reactive version that supports 'difference', 'match', 'update', 'size' 'add' and 'remove'
+    - Use hidden data container - array or set - probably set (native support for remove)
+    - Channel everything through update */
 
     add(...values) {
       const added = values.filter(

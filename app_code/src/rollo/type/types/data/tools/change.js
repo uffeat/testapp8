@@ -1,8 +1,7 @@
-/* changeType constructor */
+/* ChangeType constructor */
 export function Change(...args) {
   return new ChangeType(...args);
 }
-
 
 /* Argument for effect. 
 NOTE
@@ -21,30 +20,23 @@ export class ChangeType {
       }
     })();
 
-  constructor(argument) {
-    if (!('current' in argument)) {
-      throw new Error(`'current' required.`)
-    }
-
-    const { current, effect, index, owner, previous, session } = argument
-
+  constructor({ data, effect, index, owner, session }) {
     if (!owner) {
-      throw new Error(`'owner' required.`)
+      throw new Error(`'owner' required.`);
     }
-    this.#current = current;
+    this.#data = data;
     this.#effect = effect;
     this.#index = index || null;
     this.#owner = owner;
-    this.#previous = previous || null;
     this.#session = session || null;
     this.#time = Date.now();
   }
 
-  /* Returns current data. */
-  get current() {
-    return this.#current;
+  /* Returns data. */
+  get data() {
+    return this.#data;
   }
-  #current;
+  #data;
 
   /* Returns effect.
   NOTE
@@ -76,12 +68,6 @@ export class ChangeType {
   }
   #index;
 
-  /* Returns previous data. */
-  get previous() {
-    return this.#previous;
-  }
-  #previous;
-
   /* Returns owner */
   get owner() {
     return this.#owner;
@@ -106,5 +92,13 @@ export class ChangeType {
   */
   stop() {
     ChangeType.StopException.raise();
+  }
+
+  /* Batch updates props. Chainable. */
+  update(update) {
+    for (const [k, v] of Object.entries(update)) {
+      this[k] = v;
+    }
+    return this;
   }
 }

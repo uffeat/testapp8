@@ -115,7 +115,7 @@ export class EffectType {
       throw new Error(`Cannot call unbound effect without augument.`);
     }
     change = Change({
-      current: this.owner.current,
+      data: {current: this.owner.current},
       effect: this,
       owner: this.owner,
     });

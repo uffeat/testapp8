@@ -69,7 +69,6 @@ class Effects {
     let effect;
     if (source instanceof EffectType) {
       /* Update effect */
-
       effect = source.update({ condition, tag });
     } else {
       /* Create effect */
@@ -85,7 +84,7 @@ class Effects {
     try {
       effect.call(
         Change({
-          current: this.owner.current,
+          data: {current: this.owner.current},
           effect,
           owner: this.owner,
         })
@@ -106,11 +105,10 @@ class Effects {
     for special cases, if 'effect.call' returns false, subsequent effects in
     the session are not called; similar to `event.stopPropagation()`.
   */
-  call({ current, previous }) {
+  call(data) {
     const change = Change({
-      current,
+      data,
       owner: this.owner,
-      previous,
       session: ++this.#session,
     });
     for (const [index, effect] of [...this.registry].entries()) {

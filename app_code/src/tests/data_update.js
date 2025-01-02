@@ -13,7 +13,6 @@ await (async () => {
   /* Set up effect to check batch-updates. */
   data.effects.add((change) => {
     ////console.log("change:", change); ////
-
     const session = change.session || 0;
     if (session > 1) {
       console.error(
@@ -30,10 +29,10 @@ await (async () => {
     bar: "BAR",
   };
   if (data.match(expected)) {
-    console.log(`Success! Current data:`, data.data);
+    console.log(`Success!`);
   } else {
-    console.error(`Expected:`, expected, `Actual:`, data.data);
+    console.error(`Expected:`, expected, `Actual:`, data.current);
   }
 
-  //console.log("data.data:", data.data);
+  //console.log("data.current:", data.current);
 })();

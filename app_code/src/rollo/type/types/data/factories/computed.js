@@ -9,12 +9,87 @@ export const computed = (parent, config, ...factories) => {
     get computed() {
       return this.#computed;
     }
-    #computed = new Computed(this);
+    #computed = new Registry(this);
   };
 };
 
-/* Computed controller */
+/* */
 class Computed {
+  constructor({ condition, name, owner, reducer }) {
+    this.#condition = condition
+    this.#name = name;
+    this.#owner = owner;
+    this.reducer = reducer
+    this.#value = Value();
+  }
+  #value;
+
+  /* Returns condition */
+  get condition() {
+    return this.#condition;
+  }
+  #condition
+  /* NOTE 'condition' is read-only. */
+
+  /* Returns current value. */
+  get current() {
+    return this.#value.current;
+  }
+  /* Sets current value.
+  NOTE
+  - 
+  */
+  set current(current) {
+    this.#value.current = current;
+  }
+
+  /* Returns effects controller. */
+  get effects() {
+    return this.#value.effects;
+  }
+
+  /* Returns name. */
+  get name() {
+    return this.#name;
+  }
+  #name;
+  /* NOTE 'name' is read-only. */
+
+  /* Returns owner Data instance */
+  get owner() {
+    return this.#owner;
+  }
+  #owner;
+  /* NOTE 'owner' is read-only. */
+
+
+  /* Returns previous value. */
+  get previous() {
+    return this.#value.previous;
+  }
+
+
+
+
+  /* Returns reducer. */
+  get reducer() {
+    return this.#reducer;
+  }
+  /* Sets reducer.
+  NOTE
+  - 
+  */
+  set reducer(reducer) {
+    this.#reducer = reducer;
+  }
+  #reducer
+
+
+
+}
+
+/* Computed controller */
+class Registry {
   constructor(owner) {
     this.#owner = owner;
   }
@@ -33,90 +108,70 @@ class Computed {
   get registry() {
     return this.#registry;
   }
-  #registry = new Map();
+  #registry = {};
 
   /* Returns number of computed values. */
   get size() {
     return this.registry.size;
   }
 
-  /* Creates Value instance, creates effect to update the Value instance from 
-  reducer, and returns effect controller of the Value instance. 
-  NOTE
-  - The idea is to create a reactive value that
-    - is updated as per reducer and dependencies
-    - is not directly settable, but from which
-      effects can be set up.
-    As such the computed' concept is a "higher-order" effect.
-  - It's the reducer's resposibility to return a meaningful result, given any
-    dependencies (condition keys).
-  - Since the condition for the effect set up, can only be specified as 
-    required keys, these should be provided as trailing args, and NOT as an 
-    array (as is the case for effects).
-  - If a condition beyond required keys is needed, this should be handled in 
-    the reducer.
-  - 'add' only accept a single reducer, but the reducer can itelf be composed,
-    e.g., with the 'pipe' tool.
+  /* TODO
+  - ComputedRegistry and Computed
+  - size limit
+  - Add as prop. Ensure exception in update
   */
-  add(reducer, ...dependencies) {
+
+  /* .
+   */
+  add(name, reducer, condition) {
+    /* TODO
+    - check name
+    */
+
+    
+
     /* Create reactive value */
-    const value = Value();
+    const computed = new Computed({
+      condition,
+      name,
+      owner: this.owner,
+      reducer,
+    });
     /* Set up effect that updates reactive value with reducer result */
-    const effect = this.owner.effects.add(
-      (change) => {
-        /* Create 'current' with data relevant to reducer */
-        let current
-        if (dependencies.length) {
-          /* Dependencies specified -> ensure that 'current' only contains keys as per dependencies */
-          current = Object.fromEntries(
-            Object.entries(this.owner.current).filter(([k, v]) => dependencies.includes(k))
-          );
-        } else {
-          current = this.owner.current
-        }
-        /* Update
-        NOTE
-        - Also pass 'change' into reducer; typically, NOT used by the reducer,
-          but can be in special cases.
-        */
-        value.current = reducer(current, change);
-      },
-      dependencies.length ? dependencies : null
-    );
-    /* Register computed (effects) */
-    this.registry.set(value.effects, { effect, value });
-    /* Returns effects controller, so that effects can be set up to watch the 
+    const effect = this.owner.effects.add((change) => {
+      const result = computed.reducer.call(computed, change);
+      if (result !== undefined) {
+        computed.current = result;
+      }
+    }, condition);
+    /* Register computed */
+    this.registry[name] = Object.freeze({computed, effect})
+    /* Return computed, so that effects can be set up to watch the 
     computed value */
-    return value.effects;
+    return computed
   }
 
-  /* Returns {effect, value} object; undefined, if not registered.
-  NOTE
-  - Typically, no need to use 'get', but can be used for inspection or special 
-    cases, where effect and/or value needs to be changed.
-  */
-  get(effects) {
-    return this.registry.get(effects);
+  /* Returns ... */
+  get(name) {
+    return this.registry.get(name);
   }
 
-  /* Checks, if effects registered. */
-  has(effects) {
-    return this.registry.has(effects);
+  /* Checks, if registered. */
+  has(name) {
+    return name in this.registry;
   }
 
-  /* Deregisters effect to update Value instance, deregisters computed value 
-  (effects), and returns the Value instance. By default, effects on the Value 
-  instance are cleared, but this can be avoided with the 'clear' flag. */
-  remove(effects, clear = true) {
-    if (!this.has(effects)) {
-      return;
-    }
-    const { effect, value } = this.registry.get(effects);
+  /* . */
+  remove(name) {
+    if (!this.has(name)) return;
+    
+    const { effect, value } = this.registry.get(name);
+
     this.owner.effects.remove(effect);
-    this.registry.delete(effects);
-    if (clear) {
-      value.effects.clear()
-    }
+    delete this.registry(name);
+    value.effects.clear();
+
+   
     return value;
   }
 }

@@ -25,10 +25,12 @@ await (async () => {
 
   let result;
 
-  effects.add(({ current }) => {
+  effects.add(({data: {current}}) => {
     //console.log("current:", current);
     result = current;
   });
+
+  /* Test */
 
   (() => {
     const expected = 50;

@@ -11,8 +11,8 @@ await (async () => {
 
   data.clear();
   if (data.size) {
-    console.error(`Did not clear... Current:`, data.data);
+    console.error(`Did not clear... Current:`, data.current);
   } else {
-    console.log(`Success! Current:`, data.data);
+    console.log(`Success!`);
   }
 })();

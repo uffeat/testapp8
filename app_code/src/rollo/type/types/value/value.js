@@ -1,7 +1,7 @@
 import { type } from "rollo/type/type/type";
-import { __name__ } from "rollo/type/types/data/factories/__name__";
-import { __owner__ } from "rollo/type/types/data/factories/__owner__";
 import { effects } from "rollo/type/types/data/factories/effects";
+import { name } from "rollo/type/types/value/factories/name";
+import { owner } from "rollo/type/types/value/factories/owner";
 import { update } from "rollo/type/types/value/factories/update";
 import { value } from "rollo/type/types/value/factories/value";
 
@@ -11,9 +11,9 @@ const cls = (() => {
   const composition = type.compose(
     Object,
     {},
-    __name__,
-    __owner__,
     effects,
+    name,
+    owner,
     update,
     value
   );

@@ -16,9 +16,9 @@ await (async () => {
 
   /* Check that original has been changed independently of clone */
   if (original.empty) {
-    console.log(`Success! Original:`, original.data);
+    console.log(`Success!`);
   } else {
-    console.error(`Something went wrong! Original:`, original.data);
+    console.error(`Something went wrong! Original:`, original.current);
   }
 
   /* Check that clone 
@@ -28,9 +28,9 @@ await (async () => {
   (() => {
     const expected = { foo: "foo", bar: "bar", stuff: 42 };
     if (clone.match(expected)) {
-      console.log(`Success! Clone:`, clone.data);
+      console.log(`Success!`);
     } else {
-      console.error(`Expected:`, expected, `Got:`, clone.data);
+      console.error(`Expected:`, expected, `Got:`, clone.current);
     }
   })();
 })();

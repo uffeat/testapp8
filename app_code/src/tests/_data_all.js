@@ -15,5 +15,6 @@ await import("@/tests/data_reduce");
 await import("@/tests/data_reset");
 await import("@/tests/data_text");
 await import("@/tests/data_update");
+await import("@/tests/value_effects");
 
 
