@@ -1,57 +1,42 @@
 import "./bootstrap.scss";
 import "./main.css";
 
-//import "@/tests/_data_all"
+//import "@/tests/_all"
 
-/* Purpose: Demonstate and test List.effects */
+/* Purpose: Demonstate and test List.$ */
 await (async () => {
   const { List } = await import("rollo/type/types/list/list");
 
-  const list = List(1, 2, 3);
+  const list = List();
 
-  /* Prepare test */
-  let actual = "";
+  list.$[4.45];
+  list.$.uffe;
+  list.$.true;
+  list.$.false;
+  list.$.null;
+  list.$[4.45];
 
-  list.effects.add(({ data: { added, removed }, session = 0 }) => {
-    ////console.log("added:", added);
-    ////console.log("removed:", removed);
+  list.json();
 
-    const expected = 3;
-    if (session > expected - 1) {
-      console.error(
-        `Effect ran ${session + 1} times. Expected: ${expected} times.`
-      );
-    }
+  const actual = JSON.stringify(list.current)
+  const expected = `[4.45,"uffe",true,false,null]`
+  if (actual === expected) {
+    console.log(`Success!`)
+  } else {
+    console.error(`Expected:`, expected, ` Actual:`, actual)
+  }
 
-    if (added) {
-      actual += JSON.stringify(added);
-    }
-    if (removed) {
-      actual += JSON.stringify(removed);
-    }
-  });
 
-  list.add(4, 5);
-  list.add(5);
-  list.remove(3);
-  list.remove(3);
-  list.remove(0, 10);
 
-  /* Check test result */
-  (() => {
-    const expected = "[1,2,3][4,5][3]";
-    const message = `Expected ${expected}. Actual: ${actual}`;
-    if (actual === expected) {
-      console.log(`Success! ${message}`);
-    } else {
-      console.error(message);
-    }
-  })();
+  
 
-  ////console.log("current:", list.current);
+  
+
+  console.log("current:", list.current);
   ////console.log("current:", list.values);
 })();
 
+/* Run specific test from shift-T */
 if (import.meta.env.DEV) {
   let path = "";
   window.addEventListener("keydown", async (event) => {

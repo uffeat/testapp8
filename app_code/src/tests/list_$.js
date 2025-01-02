@@ -8,7 +8,7 @@ await (async () => {
 
  
   /* Prepare test */
-  let actual = "";
+  let actual = list.text()
 
   /* Verify */
   (() => {

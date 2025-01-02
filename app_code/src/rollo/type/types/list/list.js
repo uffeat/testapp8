@@ -45,6 +45,18 @@ const cls = (() => {
       this.add(...values);
     }
 
+
+
+
+
+
+
+
+
+
+
+
+
     /* Returns array representation of values. */
     get current() {
       return [...this.#current];

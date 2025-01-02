@@ -13,11 +13,12 @@ export const text = (parent, config, ...factories) => {
     - Only valid for flat data.
     */
     get jsonable() {
+      const current = this.current
       return (
-        this.values.filter(
+        current.filter(
           (v) =>
             v === null || ["boolean", "number", "string"].includes(typeof v)
-        ).length === this.values.length
+        ).length === current.length
       );
     }
 
@@ -31,11 +32,12 @@ export const text = (parent, config, ...factories) => {
       if (!this.jsonable) {
         throw TypeError(`Cannot convert to json.`);
       }
+
       if (sort) {
-        return `{${this.current
+        return `[${this.current
           .sort()
           .map((k) => JSON.stringify({ [k]: this[k] }).slice(1, -1))
-          .join(",")}}`;
+          .join(",")}]`;
       }
       return JSON.stringify(this);
     }
@@ -56,9 +58,9 @@ export const text = (parent, config, ...factories) => {
         return `"${k}":${String(v)}`;
       });
       if (sort) {
-        return `{${mapped.sort().join(",")}}`;
+        return `[${mapped.sort().join(",")}]`;
       }
-      return `{${mapped.join(",")}}`;
+      return `[${mapped.join(",")}]`;
     }
 
     toString() {

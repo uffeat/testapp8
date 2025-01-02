@@ -18,7 +18,6 @@ await import("@/tests/data_text");
 await import("@/tests/data_update");
 /* List */
 await import("@/tests/list_$");
-
 await import("@/tests/list_clear");
 await import("@/tests/list_clone");
 await import("@/tests/list_computed");
@@ -39,6 +38,16 @@ await import("@/tests/list_text");
 await import("@/tests/list_transformer");
 await import("@/tests/list_union");
 /* Value */
+await import("@/tests/value_$");
+await import("@/tests/value_clone");
+await import("@/tests/value_condition");
 await import("@/tests/value_effects");
+await import("@/tests/value_match");
+await import("@/tests/value_transformer");
+await import("@/tests/value_type");
+/* Other */
+await import("@/tests/wrapper");
+
+
 
 
