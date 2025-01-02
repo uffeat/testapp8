@@ -40,7 +40,7 @@ await (async () => {
 
   data.effects.add(effect);
 
-  /* Condition should prevent effect from reating */
+  /* Condition should prevent effect from reacting */
   data.$.stuff = 8;
 
   /* Change condition so that that it replicates original condition, 

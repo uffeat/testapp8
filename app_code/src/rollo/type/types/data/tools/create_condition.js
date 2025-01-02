@@ -24,6 +24,11 @@ export function create_condition(condition) {
     };
   }
 
+  /* TODO
+  - Add 'all': current must contain all keys...
+  - Add 'none': current cannot contain any of the keys...
+  */
+
   if (typeof condition === "object" && Object.keys(condition).length === 1) {
     /* Create condition function from single-item object short-hand:
     current must contain a key-value pair corresponding to the object short-hand. */

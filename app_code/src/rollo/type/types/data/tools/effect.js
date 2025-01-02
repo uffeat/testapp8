@@ -28,11 +28,9 @@ export class EffectType {
   }
   /* Sets condition. 
   NOTE
-  - Can be changed dynamically.
-    While this can be powerful, it can also add complexity!
+  - Can be changed dynamically. Powerful, but can add complexity!
   */
   set condition(condition) {
-   
     this.#condition = condition;
   }
   #condition;
@@ -106,7 +104,7 @@ export class EffectType {
     }
     if (change) {
       /* Test condition */
-      if (this.condition && !this.condition(change)) return;
+      if (this.condition && this.condition(change) === false) return;
       /* Call source and return result */
       return this.source(change);
     }
@@ -115,12 +113,12 @@ export class EffectType {
       throw new Error(`Cannot call unbound effect without augument.`);
     }
     change = Change({
-      data: {current: this.owner.current},
+      data: { current: this.owner.current },
       effect: this,
       owner: this.owner,
     });
     /* Test condition */
-    if (this.condition && !this.condition(change)) return;
+    if (this.condition && !this.condition(change) === false) return;
 
     try {
       return this.source(change);
@@ -142,15 +140,9 @@ export class EffectType {
     });
   }
 
-  /* */
+  /* Batch-updates data- and accessor props. Chainable. */
   update(update) {
     for (const [k, v] of Object.entries(update)) {
-      if (v === undefined) {
-        continue;
-      }
-      if (!(k in this)) {
-        throw new Error(`Invalid key: ${k}`);
-      }
       this[k] = v;
     }
     return this;
@@ -200,5 +192,3 @@ export class EffectType {
   }
   #owner;
 }
-
-

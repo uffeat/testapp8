@@ -5,48 +5,41 @@ await (async () => {
   const { Data } = await import("rollo/type/types/data/data");
 
   const data = Data({
-    foo: 42,
-    bar: 8,
-    stuff: "stuff",
+    foo: "foo",
+    bar: "bar",
+    stuff: 42,
   });
 
-  const effects = data.computed.add(
-    /* Reducer */
-    (current) => {
-      let sum = 0;
-      for (const v of Object.values(current)) {
-        sum += v;
+  
+  let result = "";
+
+  data.computed
+    .add(
+      "sum",
+      /* Reducer */
+      () =>
+        data.reduce(
+          () => data.values.filter((v) => typeof v === "number"),
+          (v) => {
+            let sum = 0;
+            v.forEach((v) => (sum += v));
+            return sum;
+          }
+        )
+    )
+    .effects.add(
+      /* Effect to watch computed value */
+      () => {
+        ////console.log("sum:", data.sum);
+        result += String(data.sum);
       }
-      return sum;
-    },
-    "foo",
-    "bar"
-  );
+    );
 
-  let result;
+  data.$.foo = 8;
 
-  effects.add(({data: {current}}) => {
-    //console.log("current:", current);
-    result = current;
-  });
-
-  /* Test */
-
+  /* Verify */
   (() => {
-    const expected = 50;
-    const message = `Expected ${expected}. Actual: ${result}`;
-    if (result === expected) {
-      console.log(`Success! ${message}`);
-    } else {
-      console.error(message);
-    }
-  })();
-
-  data.$.foo = 60;
-  data.$stuff = "STUFF";
-
-  (() => {
-    const expected = 68;
+    const expected = "4250";
     const message = `Expected ${expected}. Actual: ${result}`;
     if (result === expected) {
       console.log(`Success! ${message}`);

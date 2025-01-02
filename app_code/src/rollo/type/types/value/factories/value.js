@@ -9,6 +9,17 @@ export const value = (parent, config, ...factories) => {
     }
     /* Sets current value reactively. */
     set current(value) {
+      /* Filter as per condition */
+      if (this.condition && this.condition(value) === false) {
+        return;
+      }
+      /* Transform as per transformer */
+      if (this.transformer) {
+        const result = this.transformer(value);
+        if (result !== undefined) {
+          value = result;
+        }
+      }
       /* Detect change */
       if (this.current && this.current.match) {
         if (this.current.match(value)) {
@@ -19,7 +30,6 @@ export const value = (parent, config, ...factories) => {
           return;
         }
       }
-
       /* Update */
       this.#previous = this.#current;
       this.#current = value;
@@ -47,7 +57,5 @@ export const value = (parent, config, ...factories) => {
     set $(current) {
       this.current = current;
     }
-
-    
   };
 };

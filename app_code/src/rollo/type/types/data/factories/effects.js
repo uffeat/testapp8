@@ -29,8 +29,7 @@ class Effects {
   - Primarily used to catch memory leaks, e.g., when effects are to be added and 
     removed frequently, but fails to be removed. The default max of 10 is a judgement 
     call - based on the assumption that a data object with more than 10 concurrent
-    effects can be difficult to manage and should perhaps be broken up into smaller
-    "state islands".
+    effects can be difficult to manage and should perhaps be broken up.
   */
   set max(max) {
     this.#max = max;
@@ -69,7 +68,13 @@ class Effects {
     let effect;
     if (source instanceof EffectType) {
       /* Update effect */
-      effect = source.update({ condition, tag });
+      effect = source
+      if (condition !== undefined) {
+        effect.condition = condition
+      }
+      if (tag !== undefined) {
+        effect.tag = tag
+      }
     } else {
       /* Create effect */
       effect = Effect({

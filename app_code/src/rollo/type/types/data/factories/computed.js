@@ -13,23 +13,23 @@ export const computed = (parent, config, ...factories) => {
   };
 };
 
-/* */
+/* Controller for reactive computed values. */
 class Computed {
-  constructor({ condition, name, owner, reducer }) {
-    this.#condition = condition
+  #value = Value();
+  constructor({ condition, name, owner, reducer, transformer }) {
     this.#name = name;
     this.#owner = owner;
-    this.reducer = reducer
-    this.#value = Value();
+    this.update({ condition, reducer, transformer });
   }
-  #value;
 
   /* Returns condition */
   get condition() {
-    return this.#condition;
+    return this.#value.condition;
   }
-  #condition
-  /* NOTE 'condition' is read-only. */
+  /* Sets condition. */
+  set condition(condition) {
+    this.#value.condition = condition;
+  }
 
   /* Returns current value. */
   get current() {
@@ -37,7 +37,7 @@ class Computed {
   }
   /* Sets current value.
   NOTE
-  - 
+  - Can, but should generally not, be used externally. 
   */
   set current(current) {
     this.#value.current = current;
@@ -53,23 +53,17 @@ class Computed {
     return this.#name;
   }
   #name;
-  /* NOTE 'name' is read-only. */
 
   /* Returns owner Data instance */
   get owner() {
     return this.#owner;
   }
   #owner;
-  /* NOTE 'owner' is read-only. */
-
 
   /* Returns previous value. */
   get previous() {
     return this.#value.previous;
   }
-
-
-
 
   /* Returns reducer. */
   get reducer() {
@@ -77,15 +71,29 @@ class Computed {
   }
   /* Sets reducer.
   NOTE
-  - 
+  - Can be changed dynamically. Powerful, but can add complexity!
   */
   set reducer(reducer) {
     this.#reducer = reducer;
   }
-  #reducer
+  #reducer;
 
+  /* Returns transformer. */
+  get transformer() {
+    return this.#value.transformer;
+  }
+  /* Sets transformer. */
+  set transformer(transformer) {
+    this.#value.transformer = transformer;
+  }
 
-
+  /* Batch-updates data- and accessor props. Chainable. */
+  update(update) {
+    for (const [k, v] of Object.entries(update)) {
+      this[k] = v;
+    }
+    return this;
+  }
 }
 
 /* Computed controller */
@@ -100,10 +108,10 @@ class Registry {
   }
   #owner;
 
-  /* Returns computed registry.
+  /* Returns registry.
   NOTE
   - Can, but should generally not, be used externally. 
-  - Stores effects-{effect, value} pairs.
+  - Stores name-{computed, effect} pairs.
   */
   get registry() {
     return this.#registry;
@@ -112,46 +120,48 @@ class Registry {
 
   /* Returns number of computed values. */
   get size() {
-    return this.registry.size;
+    return Object.keys(this.registry).length;
   }
 
-  /* TODO
-  - ComputedRegistry and Computed
-  - size limit
-  - Add as prop. Ensure exception in update
-  */
-
-  /* .
-   */
-  add(name, reducer, condition) {
-    /* TODO
-    - check name
-    */
-
-    
-
-    /* Create reactive value */
+  /* Creates, registers and returns computed value object. */
+  add(name, reducer, { condition, transformer } = {}) {
+    /* Check name */
+    if (name in this.registry) {
+      throw new Error(`'${name}' already registered.`)
+    }
+    /* Create computed value object */
     const computed = new Computed({
       condition,
       name,
       owner: this.owner,
       reducer,
+      transformer,
     });
-    /* Set up effect that updates reactive value with reducer result */
+    /* Set up effect that updates value object with reducer result */
     const effect = this.owner.effects.add((change) => {
+      /* NOTE
+      - Reducer is called bound to 'computed'; the function can therefore have 
+      full access to the value as well as the data object. */
       const result = computed.reducer.call(computed, change);
+      /* Ignore undefined results */
       if (result !== undefined) {
         computed.current = result;
       }
-    }, condition);
-    /* Register computed */
-    this.registry[name] = Object.freeze({computed, effect})
+    });
+    /* Register */
+    this.registry[name] = Object.freeze({ computed, effect });
+    /* Add to owner as read-only non-enumerable prop */
+    Object.defineProperty(this.owner, name, {
+      configurable: true,
+      enumerable: false,
+      get: () => computed.current,
+    });
     /* Return computed, so that effects can be set up to watch the 
     computed value */
-    return computed
+    return computed;
   }
 
-  /* Returns ... */
+  /* Returns registered 'computed' object */
   get(name) {
     return this.registry.get(name);
   }
@@ -161,17 +171,15 @@ class Registry {
     return name in this.registry;
   }
 
-  /* . */
+  /* Degisters computed value object and clears all it's effects. */
   remove(name) {
     if (!this.has(name)) return;
-    
     const { effect, value } = this.registry.get(name);
-
     this.owner.effects.remove(effect);
     delete this.registry(name);
     value.effects.clear();
+    delete this.owner[name];
 
    
-    return value;
   }
 }

@@ -20,16 +20,14 @@ export class ChangeType {
       }
     })();
 
-  constructor({ data, effect, index, owner, session }) {
+  constructor({ data, effect, index = null, owner, session = null } = {}) {
     if (!owner) {
       throw new Error(`'owner' required.`);
     }
     this.#data = data;
-    this.#effect = effect;
-    this.#index = index || null;
     this.#owner = owner;
-    this.#session = session || null;
-    this.#time = Date.now();
+    this.#session = session;
+    this.update({ effect, index });
   }
 
   /* Returns data. */
@@ -84,7 +82,7 @@ export class ChangeType {
   get time() {
     return this.#time;
   }
-  #time;
+  #time = Date.now();
 
   /* Signals stop of effects execution loop.
   NOTE
@@ -94,7 +92,7 @@ export class ChangeType {
     ChangeType.StopException.raise();
   }
 
-  /* Batch updates props. Chainable. */
+  /* Batch-updates data- and accessor props. Chainable. */
   update(update) {
     for (const [k, v] of Object.entries(update)) {
       this[k] = v;
