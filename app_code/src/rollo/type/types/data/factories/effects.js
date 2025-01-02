@@ -86,10 +86,17 @@ class Effects {
     /* Register effect */
     this.registry.add(effect);
     /* Call effect */
+    let data
+    if (this.__type__ = 'list') {
+      data = {added: this.owner.current}
+    } else {
+      data = {current: this.owner.current}
+    }
+
     try {
       effect.call(
         Change({
-          data: {current: this.owner.current},
+          data,
           effect,
           owner: this.owner,
         })

@@ -21,13 +21,13 @@ export const List = (() => {
   );
 
   class List extends composition {
-    static create = (...args) => new List(...args);
+   
     static name = "List";
 
-    constructor(update, ...items) {
+    constructor(...values) {
       super();
-      this.update(update);
     }
+    #data = new Set()
 
     get values() {
       return [...this.#values.values()]
@@ -54,5 +54,5 @@ export const List = (() => {
 
   }
 
-  return type.register("list", List);
+  return type.register(List);
 })();

@@ -1,40 +1,82 @@
 import { type } from "rollo/type/type/type";
-import { effects } from "rollo/type/types/list/list/factories/effects";
-//import { update } from "rollo/type/types/list/list/factories/update";
+import { condition } from "rollo/type/types/data/factories/condition";
+import { effects } from "rollo/type/types/data/factories/effects";
+import { transformer } from "rollo/type/types/data/factories/transformer";
+import { name } from "rollo/type/types/value/factories/name";
+import { owner } from "rollo/type/types/value/factories/owner";
 
 /*
 TODO 
 $.foo -> adds foo */
 
 const cls = (() => {
-  const composition = type.compose(Object, {}, effects);
+  const composition = type.compose(
+    Object,
+    {},
+    condition,
+    effects,
+    name,
+    owner,
+    transformer
+  );
 
   class List extends composition {
     static name = "List";
 
     constructor(...values) {
       super();
+      this.add(...values)
     }
 
+    get current() {
+      return [...this.#current];
+    }
+    #current = new Set();
+
+    get previous() {
+      return [...this.#previous];
+    }
+    #previous = [];
+
     /* TODO
-    - Start with non-reactive version that supports 'difference', 'match', 'update', 'size' 'add' and 'remove'
-    - Use hidden data container - array or set - probably set (native support for remove)
-    - Channel everything through update */
+    - 'difference', 'match', 'update', 'size'
+     */
 
     add(...values) {
-      const added = values.filter(
-        (v) => !this.includes(v) && v !== undefined
-      );
-      const removed = values.filter(
-        (v) => this.includes(v) && v === undefined
-      );
-      /* Update */
-      /* TODO
-      */
-      
+      /* Infer changes */
+      const added = values.filter((v) => !this.#current.has(v));
+      if (!added.length) {
+        return this;
+      }
+      /* Update previous */
+      this.#previous = this.#current;
+      /* Update current */
+      for (const v of added) {
+        this.#current.add(v);
+      }
+      /* Call effects */
+      if (this.effects.size) {
+        this.effects.call({ added });
+      }
+      return this;
+    }
 
-      this.effects.call({});
-
+    remove(...values) {
+      /* Infer changes */
+      const removed = values.filter((v) => this.#current.has(v));
+      if (!removed.length) {
+        return this;
+      }
+      /* Update previous */
+      this.#previous = this.#current;
+      /* Update current */
+      for (const v of removed) {
+        this.#current.delete(v);
+      }
+      /* Call effects */
+      if (this.effects.size) {
+        this.effects.call({ removed });
+      }
       return this;
     }
   }
@@ -43,7 +85,7 @@ const cls = (() => {
 })();
 
 /* .*/
-export function Value(...values) {
+export function List(...values) {
   return type.create("list", ...values);
 }
 

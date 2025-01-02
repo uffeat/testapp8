@@ -3,54 +3,26 @@ import "./main.css";
 
 //import "@/tests/_data_all"
 
-/* Purpose: Demonstate and test Data.computed. */
+/* Purpose: Demonstate and Value.effects */
 await (async () => {
-  const { Data } = await import("rollo/type/types/data/data");
+  const { List } = await import("rollo/type/types/list/list");
 
-  const data = Data({
-    foo: "foo",
-    bar: "bar",
-    stuff: 42,
-  });
+  const list = List(1, 2, 3)
+
+  list.effects.add((change) => {
+    const {data: {added, removed}} = change
+    console.log('change:', change)
+    console.log('added:', added)
+    console.log('removed:', removed)
+  })
+
+  list.add(4, 5)
+  list.remove(3)
+  
+
+  console.log('current:', list.current)
 
   
-  let result = "";
-
-  data.computed
-    .add(
-      "sum",
-      /* Reducer */
-      () =>
-        data.reduce(
-          () => data.values.filter((v) => typeof v === "number"),
-          (v) => {
-            let sum = 0;
-            v.forEach((v) => (sum += v));
-            return sum;
-          }
-        )
-    )
-    .effects.add(
-      /* Effect to watch computed value */
-      () => {
-        ////console.log("sum:", data.sum);
-        result += String(data.sum);
-      }
-    );
-
-  data.$.foo = 8;
-
-  /* Test */
-
-  (() => {
-    const expected = "4250";
-    const message = `Expected ${expected}. Actual: ${result}`;
-    if (result === expected) {
-      console.log(`Success! ${message}`);
-    } else {
-      console.error(message);
-    }
-  })();
 })();
 
 if (import.meta.env.DEV) {
