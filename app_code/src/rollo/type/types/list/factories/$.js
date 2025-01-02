@@ -4,13 +4,14 @@ export const $ = (parent, config, ...factories) => {
     static name = "$";
 
     /* Adds single json-compatible value
-    NOTE
-    - Attempt to add non-json-compatible values will silently yeld incorrect 
+    XXX
+    - Attempt to add non-json-compatible values will silently yield incorrect 
       results (string coercion), so use with care!
-    - Examples: 
+    EXAMPLES
       $.foo -> adds 'foo' (correct)
       $.true -> adds true (correct)
       $[42] -> adds 42 (correct)
+      $['foo-bar'] -> adds 'foo-bar' (correct)
       $[document] -> adds '[object HTMLDocument]' (INCORRECT)
     */
     get $() {
