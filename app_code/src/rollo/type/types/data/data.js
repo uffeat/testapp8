@@ -1,6 +1,7 @@
 import { type } from "rollo/type/type/type";
-import { __name__ } from "@/rollo/type/types/data/factories/__name__";
-import { __owner__ } from "@/rollo/type/types/data/factories/__owner__";
+
+import { __name__ } from "rollo/type/types/data/factories/__name__";
+import { __owner__ } from "rollo/type/types/data/factories/__owner__";
 import { $ } from "rollo/type/types/data/factories/$";
 import { clear } from "rollo/type/types/data/factories/clear";
 import { clone } from "rollo/type/types/data/factories/clone";

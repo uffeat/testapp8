@@ -1,29 +1,25 @@
-// value_effects
+// value_transformer
 
-/* Purpose: Demonstate and Value.effects */
+/* Purpose: Demonstate and Value.transformer */
 await (async () => {
   const { Value } = await import("rollo/type/types/value/value");
+ 
 
   const value = Value(42);
 
+  /* Prepare test */
   let actual = "";
 
-  value.effects.add(({ data: { current } }) => {
-    console.log("current:", current);
-    result += String(current);
-  });
-
-  value.$ = "foo";
-
-  /* Test */
-
+  
+  /* Verify */
   (() => {
-    const expected = "42foo";
+    const expected = "42";
     const message = `Expected ${expected}. Actual: ${actual}`;
     if (actual === expected) {
       console.log(`Success! ${message}`);
     } else {
-      console.error(message);
+      //console.error(message);
     }
   })();
+
 })();

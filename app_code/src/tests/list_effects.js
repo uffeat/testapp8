@@ -1,7 +1,4 @@
-import "./bootstrap.scss";
-import "./main.css";
-
-//import "@/tests/_data_all"
+// list_effects
 
 /* Purpose: Demonstate and test List.effects */
 await (async () => {
@@ -51,13 +48,3 @@ await (async () => {
   ////console.log("current:", list.current);
   ////console.log("current:", list.values);
 })();
-
-if (import.meta.env.DEV) {
-  let path = "";
-  window.addEventListener("keydown", async (event) => {
-    if (event.code === "KeyT" && event.shiftKey) {
-      path = prompt("Path:", path);
-      await import(`./tests/${path}.js`);
-    }
-  });
-}

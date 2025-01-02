@@ -1,7 +1,7 @@
 /* Implements difference method. */
 export const difference = (parent, config, ...factories) => {
   return class extends parent {
-    static name = 'difference'
+    static name = "difference";
     /* Returns an object with items that represent,
     - if reverse is false, items in 'other' that are different from those 
       in data items. 
@@ -11,7 +11,9 @@ export const difference = (parent, config, ...factories) => {
     difference(other, reverse = false) {
       if (reverse) {
         return Object.fromEntries(
-          Object.entries(other).filter(([k, v]) => this[k] !== v).map(([k, v]) => [k, this[k]])
+          Object.entries(other)
+            .filter(([k, v]) => this[k] !== v)
+            .map(([k, v]) => [k, this[k]])
         );
       } else {
         return Object.fromEntries(
@@ -19,23 +21,15 @@ export const difference = (parent, config, ...factories) => {
             if (v === undefined) {
               return true;
             } else {
-
-
               if (this[k] && this[k].match) {
-                return !this[k].match(v)
+                return !this[k].match(v);
               } else {
                 return this[k] !== v;
               }
-
-
-
-              
             }
           })
         );
       }
-      
     }
   };
 };
-

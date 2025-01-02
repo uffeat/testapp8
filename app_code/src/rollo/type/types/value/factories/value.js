@@ -3,6 +3,20 @@ export const value = (parent, config, ...factories) => {
   return class extends parent {
     static name = "value";
 
+    /*
+    NOTE
+    - '$' is an alias for 'current', provided for a shorter syntax.
+    */
+
+    /* Returns current value. */
+    get $() {
+      return this.#current;
+    }
+    /* Sets current value reactively. */
+    set $(current) {
+      this.current = current;
+    }
+
     /* Returns current value. */
     get current() {
       return this.#current;
@@ -43,19 +57,6 @@ export const value = (parent, config, ...factories) => {
     }
     #previous;
 
-    /*
-    NOTE
-    - '$' is an alias for 'current', provided for a shorter syntax.
-    */
-
-    /* Returns current value. */
-    get $() {
-      return this.#current;
-    }
-
-    /* Sets current value reactively. */
-    set $(current) {
-      this.current = current;
-    }
+    
   };
 };
