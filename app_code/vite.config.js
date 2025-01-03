@@ -4,11 +4,12 @@ import dynamicImportVars from "@rollup/plugin-dynamic-import-vars";
 
 export default defineConfig(({ mode }) => {
   return {
-    base: mode === "production" ? "./" : "",
+    base: mode === "production" ? "./" : "/",  //
     plugins: [],
     build: {
       //minify: false, //
       emptyOutDir: true,
+      manifest: true, //
       // Allow top-level await
       target: ["es2022", "edge89", "firefox89", "chrome89", "safari15"],
       rollupOptions: {

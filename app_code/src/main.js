@@ -1,6 +1,17 @@
 import "./bootstrap.scss";
 import "./main.css";
 
+//import vite from '/vite.svg'
+
+
+
+
+const button = document.createElement('button')
+button.classList.add('btn', 'btn-primary')
+button.textContent = 'Hello'
+////button.append(vite)
+document.body.append(button)
+
 //import "@/tests/_all"
 
 /* Purpose: Demonstate and test List.clear */
