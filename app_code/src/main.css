@@ -1,8 +1,3 @@
-:root {
-}
-
-/*** Structure */
-
 body {
   position: relative;
   overflow-x: hidden;
@@ -12,28 +7,16 @@ body {
   as this would push behind any vertical scrollbars. */
   width: 100%;
   margin: 0;
-
-  
 }
 
-#root {
-  display: flex;
-  flex-direction: column;
-}
-
+/*
 main {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
 }
+*/
 
-/*** Elements */
 a {
   text-decoration: none;
-}
-
-
-/*** For testing */
-.pink {
-  background-color: pink;
 }

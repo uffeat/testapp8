@@ -1,14 +1,13 @@
 /* Value registry. */
 export class Registry {
-  static create = (...args) => new Registry(...args)
   #registry = {};
   /* Registers and returns value. */
   add(key, value) {
     if (import.meta.env.DEV) {
       if (key in this.#registry) {
-        console.info(`Replaced registered: ${key}.`);
+        console.info(`Replaced registered: ${key}`);
       } else {
-        console.info(`Registered: ${key}.`);
+        console.info(`Registered: ${key}`);
       }
     }
     this.#registry[key] = value;

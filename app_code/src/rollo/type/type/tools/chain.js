@@ -1,8 +1,14 @@
-import { is_class } from "rollo/tools/type/is_class";
-
 /* Composition class for providing access to the prototype chain. */
 export class Chain {
-  static create = () => new Chain();
+  constructor(base) {
+    this.#base = base;
+  }
+
+  /* Returns base prototype. */
+  get base() {
+    return this.#base;
+  }
+  #base;
 
   /* Returns array of classes in prototype chain. */
   get classes() {
@@ -50,10 +56,6 @@ export class Chain {
 
   /* Registers class. */
   add(cls) {
-    /* Check class */
-    if (!is_class(cls)) {
-      throw new TypeError(`Expected a class. Got: ${String(cls)}`);
-    }
     if (!cls.name) {
       throw new Error(`Class does not have a name.`);
     }

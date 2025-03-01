@@ -11,7 +11,8 @@ export default defineConfig(({ mode }) => {
       emptyOutDir: true,
       manifest: true, //
       // Allow top-level await
-      target: ["es2022", "edge89", "firefox89", "chrome89", "safari15"],
+      //target: ["es2022", "edge89", "firefox89", "chrome89", "safari15"],
+      target: 'es2022',
       rollupOptions: {
         plugins: [
           dynamicImportVars({
@@ -24,7 +25,6 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         "@": resolve(__dirname, "src"),
-        components: resolve(__dirname, "src/components"),
         rollo: resolve(__dirname, "src/rollo"),
         rolloui: resolve(__dirname, "src/rolloui"),
       },

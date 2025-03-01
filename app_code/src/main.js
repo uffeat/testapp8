@@ -1,52 +1,79 @@
-import "./bootstrap.scss";
-import "./main.css";
+/* Styles */
+import "@/main.css";
+import "@/libs/bootstrap/bootstrap.css";
+/* Rollo */
+import { App } from "rollo/app";
+import { Router } from "rollo/router/router";
+import { component } from "rollo/component/component";
+/* Rolloui */
+import { layout } from "@/rolloui/components/layout/layout";
+import { Page } from "@/rolloui/components/page";
+import { Error_ } from "rolloui/error";
+/* App-specific navs */
+import { MainNav } from "@/components/navs/main";
+import { UserNav } from '@/components/navs/user'
+/* App-specific pages */
+import { About } from "@/components/pages/about";
+import { Colors } from "@/components/pages/colors";
+import { Home } from "@/components/pages/home";
+import { Terms } from "@/components/pages/terms";
 
-//import vite from '/vite.svg'
+
+import { modal } from "rolloui/modal/modal";
+//modal()
+
+const app = App({ parent: document.body });
 
 
 
 
-const button = document.createElement('button')
-button.classList.add('btn', 'btn-primary')
-button.textContent = 'Hello'
-////button.append(vite)
-document.body.append(button)
+/* Configure layout and router */
+app.append(layout);
 
-//import "@/tests/_all"
+UserNav(layout)
 
-/* Purpose: Demonstate and test List.clear */
-await (async () => {
-  const { List } = await import("rollo/type/types/list/list");
+const page = Page({ parent: layout });
 
-  const list = List(1, 2, 3);
+const router = Router({
+  "/": (change) => {
+    page.child.update(Home(change));
+  },
+  "/about": (change) => {
+    page.child.update(About(change));
+  },
+  "/colors": (change) => {
+    page.child.update(Colors(change));
+  },
+  "/terms": (change) => {
+    page.child.update(Terms(change));
+  },
+});
+router.config.error = (path) =>
+  page.child.update(Error_(`Invalid path: ${path}`));
 
-  list.clear();
-
-  /* Prepare test */
-  let actual = "";
-
-  /* Verify */
-  (() => {
-    const expected = "42";
-    const message = `Expected ${expected}. Actual: ${actual}`;
-    if (actual === expected) {
-      console.log(`Success! ${message}`);
-    } else {
-      //console.error(message);
+MainNav(layout, (self) => {
+  self.active.effects.add(({ current }) => router.go(current.path), {run: false});
+  router.effects.add(({ current }) => {
+    const link = self.find(`[path="${current}"]`);
+    if (link) {
+      self.active.update(link);
     }
-  })();
+  }, {run: false});
+});
 
-  ////console.log("current:", list.current);
-  ////console.log("current:", list.values);
-})();
-
-/* Run specific test from shift-T */
-if (import.meta.env.DEV) {
-  let path = "";
-  window.addEventListener("keydown", async (event) => {
-    if (event.code === "KeyT" && event.shiftKey) {
-      path = prompt("Path:", path);
-      await import(`./tests/${path}.js`);
+layout.append(
+  component.a(
+    { slot: "home", cursor: "pointer", path: "/" },
+    component.h3({}, "Home"),
+    (self) => {
+      self.on.click = (event) => {
+        event.preventDefault();
+        router.go("/");
+      };
     }
-  });
-}
+  )
+);
+
+router.use();
+
+
