@@ -12,6 +12,4 @@ await (async () => {
 
   const result = await server.foo(data);
   console.log("result:", result); ////
-  
-  
 })();

@@ -26,9 +26,11 @@ dist-ssr
 
 # Custom
 uplink_keys.json
+secret.json
 scratch_code/
 NOTES.md
 TODO.txt
 TODO.md
+server.py
 
 # git rm -r --cached dist
