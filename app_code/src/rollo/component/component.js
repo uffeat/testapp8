@@ -24,6 +24,7 @@ export const component = new Proxy(
   }
 );
 
+
 /* Returns component instance. */
 export function Component(arg, ...args) {
   const [tag] = arg.split(".");
@@ -46,8 +47,7 @@ export function Component(arg, ...args) {
       parsed.parent.append(element)
     }
   }
-
-
   parsed.hooks.forEach((h) => h.call(element, element));
   return element;
 }
+

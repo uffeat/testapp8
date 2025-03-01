@@ -1,3 +1,6 @@
+/* Stylesheets */
+import "@/main.css";
+import "@/libs/bootstrap/bootstrap.css";
 /* Rollo */
 import { App } from "rollo/app";
 import { Router } from "rollo/router/router";
@@ -15,9 +18,7 @@ import { Colors } from "@/components/pages/colors";
 import { Home } from "@/components/pages/home";
 import { Terms } from "@/components/pages/terms";
 
-/* Stylesheets */
-import "@/main.css";
-import "@/libs/bootstrap/bootstrap.css";
+
 
 
 import { modal } from "rolloui/modal/modal";
