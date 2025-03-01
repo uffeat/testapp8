@@ -1,4 +1,4 @@
-/* Styles */
+/* Stylesheets */
 import "@/main.css";
 import "@/libs/bootstrap/bootstrap.css";
 /* Rollo */
