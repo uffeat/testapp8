@@ -1,16 +1,16 @@
 // import { server } from "@/tools/server";
 // const { server } = await import("@/tools/server");
-
-
-
-//https://cdn.jsdelivr.net/gh/uffeat/testapp8@1.0.0-beta/app_code/src/tools/server.js
+//  https://cdn.jsdelivr.net/gh/uffeat/testapp8@1.0.0-beta/app_code/src/tools/server.js
 
 
 import origins from "@/meta/origins";
 
-const origin = ["localhost", "127.0.0.1"].includes(window.location.hostname)
-  ? origins.development
-  : `https://${window.parent.location.hostname}`;
+const origin = origins.development;
+
+
+
+
+
 
 const BASE = `${origin}/_/api`;
 
