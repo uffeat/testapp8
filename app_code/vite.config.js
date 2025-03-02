@@ -16,8 +16,7 @@ export default defineConfig(({ mode }) => {
       rollupOptions: {
         plugins: [
           dynamicImportVars({
-            // Raise exception on error
-            warnOnError: false,
+            warnOnError: true,
           }),
         ],
       },
