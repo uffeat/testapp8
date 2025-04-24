@@ -6,23 +6,23 @@ import { Sheet } from "rollo/sheet/sheet.js";
 const { Sheet } = await import("rollo/sheet/sheet.js");
 */
 
-import { compose } from "rollo/tools/cls/compose.js";
-import { truncate } from "rollo/tools/text/truncate.js";
+import { compose } from "@/rollo/tools/cls/compose.js";
+import { truncate } from "@/rollo/tools/text/truncate.js";
 
-import { KEYFRAMES, MEDIA } from "rollo/sheet/tools/constants.js";
+import { KEYFRAMES, MEDIA } from "@/rollo/sheet/tools/constants.js";
 
-import { targets } from "rollo/sheet/factories/targets.js";
+import { targets } from "@/rollo/sheet/factories/targets.js";
 
-import { is_sheet_target } from "rollo/tools/is/is_sheet_target.js";
+import { is_sheet_target } from "@/rollo/tools/is/is_sheet_target.js";
 
-import { detail } from "rollo/sheet/types/rule/factories/detail.js";
-import { json } from "rollo/sheet/types/rule/factories/json.js";
+import { detail } from "@/rollo/sheet/types/rule/factories/detail.js";
+import { json } from "@/rollo/sheet/types/rule/factories/json.js";
 
-import { Animation } from "rollo/sheet/types/animation.js";
-import { Media } from "rollo/sheet/types/media.js";
-import { Rules } from "rollo/sheet/types/rules/rules.js";
+import { Animation } from "@/rollo/sheet/types/animation.js";
+import { Media } from "@/rollo/sheet/types/media.js";
+import { Rules } from "@/rollo/sheet/types/rules/rules.js";
 
-export { __, important, rem, px } from "rollo/sheet/tools/value.js";
+export { __, important, rem, px } from "@/rollo/sheet/tools/value.js";
 
 
 /* Returns SheetType instance. */

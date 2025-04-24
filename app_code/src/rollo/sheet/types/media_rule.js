@@ -6,21 +6,21 @@ import { MediaRule, MediaRuleType } from "rollo/sheet/types/media_rule.js";
 const { MediaRule, MediaRuleType } = await import("rollo/sheet/types/media_rule.js");
 */
 
-import { compose } from "rollo/tools/cls/compose.js";
+import { compose } from "@/rollo/tools/cls/compose.js";
 
-import { Rule } from "rollo/sheet/types/rule/rule.js";
-import { MEDIA } from "rollo/sheet/tools/constants.js";
+import { Rule } from "@/rollo/sheet/types/rule/rule.js";
+import { MEDIA } from "@/rollo/sheet/tools/constants.js";
 
-import { detail } from "rollo/sheet/types/rule/factories/detail.js";
-import { json } from "rollo/sheet/types/rule/factories/json.js";
-import { add } from "rollo/sheet/types/rules/factories/add.js";
-import { clear } from "rollo/sheet/types/rules/factories/clear.js";
-import { get } from "rollo/sheet/types/rules/factories/get.js";
-import { index } from "rollo/sheet/types/rules/factories/index.js";
-import { remove } from "rollo/sheet/types/rules/factories/remove.js";
-import { size } from "rollo/sheet/types/rules/factories/size.js";
-import { text } from "rollo/sheet/types/rules/factories/text.js";
-import { update } from "rollo/sheet/types/rules/factories/update.js";
+import { detail } from "@/rollo/sheet/types/rule/factories/detail.js";
+import { json } from "@/rollo/sheet/types/rule/factories/json.js";
+import { add } from "@/rollo/sheet/types/rules/factories/add.js";
+import { clear } from "@/rollo/sheet/types/rules/factories/clear.js";
+import { get } from "@/rollo/sheet/types/rules/factories/get.js";
+import { index } from "@/rollo/sheet/types/rules/factories/index.js";
+import { remove } from "@/rollo/sheet/types/rules/factories/remove.js";
+import { size } from "@/rollo/sheet/types/rules/factories/size.js";
+import { text } from "@/rollo/sheet/types/rules/factories/text.js";
+import { update } from "@/rollo/sheet/types/rules/factories/update.js";
 
 export function MediaRule(...args) {
   return new MediaRuleType(...args);

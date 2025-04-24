@@ -9,30 +9,30 @@ Composite non-child-accepting component.
 Componetization of Bootstrap's floating label form control with validation and group.
 */
 
-import { create_id } from "rollo/tools/id.js";
+import { create_id } from "@/rollo/tools/id.js";
 
-import { compose } from "rollo/tools/cls/compose.js";
-import { component } from "rollo/component/component.js";
-import { registry } from "rollo/component/tools/registry.js";
+import { compose } from "@/rollo/tools/cls/compose.js";
+import { component } from "@/rollo/component/component.js";
+import { registry } from "@/rollo/component/tools/registry.js";
 
-import { attribute } from "rollo/component/factories/attribute.js";
-import { classes } from "rollo/component/factories/classes.js";
-import { content } from "rollo/component/factories/content.js";
-import { handlers } from "rollo/component/factories/handlers.js";
-import { parent } from "rollo/component/factories/parent.js";
-import { props } from "rollo/component/factories/props.js";
-import { send } from "rollo/component/factories/send.js";
+import { attribute } from "@/rollo/component/factories/attribute.js";
+import { classes } from "@/rollo/component/factories/classes.js";
+import { content } from "@/rollo/component/factories/content.js";
+import { handlers } from "@/rollo/component/factories/handlers.js";
+import { parent } from "@/rollo/component/factories/parent.js";
+import { props } from "@/rollo/component/factories/props.js";
+import { send } from "@/rollo/component/factories/send.js";
 
-import { Help } from "rollo/icons/help";
-import { PopButton } from "rolloui/components/pop_button.js";
+import { Help } from "@/rollo/icons/help";
+import { PopButton } from "@/rolloui/components/pop_button.js";
 
 import { __elements__ } from "@/rolloui/components/factories/__elements__.js";
-import { __states__ } from "rolloui/components/factories/__states__.js";
+import { __states__ } from "@/rolloui/components/factories/__states__.js";
 
 import { validators } from "@/rolloui/components/form/factories/validators.js";
 
-import "rolloui/components/form/assets/sheet.js";
-import { styles } from "rolloui/components/form/tools/styles.js";
+import "@/rolloui/components/form/assets/sheet.js";
+import { styles } from "@/rolloui/components/form/tools/styles.js";
 
 class cls extends compose(
   HTMLElement,

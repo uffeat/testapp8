@@ -6,20 +6,20 @@ import { layout } from "rolloui/components/layout/layout";
 const { layout } = await import("rolloui/components/layout/layout");
 */
 
-import { Reactive } from "rollo/reactive/value.js";
-import { Sheet } from "rollo/sheet/sheet.js";
-import { compose } from "rollo/tools/cls/compose.js";
-import { component } from "rollo/component/component.js";
-import { registry } from "rollo/component/tools/registry.js";
+import { Reactive } from "@/rollo/reactive/value.js";
+import { Sheet } from "@/rollo/sheet/sheet.js";
+import { compose } from "@/rollo/tools/cls/compose.js";
+import { component } from "@/rollo/component/component.js";
+import { registry } from "@/rollo/component/tools/registry.js";
 
-import { content } from "rollo/component/factories/content.js";
-import { parent } from "rollo/component/factories/parent.js";
-import { props } from "rollo/component/factories/props.js";
-import { Shadow } from "rollo/components/shadow.js";
+import { content } from "@/rollo/component/factories/content.js";
+import { parent } from "@/rollo/component/factories/parent.js";
+import { props } from "@/rollo/component/factories/props.js";
+import { Shadow } from "@/rollo/components/shadow.js";
 
 /* Import shadow assets */
 import { reboot } from "@/libs/bootstrap/reboot.js";
-import html from "rolloui/components/layout/assets/shadow.html?raw";
+import html from "@/rolloui/components/layout/assets/shadow.html?raw";
 
 /* Implement component-specific light-DOM styles */
 Sheet(document, {

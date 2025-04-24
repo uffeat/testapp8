@@ -1,4 +1,4 @@
-import { component } from "rollo/component/component.js";
+import { component } from "@/rollo/component/component.js";
 
 export const Upload = ({ color = "currentColor", size = 16 } = {}) => {
   return component.span({

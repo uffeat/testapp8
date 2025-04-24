@@ -5,23 +5,23 @@ https://testapp8dev.anvil.app/_/api/asset?path=src/rollo/app.js
 */
 
 
-import { Sheet } from "rollo/sheet/sheet.js";
-import { Sheets } from "rollo/sheet/tools/sheets.js";
-import { compose } from "rollo/tools/cls/compose.js";
-import { registry } from "rollo/component/tools/registry.js";
+import { Sheet } from "@/rollo/sheet/sheet.js";
+import { Sheets } from "@/rollo/sheet/tools/sheets.js";
+import { compose } from "@/rollo/tools/cls/compose.js";
+import { registry } from "@/rollo/component/tools/registry.js";
 
-import { attribute } from "rollo/component/factories/attribute.js";
-import { content } from "rollo/component/factories/content.js";
-import { css_vars } from "rollo/component/factories/css_vars.js";
-import { data } from "rollo/component/factories/data.js";
-import { detail } from "rollo/component/factories/detail.js";
-import { handlers } from "rollo/component/factories/handlers.js";
-import { parent } from "rollo/component/factories/parent.js";
-import { props } from "rollo/component/factories/props.js";
-import { send } from "rollo/component/factories/send.js";
+import { attribute } from "@/rollo/component/factories/attribute.js";
+import { content } from "@/rollo/component/factories/content.js";
+import { css_vars } from "@/rollo/component/factories/css_vars.js";
+import { data } from "@/rollo/component/factories/data.js";
+import { detail } from "@/rollo/component/factories/detail.js";
+import { handlers } from "@/rollo/component/factories/handlers.js";
+import { parent } from "@/rollo/component/factories/parent.js";
+import { props } from "@/rollo/component/factories/props.js";
+import { send } from "@/rollo/component/factories/send.js";
 
-import { Shadow } from "rollo/components/shadow.js";
-import { component } from "rollo/component/component.js";
+import { Shadow } from "@/rollo/components/shadow.js";
+import { component } from "@/rollo/component/component.js";
 
 //import { reboot } from "@/libs/bootstrap/reboot.js";
 

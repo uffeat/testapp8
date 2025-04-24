@@ -6,7 +6,7 @@ import { History } from "rollo/tools/history.js";
 */
 
 
-import { Reactive } from "rollo/reactive/value.js";
+import { Reactive } from "@/rollo/reactive/value.js";
 
 class cls {
   #path;

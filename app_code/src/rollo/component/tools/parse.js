@@ -5,7 +5,7 @@ https://testapp8dev.anvil.app/_/api/asset?path=src/rollo/component/tools/parse.j
 import { parse } from "rollo/component/tools/parse.js";
 */
 
-import { is_callable } from "rollo/tools/is/is_callable.js";
+import { is_callable } from "@/rollo/tools/is/is_callable.js";
 import { is_child } from "@/rollo/tools/is/is_child.js";
 
 /* Returns parsed arguments.

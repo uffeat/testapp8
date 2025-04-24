@@ -6,22 +6,22 @@ import { Img } from "rollo/components/img.js";
 */
 
 import { assets } from "@/tools/assets.js";
-import { Reactive } from "rollo/reactive/value.js";
+import { Reactive } from "@/rollo/reactive/value.js";
 
-import { component } from "rollo/component/component.js";
-import { compose } from "rollo/tools/cls/compose.js";
-import { registry } from "rollo/component/tools/registry.js";
-import { Sheet } from "rollo/sheet/sheet.js";
+import { component } from "@/rollo/component/component.js";
+import { compose } from "@/rollo/tools/cls/compose.js";
+import { registry } from "@/rollo/component/tools/registry.js";
+import { Sheet } from "@/rollo/sheet/sheet.js";
 
-import { attribute } from "rollo/component/factories/attribute.js";
-import { content } from "rollo/component/factories/content.js";
-import { css_vars } from "rollo/component/factories/css_vars.js";
-import { data } from "rollo/component/factories/data.js";
-import { detail } from "rollo/component/factories/detail.js";
-import { handlers } from "rollo/component/factories/handlers.js";
-import { parent } from "rollo/component/factories/parent.js";
-import { props } from "rollo/component/factories/props.js";
-import { send } from "rollo/component/factories/send.js";
+import { attribute } from "@/rollo/component/factories/attribute.js";
+import { content } from "@/rollo/component/factories/content.js";
+import { css_vars } from "@/rollo/component/factories/css_vars.js";
+import { data } from "@/rollo/component/factories/data.js";
+import { detail } from "@/rollo/component/factories/detail.js";
+import { handlers } from "@/rollo/component/factories/handlers.js";
+import { parent } from "@/rollo/component/factories/parent.js";
+import { props } from "@/rollo/component/factories/props.js";
+import { send } from "@/rollo/component/factories/send.js";
 
 Sheet(document, {
   "[rollo-image]": {

@@ -5,7 +5,7 @@
 /* TODO
 - Learn and use the new AWESOME CustomStateSet/:state features! */
 
-import { Reactive } from "rollo/reactive/value.js";
+import { Reactive } from "@/rollo/reactive/value.js";
 
 export const __states__ = (parent, config, ...factories) => {
   return class extends parent {

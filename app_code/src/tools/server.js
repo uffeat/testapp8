@@ -6,7 +6,6 @@ import { server } from "@/tools/server";
 const { server } = await import("@/tools/server");
 */
 
-// Use relative path to allow import from non-built code
 import origins from "@/meta/origins.js";
 
 

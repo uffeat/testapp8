@@ -2,7 +2,7 @@
 
 */
 
-import { Reactive } from "rollo/reactive/value.js";
+import { Reactive } from "@/rollo/reactive/value.js";
 
 export const states = (parent, config, ...factories) => {
   return class extends parent {

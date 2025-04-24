@@ -6,11 +6,11 @@ import { Component, component } from "rollo/component/component.js";
 const { Component, component } = await import("rollo/component/component.js");
 */
 
-import { is_callable } from "rollo/tools/is/is_callable.js";
+import { is_callable } from "@/rollo/tools/is/is_callable.js";
 
-import { author } from "rollo/component/tools/author.js";
-import { parse } from "rollo/component/tools/parse.js";
-import { registry } from "rollo/component/tools/registry.js";
+import { author } from "@/rollo/component/tools/author.js";
+import { parse } from "@/rollo/component/tools/parse.js";
+import { registry } from "@/rollo/component/tools/registry.js";
 
 /* Returns component instance. 
 NOTE

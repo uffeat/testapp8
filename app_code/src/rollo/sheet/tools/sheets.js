@@ -6,7 +6,7 @@ import { Sheets, SheetsType } from "rollo/sheet/tools/sheets.js";
 const { Sheets, SheetsType } = await import("rollo/sheet/tools/sheets.js");
 */
 
-import { adopt, unadopt } from "rollo/sheet/tools/target.js";
+import { adopt, unadopt } from "@/rollo/sheet/tools/target.js";
 
 /* Returns SheetType instance. */
 export function Sheets(target) {

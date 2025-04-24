@@ -9,14 +9,14 @@ const { PopButton } = await import("rolloui/components/pop_button");
 import "@/bootstrap.scss";
 import { Popover } from "bootstrap";
 
-import { compose } from "rollo/tools/cls/compose.js";
-import { pascal_to_kebab } from "rollo/tools/text/case.js";
+import { compose } from "@/rollo/tools/cls/compose.js";
+import { pascal_to_kebab } from "@/rollo/tools/text/case.js";
 
-import { component } from "rollo/component/component.js";
-import { registry } from "rollo/component/tools/registry.js";
-import { author } from "rollo/component/tools/author.js";
+import { component } from "@/rollo/component/component.js";
+import { registry } from "@/rollo/component/tools/registry.js";
+import { author } from "@/rollo/component/tools/author.js";
 
-import { __elements__ } from "rolloui/components/factories/__elements__.js";
+import { __elements__ } from "@/rolloui/components/factories/__elements__.js";
 
 class cls extends compose(
   /* Inherit from Rollo's native button component; normally authored 

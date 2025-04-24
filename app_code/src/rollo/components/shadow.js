@@ -16,7 +16,7 @@ import { content } from "@/rollo/component/factories/content.js";
 import { css_vars } from "@/rollo/component/factories/css_vars.js";
 import { data } from "@/rollo/component/factories/data.js";
 import { detail } from "@/rollo/component/factories/detail.js";
-import { handlers } from "rollo/component/factories/handlers.js";
+import { handlers } from "@/rollo/component/factories/handlers.js";
 import { name } from "@/rollo/component/factories/name.js";
 import { parent } from "@/rollo/component/factories/parent.js";
 import { props } from "@/rollo/component/factories/props.js";

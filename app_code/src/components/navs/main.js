@@ -1,6 +1,6 @@
 //import { MainNav } from '@/components/navs/main.js';
 
-import { component } from "rollo/component/component.js";
+import { component } from "@/rollo/component/component.js";
 import { Nav } from "@/rolloui/components/nav.js";
 
 export const MainNav = (parent, ...hooks) => {

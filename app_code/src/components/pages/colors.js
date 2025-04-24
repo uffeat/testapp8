@@ -1,6 +1,6 @@
 //import { Colors } from '@/components/pages/colors.js';
 
-import { component } from "rollo/component/component.js";
+import { component } from "@/rollo/component/component.js";
 import { Nav } from "@/rolloui/components/nav.js";
 
 let color = 'pink'

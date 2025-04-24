@@ -8,35 +8,35 @@ const { FileLoader } = await import("rolloui/components/form/file_loader");
 
 import "@/bootstrap.scss";
 
-import { Sheet, __, important, px } from "rollo/sheet/sheet.js";
+import { Sheet, __, important, px } from "@/rollo/sheet/sheet.js";
 
-import { Cancel } from "rollo/icons/cancel.js";
-import { Help } from "rollo/icons/help.js";
-import { Upload } from "rollo/icons/upload.js";
+import { Cancel } from "@/rollo/icons/cancel.js";
+import { Help } from "@/rollo/icons/help.js";
+import { Upload } from "@/rollo/icons/upload.js";
 
-import { $, disabled, focus, selector, tag } from "rollo/tools/selector.js";
-import { create_id } from "rollo/tools/id.js";
-import { compose } from "rollo/tools/cls/compose.js";
-import { hidden } from "rollo/tools/element/hidden.js";
+import { $, disabled, focus, selector, tag } from "@/rollo/tools/selector.js";
+import { create_id } from "@/rollo/tools/id.js";
+import { compose } from "@/rollo/tools/cls/compose.js";
+import { hidden } from "@/rollo/tools/element/hidden.js";
 
-import { component } from "rollo/component/component.js";
-import { registry } from "rollo/component/tools/registry.js";
+import { component } from "@/rollo/component/component.js";
+import { registry } from "@/rollo/component/tools/registry.js";
 
-import { attribute } from "rollo/component/factories/attribute.js";
-import { classes } from "rollo/component/factories/classes.js";
-import { content } from "rollo/component/factories/content.js";
-import { handlers } from "rollo/component/factories/handlers.js";
-import { parent } from "rollo/component/factories/parent.js";
-import { props } from "rollo/component/factories/props.js";
-import { send } from "rollo/component/factories/send.js";
+import { attribute } from "@/rollo/component/factories/attribute.js";
+import { classes } from "@/rollo/component/factories/classes.js";
+import { content } from "@/rollo/component/factories/content.js";
+import { handlers } from "@/rollo/component/factories/handlers.js";
+import { parent } from "@/rollo/component/factories/parent.js";
+import { props } from "@/rollo/component/factories/props.js";
+import { send } from "@/rollo/component/factories/send.js";
 
-import { PopButton } from "rolloui/components/pop_button.js";
-import { __elements__ } from "rolloui/components/factories/__elements__.js";
-import { __states__ } from "rolloui/components/factories/__states__.js";
+import { PopButton } from "@/rolloui/components/pop_button.js";
+import { __elements__ } from "@/rolloui/components/factories/__elements__.js";
+import { __states__ } from "@/rolloui/components/factories/__states__.js";
 
 /* Load sheet that styles invalid feedback */
-import "rolloui/components/form/assets/sheet.js";
-import { styles } from "rolloui/components/form/tools/styles.js";
+import "@/rolloui/components/form/assets/sheet.js";
+import { styles } from "@/rolloui/components/form/tools/styles.js";
 
 class cls extends compose(
   HTMLElement,

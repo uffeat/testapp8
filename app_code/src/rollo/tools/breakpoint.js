@@ -1,5 +1,5 @@
-import { Reactive } from "rollo/reactive/value.js";
-import { first } from "rollo/tools/object/first.js";
+import { Reactive } from "@/rollo/reactive/value.js";
+import { first } from "@/rollo/tools/object/first.js";
 
 /* Breakpoints as per Bootstrap 5.2 
 NOTE

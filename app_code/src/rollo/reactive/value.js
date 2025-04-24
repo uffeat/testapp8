@@ -6,7 +6,7 @@ import { Reactive } from "rollo/reactive/value";
 const { Reactive } = await import("rollo/reactive/value.js");
 */
 
-import { is_callable } from "rollo/tools/is/is_callable.js";
+import { is_callable } from "@/rollo/tools/is/is_callable.js";
 
 /* Main responsibilities:
 - Retrieve current and previous.

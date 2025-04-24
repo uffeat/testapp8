@@ -6,7 +6,7 @@ import { remove } from "rollo/sheet/tools/remove.js";
 const { remove } = await import("rollo/sheet/tools/remove.js");
 */
 
-import { index } from "rollo/sheet/tools/index.js";
+import { index } from "@/rollo/sheet/tools/index.js";
 
 /* Removes rule from container by search function. Returns container
 NOTE

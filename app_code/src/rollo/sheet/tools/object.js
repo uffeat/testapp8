@@ -6,8 +6,8 @@ import { object } from "rollo/sheet/tools/object.js";
 const { object } = await import("rollo/sheet/tools/object.js");
 */
 
-import { KEYFRAMES, MEDIA } from "rollo/sheet/tools/constants.js";
-import { get as get_items } from "rollo/sheet/types/rule/tools/items.js";
+import { KEYFRAMES, MEDIA } from "@/rollo/sheet/tools/constants.js";
+import { get as get_items } from "@/rollo/sheet/types/rule/tools/items.js";
 
 /* Returns object representation of container's css rules.
 NOTE

@@ -6,22 +6,22 @@ import { Media, MediaType } from "rollo/sheet/types/media.js";
 const { Media, MediaType } = await import("rollo/sheet/types/media.js");
 */
 
-import { compose } from "rollo/tools/cls/compose.js";
-import { truncate } from "rollo/tools/text/truncate.js";
+import { compose } from "@/rollo/tools/cls/compose.js";
+import { truncate } from "@/rollo/tools/text/truncate.js";
 
-import { MediaRule } from "rollo/sheet/types/media_rule.js";
-import { MEDIA } from "rollo/sheet/tools/constants.js";
+import { MediaRule } from "@/rollo/sheet/types/media_rule.js";
+import { MEDIA } from "@/rollo/sheet/tools/constants.js";
 
-import { add } from "rollo/sheet/types/rules/factories/add.js";
-import { clear } from "rollo/sheet/types/rules/factories/clear.js";
-import { detail } from "rollo/sheet/types/rule/factories/detail.js";
-import { index } from "rollo/sheet/types/rules/factories/index.js";
-import { json } from "rollo/sheet/types/rule/factories/json.js";
-import { object } from "rollo/sheet/types/rules/factories/object.js";
-import { remove } from "rollo/sheet/types/rules/factories/remove.js";
-import { size } from "rollo/sheet/types/rules/factories/size.js";
-import { text } from "rollo/sheet/types/rules/factories/text.js";
-import { update } from "rollo/sheet/types/rules/factories/update.js";
+import { add } from "@/rollo/sheet/types/rules/factories/add.js";
+import { clear } from "@/rollo/sheet/types/rules/factories/clear.js";
+import { detail } from "@/rollo/sheet/types/rule/factories/detail.js";
+import { index } from "@/rollo/sheet/types/rules/factories/index.js";
+import { json } from "@/rollo/sheet/types/rule/factories/json.js";
+import { object } from "@/rollo/sheet/types/rules/factories/object.js";
+import { remove } from "@/rollo/sheet/types/rules/factories/remove.js";
+import { size } from "@/rollo/sheet/types/rules/factories/size.js";
+import { text } from "@/rollo/sheet/types/rules/factories/text.js";
+import { update } from "@/rollo/sheet/types/rules/factories/update.js";
 
 export function Media(owner, registry) {
   return new MediaType(owner, registry);

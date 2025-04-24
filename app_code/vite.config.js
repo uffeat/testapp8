@@ -15,7 +15,7 @@ export default defineConfig(({ mode }) => {
       //emptyOutDir: true,//
       /* Enable manifest.json generation */
       manifest: true, //
-      /* Enable features like top-level await, async imports, and smaller output. */
+      /* Enable features like top-level await, async imports, and smaller output */
       target: "es2022",
     },
     resolve: {

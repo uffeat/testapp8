@@ -1,6 +1,6 @@
 //import { UserNav } from '@/components/navs/user.js'
 
-import { component } from "rollo/component/component.js";
+import { component } from "@/rollo/component/component.js";
 import { Nav } from "@/rolloui/components/nav.js";
 
 const style = {

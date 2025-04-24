@@ -6,16 +6,16 @@ import { Frames, FramesType } from "rollo/sheet/types/frames.js";
 const { Frames, FramesType } = await import("rollo/sheet/types/frames.js");
 */
 
-import { compose } from "rollo/tools/cls/compose.js";
+import { compose } from "@/rollo/tools/cls/compose.js";
 
-import { Frame } from "rollo/sheet/types/frame.js";
-import { KEYFRAMES } from "rollo/sheet/tools/constants.js";
+import { Frame } from "@/rollo/sheet/types/frame.js";
+import { KEYFRAMES } from "@/rollo/sheet/tools/constants.js";
 
-import { add } from "rollo/sheet/types/rules/factories/add.js";
-import { detail } from "rollo/sheet/types/rule/factories/detail.js";
-import { json } from "rollo/sheet/types/rule/factories/json.js";
-import { text } from "rollo/sheet/types/rule/factories/text.js";
-import { update } from "rollo/sheet/types/rules/factories/update.js";
+import { add } from "@/rollo/sheet/types/rules/factories/add.js";
+import { detail } from "@/rollo/sheet/types/rule/factories/detail.js";
+import { json } from "@/rollo/sheet/types/rule/factories/json.js";
+import { text } from "@/rollo/sheet/types/rule/factories/text.js";
+import { update } from "@/rollo/sheet/types/rules/factories/update.js";
 
 
 export function Frames(rule, registry) {
