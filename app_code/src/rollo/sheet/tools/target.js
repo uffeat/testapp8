@@ -1,5 +1,12 @@
-// import { adopt, has, is_target, unadopt } from "@/rollo/tools/sheet/tools/target";
-// const { adopt, has, is_target, unadopt } = await import("@/rollo/tools/sheet/tools/target");
+/* 
+20250309
+src/rollo/sheet/tools/target.js
+https://testapp8dev.anvil.app/_/api/asset?path=src/rollo/sheet/tools/target.js
+import { adopt, has, is_target, unadopt } from "rollo/sheet/tools/target.js";
+const { adopt, has, is_target, unadopt } = await import("rollo/sheet/tools/target.js");
+*/
+import { remove } from "@/rollo/tools/array/remove.js";
+
 
 /* Adopts sheets to target. Returns target. 
 NOTE
@@ -22,23 +29,10 @@ export function has(target, sheet) {
   return false;
 }
 
-/* Tests, if target can adopt sheets. */
-export function is_target(target) {
-  return (
-    target === document ||
-    target instanceof ShadowRoot ||
-    target.adoptedStyleSheets
-  );
-}
+
 
 /* Unadopts sheets from target. Returns target. */
 export function unadopt(target, ...sheets) {
-  const adopted = target.adoptedStyleSheets;
-  sheets.forEach((sheet) => {
-    const index = adopted.indexOf(sheet);
-    if (index !== -1) {
-      adopted.splice(index, 1);
-    }
-  });
+  remove(target.adoptedStyleSheets, ...sheets)
   return target;
 }

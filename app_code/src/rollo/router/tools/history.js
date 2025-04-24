@@ -1,6 +1,12 @@
-//import { History } from "rollo/tools/history";
+/* 
+20250308
+src/rollo/router/tools/history.js
+https://testapp8dev.anvil.app/_/api/asset?path=src/rollo/router/tools/history.js
+import { History } from "rollo/tools/history.js";
+*/
 
-import { Reactive } from "rollo/reactive/reactive_value";
+
+import { Reactive } from "rollo/reactive/value.js";
 
 class cls {
   #path;
@@ -15,7 +21,7 @@ class cls {
 
     this.#path.effects.add(({ current }) => {
       this.#push(current);
-    }, {run: false});
+    });
   }
 
   /* Returns reactive controller for path */

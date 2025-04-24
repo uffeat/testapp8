@@ -1,23 +1,30 @@
-//import { registry } from "@/rollo/component/tools/registry";
+/* 
+20250302 
+src/rollo/component/tools/registry.js
+https://testapp8dev.anvil.app/_/api/asset?path=src/rollo/component/tools/registry.js
+import { registry } from "rollo/component/tools/registry.js";
+*/
 
-import { pascal_to_kebab } from "@/rollo/tools/text/case";
+import { pascal_to_kebab } from "@/rollo/tools/text/case.js";
 
 class Registry extends Map {
   constructor() {
     super();
   }
 
-  /* Registers and defines and component. Returns constructor. */
+  /* Registers and defines and component. Returns component class. */
   add(cls, { key, native, tag } = {}) {
     if (tag && !tag.includes("-") && !native && !key) {
-      /* This concerns basic native components */
+      /* This concerns (auto-registered) basic native components */
       key = tag;
       native = tag;
       tag = `native-${tag}`;
+    } else if (!tag && native && !key) {
+      /* This concerns custom native components */
+      key = tag = pascal_to_kebab(cls.name);
     } else if (!tag && !native && !key) {
       /* This concerns autonomous components */
-      tag = pascal_to_kebab(cls.name);
-      key = tag.split("-")[0];
+      key = tag = pascal_to_kebab(cls.name);
     }
 
     if (native) {
@@ -35,6 +42,9 @@ class Registry extends Map {
     }
 
     this.set(key, cls);
+
+    cls.__tag__ = tag
+
     return cls;
   }
 }

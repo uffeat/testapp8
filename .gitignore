@@ -1,4 +1,4 @@
-# Logs
+# Vite defaults: Logs
 logs
 *.log
 npm-debug.log*
@@ -7,12 +7,9 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
 
-# Editor directories and files
+
+# Vite defaults: Editor directories and files
 .vscode/*
 !.vscode/extensions.json
 .idea
@@ -23,14 +20,19 @@ dist-ssr
 *.sln
 *.sw?
 
+# Vite defaults: Misc
+node_modules
+dist
+dist-ssr
+*.local
+
 
 # Custom
-uplink_keys.json
-secret.json
-scratch_code/
+_server_code/
+_scratch_code/
 NOTES.md
-TODO.txt
+NOTES.txt
 TODO.md
-server.py
+TODO.txt
 
 # git rm -r --cached dist

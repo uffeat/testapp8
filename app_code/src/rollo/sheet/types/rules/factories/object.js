@@ -1,3 +1,8 @@
+/* 
+20250302 
+src/rollo/sheet/types/rules/factories/object.js
+https://testapp8dev.anvil.app/_/api/asset?path=src/rollo/sheet/types/rules/factories/object.js
+*/
 export const object = (parent, config, ...factories) => {
   return class extends parent {
     static name = "object";

@@ -1,22 +1,20 @@
 body {
   position: relative;
   overflow-x: hidden;
-  height: 100vh;
+  min-height: 100vh;
   /* NOTE Do NOT use 
   width: 100vw; 
   as this would push behind any vertical scrollbars. */
   width: 100%;
+  display: flex;
+  flex-direction: column;
   margin: 0;
 }
 
-/*
-main {
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-}
-*/
-
 a {
   text-decoration: none;
+}
+
+img {
+  max-width: 100%;
 }

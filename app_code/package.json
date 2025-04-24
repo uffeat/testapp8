@@ -14,12 +14,12 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "hint": "^2.0.0",
     "sass": "^1.81.0",
-    "vite": "^5.4.7"
+    "vite": "^6.3.2"
   },
   "dependencies": {
     "@popperjs/core": "^2.11.8",
-    "@rollup/plugin-dynamic-import-vars": "^2.1.5",
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.11.3"
   }

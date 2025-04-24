@@ -1,3 +1,10 @@
+/* 
+20250302 
+src/rollo/component/factories/detail.js
+https://testapp8dev.anvil.app/_/api/asset?path=src/rollo/component/factories/detail.js
+import { detail } from "rollo/component/factories/detail.js";
+*/
+
 export const detail = (parent, config, ...factories) => {
   return class extends parent {
     static name = "detail";

@@ -1,4 +1,10 @@
-import { adopt, unadopt } from "@/rollo/sheet/tools/target";
+/* 
+20250302 
+src/rollo/sheet/factories/targets.js
+https://testapp8dev.anvil.app/_/api/asset?path=src/rollo/sheet/factories/targets.js
+*/
+
+import { adopt, unadopt } from "rollo/sheet/tools/target.js";
 
 export const targets = (parent, config, ...factories) => {
   return class extends parent {

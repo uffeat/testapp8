@@ -1,3 +1,9 @@
+/* 
+20250302 
+src/rollo/sheet/types/rules/factories/clear.js
+https://testapp8dev.anvil.app/_/api/asset?path=src/rollo/sheet/types/rules/factories/clear.js
+*/
+
 export const clear = (parent, config, ...factories) => {
   return class extends parent {
     static name = "clear";

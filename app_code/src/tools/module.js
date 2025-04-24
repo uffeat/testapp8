@@ -1,6 +1,10 @@
-// import { text_to_module } from "@/tools/text_to_module";
-// const { text_to_module } = await import("@/tools/text_to_module");
-
+/* 
+20250303
+src/tools/module.js
+https://testapp8dev.anvil.app/_/api/asset?path=src/tools/module.js
+import { text_to_module } from "@/tools/module.js";
+const { text_to_module } = await import("@/tools/module.js");
+*/
 
 /* Returns promise resolved to JS module imported from url. 
 NOTE
@@ -19,3 +23,5 @@ export const text_to_module = async (text) => {
   URL.revokeObjectURL(url);
   return module;
 };
+
+

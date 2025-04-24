@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="shortcut icon" href="#" type="image/x-icon" />
+    <title>case</title>
+    <script type="module">
+      const base = `${location.origin}/theme/assets/public/test`;
+      const { modules } = await import(`${base}/modules.js`);
+
+      const { camel_to_kebab } = await modules.get("@/rollo/tools/text/case.js");
+
+      console.log('camel_to_kebab:', camel_to_kebab)
+    </script>
+  </head>
+  <body></body>
+</html>

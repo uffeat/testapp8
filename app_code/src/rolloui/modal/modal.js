@@ -1,7 +1,7 @@
 //import { modal } from "rolloui/modal/modal";
 
 import { Modal } from "bootstrap";
-import { component } from "rollo/component/component";
+import { component } from "rollo/component/component.js";
 
 import html from "rolloui/modal/assets/template.html?raw";
 

@@ -1,6 +1,13 @@
-import { constants } from "@/rollo/component/tools/constants";
+/* 
+20250302 
+src/rollo/component/factories/props.js
+https://testapp8dev.anvil.app/_/api/asset?path=src/rollo/component/factories/props.js
+import { props } from "rollo/component/factories/props.js";
+*/
 
-const { ARIA, CSS_VAR } = constants;
+const { constants } = await modules.get("@/rollo/component/tools/constants.js");
+
+const { CSS_VAR } = constants;
 
 export const props = (parent, config, ...factories) => {
   return class extends parent {
@@ -8,14 +15,12 @@ export const props = (parent, config, ...factories) => {
 
     /* Updates accessor props. Chainable. */
     update(updates = {}) {
-      super.update && super.update(updates);
-
+      super.update?.(updates);
       Object.entries(updates)
         .filter(
           ([k, v]) => k in this || (k.startsWith("_") && !k.startsWith(CSS_VAR))
         )
         .forEach(([k, v]) => (this[k] = v));
-
       return this;
     }
   };

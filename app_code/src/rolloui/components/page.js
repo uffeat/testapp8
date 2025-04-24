@@ -1,19 +1,19 @@
 
 
-import { Component, component } from "rollo/component/component";
-import { compose } from "rollo/tools/cls/compose";
-import { Reactive } from "rollo/reactive/reactive_value";
-import { registry } from "rollo/component/tools/registry";
+import { Component, component } from "rollo/component/component.js";
+import { compose } from "rollo/tools/cls/compose.js";
+import { Reactive } from "rollo/reactive/value.js";
+import { registry } from "rollo/component/tools/registry.js";
 
-import { attribute } from "rollo/component/factories/attribute";
-import { content } from "rollo/component/factories/content";
-import { css_vars } from "rollo/component/factories/css_vars";
-import { data } from "rollo/component/factories/data";
-import { detail } from "rollo/component/factories/detail";
-import { handlers } from "rollo/component/factories/handlers";
-import { parent } from "rollo/component/factories/parent";
-import { props } from "rollo/component/factories/props";
-import { send } from "rollo/component/factories/send";
+import { attribute } from "rollo/component/factories/attribute.js";
+import { content } from "rollo/component/factories/content.js";
+import { css_vars } from "rollo/component/factories/css_vars.js";
+import { data } from "rollo/component/factories/data.js";
+import { detail } from "rollo/component/factories/detail.js";
+import { handlers } from "rollo/component/factories/handlers.js";
+import { parent } from "rollo/component/factories/parent.js";
+import { props } from "rollo/component/factories/props.js";
+import { send } from "rollo/component/factories/send.js";
 
 class cls extends compose(
   HTMLDivElement,

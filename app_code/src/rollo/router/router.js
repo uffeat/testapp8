@@ -1,8 +1,12 @@
-//import { Router } from "rollo/router/router";
+/* 
+20250303
+src/rollo/router/router/router.js
+https://testapp8dev.anvil.app/_/api/asset?path=src/rollo/router/router/router.js
+import { Router } from "rollo/router/router";
+*/
 
-import { Reactive } from "rollo/reactive/reactive_value";
-import { History } from "@/rollo/router/tools/history";
-
+import { Reactive } from "@/rollo/reactive/value.js";
+import { History } from "@/rollo/router/tools/history.js";
 
 class cls {
   #config;
@@ -27,14 +31,14 @@ class cls {
       ({ current }) => {
         History.path.update(current);
       },
-      { run: false }
+     
     );
 
     History.path.effects.add(
       ({ current }) => {
         this.#state.update(current);
       },
-      { run: false }
+     
     );
   }
 
@@ -58,8 +62,7 @@ class cls {
 
   /* Adds and returns route. */
   add(path, route) {
-    route = Reactive(null, { condition: path, source: route });
-    this.#state.effects.add(route, { detail: path, run: false });
+    this.#state.effects.add(route);
     return route;
   }
 

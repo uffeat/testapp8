@@ -1,11 +1,21 @@
-import { compose } from "@/rollo/tools/cls/compose";
-import { detail } from "@/rollo/sheet/types/rule/factories/detail";
-import { get } from "@/rollo/sheet/types/rule/tools/items";
-import { json } from "@/rollo/sheet/types/rule/factories/json";
-import { item } from "@/rollo/sheet/types/rule/factories/item";
-import { size } from "@/rollo/sheet/types/rule/factories/size";
-import { style } from "@/rollo/sheet/types/rule/factories/style";
-import { text } from "@/rollo/sheet/types/rule/factories/text";
+/* 
+20250303
+src/rollo/sheet/types/frame.js
+https://testapp8dev.anvil.app/_/api/asset?path=src/rollo/sheet/types/frame.js
+import { Frame, FrameType } from "rollo/sheet/types/frame";
+const { Frame, FrameType } = await import("rollo/sheet/types/frame");
+*/
+
+import { compose } from "rollo/tools/cls/compose.js";
+
+import { get } from "rollo/sheet/types/rule/tools/items.js";
+
+import { detail } from "rollo/sheet/types/rule/factories/detail.js";
+import { json } from "rollo/sheet/types/rule/factories/json.js";
+import { item } from "rollo/sheet/types/rule/factories/item.js";
+import { size } from "rollo/sheet/types/rule/factories/size.js";
+import { style } from "rollo/sheet/types/rule/factories/style.js";
+import { text } from "rollo/sheet/types/rule/factories/text.js";
 
 export function Frame(...args) {
   return new FrameType(...args);

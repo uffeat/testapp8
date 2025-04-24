@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>foo</title>
+
+    <script type="module"></script>
+  </head>
+  <body>
+
+    <template test>
+      <script type="module">
+        // #sourceURL=foo
+
+        const { foo } = await modules.get("rolloui/foo.js.html");
+        //console.log("foo:", foo);
+
+        
+      </script>
+    </template>
+
+
+
+    <template script>
+      <script type="module">
+        // #sourceURL=foo
+
+        const { is_arrow } = await modules.get("rollo/tools/is/is_arrow.js");
+        //console.log("is_arrow:", is_arrow);
+
+        console.log("From foo");
+
+        export const foo = "FOO";
+      </script>
+    </template>
+  </body>
+</html>

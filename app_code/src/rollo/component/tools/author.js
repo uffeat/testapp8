@@ -1,38 +1,53 @@
-//import { author } from "@/rollo/component/tools/author";
+/* 
+20250302 
+src/rollo/component/tools/author.js
+https://testapp8dev.anvil.app/_/api/asset?path=src/rollo/component/tools/author.js
+import { author } from "rollo/component/tools/author.js";
+*/
 
-import { compose } from "@/rollo/tools/cls/compose";
-import { registry } from "@/rollo/component/tools/registry";
+import { compose } from "rollo/tools/cls/compose.js";
+import { registry } from "rollo/component/tools/registry.js";
+/* Factories */
+import { __config__ } from "rollo/component/factories/__config__.js";
+import { attribute } from "rollo/component/factories/attribute.js";
+import { classes } from "rollo/component/factories/classes.js";
+import { connected } from "rollo/component/factories/connected.js";
+import { content, elements } from "rollo/component/factories/content.js";
+import { css_vars } from "rollo/component/factories/css_vars.js";
+import { data } from "rollo/component/factories/data.js";
+import { detail } from "rollo/component/factories/detail.js";
+import { for_ } from "rollo/component/factories/for_.js";
+import { handlers } from "rollo/component/factories/handlers.js";
+import { name } from "rollo/component/factories/name.js";
+import { no_validation } from "rollo/component/factories/no_validation.js";
+import { parent } from "rollo/component/factories/parent.js";
+import { path } from "rollo/component/factories/path.js";
+import { props } from "rollo/component/factories/props.js";
+import { send } from "rollo/component/factories/send.js";
+import { style } from "rollo/component/factories/style.js";
+import { super_ } from "rollo/component/factories/super_.js";
+import { tab } from "rollo/component/factories/tab.js";
+import { text } from "rollo/component/factories/text.js";
+import { value } from "rollo/component/factories/value.js";
 
-//import { aria } from "@/rollo/component/factories/aria";
-import { attribute } from "@/rollo/component/factories/attribute";
-import { classes } from "@/rollo/component/factories/classes";
-import { connected } from "@/rollo/component/factories/connected";
-import { content } from "@/rollo/component/factories/content";
-import { css_vars } from "@/rollo/component/factories/css_vars";
-import { data } from "@/rollo/component/factories/data";
-import { detail } from "@/rollo/component/factories/detail";
-import { for_ } from "@/rollo/component/factories/for_";
-import { handlers } from "@/rollo/component/factories/handlers";
-import { name } from "@/rollo/component/factories/name";
-import { parent } from "@/rollo/component/factories/parent";
-import { path } from "@/rollo/component/factories/path";
-import { props } from "@/rollo/component/factories/props";
-import { send } from "@/rollo/component/factories/send";
-import { style } from "@/rollo/component/factories/style";
-import { tab } from "@/rollo/component/factories/tab";
-import { text } from "@/rollo/component/factories/text";
-import { value } from "@/rollo/component/factories/value";
-
-/* Composes and registers component. Returns constructor. */
+/* Composes and registers component. Returns component class. */
 export function author(tag) {
   const reference = document.createElement(tag);
   const base = reference.constructor;
   if (base === HTMLUnknownElement) {
-    throw new Error(`Cannot author component with tag '${tag}'. Must be native.`)
+    throw new Error(
+      `Cannot author component with tag '${tag}'. Must be native.`
+    );
   }
 
+  const registered = registry.get(tag)
+  if (registered) {
+    return registered
+  }
+
+  /* General factories */
   const factories = [
-    ////aria,
+    __config__,
     attribute,
     classes,
     connected,
@@ -45,13 +60,20 @@ export function author(tag) {
     props,
     send,
     style,
-    tab
+    tab,
   ];
-  if ("href" in reference) {
-    factories.push(path);
+  /* Add specialized factories */
+  if (tag === "form") {
+    factories.push(no_validation);
+  }
+  if (tag !== "form") {
+    factories.push(elements);
   }
   if (tag === "label") {
     factories.push(for_);
+  }
+  if ("href" in reference) {
+    factories.push(path);
   }
   if (!("name" in reference)) {
     factories.push(name);
@@ -62,25 +84,17 @@ export function author(tag) {
   if (!("value" in reference)) {
     factories.push(value);
   }
+
+  factories.push(super_);
+
   const config = { observedAttributes: [] };
   class cls extends compose(base, config, ...factories) {
     static observedAttributes = config.observedAttributes;
     static name = "Native";
 
-    #__config__ = {};
-    #__dict__ = {};
-
     constructor() {
       super();
       this.setAttribute("web-component", "");
-    }
-
-    get __config__() {
-      return this.#__config__;
-    }
-
-    get __dict__() {
-      return this.#__dict__;
     }
   }
 

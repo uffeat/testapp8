@@ -1,4 +1,9 @@
-import { Rule } from "@/rollo/sheet/types/rule/rule";
+/* 
+20250302 
+src/rollo/sheet/types/rules/factories/get.js
+https://testapp8dev.anvil.app/_/api/asset?path=src/rollo/sheet/types/rules/factories/get.js
+*/
+import { Rule } from "@/rollo/sheet/types/rule/rule.js";
 
 export const get = (parent, config, ...factories) => {
   return class extends parent {

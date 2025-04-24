@@ -1,16 +1,27 @@
-import { compose } from "@/rollo/tools/cls/compose";
-import { add } from "@/rollo/sheet/types/rules/factories/add";
-import { clear } from "@/rollo/sheet/types/rules/factories/clear";
-import { detail } from "@/rollo/sheet/types/rule/factories/detail";
-import { index } from "@/rollo/sheet/types/rules/factories/index";
-import { json } from "@/rollo/sheet/types/rule/factories/json";
-import { object } from "@/rollo/sheet/types/rules/factories/object";
-import { remove } from "@/rollo/sheet/types/rules/factories/remove";
-import { size } from "@/rollo/sheet/types/rules/factories/size";
-import { text } from "@/rollo/sheet/types/rules/factories/text";
-import { update } from "@/rollo/sheet/types/rules/factories/update";
-import { Frames } from "@/rollo/sheet/types/frames";
-import { KEYFRAMES } from "@/rollo/sheet/tools/constants";
+/* 
+20250303
+src/rollo/sheet/types/animation.js
+https://testapp8dev.anvil.app/_/api/asset?path=src/rollo/sheet/types/animation.js
+import { Animation, AnimationType } from "rollo/sheet/types/animation.js";
+const { Animation, AnimationType } = await import("rollo/sheet/types/animation.js");
+*/
+
+import { compose } from "rollo/tools/cls/compose.js";
+
+import { Frames } from "rollo/sheet/types/frames.js";
+import { KEYFRAMES } from "rollo/sheet/tools/constants.js";
+
+import { add } from "rollo/sheet/types/rules/factories/add.js";
+import { clear } from "rollo/sheet/types/rules/factories/clear.js";
+import { detail } from "rollo/sheet/types/rule/factories/detail.js";
+import { index } from "rollo/sheet/types/rules/factories/index.js";
+import { json } from "rollo/sheet/types/rule/factories/json.js";
+import { object } from "rollo/sheet/types/rules/factories/object.js";
+import { remove } from "rollo/sheet/types/rules/factories/remove.js";
+import { size } from "rollo/sheet/types/rules/factories/size.js";
+import { text } from "rollo/sheet/types/rules/factories/text.js";
+import { update } from "rollo/sheet/types/rules/factories/update.js";
+
 
 export function Animation(owner, registry) {
   return new AnimationType(owner, registry);

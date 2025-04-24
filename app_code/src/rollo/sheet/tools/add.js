@@ -1,10 +1,17 @@
-// import { add } from "@/rollo/tools/sheet/tools/add";
-// const { add } = await import("@/rollo/tools/sheet/tools/add");
+/* 
+20250303
+src/rollo/sheet/tools/add.js
+https://testapp8dev.anvil.app/_/api/asset?path=src/rollo/sheet/tools/add.js
+import { add } from "rollo/sheet/tools/add.js";
+const { add } = await import("rollo/sheet/tools/add.js");
+*/
 
-import { update } from "@/rollo/sheet/tools/update";
-import { KEYFRAMES, MEDIA } from "@/rollo/sheet/tools/constants";
+import { update } from "@/rollo/sheet/tools/update.js";
+import { KEYFRAMES, MEDIA } from "@/rollo/sheet/tools/constants.js";
 
-/* Adds and returns rule. */
+/* Adds and returns rule. 
+NOTE
+- Intended for use with non-Sheet sheets. */
 export function add(container, object) {
   let header = Object.keys(object)[0];
   const body = Object.values(object)[0];

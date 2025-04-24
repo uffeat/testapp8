@@ -1,11 +1,20 @@
-//import { Component, component } from "@/rollo/component/component";
-//const { Component, component } = await import("@/rollo/component/component");
+/* 
+20250302 
+src/rollo/component/component.js
+https://testapp8dev.anvil.app/_/api/asset?path=src/rollo/component/component.js
+import { Component, component } from "rollo/component/component.js";
+const { Component, component } = await import("rollo/component/component.js");
+*/
 
-import { author } from "@/rollo/component/tools/author";
-import { parse } from "@/rollo/component/tools/parse";
-import { registry } from "./tools/registry";
+import { is_callable } from "rollo/tools/is/is_callable.js";
 
-/* Returns component instance. */
+import { author } from "rollo/component/tools/author.js";
+import { parse } from "rollo/component/tools/parse.js";
+import { registry } from "rollo/component/tools/registry.js";
+
+/* Returns component instance. 
+NOTE
+- Proxy-based version of Component (syntactical alternative) */
 export const component = new Proxy(
   {},
   {
@@ -24,8 +33,9 @@ export const component = new Proxy(
   }
 );
 
-
-/* Returns component instance. */
+/* Returns component instance with option for rich in-line configuration.
+NOTE
+- Authors and registers native "base components" on-demand. */
 export function Component(arg, ...args) {
   const [tag] = arg.split(".");
   let constructor = registry.get(tag);
@@ -33,21 +43,41 @@ export function Component(arg, ...args) {
     constructor = author(tag);
   }
   const parsed = parse(arg, ...args);
-  const element = new constructor(parsed.__config__);
-  element.__new__ && element.__new__();
-  element.update && element.update(parsed.updates);
+  const self = new constructor();
+  self.__new__?.();
+  self.update?.(parsed.updates);
 
   if (parsed.css_classes) {
-    element.classList.add(...parsed.css_classes);
+    self.classList.add(...parsed.css_classes);
   }
-  element.append(...parsed.children);
+  self.append(...parsed.children);
 
+  /* NOTE Handle 'parent' separately because:
+  - element may not support the custom 'parent' prop
+  - in some cases, it's important to append to parent AFTER other props has been set. */
   if (parsed.parent) {
-    if (parsed.parent !== element.parentElement) {
-      parsed.parent.append(element)
+    if (parsed.parent !== self.parentElement) {
+      parsed.parent.append(self);
     }
   }
-  parsed.hooks.forEach((h) => h.call(element, element));
-  return element;
-}
 
+  const deferred = [];
+  parsed.hooks.forEach((h) => {
+    const result = h.call(self, self);
+    if (is_callable(result)) {
+      deferred.push(result);
+    }
+  });
+  deferred.forEach((h) => {
+    setTimeout(() => {
+      h.call(self, self);
+    }, 0);
+  });
+
+  const substitute = self.__init__?.();
+  if (substitute) {
+    return substitute
+  }
+
+  return self;
+}

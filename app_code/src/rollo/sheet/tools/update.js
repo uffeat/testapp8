@@ -1,12 +1,18 @@
-// import { update } from "@/rollo/tools/sheet/tools/update";
-// const { update } = await import("@/rollo/tools/sheet/tools/update");
+/* 
+20250303
+src/rollo/sheet/tools/update.js
+https://testapp8dev.anvil.app/_/api/asset?path=src/rollo/sheet/tools/update.js
+import { update } from "rollo/sheet/tools/update.js";
+const { update } = await import("rollo/sheet/tools/update.js");
+*/
 
-import { camel_to_kebab } from "@/rollo/tools/text/case";
-import { validate } from "@/rollo/sheet/types/rule/tools/validate";
+import { camel_to_kebab } from "@/rollo/tools/text/case.js";
+import { validate } from "@/rollo/sheet/types/rule/tools/validate.js";
 
 
 /* Updates rule.
 NOTE
+- Intended for use with non-Sheet sheets.
 - undefined item value removes item.
 - Invalid item keys are ignored, but triggers warning. */
 export function update(rule, items = {}) {

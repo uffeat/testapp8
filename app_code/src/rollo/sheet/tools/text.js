@@ -1,9 +1,16 @@
-// import { text } from "@/rollo/tools/sheet/tools/text";
-// const { text } = await import("@/rollo/tools/sheet/tools/text");
+/* 
+20250303
+src/rollo/sheet/tools/text.js
+https://testapp8dev.anvil.app/_/api/asset?path=src/rollo/sheet/tools/text.js
+import { text } from "rollo/sheet/tools/text.js";
+const { text } = await import("rollo/sheet/tools/text.js");
+*/
 
-import { truncate } from "@/rollo/tools/text/truncate";
+import { truncate } from "@/rollo/tools/text/truncate.js";
 
-/* Returns text representation of sheet content */
+/* Returns text representation of sheet content.
+NOTE
+- Intended for use with non-Sheet sheets. */
 export function text(sheet, pretty = true) {
   const fragments = [];
   for (const rule of sheet.cssRules) {

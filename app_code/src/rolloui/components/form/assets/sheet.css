@@ -1,0 +1,52 @@
+/* Provides styling not achievable with Bootstrap utils. */
+
+/* Overwrites Bootstrap default styles and deactivates Bootstrap's 
+non-display of feedback. Show-control with visibility (rather than display) prevents
+vertical shifts. */
+.rollo_form_control .invalid-feedback {
+  --size: 0.875rem;
+  font-size: var(--size);
+  --time: 800ms;
+  transition: opacity var(--time);
+  opacity: 0;
+}
+
+/* Ensure constant height. */
+.rollo_form_control .invalid-feedback::after {
+  content: "X";
+  visibility: hidden;
+}
+
+/* Allows showing hard feedback for visited invalid fields. */
+.rollo_form_control[visited][invalid] .invalid-feedback {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Prevents showing feedback for non-visited fields. */
+.rollo_form_control:not([visited]) .invalid-feedback {
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* Allows showing soft feedback for non-visited fields that are required and empty. */
+.rollo_form_control[required]:not([value]):not([visited]) .invalid-feedback {
+  opacity: 1;
+  visibility: visible;
+  color: var(--bs-body-color);
+}
+
+/* Shows hard feedback for components (artificially) styled as invalid. */
+.rollo_form_control:has(input.is-invalid) .invalid-feedback {
+  opacity: 1;
+  visibility: visible;
+  color: var(--bs-form-invalid-color) !important;
+}
+
+.rollo_form_control ._help:not(:hover) {
+  background-color: var(--bs-tertiary-bg);
+}
+
+
+
+

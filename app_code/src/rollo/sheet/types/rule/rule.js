@@ -1,13 +1,18 @@
-import { compose } from "@/rollo/tools/cls/compose";
+/* 
+20250302 
+src/rollo/sheet/types/rule/rule.js
+https://testapp8dev.anvil.app/_/api/asset?path=src/rollo/sheet/types/rule/rule.js
+*/
+import { compose } from "@/rollo/tools/cls/compose.js";
 
-import { detail } from "@/rollo/sheet/types/rule/factories/detail";
-import { json } from "@/rollo/sheet/types/rule/factories/json";
-import { item } from "@/rollo/sheet/types/rule/factories/item";
-import { size } from "@/rollo/sheet/types/rule/factories/size";
-import { style } from "@/rollo/sheet/types/rule/factories/style";
-import { text } from "@/rollo/sheet/types/rule/factories/text";
+import { detail } from "@/rollo/sheet/types/rule/factories/detail.js";
+import { json } from "@/rollo/sheet/types/rule/factories/json.js";
+import { item } from "@/rollo/sheet/types/rule/factories/item.js";
+import { size } from "@/rollo/sheet/types/rule/factories/size.js";
+import { style } from "@/rollo/sheet/types/rule/factories/style.js";
+import { text } from "@/rollo/sheet/types/rule/factories/text.js";
 
-import { get } from "@/rollo/sheet/types/rule/tools/items";
+import { get } from "@/rollo/sheet/types/rule/tools/items.js";
 
 export function Rule(rule) {
   const instance = new RuleType(rule);

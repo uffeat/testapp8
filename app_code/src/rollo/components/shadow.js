@@ -1,34 +1,39 @@
-import { Sheet } from "@/rollo/sheet/sheet";
-import { Sheets } from "@/rollo/sheet/tools/sheets";
-import { component } from "@/rollo/component/component";
-import { compose } from "@/rollo/tools/cls/compose";
-import { registry } from "@/rollo/component/tools/registry";
+/* 
+20250302 
+src/rollo/components/shadow.js
+https://testapp8dev.anvil.app/_/api/asset?path=src/rollo/components/shadow.js
+*/
+import { Sheet } from "@/rollo/sheet/sheet.js";
+import { Sheets } from "@/rollo/sheet/tools/sheets.js";
+import { component } from "@/rollo/component/component.js";
+import { compose } from "@/rollo/tools/cls/compose.js";
+import { registry } from "@/rollo/component/tools/registry.js";
 
-import { attribute } from "@/rollo/component/factories/attribute";
-import { connected } from "@/rollo/component/factories/connected";
-import { content } from "@/rollo/component/factories/content";
-import { css_vars } from "@/rollo/component/factories/css_vars";
-import { data } from "@/rollo/component/factories/data";
-import { detail } from "@/rollo/component/factories/detail";
-import { elements } from "rollo/component/factories/elements";
-import { handlers } from "rollo/component/factories/handlers";
-import { name } from "@/rollo/component/factories/name";
-import { parent } from "@/rollo/component/factories/parent";
-import { props } from "@/rollo/component/factories/props";
-import { style } from "@/rollo/component/factories/style";
-import { text } from "@/rollo/component/factories/text";
-import { value } from "@/rollo/component/factories/value";
+import { attribute } from "@/rollo/component/factories/attribute.js";
+import { classes } from "@/rollo/component/factories/classes.js";
+import { connected } from "@/rollo/component/factories/connected.js";
+import { content } from "@/rollo/component/factories/content.js";
+import { css_vars } from "@/rollo/component/factories/css_vars.js";
+import { data } from "@/rollo/component/factories/data.js";
+import { detail } from "@/rollo/component/factories/detail.js";
+import { handlers } from "rollo/component/factories/handlers.js";
+import { name } from "@/rollo/component/factories/name.js";
+import { parent } from "@/rollo/component/factories/parent.js";
+import { props } from "@/rollo/component/factories/props.js";
+import { style } from "@/rollo/component/factories/style.js";
+import { text } from "@/rollo/component/factories/text.js";
+import { value } from "@/rollo/component/factories/value.js";
 
 class cls extends compose(
   HTMLElement,
   {},
   attribute,
+  classes,
   connected,
   content,
   css_vars,
   data,
   detail,
-  elements,
   handlers,
   name,
   parent,
@@ -37,7 +42,7 @@ class cls extends compose(
   text,
   value
 ) {
-  static name = "ShadowComponent";
+  static name = "RolloShadow";
 
   #owner;
   #sheet;
@@ -82,23 +87,21 @@ class cls extends compose(
 
 registry.add(cls);
 
+/* Returns instance of ShadowComponent.
+NOTE
+- ShadowComponent is a specialized web component. 
+- Primary use case: As a read-only prop in an owner component.
+- The idea is that, rather than operating on shadowRoot directly, 
+  an owner component should operate on the shadow instance.  
+- The ShadowComponent instance injects itself as a first child into 
+  the owners shadowRoot. This works around the fact that ShadowRoot 
+  cannot be extended and also provide a richer API compared to operating 
+  directly on a shadowRoot */
 export const Shadow = (owner, ...children) => {
-  return component.shadow({ owner }, ...children);
+  return component.rollo_shadow({ owner }, ...children);
 };
 
-export const shadow = (owner, ...children) => {
-  const self = component.shadow({ owner }, ...children);
-  return new Proxy(self, {
-    get(target, key) {
-      if (key in self) {
-        const value = Reflect.get(self, key);
-        /* Bind any function value to self */
-        return typeof value === "function" ? value.bind(self) : value;
-      }
-      return self.elements[key];
-    },
-  });
-};
+
 
 /* Controller for slots. */
 class Slots {

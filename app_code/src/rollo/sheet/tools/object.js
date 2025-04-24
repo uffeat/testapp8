@@ -1,11 +1,17 @@
-// import { object } from "@/rollo/tools/sheet/tools/object";
-// const { object } = await import("@/rollo/tools/sheet/tools/object");
+/* 
+20250303
+src/rollo/sheet/tools/object.js
+https://testapp8dev.anvil.app/_/api/asset?path=src/rollo/sheet/tools/object.js
+import { object } from "rollo/sheet/tools/object.js";
+const { object } = await import("rollo/sheet/tools/object.js");
+*/
 
-import { KEYFRAMES, MEDIA } from "@/rollo/sheet/tools/constants";
-import { get as get_items } from "@/rollo/sheet/types/rule/tools/items";
+import { KEYFRAMES, MEDIA } from "rollo/sheet/tools/constants.js";
+import { get as get_items } from "rollo/sheet/types/rule/tools/items.js";
 
 /* Returns object representation of container's css rules.
 NOTE
+- Intended for use with non-Sheet sheets.
 - Supported rules:
   - Top-level CSSStyleRules
   - Top-level CSSMediaRules with CSSStyleRule or CSSKeyframesRule children

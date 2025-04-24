@@ -1,58 +1,69 @@
-// import { Future } from "@/rollo/tools/future";
-// const { Future } = await import("@/rollo/tools/future");
+/*
+20250406
+src/rollo/tools/future.js
+https://testapp8dev.anvil.app/_/api/asset?path=src/rollo/tools/future.js
+import { Future, FutureType } from "rollo/tools/future";
+const { Future, FutureType } = await import("rollo/tools/future");
+*/
 
-/* Returns FutureType instance.
+/* 
 NOTE
-- Promise-like stateful object with 
-  - explicit reject/resolve
-  - universal persistant callback
-  - ability to recreate promise */
-export function Future({ callback, name, owner, value } = {}) {
-  return new FutureType({ callback, name, owner, value });
-}
-
-/* Wraps a promise instance.
-NOTE
-- The ability to settle the wrapped promise via 'resolve'/'reject' 
-  methods, i.e., externally with respect to the promise executor is a 
-  core feature of 'FutureType'. This feature is indeed natively available 
-  with Promise.withResolvers(). However, 'FutureType' also provides 
-  non-native features, including:
-  - Ability to recreate promise.
-  - Persistant state (value and settled/rejected/resoved state).
-  - Universal callback method.
-  - Strict enforcing of rejected/resolved value types. 
-- 'FutureType' could be regarded as 
-  - a stateful Promise with explicit resolve/reject and option for recreation
-  or
-  - an awaitable value object with a single-subscriber pub-sub mechanism. */
-class FutureType {
-  /* Set name explicitly, since bundler may change class name */
-  static name = "FutureType";
+- Can be seen a hybrid between
+  - a native promise that
+    - has no reject, only resolve
+    - can be reused 
+    - can be resolved externally
+    - exposes resolved state
+    - exposes value state
+  - a Rollo reactive util that
+    - can only have a single effect
+    - does no change-detection
+    - can be made "awaitable", i.e., can block execution flow until resolved
+    - supports a "then" syntax for adding the effect
+  - Example use-cases:
+    - Need a promise with the ability to inspect its fulfillment status.
+    - Need a promise that can be reused without resetting 'then' callback.
+    - Need a promise that keeps track of its own resolved value.
+    - Need a reactive util that can block execution flow until value set.
+    - Prefers a reactive util with a promise-like then-syntax for effect.
+  - Can be used with two different syntax paradigms, e.g.:
+    - const value = await future.complete();
+    OR
+    - future.then((value) => console.log('value', value)); */
+export class FutureType {
+  #current;
+  #name = null;
+  #owner = null;
+  #previous;
   #promise;
-  #reject;
   #resolve;
-  #session = -1;
-  #value;
+  #resolved = false;
+  #then;
 
-  constructor({ callback, name, owner, value } = {}) {
-    this.callback = callback;
-    this.name = name;
-    this.owner = owner;
-    this.reset(value);
+  constructor({ current, name, owner, then } = {}) {
+    if (current !== undefined) {
+      this.#current = current;
+    }
+    if (name !== undefined) {
+      this.#name = name;
+    }
+    if (owner !== undefined) {
+      this.#owner = owner;
+    }
+    if (then) {
+      this.#then = then;
+    }
+    this.#refresh_promise();
   }
 
-  /* Returns callback. */
-  get callback() {
-    return this.#callback;
+  /* Returns current value. */
+  get current() {
+    return this.#current;
   }
-  /* Sets callback. */
-  set callback(callback) {
-    this.#callback = callback;
-  }
-  #callback;
 
-  /* Returns name. */
+  /* Returns name.
+    NOTE
+    - Useful for soft identification. */
   get name() {
     return this.#name;
   }
@@ -60,9 +71,11 @@ class FutureType {
   set name(name) {
     this.#name = name;
   }
-  #name;
 
-  /* Returns owner. */
+  /* Returns owner.
+  NOTE
+  - Can, e.g., be used to indirectly expand feature set;
+    available from then-function as 'owner.owner'. */
   get owner() {
     return this.#owner;
   }
@@ -70,155 +83,54 @@ class FutureType {
   set owner(owner) {
     this.#owner = owner;
   }
-  #owner;
 
-  /* Returns rejected status. */
-  get rejected() {
-    return this.#rejected;
+  /* Returns previous value 
+  (current value from previous resolve session). */
+  get previous() {
+    return this.#previous;
   }
-  #rejected;
 
-  /* Returns resolved status. */
+  /* Returns resolved state.
+  NOTE
+  - Returns true, if ever resolved, i.e., NOT session-bound. */
   get resolved() {
     return this.#resolved;
   }
-  #resolved;
 
-  /* Returns settled status. */
-  get settled() {
-    return this.resolved || this.rejected;
-  }
-
-  /* Returns session. */
-  get session() {
-    return this.#session;
-  }
-
-  /* Returns awaitable value. */
-  get value() {
-    return this.#promise.then(
-      (value) => Promise.resolve(value),
-      (error) => Promise.reject(error)
-    );
-    /* Alternative implementation:
-    return new Promise((resolve, reject) => {
-      this.#promise.then(resolve).catch(reject);
-    });
-    */
-  }
-  /* Resolves/rejects to value.
-  NOTE
-  - Error instances reject
-  - Non-Error instances resolve. */
-  set value(value) {
-    if (value instanceof Error) {
-      this.reject(value);
-    } else {
-      this.resolve(value);
+  /* Blocks execution flow until resolved, optionally on condition, and then 
+  refrehses promise. Returns current value. */
+  async complete(condition) {
+    if (!condition || condition.call(this, this)) {
+      await this.#promise;
+      this.#refresh_promise();
+      return this.#current;
     }
   }
 
-  /* Recreates promise and resets value and rejected/resolved status. 
-  Chainable. 
-  NOTE
-  - Passing in a non-undefined value immediately settles the promise. */
-  reset(value) {
-    this.#promise = new Promise((resolve, reject) => {
-      this.#reject = reject;
-      this.#resolve = resolve;
-    });
-    /*
-    Alternative to the declared 'value' getter:
-    Object.defineProperty(this, `value`, {
-      configurable: true,
-      enumerable: true,
-      get: async () => await this.#promise,
-    });
-    */
-    this.#rejected = false;
-    this.#resolved = false;
-    ++this.#session;
-    this.#value = null;
-
-    if (value !== undefined) {
-      this.value = value;
-    }
-    return this;
-  }
-
-  /* Rejects promise. Chainable. */
-  reject(value) {
-    if (!(value instanceof Error)) {
-      console.error("Error re:", this);
-      throw new TypeError(
-        `Rejected values should be an error! Got: ${String(value)}`
-      );
-    }
-    this.#reject(value);
-    this.#rejected = true;
-    this.#resolved = false;
-    this.#value = value;
-    if (this.callback) {
-      this.callback(value, this);
-    }
-    return this;
-  }
-
-  /* Resolves promise. Chainable. */
+  /* Resolves current sessions's promise. Chainable. */
   resolve(value) {
-    if (value instanceof Error) {
-      console.error("Error re:", this);
-      throw new TypeError(
-        `Resolved values should not be an error! Got: ${String(value)}`
-      );
-    }
-    this.#resolve(value);
-    this.#rejected = false;
+    this.#previous = this.#current;
+    this.#current = value;
     this.#resolved = true;
-    this.#value = value;
-    if (this.callback) {
-      this.callback(value, this);
-    }
+    /* Resolve the actual promise */
+    this.#resolve(value);
+    this.#then?.call(this, value, { owner: this });
+    this.#refresh_promise();
     return this;
   }
 
-  /* Returns string representation of instance. */
-  toString() {
-    try {
-      return JSON.stringify({
-        callback: this.callback ? String(this.callback) : null,
-        owner: this.owner ? String(this.owner) : null,
-        name: this.name || null,
-        rejected: this.rejected,
-        resolved: this.resolved,
-        session: this.session,
-        value:
-          typeof this.#value === "bigint"
-            ? `${this.#value}n`
-            : [false, null, true].includes(this.#value) ||
-              ["number", "string"].includes(typeof this.#value)
-            ? this.#value
-            : String(this.#value),
-      });
-    } catch {
-      return this.constructor.name;
-    }
+  /* Sets 'then' callback. Chainable. */
+  then(then) {
+    this.#then = then;
+    return this;
   }
 
-  /* Sets callback. Chainable.
-  NOTE
-  - Syntactical alternative to setting 'callback'. */
-  then(callback) {
-    this.callback =  callback
-    return this;
-
-  }
-
-  /* Resolves/rejects to value. Chainable.
-  NOTE
-  - Syntactical alternative to setting 'value'. */
-  update(value) {
-    this.value = value;
-    return this;
+  /* Enables repeated use of 'complete()'. */
+  #refresh_promise() {
+    const { promise, resolve } = Promise.withResolvers();
+    this.#promise = promise;
+    this.#resolve = resolve;
   }
 }
+
+export const Future = (...args) => new FutureType(...args);

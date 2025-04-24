@@ -1,5 +1,10 @@
-import { camel_to_kebab } from "@/rollo/tools/text/case";
-import { validate } from "@/rollo/sheet/types/rule/tools/validate";
+/* 
+20250302 
+src/rollo/sheet/types/rule/factories/style.js
+https://testapp8dev.anvil.app/_/api/asset?path=src/rollo/sheet/types/rule/factories/style.js
+*/
+import { camel_to_kebab } from "@/rollo/tools/text/case.js";
+import { validate } from "@/rollo/sheet/types/rule/tools/validate.js";
 
 export const style = (parent, config, ...factories) => {
   return class extends parent {
@@ -47,7 +52,9 @@ export const style = (parent, config, ...factories) => {
             delete this.__dict__.current[key];
           }
         } else {
-          /* Ensure that value is a string */
+          /* Ensure that value is a string 
+          NOTE
+          - null is translated into 'none' */
           const value = _value === null ? "none" : String(_value);
           if (this.__dict__.current[key] !== value) {
             /* Update rule */

@@ -1,9 +1,16 @@
-// import { remove } from "@/rollo/tools/sheet/tools/remove";
-// const { remove } = await import("@/rollo/tools/sheet/tools/remove");
+/* 
+20250303
+src/rollo/sheet/tools/remove.js
+https://testapp8dev.anvil.app/_/api/asset?path=src/rollo/sheet/tools/remove.js
+import { remove } from "rollo/sheet/tools/remove.js";
+const { remove } = await import("rollo/sheet/tools/remove.js");
+*/
 
-import { index } from "@/rollo/sheet/tools/index";
+import { index } from "rollo/sheet/tools/index.js";
 
-/*  */
+/* Removes rule from container by search function. Returns container
+NOTE
+- Intended for use with non-Sheet sheets. */
 export const remove = (container, search) => {
   if (container instanceof CSSKeyframesRule) {
     if (container.findRule(search)) {
@@ -15,6 +22,5 @@ export const remove = (container, search) => {
       container.deleteRule(i);
     }
   }
-
   return container;
 };

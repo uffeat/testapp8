@@ -1,7 +1,7 @@
-//import { Colors } from '@/components/pages/colors';
+//import { Colors } from '@/components/pages/colors.js';
 
-import { component } from "rollo/component/component";
-import { Nav } from "@/rolloui/components/nav";
+import { component } from "rollo/component/component.js";
+import { Nav } from "@/rolloui/components/nav.js";
 
 let color = 'pink'
 
@@ -17,7 +17,7 @@ export const Colors = () => {
     component.a("nav-link", { detail: "cornsilk" }, "Corn")
   );
 
-  nav.active.effects.add(({ current }) => {
+  nav.effects.add(({ current }) => {
     if (current) {
       self.update({ backgroundColor: current.detail });
       color = current.detail;
@@ -26,7 +26,7 @@ export const Colors = () => {
 
   if (color) {
     const link = nav.find(`[detail="${color}"]`);
-    nav.active.update(link);
+    nav.state.update(link);
   }
 
   return self;

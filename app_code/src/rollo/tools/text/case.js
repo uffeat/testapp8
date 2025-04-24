@@ -1,5 +1,5 @@
-// import { camel_to_kebab } from "@/rollo/tools/text/case";
-// const { camel_to_kebab } = await import("@/rollo/tools/text/case");
+// import { camel_to_kebab } from "@/rollo/tools/text/case.js";
+// const { camel_to_kebab } = await import("@/rollo/tools/text/case.js");
 
 export function camel_to_kebab(camel) {
   /* NOTE Digits are treated as lower-case characters, 

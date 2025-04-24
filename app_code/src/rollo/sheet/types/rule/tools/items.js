@@ -1,3 +1,8 @@
+/* 
+20250302 
+src/rollo/sheet/types/rule/tools/items.js
+https://testapp8dev.anvil.app/_/api/asset?path=src/rollo/sheet/types/rule/tools/items.js
+*/
 export function get(rule) {
   const items = {};
   const style = rule.style;

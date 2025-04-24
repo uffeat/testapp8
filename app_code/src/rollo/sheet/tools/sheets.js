@@ -1,10 +1,19 @@
-import { adopt, unadopt } from "@/rollo/sheet/tools/target";
+/* 
+20250303
+src/rollo/sheet/tools/sheets.js
+https://testapp8dev.anvil.app/_/api/asset?path=src/rollo/sheet/tools/sheets.js
+import { Sheets, SheetsType } from "rollo/sheet/tools/sheets.js";
+const { Sheets, SheetsType } = await import("rollo/sheet/tools/sheets.js");
+*/
+
+import { adopt, unadopt } from "rollo/sheet/tools/target.js";
 
 /* Returns SheetType instance. */
 export function Sheets(target) {
   return new SheetsType(target);
 }
 
+/* Controller for managing sheets for a given target. */
 export class SheetsType {
   #registry = new Set();
   #target;

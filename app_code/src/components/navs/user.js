@@ -1,7 +1,7 @@
-//import { UserNav } from '@/components/navs/user'
+//import { UserNav } from '@/components/navs/user.js'
 
-import { component } from "rollo/component/component";
-import { Nav } from "@/rolloui/components/nav";
+import { component } from "rollo/component/component.js";
+import { Nav } from "@/rolloui/components/nav.js";
 
 const style = {
   minWidth: "4rem",
