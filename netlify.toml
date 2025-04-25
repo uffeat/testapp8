@@ -1,3 +1,6 @@
 [[redirects]]
   from = "/stuff"
   to = "/"
+
+[dev]
+  functions = "netlify/functions"

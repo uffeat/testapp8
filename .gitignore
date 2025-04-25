@@ -36,3 +36,5 @@ TODO.md
 TODO.txt
 
 # git rm -r --cached dist
+# Local Netlify folder
+.netlify
