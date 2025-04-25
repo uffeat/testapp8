@@ -2,3 +2,6 @@
   from = "/stuff"
   to = "/"
 
+[dev]
+  # point the CLI at the same functions folder
+  functions = "app_code/netlify/functions"
