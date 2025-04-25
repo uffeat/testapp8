@@ -13,3 +13,6 @@ const { component } = await modules.get("@/rollo/component/component.js");
 const { Check } = await modules.get("@/rolloui/components/form/check.js");
 
 document.body.append(Check());
+
+const response = await fetch('/.netlify/functions/foo');
+console.log(await response.text())
