@@ -2,12 +2,5 @@
   from = "/stuff"
   to = "/"
 
-[build]
-  base      = "app_code"                         # where your Vite project lives
-  functions = "app_code/netlify/functions"       # production functions path
-
 [dev]
-  command    = "npm run dev"                     # how to start Vite locally
-  port       = 8888                              # where Netlify Dev will listen
-  targetPort = 5173                              # where Vite itself runs (default Vite port)
-  functions  = "app_code/netlify/functions"      # point the CLI at your functions
+  functions  = "app_code/netlify/functions"
