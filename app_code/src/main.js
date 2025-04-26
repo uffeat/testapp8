@@ -15,7 +15,7 @@ document.body.append(Check());
 console.dir(location);
 
 if (["testapp8.vercel.app", "localhost:3000"].includes(location.host)) {
-  const response = await fetch("api/foo");
+  const response = await fetch("/api/foo");
   console.log(await response.text());
 }
 
