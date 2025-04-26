@@ -15,8 +15,8 @@ document.body.append(Check());
 
 
 if (["testapp8.vercel.app", "localhost:3000"].includes(location.host)) {
- 
   console.log(await (await fetch("/api/foo")).text());
+  console.log(await (await fetch("/api/bar")).text());
 }
 
 
