@@ -16,6 +16,8 @@ document.body.append(Check());
 if (["testapp8.vercel.app"].includes(location.host)) {
   console.log(await (await fetch("/api/foo")).text());
   console.log(await (await fetch("/api/bar")).text());
+  console.log(await (await fetch("/api/stuff")).text());
+  console.log(await (await fetch("/api/stuff/thing")).text());
 }
 
 
