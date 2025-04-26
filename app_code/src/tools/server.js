@@ -8,13 +8,16 @@ const { server } = await import("@/tools/server");
 
 import origins from "@/meta/origins.js";
 
+/* TODO
+- Use vite env instead
+ */
 
 const api_origin = `${["localhost", "127.0.0.1"].includes(window.location.hostname)
     ? origins.development
     : `https://${window.parent.location.hostname}`
   }/_/api`;
 
-// "/_/api"
+
 const options = {
   headers: { "content-type": "text/plain" },
   method: "POST",
