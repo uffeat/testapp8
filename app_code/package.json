@@ -17,6 +17,7 @@
     "hint": "^2.0.0",
     "netlify-cli": "^20.0.4",
     "sass": "^1.81.0",
+    "vercel": "^41.6.2",
     "vite": "^6.3.2"
   },
   "dependencies": {
