@@ -14,6 +14,7 @@ const { Check } = await modules.get("@/rolloui/components/form/check.js");
 
 document.body.append(Check());
 
+console.dir(location)
 
 const response = await fetch('api/foo');
 console.log(await response.text())
