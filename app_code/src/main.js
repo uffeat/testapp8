@@ -12,11 +12,11 @@ const { Check } = await modules.get("@/rolloui/components/form/check.js");
 
 document.body.append(Check());
 
-console.dir(location);
+
 
 if (["testapp8.vercel.app", "localhost:3000"].includes(location.host)) {
-  const response = await fetch("/api/foo");
-  console.log(await response.text());
+ 
+  console.log(await (await fetch("/api/foo")).text());
 }
 
 
