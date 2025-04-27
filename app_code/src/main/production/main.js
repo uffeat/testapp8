@@ -19,3 +19,5 @@ console.log(await (await fetch("/api/stuff/thing")).text());
 
 //const response = await fetch('/.netlify/functions/foo');
 //console.log(await response.text())
+
+console.log('This is new...')
