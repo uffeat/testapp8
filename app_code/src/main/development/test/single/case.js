@@ -2,7 +2,8 @@
 http://localhost:5173/@/test/single/case.js
 */
 
-const { camel_to_kebab } = await modules.get("@/rollo/tools/text/case.js")
+import { camel_to_kebab } from "@/rollo/tools/text/case.js";
+//const { camel_to_kebab } = await modules.get("@/rollo/tools/text/case.js")
 
 
 console.log('kebab:', camel_to_kebab('uffeArlo'))

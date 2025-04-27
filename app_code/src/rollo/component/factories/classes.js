@@ -5,7 +5,8 @@ https://testapp8dev.anvil.app/_/api/asset?path=src/rollo/component/factories/cla
 import { classes } from "rollo/component/factories/classes.js";
 */
 
-const { constants } = await modules.get("@/rollo/component/tools/constants.js");
+import { constants } from "@/rollo/component/tools/constants.js";
+//const { constants } = await modules.get("@/rollo/component/tools/constants.js");
 
 const { CSS_CLASS } = constants;
 

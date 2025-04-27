@@ -6,9 +6,11 @@ import { attribute } from "rollo/component/factories/attribute.js";
 */
 
 
+import { camel_to_kebab } from "@/rollo/tools/text/case.js";
+//const { camel_to_kebab } = await modules.get("@/rollo/tools/text/case.js");
+import { constants } from "@/rollo/component/tools/constants.js";
+//const { constants } = await modules.get("@/rollo/component/tools/constants.js");
 
-const { camel_to_kebab } = await modules.get("@/rollo/tools/text/case.js");
-const { constants } = await modules.get("@/rollo/component/tools/constants.js");
 
 const { ATTRIBUTE } = constants;
 

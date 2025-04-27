@@ -5,8 +5,10 @@ https://testapp8dev.anvil.app/_/api/asset?path=src/rollo/component/factories/dat
 import { data } from "rollo/component/factories/data.js";
 */
 
-const { camel_to_kebab } = await modules.get("@/rollo/tools/text/case.js");
-const { constants } = await modules.get("@/rollo/component/tools/constants.js");
+import { camel_to_kebab } from "@/rollo/tools/text/case.js";
+//const { camel_to_kebab } = await modules.get("@/rollo/tools/text/case.js");
+import { constants } from "@/rollo/component/tools/constants.js";
+//const { constants } = await modules.get("@/rollo/component/tools/constants.js");
 
 const { DATA } = constants;
 

@@ -5,7 +5,8 @@ https://testapp8dev.anvil.app/_/api/asset?path=src/rollo/component/factories/mix
 import { mixin } from "rollo/component/factories/mixin.js";
 */
 
-const { assign } = await modules.get("@/rollo/tools/assign.js");
+import { assign } from "@/rollo/tools/assign.js";
+//const { assign } = await modules.get("@/rollo/tools/assign.js");
 
 /* Special-case factory. */
 export const mixin = (parent, config, ...factories) => {

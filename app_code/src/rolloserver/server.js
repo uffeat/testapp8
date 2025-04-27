@@ -1,22 +1,8 @@
-/* 
-20250303
-src/tools/server.js
-https://testapp8dev.anvil.app/_/api/asset?path=src/tools/server.js
-import { server } from "@/tools/server";
-const { server } = await import("@/tools/server");
-*/
+import origins from "@/rolloserver/origins.js";
 
-import origins from "@/meta/origins.js";
-
-/* TODO
-- Use vite env instead
- */
-
-const api_origin = `${["localhost", "127.0.0.1"].includes(window.location.hostname)
-    ? origins.development
-    : `https://${window.parent.location.hostname}`
-  }/_/api`;
-
+const api_origin = `${
+  import.meta.env.DEV ? origins.development : origins.production
+}/_/api`;
 
 const options = {
   headers: { "content-type": "text/plain" },
@@ -53,7 +39,6 @@ export const server = new Proxy(
     },
   }
 );
-
 
 /* EXAMPLES
 

@@ -5,7 +5,8 @@ https://testapp8dev.anvil.app/_/api/asset?path=src/rollo/component/factories/han
 import { handlers } from "rollo/component/factories/handlers.js";
 */
 
-const { constants } = await modules.get("@/rollo/component/tools/constants.js");
+import { constants } from "@/rollo/component/tools/constants.js";
+//const { constants } = await modules.get("@/rollo/component/tools/constants.js");
 
 const { ON } = constants;
 

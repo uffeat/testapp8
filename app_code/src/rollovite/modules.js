@@ -1,14 +1,18 @@
 /* NOTE Do NOT import modules here that uses 'modules' */
 /* TODO
 - Integrate instead of import */
-import { import_, text_to_module } from "@/tools/module.js";
+import { import_, text_to_module } from "@/rollovite/module.js";
 
 /* TODO
+- Path - perhaps with native URLstuff
 - version of modules for static (in public)
 - test json
 - test non-vite loaders 
 - Python-like dot-syntax (optional) 
-- Build tool for processed imports */
+- Build tool for processed imports 
+- Perhaps externalize (in-module):
+  - Loaders
+  - Processors */
 
 class Path {
   #extension;
@@ -151,7 +155,7 @@ export const modules = new (class Modules {
 
     const [format, type, query] = this.#parse_path(path);
 
-    const extension = `${format}.${type}`;
+    const extension = format ? `${format}.${type}` : type;
 
     /* Reconstruct path without query */
     path = query ? path.slice(0, -(query.length + 1)) : path;
@@ -170,7 +174,7 @@ export const modules = new (class Modules {
       this.#cache[path] = result;
     } else {
       /* Construct loader key */
-      const key = query ? `${type}?${query}` : type;
+      const key = query ? `${extension}?${query}` : extension;
 
       const loader = this.#loaders.get(key);
       if (!loader) {
@@ -210,59 +214,5 @@ Object.defineProperty(window, "modules", {
   value: modules,
 });
 
-/* Set up support for Vite-native css import */
-modules.loaders.add("css", import.meta.glob("/src/rollo/**/*.css"));
 
-/* Set up support for import of css as text */
-modules.loaders.add(
-  "css?raw",
-  import.meta.glob("/src/**/*.css", {
-    import: "default",
-    query: "?raw",
-  })
-);
 
-/* Set up support for import of html as text */
-modules.loaders.add(
-  "html",
-  import.meta.glob("/src/**/*.html", {
-    import: "default",
-    query: "?raw",
-  })
-);
-
-/* Set up support for Vite-native js module import */
-modules.loaders.add("js", import.meta.glob("/src/**/*.js"));
-
-/* Set up support for Vite-native json import */
-modules.loaders.add("json", import.meta.glob("/src/**/*.json"));
-
-/* Set up support for import of js modules as text */
-modules.loaders.add(
-  "js?raw",
-  import.meta.glob("/src/**/*.js", {
-    import: "default",
-    query: "?raw",
-  })
-);
-
-/* */
-(() => {
-  const cache = {};
-  modules.processors.add("js.html", async (path, html) => {
-    if (path in cache) {
-      return cache[path];
-    }
-    const element = document.createElement("div");
-    element.innerHTML = html;
-
-    const result = await text_to_module(
-      element
-        .querySelector("template[script]")
-        .content.querySelector("script")
-        .textContent.trim()
-    );
-    cache[path] = result;
-    return result;
-  });
-})();

@@ -5,7 +5,8 @@ https://testapp8dev.anvil.app/_/api/asset?path=src/rollo/component/factories/pro
 import { props } from "rollo/component/factories/props.js";
 */
 
-const { constants } = await modules.get("@/rollo/component/tools/constants.js");
+import { constants } from "@/rollo/component/tools/constants.js";
+//const { constants } = await modules.get("@/rollo/component/tools/constants.js");
 
 const { CSS_VAR } = constants;
 

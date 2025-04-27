@@ -1,6 +1,7 @@
-const { component } = await modules.get("@/rollo/component/component.js");
-
-const { match } = await modules.get("@/rollo/tools/object/match.js");
+import { component } from "@/rollo/component/component.js";
+//const { component } = await modules.get("@/rollo/component/component.js");
+import { match } from "@/rollo/tools/object/match.js";
+//const { match } = await modules.get("@/rollo/tools/object/match.js");
 
 /* In-module error message to retain traceback */
 const error = (actual, expected) => {
