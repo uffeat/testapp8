@@ -1,6 +1,6 @@
 import { vercel } from "@/rollovercel/vercel.js";
 
-console.log('Vercel environment:', vercel.environment.NAME)
+console.log('Vercel environment name:', vercel.environment.NAME)
 console.log('Vercel url:', vercel.URL)
 
 /* NOTE Do NOT await import! */
