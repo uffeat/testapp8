@@ -8,10 +8,9 @@ import { component } from "@/rollo/component/component.js";
 import { Check } from "@/rolloui/components/form/check.js";
 //const { Check } = await modules.get("@/rolloui/components/form/check.js");
 
-console.info("Environment:", import.meta.env.MODE);
+console.info("Vite environment:", import.meta.env.MODE);
 
 document.querySelector("html").dataset.bsTheme = "dark";
-
 
 
 

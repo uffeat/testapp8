@@ -43,7 +43,7 @@ export const server = new Proxy(
 /* EXAMPLES
 
 await (async () => {
-  const { server } = await import("@/tools/server");
+  const { server } = await import("@/rolloserver/server");
 
   const data = {
     email: "name@company.com",
