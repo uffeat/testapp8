@@ -1,5 +1,7 @@
 import { vercel } from "@/rollovercel/vercel.js";
 
+console.log('A change called Rufus')
+
 console.log('Vercel environment name:', vercel.environment.NAME)
 console.log('Vercel url:', vercel.URL)
 
