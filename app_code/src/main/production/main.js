@@ -21,3 +21,5 @@ console.log(await (await fetch("/api/stuff/thing")).text());
 //console.log(await response.text())
 
 console.log('This is new...')
+
+console.log('Vercel url:', import.meta.env.VERCEL_URL)
