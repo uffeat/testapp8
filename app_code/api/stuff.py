@@ -1,19 +1,29 @@
 from flask import Flask, Response
+from werkzeug.middleware.dispatcher import DispatcherMiddleware
+from werkzeug.wrappers import Response as WsgiResponse
 
-app = Flask(__name__)
+##app = Flask(__name__)
+flask_app = Flask(__name__)
 
 
-@app.route("/")
+@flask_app.route("/")
 def stuff():
     return Response("From Vercel stuff", mimetype="text/plain")
 
 
 
 """
-@app.route("/thing")
+@flask_app.route("/thing")
 def thing():
     return Response("From Vercel thing", mimetype="text/plain")
 """
+
+app = DispatcherMiddleware(
+    WsgiResponse("Not Found", status=404),
+    {
+      "/api/stuff": flask_app
+    }
+)
 
 
 

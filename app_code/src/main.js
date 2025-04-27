@@ -1,4 +1,4 @@
-console.info("Vite environment:", import.meta.env.MODE);
+
 
 /* NOTE Do NOT await import! */
 if (import.meta.env.DEV) {

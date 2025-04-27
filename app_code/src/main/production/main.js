@@ -14,7 +14,7 @@ document.body.append(Check());
 
 console.log(await (await fetch("/api/foo")).text());
 console.log(await (await fetch("/api/bar")).text());
-//console.log(await (await fetch("/api/stuff")).text());
+console.log(await (await fetch("/api/stuff")).text());
 //console.log(await (await fetch("/api/stuff/thing")).text());
 
 //const response = await fetch('/.netlify/functions/foo');
