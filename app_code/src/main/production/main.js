@@ -13,7 +13,11 @@ document.body.append(Check());
 
 
 
-
+/* Enable triggering of tests.
+NOTE
+- These tests should be confined to features not available in Vite development, 
+  e.g., serverless functions. All other tests should be relegated to 
+  main/development/tests  */
 if (!vercel.environment.PRODUCTION) {
   /* Batch tests */
   (async () => {
