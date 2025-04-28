@@ -17,8 +17,6 @@ console.log(await (await fetch("/api/bar")).text());
 console.log(await (await fetch("/api/stuff")).text());
 console.log(await (await fetch("/api/stuff/thing")).text());
 
-//const response = await fetch('/.netlify/functions/foo');
-//console.log(await response.text())
 
 await (async () => {
   const { server } = await import("@/rolloanvil/server.js");

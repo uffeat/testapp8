@@ -19,21 +19,23 @@ document.body.append(Check());
 
 
 
-await (async () => {
-  const { server } = await import("@/rolloanvil/server.js");
+window.addEventListener("keydown", async (event) => {
+  if (event.code === "KeyT" && event.shiftKey) {
+    const loaders = import.meta.glob("/src/main/development/tests/**/*.test.js");
 
-  const data = {
-    email: "name@company.com",
-    score: 8,
-    accept: true,
-    bar: null,
-    stuff: false,
-  };
-  
-  const result = await server.foo(data);
-  console.log("result:", result);
-  
-  const raw = await server.foo(data, { raw: true });
-  console.log("raw:", raw);
-  
-})();
+    for (const [path, load] of Object.entries(loaders)) {
+      const module = await load();
+
+      let count = 0;
+      const tests = Object.values(module);
+      for (const test of tests) {
+        count++;
+        test();
+      }
+      console.info(`Test ran in '${path}':`, count);
+    }
+  }
+});
+
+
+

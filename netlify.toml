@@ -1,6 +1,0 @@
-[[redirects]]
-  from = "/stuff"
-  to = "/"
-
-[dev]
-  functions  = "app_code/netlify/functions"

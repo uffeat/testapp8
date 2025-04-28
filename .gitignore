@@ -7,8 +7,6 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-
-
 # Vite defaults: Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -26,17 +24,16 @@ dist
 dist-ssr
 *.local
 
+# Vercel stuff
+.vercel
 
 # Custom
+_notes/
 _server_code/
 _scratch_code/
-NOTES.md
-NOTES.txt
-TODO.md
-TODO.txt
 
-# git rm -r --cached dist
-# Local Netlify folder
-.netlify
 
-.vercel
+
+
+
+

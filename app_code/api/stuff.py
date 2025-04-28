@@ -11,22 +11,11 @@ def stuff():
     return Response("From Vercel stuff", mimetype="text/plain")
 
 
-
-
 @flask_app.route("/thing")
 def thing():
     return Response("From Vercel thing", mimetype="text/plain")
 
 
 app = DispatcherMiddleware(
-    WsgiResponse("Not Found", status=404),
-    {
-      "/api/stuff": flask_app
-    }
+    WsgiResponse("Not Found", status=404), {"/api/stuff": flask_app}
 )
-
-
-
-
-
-

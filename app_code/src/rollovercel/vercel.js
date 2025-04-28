@@ -7,7 +7,11 @@ export const vercel = new (class Vercel {
       - Vercel's 'preview' corresponds to the GitHub repo's 'development' branch, 
         while Vercel's 'development' pertains to Vercel's dev server.
         This naming mismatch is not elegant, but is not critical.
-        Could be corrected by renaming the GitHub repo's 'development' branch. */
+        Could be corrected by 
+        - in this util, purge the PREVIEW prop and redefine the DEVELOPMENT prop, 
+          so that is actually reflects Vercel's "preview"
+        OR
+        - renaming the GitHub repo's 'development' branch. */
 
 
       /* Returns development environment flag. */

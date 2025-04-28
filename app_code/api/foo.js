@@ -1,4 +1,4 @@
-export default function handler(req, res) {
-  // you can inspect req.query, req.body, headers, etc.
-  res.status(200).send('From Vercel foo');
+export default function handler(request, response) {
+  // you can inspect request.query, request.body, headers, etc.
+  response.status(200).send('From Vercel foo');
 }
