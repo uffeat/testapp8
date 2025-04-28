@@ -17,7 +17,7 @@ async function Server(name, data = {}, { raw = false } = {}) {
   }
   options.body = JSON.stringify(data);
   /* NOTE
-  - Add the submission query item not only provides useful meta data, 
+  - Adding the submission query item not only provides useful meta data, 
     but also ensures busting of any silent browser caching. */
   const response = await fetch(`${api_origin}/${name}?${SUBMISSION}=${create_submission()}`, options);
   if (raw) {
