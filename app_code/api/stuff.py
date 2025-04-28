@@ -8,12 +8,12 @@ flask_app = Flask(__name__)
 
 @flask_app.route("/")
 def stuff():
-    return Response("From Vercel stuff", mimetype="text/plain")
+    return Response("STUFF", mimetype="text/plain")
 
 
 @flask_app.route("/thing")
 def thing():
-    return Response("From Vercel thing", mimetype="text/plain")
+    return Response("THING", mimetype="text/plain")
 
 
 app = DispatcherMiddleware(

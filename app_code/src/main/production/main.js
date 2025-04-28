@@ -12,9 +12,7 @@ document.querySelector("html").dataset.bsTheme = "dark";
 document.body.append(Check());
 
 
-console.log(await (await fetch("/api/bar")).text());
-console.log(await (await fetch("/api/stuff")).text());
-console.log(await (await fetch("/api/stuff/thing")).text());
+
 
 if (!vercel.environment.PRODUCTION) {
   /* Batch tests */

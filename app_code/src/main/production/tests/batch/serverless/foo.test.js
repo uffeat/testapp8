@@ -8,12 +8,11 @@ const error = (actual, expected) => {
 };
 
 export const test = async (unit_test) => {
-  const actual = await (await fetch("/api/foo")).text()
-  const expected = 'FOO'
+  const actual = await (await fetch("/api/foo")).text();
+  const expected = "FOO";
   if (actual !== expected) {
-    error(actual, expected)
+    error(actual, expected);
   } else if (unit_test) {
-    console.log('Success!')
+    console.log("Success!");
   }
-
-}
+};
