@@ -1,19 +1,25 @@
 import { anvil } from "@/rolloanvil/anvil.js";
 
 const api_origin = `${anvil.URL}/_/api`;
-
 const options = {
   headers: { "content-type": "text/plain" },
   method: "POST",
 };
+const SUBMISSION = 'submission'
 
 /* Returns result from server endpoint. 
 NOTE
 - raw -> Result as text, no error check.
 */
 async function Server(name, data = {}, { raw = false } = {}) {
+  if (SUBMISSION in data) {
+    throw new Error(`'${SUBMISSION}' is a reserved word.`)
+  }
   options.body = JSON.stringify(data);
-  const response = await fetch(`${api_origin}/${name}`, options);
+  /* NOTE
+  - Adding the submission query item not only provides useful meta data, 
+    but also ensures busting of any silent browser caching. */
+  const response = await fetch(`${api_origin}/${name}?${SUBMISSION}=${create_submission()}`, options);
   if (raw) {
     return response.text();
   }
@@ -37,6 +43,11 @@ export const server = new Proxy(
     },
   }
 );
+
+const create_submission = (() => {
+  let submission = 0
+  return () => submission++
+})();
 
 /* EXAMPLES
 
