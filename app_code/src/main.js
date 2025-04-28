@@ -1,12 +1,13 @@
 import { vercel } from "@/rollovercel/vercel.js";
+import { anvil } from "@/rolloanvil/anvil.js";
 
-console.log('A change...')
+
 
 console.log('Vercel environment name:', vercel.environment.NAME)
 console.log('Vercel url:', vercel.URL)
+console.log('Anvil url:', anvil.URL)
 
 /* NOTE Do NOT await import! */
-/* Make a clean distinction between development and production Vite envs */
 if (import.meta.env.DEV) {
   import("@/main/development/main.js");
 } else {
