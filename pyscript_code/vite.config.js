@@ -2,23 +2,29 @@ import { defineConfig } from "vite";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 
-/* Create __dirname to help aliases work reliably */
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-export default defineConfig(({ mode }) => {
-  return {
-    /* Set base URL for dev and production */
-    base: mode === "production" ? "./" : "/",
-    build: {
-      /* Enable manifest.json generation */
-      manifest: true, //
-      /* Enable features like top-level await, async imports, and smaller output */
-      target: "es2022",
+export default defineConfig({
+  build: {
+    lib: {
+      entry: resolve(__dirname, "src/index.js"),
+      name: "PyScriptRuntime",
+      fileName: (format) => `pyscript-runtime.${format}.js`,
+      formats: ["es"],
     },
-    resolve: {
-      alias: {
-        "@": resolve(__dirname, "src"),
+    target: "es2022",
+    manifest: false,
+    rollupOptions: {
+      external: [],
+      output: {
+        globals: {},
+        inlineDynamicImports: true,
       },
     },
-  };
+  },
+  resolve: {
+    alias: {
+      "@": resolve(__dirname, "src"),
+    },
+  },
 });
