@@ -1,4 +1,3 @@
-import origins from "@/rolloanvil/origins.js";
 import { anvil } from "@/rolloanvil/anvil.js";
 
 const api_origin = `${anvil.URL}/_/api`;
