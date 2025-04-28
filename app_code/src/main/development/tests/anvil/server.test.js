@@ -1,3 +1,7 @@
+/*
+anvil/server
+*/
+
 import { server } from "@/rolloanvil/server.js";
 
 export const test = async () => {

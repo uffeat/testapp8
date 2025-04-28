@@ -1,7 +1,9 @@
+/*
+batch/rollo/component/attribute
+*/
+
 import { component } from "@/rollo/component/component.js";
-//const { component } = await modules.get("@/rollo/component/component.js");
 import { match } from "@/rollo/tools/object/match.js";
-//const { match } = await modules.get("@/rollo/tools/object/match.js");
 
 /* In-module error message to retain traceback */
 const error = (actual, expected) => {
@@ -9,19 +11,25 @@ const error = (actual, expected) => {
 };
 
 /* Does event capture change? */
-export const event_capture = () => {
+export const event_capture = (unit_test) => {
   const expected = { name: "foo", current: "FOO", previous: null }; ////
 
   const button = component.button();
   button.on.attribute = (event) => {
     const actual = event.detail;
-    if (!match(actual, expected)) error(actual, expected);
+    if (!match(actual, expected)) {
+      error(actual, expected)
+    } else {
+      if (unit_test) {
+        console.log('Success!')
+      }
+    }
   };
   button.attribute.foo = "FOO";
 };
 
 /* Does event only fire, when change? */
-export const event_fire = () => {
+export const event_fire = (unit_test) => {
   let actual = 0;
   const expected = 2;
 
@@ -29,7 +37,13 @@ export const event_fire = () => {
   button.on.attribute = (event) => {
     actual++;
     if (button.attribute.foo === "STOP") {
-      if (actual !== expected) error(actual, expected);
+      if (actual !== expected) {
+        error(actual, expected)
+      } else {
+        if (unit_test) {
+          console.log('Success!')
+        }
+      }
     }
   };
   button.attribute.foo = "FOO";
