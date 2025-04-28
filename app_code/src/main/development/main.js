@@ -16,3 +16,24 @@ document.querySelector("html").dataset.bsTheme = "dark";
 
 
 document.body.append(Check());
+
+
+
+await (async () => {
+  const { server } = await import("@/rolloanvil/server.js");
+
+  const data = {
+    email: "name@company.com",
+    score: 8,
+    accept: true,
+    bar: null,
+    stuff: false,
+  };
+  
+  const result = await server.foo(data);
+  console.log("result:", result);
+  
+  const raw = await server.foo(data, { raw: true });
+  console.log("raw:", raw);
+  
+})();

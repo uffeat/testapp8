@@ -1,4 +1,4 @@
-import origins from "@/rolloserver/origins.js";
+import origins from "@/rolloanvil/origins.js";
 
 const api_origin = `${
   import.meta.env.DEV ? origins.development : origins.production

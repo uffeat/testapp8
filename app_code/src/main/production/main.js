@@ -20,5 +20,22 @@ console.log(await (await fetch("/api/stuff/thing")).text());
 //const response = await fetch('/.netlify/functions/foo');
 //console.log(await response.text())
 
-console.log('This is new...')
+await (async () => {
+  const { server } = await import("@/rolloanvil/server.js");
+
+  const data = {
+    email: "name@company.com",
+    score: 8,
+    accept: true,
+    bar: null,
+    stuff: false,
+  };
+  
+  const result = await server.foo(data);
+  console.log("result:", result);
+  
+  const raw = await server.foo(data, { raw: true });
+  console.log("raw:", raw);
+  
+})();
 
