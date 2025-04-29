@@ -20,7 +20,7 @@ const script = component.script({
 });
 const {promise, resolve} = Promise.withResolvers()
 script.onload = (event) => resolve()
-await promise
+//await promise
 console.dir(window)
 
 //
