@@ -14,6 +14,7 @@ const { Check } = await modules.get("@/rolloui/components/form/check.js");
 //
 //
 
+console.log('Loading Brython...')
 const script = component.script({
   parent: document.head,
   src: `${import.meta.env.BASE_URL}libs/brython/core.js`,
