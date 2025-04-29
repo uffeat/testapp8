@@ -1,7 +1,16 @@
 import { component } from "@/rollo/component/component.js";
 import { modules } from "@/rollovite/modules.js";
 
-console.log("Loading Brython...");
+console.info("Loading Brython...");
+
+/* Set up support for import of py files as text */
+modules.loaders.add(
+  "py",
+  import.meta.glob("/src/**/*.py", {
+    import: "default",
+    query: "?raw",
+  })
+);
 
 const iframe_window = await (async () => {
   /* Create iframe with Bryton stuff */

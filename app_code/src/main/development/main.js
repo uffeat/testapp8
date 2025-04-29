@@ -11,7 +11,20 @@ const { component } = await modules.get("@/rollo/component/component.js");
 const { Check } = await modules.get("@/rolloui/components/form/check.js");
 */
 
+//
 
+console.log('css:', await modules.get("@/rollo/foo/foo.css?raw"))////
+console.log((await modules.get("@/rollo/tools/text/case.js")).camel_to_kebab('uffeArlo'))////
+console.log('text:', await modules.get("@/rollo/tools/text/case.js?raw"))////
+console.log('html:', await modules.get("@/rollo/foo/foo.html"))////
+
+
+console.log('foo:', (await modules.get("@/rollo/foo/foo.js.html")).foo)////
+
+
+console.log("public foo:", (await modules.get("/foo.js")).foo); ////
+console.log("public html:", await modules.get("/foo.html")); ////
+//
 
 
 

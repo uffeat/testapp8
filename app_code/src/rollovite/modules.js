@@ -1,17 +1,17 @@
-/* NOTE Do NOT import modules here that uses 'modules' */
-/* TODO
-- Integrate instead of import */
-import { module } from "@/rollovite/module.js";
+/* NOTE Do NOT import modules that uses 'modules' here! */
+import { module } from "@/rollo/tools/module.js";
 
 const PUBLIC = "/";
-const SRC = '@/'
+const SRC = "@/";
 
 /* TODO
-- version of 'modules' for static (in public)
+- version of 'modules' for static (/public), so that html-files in /public 
+  can be run directly and use files from /src (that do not import npm-installed modules)
+  as well as import other files from /public.
 - test json
 - test non-vite loaders 
 - Python-like dot-syntax (optional) 
-- Build tool for processed imports 
+- Build tool for processed imports
 */
 
 /* Import utility.
@@ -33,80 +33,80 @@ NOTE
 - Can enable import from external code provided that
   - the 'modules' syntax is exclusively used in all involves files.
   - an external version of 'modules' is set up globally in the external code.   */
-  class Modules {
-    #cache = {};
-    #loaders;
-    #processors;
-  
-    constructor() {
-      this.#loaders = new Loaders();
-  
-      this.#processors = new Processors();
-    }
-  
-    /*  */
-    get loaders() {
-      return this.#loaders;
-    }
-  
-    /*  */
-    get processors() {
-      return this.#processors;
-    }
-  
-    /* Returns import. */
-    async get(specifier) {
-      const path = new Path(specifier);
-  
-      let result;
-      if (path.public) {
-        if (path.path in this.#cache) {
-          return this.#cache[path.path];
-        }
-        if (path.type === "js" && !query) {
-          result = await module.import(path.path);
-        } else {
-          const response = await fetch(path);
-          result = (await response.text()).trim();
-        }
-        this.#cache[path.path] = result;
+class Modules {
+  #cache = {};
+  #loaders;
+  #processors;
+
+  constructor() {
+    this.#loaders = new Loaders();
+    this.#processors = new Processors();
+  }
+
+  /* Returns controller for loaders.
+  - Typically uses with Vite's import.meta.glob, but can also be used for 
+    - manually-created module loaders
+    - "virtual module loaders" */
+  get loaders() {
+    return this.#loaders;
+  }
+
+  /* Returns controller for processors. */
+  get processors() {
+    return this.#processors;
+  }
+
+  /* Returns import result. */
+  async get(specifier) {
+    const path = new Path(specifier);
+    let result;
+    if (path.public) {
+      if (path.path in this.#cache) {
+        return this.#cache[path.path];
+      }
+      if (path.type === "js" && !path.query) {
+        result = await module.import(path.path);
       } else {
-        const loader = this.#loaders.get(path.type);
-        if (!loader) {
-          throw new Error(`Invalid loader key: ${path.type}`);
-        }
-        /* Get load function */
-        const load = loader[path.path];
-        if (!load) {
-          throw new Error(`Invalid path: ${path.path}`);
-        }
-        /* */
-        result = await load.call(this, { owner: this });
+        const response = await fetch(path);
+        result = (await response.text()).trim();
       }
-  
+      this.#cache[path.path] = result;
+    } else {
+      const key = path.query ? `${path.type}?${path.query}` : path.type;
+      const loader = this.#loaders.get(key);
+      if (!loader) {
+        throw new Error(`Invalid loader key: ${path.type}`);
+      }
+      /* Get load function */
+      const load = loader[path.path];
+      if (!load) {
+        throw new Error(`Invalid path: ${path.path}`);
+      }
       /* */
-      if (path.query) {
-        const processor = this.#processors.get(`${path.extension}?${path.query}`);
-        if (processor) {
-          await processor.call(this, path, result, { owner: this });
-        } else {
-          return result;
-        }
-      }
+      result = await load.call(this, { owner: this, path });
+    }
+    /* Perform any processing and resturn result */
+    const key = path.query ? `${path.extension}?${path.query}` : path.extension;
+    const processor = this.#processors.get(key);
+    if (processor) {
+      return await processor.call(this, path, result, { owner: this });
+    } else {
       return result;
     }
   }
-
-
-
+}
 
 /* Utils... */
 
-/*  */
+/* Util for managing loaders.  */
 class Loaders {
   #registry = new Map();
 
-  /*  */
+  /* Registers loader. 
+  NOTE
+  - Multiple loaders can be added in one-go (without the need to destructure 
+    into a single object).
+  - Method can be called multiple times without clearing registry. */
   add(key, ...loaders) {
     let registered = this.#registry.get(key);
     if (!registered) {
@@ -120,27 +120,27 @@ class Loaders {
     }
   }
 
-  /* Returns loaders for a given key.
+  /* Returns loaders as entries for a given key.
   NOTE
   - Primarily for debugging. */
   entries(key) {
     if (key) {
-      const registered = this.#registry.get(key)
+      const registered = this.#registry.get(key);
       if (registered) {
-        return Object.entries(registered)
+        return Object.entries(registered);
       }
-     
-      
     }
+    /* TODO
+    - If no key, return an amalgamation of all loaders */
   }
 
-  /*  */
+  /* Returns loader by key. */
   get(key) {
     return this.#registry.get(key);
   }
 }
 
-/*  */
+/* Util for parsing patch specifier.  */
 class Path {
   #extension;
   #format;
@@ -154,7 +154,7 @@ class Path {
     this.#specifier = specifier;
   }
 
-  /*  */
+  /* Returns extension (format and type). */
   get extension() {
     if (this.#extension === undefined) {
       const file = this.path.split("/").reverse()[0];
@@ -164,7 +164,7 @@ class Path {
     return this.#extension;
   }
 
-  /*  */
+  /* Returns format ("secondary file type"). */
   get format() {
     if (this.#format === undefined) {
       this.#format = this.extension.includes(".")
@@ -174,7 +174,7 @@ class Path {
     return this.#format;
   }
 
-  /*  */
+  /* Returns public flag (does the specifier pertain to /pulic?). */
   get public() {
     if (this.#public === undefined) {
       this.#public = this.#specifier.startsWith(PUBLIC);
@@ -195,17 +195,13 @@ class Path {
           PUBLIC.length
         )}`;
       } else if (this.#path.startsWith(SRC)) {
-        this.#path = `/src/${this.#path.slice(SRC.length)}`
+        this.#path = `/src/${this.#path.slice(SRC.length)}`;
       }
-
-
-
-      
     }
     return this.#path;
   }
 
-  /*  */
+  /* Returns any query key. */
   get query() {
     if (this.#query === undefined) {
       this.#query = this.#specifier.includes("?")
@@ -215,7 +211,7 @@ class Path {
     return this.#query;
   }
 
-  /*  */
+  /* Returns file type. */
   get type() {
     if (this.#type === undefined) {
       this.#type = this.extension.includes(".")
@@ -226,16 +222,23 @@ class Path {
   }
 }
 
-/*  */
+/* Util for managing processors  */
 class Processors {
   #registry = new Map();
 
-  /*  */
+  /* Adds processor. */
   add(key, processor) {
     this.#registry.set(key, processor);
   }
 
-  /*  */
+  /* Returns registered processors as entries.
+  NOTE
+  - Primarily for debugging. */
+  entries() {
+    return  this.#registry.entries()
+  }
+
+  /* Returns processor by key. */
   get(key) {
     return this.#registry.get(key);
   }
