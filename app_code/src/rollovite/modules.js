@@ -4,6 +4,7 @@
 import { module } from "@/rollovite/module.js";
 
 const PUBLIC = "/";
+const SRC = '@/'
 
 /* TODO
 - version of 'modules' for static (in public)
@@ -70,9 +71,9 @@ NOTE
         }
         this.#cache[path.path] = result;
       } else {
-        const loader = this.#loaders.get(path.extension);
+        const loader = this.#loaders.get(path.type);
         if (!loader) {
-          throw new Error(`Invalid loader key: ${path.extension}`);
+          throw new Error(`Invalid loader key: ${path.type}`);
         }
         /* Get load function */
         const load = loader[path.path];
@@ -116,6 +117,20 @@ class Loaders {
       for (const [path, load] of Object.entries(loader)) {
         registered[path] = load;
       }
+    }
+  }
+
+  /* Returns loaders for a given key.
+  NOTE
+  - Primarily for debugging. */
+  entries(key) {
+    if (key) {
+      const registered = this.#registry.get(key)
+      if (registered) {
+        return Object.entries(registered)
+      }
+     
+      
     }
   }
 
@@ -170,14 +185,22 @@ class Path {
   /* Returns specifier without query and, if public, adjusted with BASE_URL. */
   get path() {
     if (this.#path === undefined) {
+      /* Remove query */
       this.#path = this.query
         ? this.#specifier.slice(0, -(this.query.length + 1))
         : this.#specifier;
-      if (this.public) {
-        this.#path = `${import.meta.env.BASE_URL}${this.#specifier.slice(
+      /* Correct source */
+      if (this.#specifier.startsWith(PUBLIC)) {
+        this.#path = `${import.meta.env.BASE_URL}${this.#path.slice(
           PUBLIC.length
         )}`;
+      } else if (this.#path.startsWith(SRC)) {
+        this.#path = `/src/${this.#path.slice(SRC.length)}`
       }
+
+
+
+      
     }
     return this.#path;
   }
