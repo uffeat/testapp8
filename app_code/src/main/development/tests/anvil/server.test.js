@@ -18,6 +18,5 @@ export const test = async () => {
   
   const raw = await server.foo(data, { raw: true });
   console.log("raw:", raw);
-  
 }
 

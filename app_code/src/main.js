@@ -1,17 +1,14 @@
-import { component } from "@/rollo/component/component.js";
+import { modules } from "@/rollovite/modules.js";
 
+modules.loaders.add('js', import.meta.glob("/src/**/*.js"))
 
-import { brython } from "@/libs/brython/brython";
-
-
-/* Test */
-brython.run("print('Hello from Brython')");
-//
-//
 
 /* NOTE Do NOT await import! */
 if (import.meta.env.DEV) {
-  import("@/main/development/main.js");
+  //import("@/main/development/main.js");
+  modules.get("@/main/development/main.js")
+
 } else {
-  import("@/main/production/main.js");
+  //import("@/main/production/main.js");
+  modules.get("@/main/production/main.js")
 }
