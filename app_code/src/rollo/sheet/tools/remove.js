@@ -1,7 +1,5 @@
 /* 
 20250303
-src/rollo/sheet/tools/remove.js
-https://testapp8dev.anvil.app/_/api/asset?path=src/rollo/sheet/tools/remove.js
 import { remove } from "rollo/sheet/tools/remove.js";
 const { remove } = await import("rollo/sheet/tools/remove.js");
 */

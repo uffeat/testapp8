@@ -99,6 +99,11 @@ class Modules {
         ? `${path.extension}?${path.query}`
         : path.extension;
 
+        
+
+
+
+
       const loader = this.#loaders.get(key);
       if (!loader) {
         throw new Error(`Invalid loader key: ${key}`);
@@ -108,7 +113,7 @@ class Modules {
       if (!load) {
         throw new Error(`Invalid path: ${path.path}`);
       }
-
+      /* */
       result = await load.call(this, { owner: this, path });
     }
     /* Perform any processing and return result */

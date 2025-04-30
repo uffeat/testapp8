@@ -1,7 +1,5 @@
 /* 
 20250309
-src/rollo/sheet/tools/target.js
-https://testapp8dev.anvil.app/_/api/asset?path=src/rollo/sheet/tools/target.js
 import { adopt, has, is_target, unadopt } from "rollo/sheet/tools/target.js";
 const { adopt, has, is_target, unadopt } = await import("rollo/sheet/tools/target.js");
 */

@@ -1,7 +1,5 @@
 /* 
 20250302 
-src/rollo/sheet/sheet.js
-https://testapp8dev.anvil.app/_/api/asset?path=src/rollo/sheet/sheet.js
 import { Sheet } from "rollo/sheet/sheet.js";
 const { Sheet } = await import("rollo/sheet/sheet.js");
 */

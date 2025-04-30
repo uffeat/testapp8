@@ -29,18 +29,11 @@ modules.loaders.add(
   })
 );
 
-
-
-
-
 /* Set up support for Vite-native js module import */
 //modules.loaders.add("js", import.meta.glob("/src/**/*.js"));
 modules.loaders.add({
   js: import.meta.glob("/src/**/*.js"),
 });
-
-
-
 
 /* Set up support for Vite-native json import */
 modules.loaders.add("json", import.meta.glob("/src/**/*.json"));
@@ -98,10 +91,8 @@ export const test = async (unit_test) => {
   console.log("foo:", (await modules.get("@/rollo/foo/foo.js.html")).foo);
   console.log("public foo:", (await modules.get("/foo.js")).foo);
   console.log("public html:", await modules.get("/foo.html"));
-
   console.log("modules.loaders.has('js'):", modules.loaders.has("js"));
   console.log("modules.loaders.has('foo'):", modules.loaders.has("foo"));
-
   console.log(
     "modules.loaders.has('js', '@/rollo/foo/foo.js'):",
     modules.loaders.has("js", "@/rollo/foo/foo.js")

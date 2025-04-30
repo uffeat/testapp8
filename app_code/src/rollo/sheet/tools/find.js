@@ -1,7 +1,6 @@
 /* 
 20250303
 src/rollo/sheet/tools/find.js
-https://testapp8dev.anvil.app/_/api/asset?path=src/rollo/sheet/tools/find.js
 import { find } from "rollo/sheet/tools/find.js";
 const { find } = await import("rollo/sheet/tools/find.js");
 */

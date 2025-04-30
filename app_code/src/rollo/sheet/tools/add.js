@@ -1,7 +1,6 @@
 /* 
 20250303
 src/rollo/sheet/tools/add.js
-https://testapp8dev.anvil.app/_/api/asset?path=src/rollo/sheet/tools/add.js
 import { add } from "rollo/sheet/tools/add.js";
 const { add } = await import("rollo/sheet/tools/add.js");
 */
