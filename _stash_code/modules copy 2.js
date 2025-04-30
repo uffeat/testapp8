@@ -127,35 +127,20 @@ class Modules {
 class Loaders {
   #registry = new Map();
 
-  /* Registers loader(s). Chainable.
+  /* Registers loader. Chainable.
   NOTE
   - Multiple loaders can be added in one-go (without the need to destructure 
     into a single object).
-  - Multiple loaders for multiple keys can be added in one-go.
   - Method can be called multiple times without clearing registry. */
   add(key, ...loaders) {
-    const add = (key, ...loaders) => {
-      let registered = this.#registry.get(key);
-      if (!registered) {
-        registered = {};
-        this.#registry.set(key, registered);
-      }
-      for (const loader of loaders) {
-        for (const [path, load] of Object.entries(loader)) {
-          registered[path] = load;
-        }
-      }
-    };
-    if (typeof key === "string") {
-      add(key, ...loaders);
-    } else {
-      /* key assumed to be a spec object for multi-key registration */
-      for (const [_key, loader] of Object.entries(key)) {
-        if (Array.isArray(loader)) {
-          add(_key, ...loader);
-        } else {
-          add(_key, loader);
-        }
+    let registered = this.#registry.get(key);
+    if (!registered) {
+      registered = {};
+      this.#registry.set(key, registered);
+    }
+    for (const loader of loaders) {
+      for (const [path, load] of Object.entries(loader)) {
+        registered[path] = load;
       }
     }
     return this;
@@ -187,7 +172,7 @@ class Loaders {
   has(key, path) {
     const registered = this.#registry.get(key);
     if (path) {
-      path = new Path(path);
+      path = new Path(path)
       if (registered) {
         return path.path in registered;
       }
