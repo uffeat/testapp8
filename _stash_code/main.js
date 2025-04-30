@@ -43,7 +43,7 @@ document.body.append(Check());
 
 /* Single-file tests */
 (() => {
-  modules.loaders.add("test.js", import.meta.glob("/src/main/development/tests/**/*.test.js"));
+  const loaders = import.meta.glob("/src/main/development/tests/**/*.test.js");
 
   let path = "";
 
@@ -51,16 +51,11 @@ document.body.append(Check());
     if (event.code === "KeyU" && event.shiftKey) {
       path = prompt("Path:", path);
       if (path) {
-
-        const module = await modules.get(`@/main/development/tests/${path}.test.js`);
-
-
-
-        
-        
-
-
-
+        const load = loaders[`/src/main/development/tests/${path}.test.js`];
+        if (!load) {
+          throw new Error(`Invalid path: ${path}`);
+        }
+        const module = await load();
         const tests = Object.values(module);
         for (const test of tests) {
           test(true);

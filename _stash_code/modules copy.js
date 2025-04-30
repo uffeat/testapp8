@@ -76,10 +76,10 @@ class Modules {
       }
       this.#cache[path.path] = result;
     } else {
-      const key = path.query ? `${path.extension}?${path.query}` : path.extension;
+      const key = path.query ? `${path.type}?${path.query}` : path.type;
       const loader = this.#loaders.get(key);
       if (!loader) {
-        throw new Error(`Invalid loader key: ${key}`);
+        throw new Error(`Invalid loader key: ${path.type}`);
       }
       /* Get load function */
       const load = loader[path.path];
@@ -141,8 +141,6 @@ class Loaders {
   /* Returns loader by key. */
   get(key) {
     return this.#registry.get(key);
-    /* TODO
-    - If no key, return an amalgamation of all loaders */
   }
 }
 
