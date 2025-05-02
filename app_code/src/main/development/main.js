@@ -2,7 +2,7 @@
 import "@/bootstrap.scss";
 import "@/main.css";
 
-import { modules } from "@/rollovite/modules.js";
+//import { modules } from "@/rollovite/modules.js";
 
 import { component } from "@/rollo/component/component.js";
 import { Check } from "@/rolloui/components/form/check.js";
@@ -15,20 +15,15 @@ document.body.append(Check());
 
 /* Tests */
 await (async () => {
-  modules.loaders.add(
-    "test.js",
-    import.meta.glob("/src/main/development/tests/**/*.test.js")
-  );
+  const loaders = import.meta.glob("/src/main/development/tests/**/*.test.js");
 
   /* Batch tests */
   window.addEventListener("keydown", async (event) => {
     if (event.code === "KeyT" && event.shiftKey) {
       let count = 0;
 
-      for (const [path, load] of Object.entries(
-        modules.loaders.get("test.js")
-      )) {
-        if (!path.includes('/batch/')) continue
+      for (const [path, load] of Object.entries(loaders)) {
+        if (!path.includes("/batch/")) continue;
         const module = await load();
         const tests = Object.values(module);
         for (const test of tests) {
@@ -46,16 +41,16 @@ await (async () => {
     if (event.code === "KeyU" && event.shiftKey) {
       path = prompt("Path:", path);
       if (path) {
-        const module = await modules.get(
-          `@/main/development/tests/${path}.test.js`
-        );
+        const load = loaders[`/src/main/development/tests/${path}.test.js`];
+        if (!load) {
+          throw new Error(`Invalid path: ${path}`)
+        }
+        const module = await load();
         const tests = Object.values(module);
         for (const test of tests) {
-          test(true);
+          await test(true);
         }
       }
     }
   });
 })();
-
-
