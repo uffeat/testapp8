@@ -84,8 +84,8 @@ class Modules {
     const path = new Path(specifier);
     let result;
     if (path.public) {
-      if (specifier in this.#cache) {
-        return this.#cache[specifier];
+      if (path.path in this.#cache) {
+        return this.#cache[path.path];
       }
       if (path.type === "js" && !path.query) {
         result = await module.import(path.path);
@@ -93,7 +93,7 @@ class Modules {
         const response = await fetch(path);
         result = (await response.text()).trim();
       }
-      this.#cache[specifier] = result;
+      this.#cache[path.path] = result;
     } else {
       const key = path.query
         ? `${path.extension}?${path.query}`
@@ -135,6 +135,7 @@ class Loaders {
   - Multiple loaders for multiple keys can be added in one-go.
   - Method can be called multiple times without clearing registry. */
   add(key, ...loaders) {
+    
     const add = (key, ...loaders) => {
       let registered = this.#registry.get(key);
       if (!registered) {
@@ -147,6 +148,7 @@ class Loaders {
         }
       }
     };
+
     if (typeof key === "string") {
       add(key, ...loaders);
     } else {
@@ -162,7 +164,23 @@ class Loaders {
     return this;
   }
 
+  /* */
+  audit() {
+    const paths = new Set()
+    const duplicates = []
+
+    this.#registry.entries().forEach(([key, registered]) => Object.keys(registered).forEach((path) => {
+      if (paths.has(path)) {
+        duplicates.push(path)
+      }
+    }));
+
+
+
+  }
+
   /* Returns loaders as entries for a given key.
+  Returns an amalgamation of all loaders, if no key.
   NOTE
   - Primarily for debugging. */
   entries(key) {
@@ -172,8 +190,7 @@ class Loaders {
         return Object.entries(registered);
       }
     }
-    /* TODO
-    - If no key, return an amalgamation of all loaders */
+    return Array.from(this.#registry.values(), (registered) => Object.entries(registered));
   }
 
   /* Returns loader by key. */

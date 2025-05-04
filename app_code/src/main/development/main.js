@@ -36,15 +36,20 @@ await (async () => {
   });
 
   /* Unit (single-file) tests */
-  let path = "";
+  const UNIT_TEST = 'unit_test'
+  let path = localStorage.getItem(UNIT_TEST) || '';
   window.addEventListener("keydown", async (event) => {
     if (event.code === "KeyU" && event.shiftKey) {
+
+
       path = prompt("Path:", path);
       if (path) {
         const load = loaders[`/src/main/development/tests/${path}.test.js`];
         if (!load) {
-          throw new Error(`Invalid path: ${path}`)
+          throw new Error(`Invalid path: ${path}`);
         }
+        localStorage.setItem(UNIT_TEST, path);
+
         const module = await load();
         const tests = Object.values(module);
         for (const test of tests) {
