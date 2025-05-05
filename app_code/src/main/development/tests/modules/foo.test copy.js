@@ -9,7 +9,43 @@ import { component } from "@/rollo/component/component.js";
 
 const success = () => console.info("Success!");
 
+/* Set up support for import of css as text */
+modules.loaders.add(
+  "css?raw",
+  import.meta.glob("/src/main/development/tests/modules/foo/**/*.css", {
+    import: "default",
+    query: "?raw",
+  })
+);
 
+/* Set up support for import of html as text */
+modules.loaders.add(
+  "html",
+  import.meta.glob("/src/main/development/tests/modules/foo/**/*.html", {
+    import: "default",
+    query: "?raw",
+  })
+);
+
+/* Set up support for Vite-native js module import */
+modules.loaders.add({
+  js: import.meta.glob("/src/main/development/tests/modules/foo/**/*.js"),
+});
+
+/* Set up support for Vite-native json import */
+modules.loaders.add(
+  "json",
+  import.meta.glob("/src/main/development/tests/modules/foo/**/*.json")
+);
+
+/* Set up support for import of js modules as text */
+modules.loaders.add(
+  "js?raw",
+  import.meta.glob("/src/main/development/tests/modules/foo/**/*.js", {
+    import: "default",
+    query: "?raw",
+  })
+);
 
 /* Set up loader and processor to handle "js from html" */
 (() => {

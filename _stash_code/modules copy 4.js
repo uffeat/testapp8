@@ -135,6 +135,7 @@ class Loaders {
   - Multiple loaders for multiple keys can be added in one-go.
   - Method can be called multiple times without clearing registry. */
   add(key, ...loaders) {
+    
     const add = (key, ...loaders) => {
       let registered = this.#registry.get(key);
       if (!registered) {
@@ -164,17 +165,19 @@ class Loaders {
   }
 
   /* */
-  define(key, loaders) {
-    this.#registry.set(key, loaders);
+  audit() {
+    const paths = new Set()
+    const duplicates = []
+
+    this.#registry.entries().forEach(([key, registered]) => Object.keys(registered).forEach((path) => {
+      if (paths.has(path)) {
+        duplicates.push(path)
+      }
+    }));
+
+
 
   }
-
-  /* */
-  find() {}
-
-
-  /* */
-  freeze() {}
 
   /* Returns loaders as entries for a given key.
   Returns an amalgamation of all loaders, if no key.
@@ -187,15 +190,13 @@ class Loaders {
         return Object.entries(registered);
       }
     }
-    return Array.from(this.#registry.values(), (registered) =>
-      Object.entries(registered)
-    );
+    return Array.from(this.#registry.values(), (registered) => Object.entries(registered));
   }
 
   /* Returns loader by key. */
   get(key) {
     return this.#registry.get(key);
-    /* TODO... Perhaps...
+    /* TODO
     - If no key, return an amalgamation of all loaders */
   }
 
@@ -342,52 +343,3 @@ Object.defineProperty(window, "modules", {
   writable: false,
   value: modules,
 });
-
-
-/* Configure... */
-
-
-/* Set up support for Vite-native css import */
-modules.loaders.add({
-  css: import.meta.glob("/src/**/*.css"),
-});
-
-/* Set up support for import of css as text */
-modules.loaders.add(
-  "css?raw",
-  import.meta.glob("/src/**/*.css", {
-    import: "default",
-    query: "?raw",
-  })
-);
-
-/* Set up support for import of html as text */
-modules.loaders.add(
-  "html",
-  import.meta.glob("/src/**/*.html", {
-    import: "default",
-    query: "?raw",
-  })
-);
-
-/* Set up support for Vite-native js module import */
-modules.loaders.add({
-  js: import.meta.glob("/src/**/*.js"),
-});
-
-/* Set up support for import of js modules as text */
-modules.loaders.add(
-  "js?raw",
-  import.meta.glob("/src/**/*.js", {
-    import: "default",
-    query: "?raw",
-  })
-);
-
-/* Set up support for Vite-native json import */
-modules.loaders.add(
-  "json",
-  import.meta.glob("/src/**/*.json")
-);
-
-
