@@ -4,11 +4,6 @@ const PUBLIC = "/";
 const SRC = "@/";
 
 /* TODO
-- Optional Python-like dot-syntax
-  - Implement with proxies that build up an in-scope path specifier and returns
-    result once a file type (or similar is encountered).
-  - Handling of "secondary file types" and queries will require a special syntax
-    or a cleaver (perhaps timer-based) way to terminate the proxy process.
 - Build tool for processed imports
 */
 
@@ -177,7 +172,8 @@ class Modules {
   NOTE
   - By-passes Vite's barking at dynamic imports.
   - In contrast to the native 'import', 'import_' does (intentionally) NOT cache.
-    Any caching should be handled in consuming code. */
+    Any caching should be handled in consuming code.
+  - Unrelated to the public 'import' prop. */
   #import(url) {
     return new Function(`return import("${url}")`)();
   }
