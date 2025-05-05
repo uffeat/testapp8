@@ -6,8 +6,8 @@ const SRC = "@/";
 
 /* TODO
 - Version of 'modules' in external code (e.g., code in /public), so that 
-  html-files in external sources can be run 
-  directly (LiveServer) and use files from
+  html-files in external sources can be run directly (LiveServer) and use 
+  files from
   - the external source itself
   - /public 
   - /src, provided that these files
@@ -27,18 +27,6 @@ const SRC = "@/";
   - Handling of "secondary file types" and queries will require a special syntax
     or a cleaver (perhaps timer-based) way to terminate the proxy process.
 - Build tool for processed imports
-- Consider (NOT critical):
-  Awesomeness of fine-grained control and flexibility aside, could perhaps 
-  be simplied - not only to make 'modules' leaner, but PERHAPS also to
-  - mitigate the risk of redundant module mapping (especially, if this is done
-    in multiple decentralized places)
-  - mitigate any inconsistencies re 
-    - loader keys
-    - import.meta.glob paths
-    - path specifiers
-    - processors
-  These concerns do NOT pertain to bugs in 'modules' per se, but rather
-  robustness in the face of careless/incorrect use.
 */
 
 /* Import utility that
@@ -90,7 +78,7 @@ class Modules {
         return this.#cache[path.path];
       }
       if (path.type === "js" && !path.query) {
-        result = await module.import(path.path);
+        result = await this.#import(path.path);
       } else {
         const response = await fetch(path);
         result = (await response.text()).trim();
@@ -122,6 +110,10 @@ class Modules {
     } else {
       return result;
     }
+  }
+
+  #import(url) {
+    return new Function(`return import("${url}")`)();
   }
 }
 
