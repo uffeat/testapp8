@@ -126,7 +126,6 @@ class Modules {
 
 /* Util for managing loaders.  */
 class Loaders {
-  #frozen = new Set()
   #registry = new Map();
 
   /* Registers loader(s). Chainable.
@@ -137,9 +136,6 @@ class Loaders {
   - Method can be called multiple times without clearing registry. */
   add(key, ...loaders) {
     const add = (key, ...loaders) => {
-      if (this.#frozen.has(key)) {
-        throw new Error(`The key '${key}' has been frozen`)
-      }
       let registered = this.#registry.get(key);
       if (!registered) {
         registered = {};
@@ -168,18 +164,8 @@ class Loaders {
   }
 
   /* */
-  define(spec) {
-    for (const [key, loaders] of Object.entries(spec)) {
-      if (this.#frozen.has(key)) {
-        throw new Error(`The key '${key}' has been frozen`)
-      }
-      this.#registry.set(key, loaders);
-      this.#frozen.add(key)
-
-    }
-    //
-    
-    return this
+  define(key, loaders) {
+    this.#registry.set(key, loaders);
 
   }
 
@@ -375,7 +361,7 @@ modules.loaders.add(
   })
 );
 
-/* Support for import of html as text */
+/* Set up support for import of html as text */
 modules.loaders.add(
   "html",
   import.meta.glob("/src/**/*.html", {
@@ -384,22 +370,22 @@ modules.loaders.add(
   })
 );
 
-
-modules.loaders.define({
-  /* Support for Vite-native js module import */
+/* Set up support for Vite-native js module import */
+modules.loaders.add({
   js: import.meta.glob(["/src/**/*.js", "!/src/**/test.js"]),
-  /* Support for import of js modules as text */
-  "js?raw": import.meta.glob("/src/**/*.js", {
+});
+
+
+/* Set up support for import of js modules as text */
+modules.loaders.add(
+  "js?raw",
+  import.meta.glob("/src/**/*.js", {
     import: "default",
     query: "?raw",
   })
-})
+);
 
-
-
-
-
-/* Support for Vite-native json import */
+/* Set up support for Vite-native json import */
 modules.loaders.add(
   "json",
   import.meta.glob("/src/**/*.json")
