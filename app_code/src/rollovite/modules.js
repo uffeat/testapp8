@@ -5,7 +5,6 @@ const PUBLIC = "/";
 const SRC = "@/";
 
 /* TODO
-- 
 - Optional Python-like dot-syntax
   - Implement with proxies that build up an in-scope path specifier and returns
     result once a file type (or similar is encountered).
@@ -151,7 +150,7 @@ class Modules {
 
 /* Utils... */
 
-/* Util for managing loaders.  */
+/* Util for managing loaders. */
 class Loaders {
   #frozen = new Set();
   #registry = new Map();
