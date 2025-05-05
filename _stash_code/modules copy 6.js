@@ -407,17 +407,14 @@ modules.loaders.define({
   /* Vite-native js module import */
   js: import.meta.glob(["/src/**/*.js", "!/src/**/*.*.js"]),
   /* Import of js modules as text */
-  "js?raw": import.meta.glob(["/src/**/*.js", "!/src/**/*.*.js"], { import: "default", query: "?raw"}),
+  "js?raw": import.meta.glob("/src/**/*.js", {
+    import: "default",
+    query: "?raw",
+  }),
   /* Vite-native json import */
   json: import.meta.glob("/src/**/*.json"),
 });
 
 
 console.log(modules.loaders.has('js', '@/main/development/tests/modules/foo.test.js'))
-console.log(modules.loaders.has('js?raw', '@/main/development/tests/modules/foo.test.js'))
-
-
-
-
 console.log(modules.loaders.has('js', '@/rollo/tools/text/case.js'))
-console.log(modules.loaders.has('js?raw', '@/rollo/tools/text/case.js'))
