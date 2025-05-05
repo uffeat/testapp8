@@ -13,12 +13,15 @@ const success = () => console.info("Success!");
 
 /* Set up loader and processor to handle "js from html" */
 (() => {
-  modules.loaders.add(
-    "js.html",
-    import.meta.glob("/src/main/development/tests/modules/foo/**/*.js.html", {
+  modules.loaders.add({
+     "js.html": import.meta.glob("/src/main/development/tests/modules/foo/**/*.js.html", {
       import: "default",
       query: "?raw",
     })
+  }
+
+
+  
   );
   const cache = {};
   modules.processors.add("js.html", async (path, html) => {

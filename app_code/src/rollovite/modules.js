@@ -84,6 +84,7 @@ class Modules {
     const path = new Path(specifier);
     let result;
     if (path.public) {
+      /* Import from files in /public */
       if (path.path in this.#cache) {
         return this.#cache[path.path];
       }
@@ -95,6 +96,7 @@ class Modules {
       }
       this.#cache[path.path] = result;
     } else {
+      /* Import from files in /src */
       const key = path.query
         ? `${path.extension}?${path.query}`
         : path.extension;
@@ -126,7 +128,7 @@ class Modules {
 
 /* Util for managing loaders.  */
 class Loaders {
-  #frozen = new Set()
+  #frozen = new Set();
   #registry = new Map();
 
   /* Registers loader(s). Chainable.
@@ -135,33 +137,23 @@ class Loaders {
     into a single object).
   - Multiple loaders for multiple keys can be added in one-go.
   - Method can be called multiple times without clearing registry. */
-  add(key, ...loaders) {
-    const add = (key, ...loaders) => {
+  add(spec) {
+    for (const [key, loaders] of Object.entries(spec)) {
+      /* */
       if (this.#frozen.has(key)) {
-        throw new Error(`The key '${key}' has been frozen`)
+        throw new Error(`The key '${key}' has been frozen.`);
       }
+      /* */
       let registered = this.#registry.get(key);
       if (!registered) {
         registered = {};
         this.#registry.set(key, registered);
       }
-      for (const loader of loaders) {
-        for (const [path, load] of Object.entries(loader)) {
-          registered[path] = load;
-        }
-      }
-    };
 
-    if (typeof key === "string") {
-      add(key, ...loaders);
-    } else {
-      /* key assumed to be a spec object for multi-key registration */
-      for (const [_key, loader] of Object.entries(key)) {
-        if (Array.isArray(loader)) {
-          add(_key, ...loader);
-        } else {
-          add(_key, loader);
-        }
+      if (Array.isArray(loaders)) {
+        loaders.forEach((loaders) => Object.assign(registered, loaders));
+      } else {
+        Object.assign(registered, loaders);
       }
     }
     return this;
@@ -171,24 +163,22 @@ class Loaders {
   define(spec) {
     for (const [key, loaders] of Object.entries(spec)) {
       if (this.#frozen.has(key)) {
-        throw new Error(`The key '${key}' has been frozen`)
+        throw new Error(`The key '${key}' has been frozen`);
       }
       this.#registry.set(key, loaders);
-      this.#frozen.add(key)
-
+      this.#frozen.add(key);
     }
-    //
-    
-    return this
-
+    return this;
   }
 
   /* */
   find() {}
 
-
   /* */
-  freeze() {}
+  freeze(...keys) {
+    keys.forEach((key) => this.#frozen.add(key));
+    return this;
+  }
 
   /* Returns loaders as entries for a given key.
   Returns an amalgamation of all loaders, if no key.
@@ -357,52 +347,34 @@ Object.defineProperty(window, "modules", {
   value: modules,
 });
 
-
-/* Configure... */
-
-
-/* Set up support for Vite-native css import */
-modules.loaders.add({
-  css: import.meta.glob("/src/**/*.css"),
-});
-
-/* Set up support for import of css as text */
-modules.loaders.add(
-  "css?raw",
-  import.meta.glob("/src/**/*.css", {
-    import: "default",
-    query: "?raw",
-  })
-);
-
-/* Support for import of html as text */
-modules.loaders.add(
-  "html",
-  import.meta.glob("/src/**/*.html", {
-    import: "default",
-    query: "?raw",
-  })
-);
-
-
+/* Set up loaders */
 modules.loaders.define({
-  /* Support for Vite-native js module import */
-  js: import.meta.glob(["/src/**/*.js", "!/src/**/test.js"]),
-  /* Support for import of js modules as text */
+  /* Vite-native css import */
+  css: import.meta.glob("/src/**/*.css"),
+  /* Import of css as text */
+  "css?raw": import.meta.glob("/src/**/*.css", {
+    import: "default",
+    query: "?raw",
+  }),
+  /* Import of html as text */
+  html: import.meta.glob("/src/**/*.html", {
+    import: "default",
+    query: "?raw",
+  }),
+  /* Vite-native js module import */
+  
+  ////js: import.meta.glob(["/src/**/*.js", "!/src/**/test.js"]),
+
+  /* Import of js modules as text */
   "js?raw": import.meta.glob("/src/**/*.js", {
     import: "default",
     query: "?raw",
-  })
+  }),
+  /* Vite-native json import */
+  json: import.meta.glob("/src/**/*.json"),
+});
+
+
+modules.loaders.add({
+  js: [import.meta.glob(["/src/**/*.js", "!/src/**/test.js"])]
 })
-
-
-
-
-
-/* Support for Vite-native json import */
-modules.loaders.add(
-  "json",
-  import.meta.glob("/src/**/*.json")
-);
-
-
