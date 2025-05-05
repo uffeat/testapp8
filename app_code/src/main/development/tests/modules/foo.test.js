@@ -9,20 +9,17 @@ import { component } from "@/rollo/component/component.js";
 
 const success = () => console.info("Success!");
 
-
-
 /* Set up loader and processor to handle "js from html" */
 (() => {
   modules.loaders.add({
-     "js.html": import.meta.glob("/src/main/development/tests/modules/foo/**/*.js.html", {
-      import: "default",
-      query: "?raw",
-    })
-  }
-
-
-  
-  );
+    "js.html": import.meta.glob(
+      "/src/test/foo/**/*.js.html",
+      {
+        import: "default",
+        query: "?raw",
+      }
+    ),
+  });
   const cache = {};
   modules.processors.add({
     "js.html": async (path, html) => {
@@ -38,21 +35,13 @@ const success = () => console.info("Success!");
       );
       cache[path] = result;
       return result;
-    }
-  }
-    
-    
- 
-
-
-);
-
-
+    },
+  });
 })();
 
 export const test_raw_ccc = async (unit_test) => {
   const actual = await modules.get(
-    "@/main/development/tests/modules/foo/foo.css?raw"
+    "@/test/foo/foo.css?raw"
   );
   if (!actual.startsWith(".foo")) {
     console.error("Raw css did not import correctly!");
@@ -63,7 +52,7 @@ export const test_raw_ccc = async (unit_test) => {
 
 export const test_js = async (unit_test) => {
   const actual = (
-    await modules.get("@/main/development/tests/modules/foo/foo.js")
+    await modules.get("@/test/foo/foo.js")
   ).foo;
   const expected = "FOO";
   if (actual !== expected) {
@@ -75,7 +64,7 @@ export const test_js = async (unit_test) => {
 
 export const test_raw_js = async (unit_test) => {
   const actual = (
-    await modules.get("@/main/development/tests/modules/foo/foo.js?raw")
+    await modules.get("@/test/foo/foo.js?raw")
   ).trim();
   const expected = `export const foo = "FOO";`;
   if (actual !== expected) {
@@ -87,7 +76,7 @@ export const test_raw_js = async (unit_test) => {
 
 export const test_html = async (unit_test) => {
   const actual = (
-    await modules.get("@/main/development/tests/modules/foo/foo.html")
+    await modules.get("@/test/foo/foo.html")
   ).trim();
   const expected = `<h1>FOO</h1>`;
   if (actual !== expected) {
@@ -99,7 +88,7 @@ export const test_html = async (unit_test) => {
 
 export const test_json = async (unit_test) => {
   const actual = (
-    await modules.get("@/main/development/tests/modules/foo/foo.json")
+    await modules.get("@/test/foo/foo.json")
   ).default;
   const expected = { foo: "FOO" };
 
@@ -117,7 +106,7 @@ export const test_json = async (unit_test) => {
 
 export const test_js_html = async (unit_test) => {
   const actual = (
-    await modules.get("@/main/development/tests/modules/foo/foo.js.html")
+    await modules.get("@/test/foo/foo.js.html")
   ).foo;
   const expected = "FOO";
   if (actual !== expected) {
@@ -132,7 +121,7 @@ export const test_meta = (unit_test) => {
     const actual = modules.loaders.has("js");
     const expected = true;
     if (actual !== expected) {
-      console.error(`'modules.loaders.has("js")' failed!`);
+      console.error(`'modules.loaders.has()' failed!`);
     } else if (unit_test) {
       success();
     }
@@ -142,7 +131,7 @@ export const test_meta = (unit_test) => {
     const actual = modules.loaders.has("foo");
     const expected = false;
     if (actual !== expected) {
-      console.error(`'modules.loaders.has("foo")' failed!`);
+      console.error(`'modules.loaders.has()' failed!`);
     } else if (unit_test) {
       success();
     }
@@ -151,21 +140,17 @@ export const test_meta = (unit_test) => {
   (() => {
     const actual = modules.loaders.has(
       "js",
-      "@/main/development/tests/modules/foo/foo.js"
+      "@/test/foo/foo.js"
     );
     const expected = true;
     if (actual !== expected) {
       console.error(
-        `'modules.loaders.has("js", "@/main/development/tests/modules/foo/foo.js")' failed!`
+        `'modules.loaders.has()' failed!`
       );
     } else if (unit_test) {
       success();
     }
   })();
 
-
-  console.log(modules.loaders.entries())
-
-
-
+  console.log(modules.loaders.entries());
 };

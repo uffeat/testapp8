@@ -40,7 +40,7 @@ export const test = async (unit_test) => {
   if (!unit_test) return;
 
  
-  console.log("public foo:", (await modules.get("/foo.js")).foo);
-  console.log("public html:", await modules.get("/foo.html"));
+  console.log("public foo:", (await modules.get("/test/foo.js")).foo);
+  console.log("public html:", await modules.get("/test/foo.html"));
   
 };

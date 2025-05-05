@@ -67,9 +67,10 @@ class Modules {
   }
 
   /* Returns controller for loaders.
+  NOTE
   - Typically used with Vite's import.meta.glob, but can also be used for 
     - manually-created module loaders
-    - "virtual module loaders" */
+    - "virtual module loaders". */
   get loaders() {
     return this.#loaders;
   }
@@ -177,8 +178,6 @@ class Loaders {
     return this;
   }
 
- 
-
   /* Prevents future registration for one or more keys. Chainable. */
   freeze(...keys) {
     keys.forEach((key) => this.#frozen.add(key));
@@ -239,7 +238,7 @@ class Loaders {
   /* Returns number of load functions registered for a given key.
   Returns total number of registered load functions, if no key is provided.
   NOTE
-  - Primarily for debugging */
+  - Primarily for debugging. */
   size(key) {
     if (key) {
       const registered = this.#registry.get(key);
@@ -343,7 +342,7 @@ class Processors {
   #frozen = new Set();
   #registry = new Map();
 
-  /* Adds processor(s). Chainable. 
+  /* Adds one or more processors. Chainable. 
   NOTE
   - Processors for multiple keys can be added in one-go. */
   add(spec) {
@@ -378,6 +377,15 @@ class Processors {
   has(key) {
     return this.#registry.has(key);
   }
+
+  /* Returns number of processors registered.
+  NOTE
+  - Primarily for debugging. */
+  size() {
+    /* NOTE
+    - Implemented as method for consistency with respect to Loaders */
+    return this.#registry.size;
+  }
 }
 
 export const modules = new Modules();
@@ -390,35 +398,70 @@ Object.defineProperty(window, "modules", {
   value: modules,
 });
 
-/* Define loaders */
+/* Define production-relevant universal loaders 
+NOTE
+- Excludes files in src/main/development.
+- To keep lean and idiomatic, does NOT include files with secondary file 
+  type, except for css imports (to support .module.css). Such special formats 
+  should be handled decentralized and perhaps env-dependent. */
 modules.loaders.define({
-  /* Vite-native css import */
-  css: import.meta.glob("/src/**/*.css"),
-  /* Import of css as text */
-  "css?raw": import.meta.glob("/src/**/*.css", {
-    import: "default",
-    query: "?raw",
-  }),
+  /* Vite-native import of css, incl. css as text */
+  css: import.meta.glob(["/src/**/*.css", "!/src/main/development/**/*.*"]),
+  "css?raw": import.meta.glob(
+    ["/src/**/*.css", "!/src/**/*.*.*", "!/src/main/development/**/*.*"],
+    {
+      import: "default",
+      query: "?raw",
+    }
+  ),
   /* Import of html as text */
-  html: import.meta.glob("/src/**/*.html", {
-    import: "default",
-    query: "?raw",
-  }),
-  /* Vite-native js module import */
-  js: import.meta.glob(["/src/**/*.js", "!/src/**/*.*.js"]),
-  /* Import of js modules as text */
-  "js?raw": import.meta.glob(["/src/**/*.js", "!/src/**/*.*.js"], { import: "default", query: "?raw"}),
+  html: import.meta.glob(
+    ["/src/**/*.html", "!/src/**/*.*.*", "!/src/main/development/**/*.*"],
+    {
+      import: "default",
+      query: "?raw",
+    }
+  ),
+  /* Vite-native import of js as module and text */
+  js: import.meta.glob([
+    "/src/**/*.js",
+    "!/src/**/*.*.*",
+    "!/src/main/development/**/*.*",
+  ]),
+  "js?raw": import.meta.glob(
+    ["/src/**/*.js", "!/src/**/*.*.*", "!/src/main/development/**/*.*"],
+    { import: "default", query: "?raw" }
+  ),
   /* Vite-native json import */
-  json: import.meta.glob("/src/**/*.json"),
+  json: import.meta.glob([
+    "/src/**/*.json",
+    "!/src/**/*.*.*",
+    "!/src/main/development/**/*.*",
+  ]),
 });
 
-
 /* Test (purge) */
-console.log(modules.loaders.has('js', '@/main/development/tests/modules/foo.test.js'))
-console.log(modules.loaders.has('js?raw', '@/main/development/tests/modules/foo.test.js'))
+/* false */
+
+console.log(modules.loaders.has("html", "@/test/foo/foo.js.html"));
+console.log(
+  modules.loaders.has("js", "@/main/development/tests/modules/foo.test.js")
+);
+console.log(
+  modules.loaders.has("js?raw", "@/main/development/tests/modules/foo.test.js")
+);
+console.log(modules.loaders.has("js", "@/test/foo/foo.foo.js"));
+console.log(modules.loaders.has("json", "@/test/foo/foo.foo.json"));
+
+console.log("true...");
+/* true */
 
 
 
-
-console.log(modules.loaders.has('js', '@/rollo/tools/text/case.js'))
-console.log(modules.loaders.has('js?raw', '@/rollo/tools/text/case.js'))
+console.log(modules.loaders.has("css", "@/test/foo/foo.css"));
+console.log(modules.loaders.has("css", "@/test/foo/foo.module.css"));
+console.log(modules.loaders.has("css?raw", "@/test/foo/foo.css"));
+console.log(modules.loaders.has("html", "@/test/foo/foo.html"));
+console.log(modules.loaders.has("js", "@/test/foo/foo.js"));
+console.log(modules.loaders.has("js?raw", "@/test/foo/foo.js"));
+console.log(modules.loaders.has("json", "@/test/foo/foo.json"));
