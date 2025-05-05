@@ -414,3 +414,6 @@ modules.loaders.define({
   /* Vite-native json import */
   json: import.meta.glob("/src/**/*.json"),
 });
+
+
+console.log(modules.has('js', '@/main/development/tests/modules/foo.test.js'))
