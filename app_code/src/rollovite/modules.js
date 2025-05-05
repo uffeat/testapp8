@@ -372,8 +372,9 @@ modules.loaders.add(
 
 /* Set up support for Vite-native js module import */
 modules.loaders.add({
-  js: import.meta.glob("/src/**/*.js"),
+  js: import.meta.glob("/src/rollo/**/*.js"),
 });
+
 
 /* Set up support for import of js modules as text */
 modules.loaders.add(
