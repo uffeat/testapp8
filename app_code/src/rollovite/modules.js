@@ -131,7 +131,7 @@ class Loaders {
   #frozen = new Set();
   #registry = new Map();
 
-  /* Registers loader(s). Chainable.
+  /* Registers one or more loaders. Chainable.
   NOTE
   - Multiple loaders can be added in one-go (without the need to destructure 
     into a single object).
@@ -143,7 +143,6 @@ class Loaders {
       if (this.#frozen.has(key)) {
         throw new Error(`The key '${key}' has been frozen.`);
       }
-      /* */
       let registered = this.#registry.get(key);
       if (!registered) {
         registered = {};
@@ -159,7 +158,14 @@ class Loaders {
     return this;
   }
 
-  /* */
+  /* Registers and freezes one or more loaders. Chainable. 
+  NOTE
+  - A leaner and safer, but less flexible alternative to 'add'.
+    - Leaner because loaders are not copied, but stored directly.
+    - Safer, but less flexible because subsequent change attempts 
+      will throw an error.
+  - Use (instead of 'add'), when global reliability and consistency 
+    with respect to conventions are critical. */
   define(spec) {
     for (const [key, loaders] of Object.entries(spec)) {
       if (this.#frozen.has(key)) {
@@ -171,17 +177,16 @@ class Loaders {
     return this;
   }
 
-  /* */
-  find() {}
+ 
 
-  /* */
+  /* Prevents future registration for one or more keys. Chainable. */
   freeze(...keys) {
     keys.forEach((key) => this.#frozen.add(key));
     return this;
   }
 
   /* Returns loaders as entries for a given key.
-  Returns an amalgamation of all loaders, if no key.
+  Returns an amalgamation of all loaders as entries, if no key.
   NOTE
   - Primarily for debugging. */
   entries(key) {
@@ -190,17 +195,31 @@ class Loaders {
       if (registered) {
         return Object.entries(registered);
       }
+    } else {
+      return Array.from(this.#registry.values(), (registered) =>
+        Object.entries(registered)
+      );
     }
-    return Array.from(this.#registry.values(), (registered) =>
-      Object.entries(registered)
-    );
+  }
+
+  /* Prevents future registration for one or more keys. Chainable. */
+  freeze(...keys) {
+    keys.forEach((key) => this.#frozen.add(key));
+    return this;
   }
 
   /* Returns loader by key. */
   get(key) {
-    return this.#registry.get(key);
-    /* TODO... Perhaps...
-    - If no key, return an amalgamation of all loaders */
+    if (key) {
+      return this.#registry.get(key);
+    }
+    const result = {};
+    for (const registered of this.#registry.values()) {
+      for (const [path, load] of Object.entries(registered)) {
+        result[path] = load;
+      }
+    }
+    return Object.freeze(result);
   }
 
   /* Checks, if a loaders with a given key has been registered. 
@@ -215,6 +234,25 @@ class Loaders {
       return false;
     }
     return registered ? true : false;
+  }
+
+  /* Returns number of load functions registered for a given key.
+  Returns total number of registered load functions, if no key is provided.
+  NOTE
+  - Primarily for debugging */
+  size(key) {
+    if (key) {
+      const registered = this.#registry.get(key);
+      if (registered) {
+        return Object.keys(registered).length;
+      }
+    } else {
+      let result = 0;
+      this.#registry
+        .values()
+        .forEach((registered) => (result += Object.keys(registered).length));
+      return result;
+    }
   }
 }
 
@@ -302,20 +340,19 @@ class Path {
 
 /* Util for managing processors  */
 class Processors {
+  #frozen = new Set();
   #registry = new Map();
 
   /* Adds processor(s). Chainable. 
   NOTE
   - Processors for multiple keys can be added in one-go. */
-  add(key, processor) {
-    if (typeof key === "string") {
-      this.#registry.set(key, processor);
-    } else {
-      /* key assumed to be a spec object for multi-key registration */
-      for (const [_key, processor] of Object.entries(key)) {
-        this.#registry.set(_key, processor);
+  add(spec) {
+    Object.entries(spec).forEach(([key, processor]) => {
+      if (this.#frozen.has(key)) {
+        throw new Error(`The key '${key}' has been frozen`);
       }
-    }
+      this.#registry.set(key, processor);
+    });
     return this;
   }
 
@@ -324,6 +361,12 @@ class Processors {
   - Primarily for debugging. */
   entries() {
     return this.#registry.entries();
+  }
+
+  /* Prevents future registration for one or more keys. Chainable. */
+  freeze(...keys) {
+    keys.forEach((key) => this.#frozen.add(key));
+    return this;
   }
 
   /* Returns processor by key. */
@@ -347,7 +390,7 @@ Object.defineProperty(window, "modules", {
   value: modules,
 });
 
-/* Set up loaders */
+/* Define loaders */
 modules.loaders.define({
   /* Vite-native css import */
   css: import.meta.glob("/src/**/*.css"),
@@ -362,9 +405,7 @@ modules.loaders.define({
     query: "?raw",
   }),
   /* Vite-native js module import */
-  
-  ////js: import.meta.glob(["/src/**/*.js", "!/src/**/test.js"]),
-
+  js: import.meta.glob(["/src/**/*.js", "!/src/**/*.*.js"]),
   /* Import of js modules as text */
   "js?raw": import.meta.glob("/src/**/*.js", {
     import: "default",
@@ -373,8 +414,3 @@ modules.loaders.define({
   /* Vite-native json import */
   json: import.meta.glob("/src/**/*.json"),
 });
-
-
-modules.loaders.add({
-  js: [import.meta.glob(["/src/**/*.js", "!/src/**/test.js"])]
-})

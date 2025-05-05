@@ -24,20 +24,30 @@ const success = () => console.info("Success!");
   
   );
   const cache = {};
-  modules.processors.add("js.html", async (path, html) => {
-    if (path in cache) {
-      return cache[path];
+  modules.processors.add({
+    "js.html": async (path, html) => {
+      if (path in cache) {
+        return cache[path];
+      }
+      const element = component.div({ innerHTML: html });
+      const result = await module.from_text(
+        element
+          .querySelector("template[script]")
+          .content.querySelector("script")
+          .text.trim()
+      );
+      cache[path] = result;
+      return result;
     }
-    const element = component.div({ innerHTML: html });
-    const result = await module.from_text(
-      element
-        .querySelector("template[script]")
-        .content.querySelector("script")
-        .text.trim()
-    );
-    cache[path] = result;
-    return result;
-  });
+  }
+    
+    
+ 
+
+
+);
+
+
 })();
 
 export const test_raw_ccc = async (unit_test) => {
