@@ -132,6 +132,7 @@ class Modules {
       if (!load) {
         throw new Error(`Invalid path: ${path.path}`);
       }
+
       result = await load.call(this, { owner: this, path });
     }
     /* Perform any processing and return result */
@@ -164,6 +165,7 @@ class Loaders {
   - Method can be called multiple times without clearing registry. */
   add(spec) {
     for (const [key, loaders] of Object.entries(spec)) {
+      /* */
       if (this.#frozen.has(key)) {
         throw new Error(`The key '${key}' has been frozen.`);
       }
@@ -172,6 +174,7 @@ class Loaders {
         registered = {};
         this.#registry.set(key, registered);
       }
+
       if (Array.isArray(loaders)) {
         loaders.forEach((loaders) => Object.assign(registered, loaders));
       } else {
@@ -206,7 +209,22 @@ class Loaders {
     return this;
   }
 
-  
+  /* Returns loaders as entries for a given key.
+  Returns an amalgamation of all loaders as entries, if no key.
+  NOTE
+  - Primarily for debugging. */
+  entries(key) {
+    if (key) {
+      const registered = this.#registry.get(key);
+      if (registered) {
+        return Object.entries(registered);
+      }
+    } else {
+      return Array.from(this.#registry.values(), (registered) =>
+        Object.entries(registered)
+      );
+    }
+  }
 
   /* Prevents future registration for one or more keys. Chainable. */
   freeze(...keys) {
@@ -362,6 +380,13 @@ class Processors {
     return this;
   }
 
+  /* Returns registered processors as entries.
+  NOTE
+  - Primarily for debugging. */
+  entries() {
+    return this.#registry.entries();
+  }
+
   /* Prevents future registration for one or more keys. Chainable. */
   freeze(...keys) {
     keys.forEach((key) => this.#frozen.add(key));
@@ -440,3 +465,26 @@ modules.loaders.define({
   ]),
 });
 
+/* Test (purge) */
+/* false */
+
+console.log(modules.loaders.has("html", "@/test/foo/foo.js.html"));
+console.log(
+  modules.loaders.has("js", "@/main/development/tests/modules/foo.test.js")
+);
+console.log(
+  modules.loaders.has("js?raw", "@/main/development/tests/modules/foo.test.js")
+);
+console.log(modules.loaders.has("js", "@/test/foo/foo.foo.js"));
+console.log(modules.loaders.has("json", "@/test/foo/foo.foo.json"));
+
+console.log("true...");
+/* true */
+
+console.log(modules.loaders.has("css", "@/test/foo/foo.css"));
+console.log(modules.loaders.has("css", "@/test/foo/foo.module.css"));
+console.log(modules.loaders.has("css?raw", "@/test/foo/foo.css"));
+console.log(modules.loaders.has("html", "@/test/foo/foo.html"));
+console.log(modules.loaders.has("js", "@/test/foo/foo.js"));
+console.log(modules.loaders.has("js?raw", "@/test/foo/foo.js"));
+console.log(modules.loaders.has("json", "@/test/foo/foo.json"));

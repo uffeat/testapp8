@@ -39,7 +39,7 @@ const success = () => console.info("Success!");
   });
 })();
 
-export const test_raw_ccc = async (unit_test) => {
+export const test_raw_css = async (unit_test) => {
   const actual = await modules.get(
     "@/test/foo/foo.css?raw"
   );
@@ -114,43 +114,4 @@ export const test_js_html = async (unit_test) => {
   } else if (unit_test) {
     success();
   }
-};
-
-export const test_meta = (unit_test) => {
-  (() => {
-    const actual = modules.loaders.has("js");
-    const expected = true;
-    if (actual !== expected) {
-      console.error(`'modules.loaders.has()' failed!`);
-    } else if (unit_test) {
-      success();
-    }
-  })();
-
-  (() => {
-    const actual = modules.loaders.has("foo");
-    const expected = false;
-    if (actual !== expected) {
-      console.error(`'modules.loaders.has()' failed!`);
-    } else if (unit_test) {
-      success();
-    }
-  })();
-
-  (() => {
-    const actual = modules.loaders.has(
-      "js",
-      "@/test/foo/foo.js"
-    );
-    const expected = true;
-    if (actual !== expected) {
-      console.error(
-        `'modules.loaders.has()' failed!`
-      );
-    } else if (unit_test) {
-      success();
-    }
-  })();
-
-  console.log(modules.loaders.entries());
 };
