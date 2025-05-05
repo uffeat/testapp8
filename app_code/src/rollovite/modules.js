@@ -413,6 +413,7 @@ modules.loaders.define({
 });
 
 
+/* Test (purge) */
 console.log(modules.loaders.has('js', '@/main/development/tests/modules/foo.test.js'))
 console.log(modules.loaders.has('js?raw', '@/main/development/tests/modules/foo.test.js'))
 
