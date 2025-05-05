@@ -1,5 +1,4 @@
 export const module = new (class Module {
-
   /* Returns a JS module constructed from text. 
   NOTE
   - Any caching should be handled in consuming code. */
@@ -11,7 +10,6 @@ export const module = new (class Module {
     return module;
   }
 
-
   /* Returns promise resolved to JS module imported from url. 
   NOTE
   - By-passes Vite's barking at dynamic imports.
@@ -20,8 +18,4 @@ export const module = new (class Module {
   import(url) {
     return new Function(`return import("${url}")`)();
   }
-
-
 })();
-
-

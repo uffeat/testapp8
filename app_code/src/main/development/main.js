@@ -2,29 +2,25 @@
 import "@/bootstrap.scss";
 import "@/main.css";
 
-
-import { component } from "@/rollo/component/component.js";
-/*
-import { Check } from "@/rolloui/components/form/check.js";
-*/
-const { Check } = await modules.get("@/rolloui/components/form/check.js")
-
 console.info("Vite environment:", import.meta.env.MODE);
 
-document.querySelector("html").dataset.bsTheme = "dark";
 
-document.body.append(Check());
+
+const { foo } = await modules.import.public.test.foo.foo.js
+console.log('foo:', foo)
+
+const raw_foo = await modules.import.src.test.foo.foo.js$raw
+console.log('raw_foo:', raw_foo)
 
 /* Tests */
 await (async () => {
-  const loaders = import.meta.glob("/src/main/development/tests/**/*.test.js");
+  const test = new (class Test {
+    #loaders = import.meta.glob("/src/main/development/tests/**/*.test.js");
+    constructor() {}
 
-  /* Batch tests */
-  window.addEventListener("keydown", async (event) => {
-    if (event.code === "KeyT" && event.shiftKey) {
+    async batch() {
       let count = 0;
-
-      for (const [path, load] of Object.entries(loaders)) {
+      for (const [path, load] of Object.entries(this.#loaders)) {
         if (!path.includes("/batch/")) continue;
         const module = await load();
         const tests = Object.values(module);
@@ -35,29 +31,50 @@ await (async () => {
       }
       console.info(`Invoked ${count} test functions.`);
     }
-  });
 
-  /* Unit (single-file) tests */
-  const UNIT_TEST = 'unit_test'
-  let path = localStorage.getItem(UNIT_TEST) || '';
-  window.addEventListener("keydown", async (event) => {
-    if (event.code === "KeyU" && event.shiftKey) {
-
-
-      path = prompt("Path:", path);
-      if (path) {
-        const load = loaders[`/src/main/development/tests/${path}.test.js`];
-        if (!load) {
-          throw new Error(`Invalid path: ${path}`);
-        }
-        localStorage.setItem(UNIT_TEST, path);
-
-        const module = await load();
-        const tests = Object.values(module);
-        for (const test of tests) {
-          await test(true);
-        }
+    async unit(path) {
+      const load = this.#loaders[`/src/main/development/tests/${path}.test.js`];
+      if (!load) {
+        throw new Error(`Invalid path: ${path}`);
+      }
+      const module = await load();
+      const tests = Object.values(module);
+      for (const test of tests) {
+        await test(true);
       }
     }
+  })();
+
+  await (async () => {
+    const on_hash_change = async (event) => {
+      const path = location.hash ? location.hash.slice(1) : null;
+      if (path) {
+        await test.unit(path);
+      }
+    };
+    window.addEventListener("hashchange", on_hash_change);
+    on_hash_change();
+  })();
+
+  /* Batch tests */
+  window.addEventListener("keydown", async (event) => {
+    if (event.code === "KeyT" && event.shiftKey) {
+      test.batch();
+    }
   });
+
+  /* Unit tests by prompt */
+  await (async () => {
+    const UNIT_TEST = "unit_test";
+    let path = localStorage.getItem(UNIT_TEST) || "";
+    window.addEventListener("keydown", async (event) => {
+      if (event.code === "KeyU" && event.shiftKey) {
+        path = prompt("Path:", path);
+        if (path) {
+          localStorage.setItem(UNIT_TEST, path);
+          await test.unit(path);
+        }
+      }
+    });
+  })();
 })();

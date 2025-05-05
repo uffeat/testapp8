@@ -1,6 +1,5 @@
 /* NOTE Do NOT import modules that uses 'modules' here! */
 
-
 const PUBLIC = "/";
 const SRC = "@/";
 
@@ -11,22 +10,6 @@ const SRC = "@/";
   - Handling of "secondary file types" and queries will require a special syntax
     or a cleaver (perhaps timer-based) way to terminate the proxy process.
 - Build tool for processed imports
-- Version of 'modules' in external code (e.g., code in /public), so that 
-  html-files in external sources can be run directly (LiveServer) and use 
-  files from
-  - the external source itself
-  - /public 
-  - /src, provided that these files
-    - do not import npm-installed modules
-    - use the 'modules' syntax (or relative imports).
-  This could enable an elegant way of running (certain) tests from external code.
-  However, before rushing into implementation of this, take into account that:
-  - An "in-app" test paradigm has indeed been established (and in such a way 
-    that it does not hit the production bundle).
-  - It would require refactoring of all involved /src files to use 'modules'
-    for imports.
-  ... therefore, if proceeding with this, perhaps limit to a few specific dir 
-  scopes.
 */
 
 /* Import utility that
@@ -52,6 +35,50 @@ class Modules {
   constructor() {
     this.#loaders = new Loaders();
     this.#processors = new Processors();
+  }
+
+  /* Returns import result. 
+  NOTE
+  - Syntactial Python-like alternative to 'get'. 
+  - Does NOT support relative imports.
+  - Currently, does NOT support secondary file types. */
+  get import() {
+    /* TODO
+    - Implement support for secodary file types (formats) */
+    let specifier;
+    const modules = this;
+    const terminators = ["css", "html", "js", "json"];
+    const get_proxy = () =>
+      new Proxy(this, {
+        get: (target, part) => {
+          /* Handle source */
+          if (specifier === undefined) {
+            if (part === "src") {
+              specifier = "@";
+            } else if (part === "public") {
+              specifier = "";
+            } else {
+              throw new Error(`Invalid source`);
+            }
+            return get_proxy();
+          }
+          /* Handle extension without query */
+          if (terminators.includes(part)) {
+            specifier += `.${part}`;
+            return modules.get(specifier);
+          }
+          /* Handle extension with query */
+          if (part.includes("$")) {
+            const [type, query] = part.split("$");
+            specifier += `.${type}?${query}`;
+            return modules.get(specifier);
+          }
+          /* Handle dir path */
+          specifier += `/${part}`;
+          return get_proxy();
+        },
+      });
+    return get_proxy();
   }
 
   /* Returns controller for loaders.
@@ -90,16 +117,16 @@ class Modules {
           )
         ) {
           const { promise, resolve } = Promise.withResolvers();
-          const link = document.createElement('link')
-          link.rel = "stylesheet"
-          link.href = path.path
+          const link = document.createElement("link");
+          link.rel = "stylesheet";
+          link.href = path.path;
           const on_load = (event) => {
-            link.removeEventListener('load', on_load)
-            resolve()
-          }
-          link.addEventListener('load', on_load)
-          document.head.append(link)
-          await promise
+            link.removeEventListener("load", on_load);
+            resolve();
+          };
+          link.addEventListener("load", on_load);
+          document.head.append(link);
+          await promise;
         }
         return;
       } else {
@@ -137,18 +164,24 @@ class Modules {
     const key = path.query ? `${path.extension}?${path.query}` : path.extension;
     const processor = this.#processors.get(key);
     if (processor) {
-      return await processor.call(this, path, result, { owner: this });
+      return await processor.call(this, path.path, result, {
+        owner: this,
+        path,
+      });
     } else {
       return result;
     }
   }
 
+  /* Returns promise resolved to JS module imported from url. 
+  NOTE
+  - By-passes Vite's barking at dynamic imports.
+  - In contrast to the native 'import', 'import_' does (intentionally) NOT cache.
+    Any caching should be handled in consuming code. */
   #import(url) {
     return new Function(`return import("${url}")`)();
   }
 }
-
-/* Utils... */
 
 /* Util for managing loaders. */
 class Loaders {
@@ -198,14 +231,6 @@ class Loaders {
     }
     return this;
   }
-
-  /* Prevents future registration for one or more keys. Chainable. */
-  freeze(...keys) {
-    keys.forEach((key) => this.#frozen.add(key));
-    return this;
-  }
-
-  
 
   /* Prevents future registration for one or more keys. Chainable. */
   freeze(...keys) {
@@ -295,7 +320,7 @@ class Path {
     return this.#format;
   }
 
-  /* Returns public flag (does the specifier pertain to /pulic?). */
+  /* Returns public flag (does the specifier pertain to /public?). */
   get public() {
     if (this.#public === undefined) {
       this.#public = this.#specifier.startsWith(PUBLIC);
@@ -438,4 +463,3 @@ modules.loaders.define({
     "!/src/main/development/**/*.*",
   ]),
 });
-

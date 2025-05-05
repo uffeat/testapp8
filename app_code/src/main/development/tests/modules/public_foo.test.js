@@ -30,8 +30,6 @@ const success = () => console.info("Success!");
   });
 })();
 
-
-
 export const test_raw_css = async (unit_test) => {
   const actual = await modules.get("/test/foo/foo.css?raw");
   if (!actual.startsWith(".foo")) {
@@ -42,9 +40,7 @@ export const test_raw_css = async (unit_test) => {
 };
 
 export const test_html = async (unit_test) => {
-  const actual = (
-    await modules.get("/test/foo/foo.html")
-  ).trim();
+  const actual = (await modules.get("/test/foo/foo.html")).trim();
   const expected = `<h1>FOO</h1>`;
   if (actual !== expected) {
     console.error("Expected:", expected, "\nActual:", actual);
@@ -74,9 +70,7 @@ export const test_raw_js = async (unit_test) => {
 };
 
 export const test_json = async (unit_test) => {
-  const actual = (
-    await modules.get("/test/foo/foo.json")
-  );
+  const actual = await modules.get("/test/foo/foo.json");
   const expected = { foo: "FOO" };
 
   if (!match(actual, expected)) {
@@ -91,11 +85,8 @@ export const test_json = async (unit_test) => {
   }
 };
 
-
 export const test_js_html = async (unit_test) => {
-  const actual = (
-    await modules.get("/test/foo/foo.js.html")
-  ).foo;
+  const actual = (await modules.get("/test/foo/foo.js.html")).foo;
   const expected = "FOO";
   if (actual !== expected) {
     console.error("Expected:", expected, "\nActual:", actual);
