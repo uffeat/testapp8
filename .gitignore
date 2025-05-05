@@ -29,8 +29,6 @@ dist-ssr
 
 # Custom
 _notes/
-_devops_code
-_server_code/
 _scratch_code/
 secrets.json
 
