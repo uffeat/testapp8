@@ -11,6 +11,12 @@ document.querySelector("html").dataset.bsTheme = "dark";
 
 document.body.append(Check());
 
+const { foo } = await modules.import.public.test.foo.foo.js()
+console.log('foo:', foo)
+
+const raw_foo = await modules.import.src.test.foo.foo.js({raw: true})
+console.log('raw_foo:', raw_foo)
+
 
 
 /* Enable triggering of tests.
