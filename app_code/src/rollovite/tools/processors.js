@@ -1,3 +1,5 @@
+/* NOTE Do NOT import modules that uses 'modules' here! */
+
 /* Util for managing processors  */
 export class Processors {
   #registry = new Map();

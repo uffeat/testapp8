@@ -1,4 +1,6 @@
-[
+/* Auto-generated: 2025-05-06 22:48:57 */
+
+export default [
   "/favicon.svg",
   "/routes.json",
   "/rollo.md",
@@ -24,5 +26,5 @@
   "/test/foo/foo.json",
   "/tests/modules/foo.html",
   "/tests/tools/main.css",
-  "/tests/tools/main.js"
-]
+  "/tests/tools/main.js",
+];

@@ -1,16 +1,9 @@
 /* NOTE Do NOT import modules that uses 'modules' here! */
-
 import { Src } from "@/rollovite/tools/src.js";
 import { Processors } from "@/rollovite/tools/processors.js";
 import { Public } from "@/rollovite/tools/public/public.js";
 
 /* TODO
-- Perhaps refactor get to take kwargs rather than extension stuff
-- Build tool for mapping public assets
-- Perhaps break up into sub-modules
-- Perhaps create sub-classes:
-  - Loader (wrapper around import.meta.glob - or similar)
-  - PublicLoader
 - Perhaps inject meta data into modules
 - Build tool for processed imports
 */

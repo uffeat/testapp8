@@ -1,17 +1,18 @@
+/* NOTE Do NOT import modules that uses 'modules' here! */
 import { component } from "@/rollo/component/component.js";
 import { module } from "@/rollo/tools/module.js";
-import _paths from "@/rollovite/tools/public/__paths__.json";
 
-//const paths = Object.freeze(JSON.parse(await fetch_text(normalize_path("/__paths__.json"))));
+import _paths from "@/rollovite/tools/public/__paths__.js";
 const paths = Object.freeze(_paths);
+/* Alternatively:
+const paths = Object.freeze(JSON.parse(await fetch_text(normalize_path("/__paths__.json"))));
+*/
 
 export class Public {
   #cache = {};
   #module_cache = {};
 
-  /* 
-  NOTE
-  -  */
+  /* Returns /public file import result. */
   async get(path, { raw = false } = {}) {
     const type = path.split(".").reverse()[0];
     path = normalize_path(path);
@@ -53,12 +54,13 @@ export class Public {
     return result;
   }
 
-  /* */
+  /* Checks, if path is in /public. */
   has(path) {
     return paths.includes(path);
   }
 
-  /* */
+  /* Returns paths in /public, optionally as per filter.
+  Returns null, if none found. */
   paths(filter) {
     if (filter) {
       const result = paths.filter(filter);
@@ -67,7 +69,7 @@ export class Public {
     return paths;
   }
 
-  /* */
+  /* Retutns number of files in /public. */
   size(filter) {
     if (filter) {
       return paths.filter(filter).length;
@@ -76,10 +78,15 @@ export class Public {
   }
 }
 
+/* Returns normalized interpretation of path, 
+i.e., environment-adjusted. */
 function normalize_path(path) {
   return `${import.meta.env.BASE_URL}${path.slice("/".length)}`;
 }
 
+/* Returns text content of file in /public.
+NOTE
+- 'path' should be normalized, i.e., environment-adjusted. */
 async function fetch_text(path) {
   const response = await fetch(path);
   return (await response.text()).trim();
