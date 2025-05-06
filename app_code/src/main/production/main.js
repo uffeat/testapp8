@@ -19,7 +19,7 @@ console.log('foo:', foo)
 const raw_foo = await modules.import.src.test.foo.foo.js({raw: true})
 console.log('raw_foo:', raw_foo)
 
-//console.log('foo:',(await modules.get(`/test/foo/foo.js`)).foo)
+console.log('foo:',(await modules.get(`/test/foo/foo.js`)).foo)
 console.log('foo:',(await modules.get(`/test/foo/foo.json`)))
 
 const text = await modules.import.public.test.foo.foo.js({raw: true})

@@ -146,7 +146,6 @@ NOTE
 - To keep lean and idiomatic, does NOT include files with secondary file 
   type, except for css imports (to support .module.css). Such special formats 
   should be handled decentralized and perhaps env-dependent. */
-
 modules.src
   /* Vite-native import of css, incl. css as text */
   .add(import.meta.glob(["/src/**/*.css", "!/src/main/development/**/*.*"]))
@@ -195,4 +194,3 @@ modules.src
     ])
   );
 
-//console.log(modules.__registry__);

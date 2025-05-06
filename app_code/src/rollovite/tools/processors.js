@@ -1,3 +1,8 @@
+/*
+rollovite/tools/processors.js
+20250506
+*/
+
 /* NOTE Do NOT import modules that uses 'modules' here! */
 
 /* Util for managing processors  */
@@ -46,8 +51,8 @@ export class Processors {
   }
 
   /* Removes processor. Chainable. */
-  remove(key, processor) {
-    this.#registry.delete(key, processor);
+  remove(key) {
+    this.#registry.delete(key);
     return this;
   }
 }

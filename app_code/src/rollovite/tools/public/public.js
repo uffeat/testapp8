@@ -1,3 +1,8 @@
+/*
+rollovite/tools/public/public.js
+20250506
+*/
+
 /* NOTE Do NOT import modules that uses 'modules' here! */
 import { component } from "@/rollo/component/component.js";
 import { module } from "@/rollo/tools/module.js";

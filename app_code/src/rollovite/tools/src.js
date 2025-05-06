@@ -1,3 +1,8 @@
+/*
+rollovite/tools/src.js
+20250506
+*/
+
 /* NOTE Do NOT import modules that uses 'modules' here! */
 
 /* Util for managing src loaders. */
@@ -21,6 +26,7 @@ export class Src {
   /* Removes loaders. Chainable. */
   clear() {
     this.#registry.clear();
+    this.#raw.clear();
     return this;
   }
 
