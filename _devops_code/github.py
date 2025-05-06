@@ -31,7 +31,7 @@ title = "development to production"
 body = "Ready for production."
 
 
-def merge_to_production():
+def main():
     """Merges development into production via a PR
     (in accordance with branch rules)."""
     # Get access to repo
@@ -47,4 +47,4 @@ def merge_to_production():
 
 
 if __name__ == "__main__":
-    merge_to_production()
+    main()

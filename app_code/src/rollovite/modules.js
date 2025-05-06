@@ -4,6 +4,12 @@ const PUBLIC = "/";
 const SRC = "@/";
 
 /* TODO
+- Build tool for mapping public assets
+- Perhaps break up into sub-modules
+- Perhaps create sub-classes:
+  - Loader (wrapper around import.meta.glob - or similar)
+  - PublicLoader
+- Perhaps inject meta data into modules
 - Build tool for processed imports
 */
 

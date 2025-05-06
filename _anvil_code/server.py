@@ -8,7 +8,7 @@ from pathlib import Path
 from anvil.server import callable as callable_, connect, wait_forever
 
 
-def run_server():
+def main():
     """Spins up a local Anvil server that relaxes cors restrictions and enables
     'peek'."""
     connect(
@@ -29,4 +29,4 @@ def run_server():
 
 
 if __name__ == "__main__":
-    run_server()
+    main()
