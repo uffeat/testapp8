@@ -1,0 +1,474 @@
+/* NOTE Do NOT import modules that uses 'modules' here! */
+
+const PUBLIC = "/";
+const SRC = "@/";
+
+/* TODO
+- Perhaps refactor get to take kwargs rather than extension stuff
+- Build tool for mapping public assets
+- Perhaps break up into sub-modules
+- Perhaps create sub-classes:
+  - Loader (wrapper around import.meta.glob - or similar)
+  - PublicLoader
+- Perhaps inject meta data into modules
+- Build tool for processed imports
+*/
+
+/* Import utility that
+- builds on Vite's import features with a similar syntax and can be used
+  as a drop-in replacement for static and dynamic imports
+- adds platform-native features (e.g., truly native dynamic imports)
+- supports import of /src as well as /public files (regardless of environment)
+- can be configured 
+  - for fine-grained import source control
+  - to support native and synthetic files types
+  - to post-process imports (hook-like mechanism)
+XXX
+- Changes to code that uses 'modules' are NOT picked up by Vite's HMR, i.e., 
+  a manual browser refresh is required for Vite's dev server to pick up the 
+  changes (restart of the dev server is NOT required).
+- Usage of 'modules' requires that all mapped files use imports with extensions,
+  i.e., cannot leave out '.js'. */
+class Modules {
+  #cache = {};
+  #loaders;
+  #processors;
+
+  constructor() {
+    this.#loaders = new Loaders();
+    this.#processors = new Processors();
+  }
+
+  /* Returns import result. 
+  NOTE
+  - Syntactial Python-like alternative to 'get'. 
+  - Does NOT support relative imports. */
+  get import() {
+    let specifier;
+    const modules = this;
+    const terminators = ["css", "html", "js", "json"];
+    const get_proxy = () =>
+      new Proxy(this, {
+        get: (target, part) => {
+          /* Handle source */
+          if (specifier === undefined) {
+            if (part === "src") {
+              specifier = "@";
+            } else if (part === "public") {
+              specifier = "";
+            } else {
+              throw new Error(`Invalid source`);
+            }
+            return get_proxy();
+          }
+          /* Handle termination */
+          if (terminators.includes(part)) {
+            const terminator = ({ format, raw = false } = {}) => {
+              /* NOTE
+              - 'raw' is provided as an object item with a Boolean value to 
+                minimize the use of strings. 
+              - 'format' (secondary file type) is provided as an object item 
+                with a string value - difficult to avoid string, since possible 
+                values of 'format' are not known a priori (NOT critical!). */
+              if (format) {
+                part = `${format}.${part}`;
+              }
+              if (raw) {
+                part = `${part}?raw`;
+              }
+              specifier += `.${part}`;
+              return modules.get(specifier);
+            };
+            return terminator;
+          }
+          /* Handle dir path */
+          specifier += `/${part}`;
+          return get_proxy();
+        },
+      });
+    return get_proxy();
+  }
+
+  /* Returns controller for loaders.
+  NOTE
+  - Typically used with Vite's import.meta.glob, but can also be used for 
+    - manually-created module loaders
+    - "virtual module loaders". */
+  get loaders() {
+    return this.#loaders;
+  }
+
+  /* Returns controller for processors. */
+  get processors() {
+    return this.#processors;
+  }
+
+  /* Returns import result. */
+  async get(specifier) {
+    const path = new Path(specifier);
+    let result;
+    if (path.public) {
+      /* Import from files in /public */
+      if (path.type === "js" && !path.query) {
+        /* Module import */
+        if (path.path in this.#cache) {
+          result = this.#cache[path.path];
+        } else {
+          result = await this.#import(path.path);
+          this.#cache[path.path] = result;
+        }
+      } else if (path.type === "css" && !path.query) {
+        /* Mimic Vite's css import -> css becomes global (albeit via link) */
+        if (
+          !document.head.querySelector(
+            `link[rel="stylesheet"][href="${path.path}"]`
+          )
+        ) {
+          const { promise, resolve } = Promise.withResolvers();
+          const link = document.createElement("link");
+          link.rel = "stylesheet";
+          link.href = path.path;
+          const on_load = (event) => {
+            link.removeEventListener("load", on_load);
+            resolve();
+          };
+          link.addEventListener("load", on_load);
+          document.head.append(link);
+          await promise;
+        }
+        return;
+      } else {
+        const key = path.query ? `${path.path}?${path.query}` : path.path;
+        if (key in this.#cache) {
+          result = this.#cache[key];
+        } else {
+          const response = await fetch(path.path);
+          result = (await response.text()).trim();
+          this.#cache[key] = result;
+        }
+      }
+      /* Mimic Vite's json import -> uncached parsed json */
+      if (path.type === "json" && !path.query) {
+        result = JSON.parse(result);
+      }
+    } else {
+      /* Import from files in /src */
+      const key = path.query
+        ? `${path.extension}?${path.query}`
+        : path.extension;
+
+      const loader = this.#loaders.get(key);
+      if (!loader) {
+        throw new Error(`Invalid loader key: ${key}`);
+      }
+      /* Get load function */
+      const load = loader[path.path];
+      if (!load) {
+        throw new Error(`Invalid path: ${path.path}`);
+      }
+      result = await load.call(this, { owner: this, path });
+    }
+    /* Perform any processing and return result */
+    const key = path.query ? `${path.extension}?${path.query}` : path.extension;
+    const processor = this.#processors.get(key);
+    if (processor) {
+      return await processor.call(this, path.path, result, {
+        owner: this,
+        path,
+      });
+    } else {
+      return result;
+    }
+  }
+
+  /* Returns promise resolved to JS module imported from url. 
+  NOTE
+  - By-passes Vite's barking at dynamic imports.
+  - In contrast to the native 'import', 'import_' does (intentionally) NOT cache.
+    Any caching should be handled in consuming code.
+  - Unrelated to the public 'import' prop. */
+  #import(url) {
+    return new Function(`return import("${url}")`)();
+  }
+}
+
+/* Util for managing loaders. */
+class Loaders {
+  #frozen = new Set();
+  #registry = new Map();
+
+  /* Registers one or more loaders. Chainable.
+  NOTE
+  - Multiple loaders can be added in one-go (without the need to destructure 
+    into a single object).
+  - Multiple loaders for multiple keys can be added in one-go.
+  - Method can be called multiple times without clearing registry. */
+  add(spec) {
+    for (const [key, loaders] of Object.entries(spec)) {
+      if (this.#frozen.has(key)) {
+        throw new Error(`The key '${key}' has been frozen.`);
+      }
+      let registered = this.#registry.get(key);
+      if (!registered) {
+        registered = {};
+        this.#registry.set(key, registered);
+      }
+      if (Array.isArray(loaders)) {
+        loaders.forEach((loaders) => Object.assign(registered, loaders));
+      } else {
+        Object.assign(registered, loaders);
+      }
+    }
+    return this;
+  }
+
+  /* Registers and freezes one or more loaders. Chainable. 
+  NOTE
+  - A leaner and safer, but less flexible alternative to 'add'.
+    - Leaner because loaders are not copied, but stored directly.
+    - Safer, but less flexible because subsequent change attempts 
+      will throw an error.
+  - Use (instead of 'add'), when global reliability and consistency 
+    with respect to conventions are critical. */
+  define(spec) {
+    for (const [key, loaders] of Object.entries(spec)) {
+      if (this.#frozen.has(key)) {
+        throw new Error(`The key '${key}' has been frozen`);
+      }
+      this.#registry.set(key, loaders);
+      this.#frozen.add(key);
+    }
+    return this;
+  }
+
+  /* Prevents future registration for one or more keys. Chainable. */
+  freeze(...keys) {
+    keys.forEach((key) => this.#frozen.add(key));
+    return this;
+  }
+
+  /* Returns loader by key. */
+  get(key) {
+    if (key) {
+      return this.#registry.get(key);
+    }
+    const result = {};
+    for (const registered of this.#registry.values()) {
+      for (const [path, load] of Object.entries(registered)) {
+        result[path] = load;
+      }
+    }
+    return Object.freeze(result);
+  }
+
+  /* Checks, if a loaders with a given key has been registered. 
+  Optionally, also tests if a given path is present in the loader. */
+  has(key, path) {
+    const registered = this.#registry.get(key);
+    if (path) {
+      path = new Path(path);
+      if (registered) {
+        return path.path in registered;
+      }
+      return false;
+    }
+    return registered ? true : false;
+  }
+
+  /* Returns number of load functions registered for a given key.
+  Returns total number of registered load functions, if no key is provided.
+  NOTE
+  - Primarily for debugging. */
+  size(key) {
+    if (key) {
+      const registered = this.#registry.get(key);
+      if (registered) {
+        return Object.keys(registered).length;
+      }
+    } else {
+      let result = 0;
+      this.#registry
+        .values()
+        .forEach((registered) => (result += Object.keys(registered).length));
+      return result;
+    }
+  }
+}
+
+/* Util for parsing patch specifier.  */
+class Path {
+  #extension;
+  #format;
+  #path;
+  #public;
+  #query;
+  #specifier;
+  #type;
+
+  constructor(specifier) {
+    this.#specifier = specifier;
+  }
+
+  /* Returns extension (format and type). */
+  get extension() {
+    if (this.#extension === undefined) {
+      const file = this.path.split("/").reverse()[0];
+      const [stem, ...meta] = file.split(".");
+      this.#extension = meta.join(".");
+    }
+    return this.#extension;
+  }
+
+  /* Returns format ("secondary file type"). */
+  get format() {
+    if (this.#format === undefined) {
+      this.#format = this.extension.includes(".")
+        ? this.extension.split(".")[0]
+        : "";
+    }
+    return this.#format;
+  }
+
+  /* Returns public flag (does the specifier pertain to /public?). */
+  get public() {
+    if (this.#public === undefined) {
+      this.#public = this.#specifier.startsWith(PUBLIC);
+    }
+    return this.#public;
+  }
+
+  /* Returns specifier without query and, if public, adjusted with BASE_URL. */
+  get path() {
+    if (this.#path === undefined) {
+      /* Remove query */
+      this.#path = this.query
+        ? this.#specifier.slice(0, -(this.query.length + 1))
+        : this.#specifier;
+      /* Correct source */
+      if (this.#specifier.startsWith(PUBLIC)) {
+        this.#path = `${import.meta.env.BASE_URL}${this.#path.slice(
+          PUBLIC.length
+        )}`;
+      } else if (this.#path.startsWith(SRC)) {
+        this.#path = `/src/${this.#path.slice(SRC.length)}`;
+      }
+    }
+    return this.#path;
+  }
+
+  /* Returns any query key. */
+  get query() {
+    if (this.#query === undefined) {
+      this.#query = this.#specifier.includes("?")
+        ? this.#specifier.split("?").reverse()[0]
+        : "";
+    }
+    return this.#query;
+  }
+
+  /* Returns file type. */
+  get type() {
+    if (this.#type === undefined) {
+      this.#type = this.extension.includes(".")
+        ? this.extension.split(".").reverse()[0]
+        : this.extension;
+    }
+    return this.#type;
+  }
+}
+
+/* Util for managing processors  */
+class Processors {
+  #frozen = new Set();
+  #registry = new Map();
+
+  /* Adds one or more processors. Chainable. 
+  NOTE
+  - Processors for multiple keys can be added in one-go. */
+  add(spec) {
+    Object.entries(spec).forEach(([key, processor]) => {
+      if (this.#frozen.has(key)) {
+        throw new Error(`The key '${key}' has been frozen`);
+      }
+      this.#registry.set(key, processor);
+    });
+    return this;
+  }
+
+  /* Prevents future registration for one or more keys. Chainable. */
+  freeze(...keys) {
+    keys.forEach((key) => this.#frozen.add(key));
+    return this;
+  }
+
+  /* Returns processor by key. */
+  get(key) {
+    return this.#registry.get(key);
+  }
+
+  /* Checks, if a processor with a given key has been registered. */
+  has(key) {
+    return this.#registry.has(key);
+  }
+
+  /* Returns number of processors registered.
+  NOTE
+  - Primarily for debugging. */
+  size() {
+    /* NOTE
+    - Implemented as method for consistency with respect to Loaders */
+    return this.#registry.size;
+  }
+}
+
+export const modules = new Modules();
+
+/* Make modules global */
+Object.defineProperty(window, "modules", {
+  configurable: false,
+  enumerable: true,
+  writable: false,
+  value: modules,
+});
+
+/* Define production-relevant universal loaders 
+NOTE
+- Excludes files in src/main/development.
+- To keep lean and idiomatic, does NOT include files with secondary file 
+  type, except for css imports (to support .module.css). Such special formats 
+  should be handled decentralized and perhaps env-dependent. */
+modules.loaders.define({
+  /* Vite-native import of css, incl. css as text */
+  css: import.meta.glob(["/src/**/*.css", "!/src/main/development/**/*.*"]),
+  "css?raw": import.meta.glob(
+    ["/src/**/*.css", "!/src/**/*.*.*", "!/src/main/development/**/*.*"],
+    {
+      import: "default",
+      query: "?raw",
+    }
+  ),
+  /* Import of html as text */
+  html: import.meta.glob(
+    ["/src/**/*.html", "!/src/**/*.*.*", "!/src/main/development/**/*.*"],
+    {
+      import: "default",
+      query: "?raw",
+    }
+  ),
+  /* Vite-native import of js as module and text */
+  js: import.meta.glob([
+    "/src/**/*.js",
+    "!/src/**/*.*.*",
+    "!/src/main/development/**/*.*",
+  ]),
+  "js?raw": import.meta.glob(
+    ["/src/**/*.js", "!/src/**/*.*.*", "!/src/main/development/**/*.*"],
+    { import: "default", query: "?raw" }
+  ),
+  /* Vite-native json import */
+  json: import.meta.glob([
+    "/src/**/*.json",
+    "!/src/**/*.*.*",
+    "!/src/main/development/**/*.*",
+  ]),
+});

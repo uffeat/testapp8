@@ -11,15 +11,14 @@ const success = () => console.info("Success!");
 
 /* Set up loader and processor to handle "js from html" */
 (() => {
-  modules.loaders.add({
-    "js.html": import.meta.glob(
-      "/src/test/foo/**/*.js.html",
-      {
-        import: "default",
-        query: "?raw",
-      }
-    ),
-  });
+  modules.src.add(
+    import.meta.glob("/src/test/foo/**/*.js.html", {
+      import: "default",
+      query: "?raw",
+    }),
+    { raw: "html" }
+  );
+
   const cache = {};
   modules.processors.add({
     "js.html": async (path, html) => {
@@ -40,9 +39,7 @@ const success = () => console.info("Success!");
 })();
 
 export const test_raw_css = async (unit_test) => {
-  const actual = await modules.get(
-    "@/test/foo/foo.css?raw"
-  );
+  const actual = await modules.get("@/test/foo/foo.css", { raw: true });
   if (!actual.startsWith(".foo")) {
     console.error("Raw css did not import correctly!");
   } else if (unit_test) {
@@ -51,9 +48,7 @@ export const test_raw_css = async (unit_test) => {
 };
 
 export const test_js = async (unit_test) => {
-  const actual = (
-    await modules.get("@/test/foo/foo.js")
-  ).foo;
+  const actual = (await modules.get("@/test/foo/foo.js")).foo;
   const expected = "FOO";
   if (actual !== expected) {
     console.error("Expected:", expected, "\nActual:", actual);
@@ -63,9 +58,7 @@ export const test_js = async (unit_test) => {
 };
 
 export const test_raw_js = async (unit_test) => {
-  const actual = (
-    await modules.get("@/test/foo/foo.js?raw")
-  ).trim();
+  const actual = (await modules.get("@/test/foo/foo.js", { raw: true })).trim();
   const expected = `export const foo = "FOO";`;
   if (actual !== expected) {
     console.error("Expected:", expected, "\nActual:", actual);
@@ -75,9 +68,7 @@ export const test_raw_js = async (unit_test) => {
 };
 
 export const test_html = async (unit_test) => {
-  const actual = (
-    await modules.get("@/test/foo/foo.html")
-  ).trim();
+  const actual = (await modules.get("@/test/foo/foo.html")).trim();
   const expected = `<h1>FOO</h1>`;
   if (actual !== expected) {
     console.error("Expected:", expected, "\nActual:", actual);
@@ -87,9 +78,7 @@ export const test_html = async (unit_test) => {
 };
 
 export const test_json = async (unit_test) => {
-  const actual = (
-    await modules.get("@/test/foo/foo.json")
-  ).default;
+  const actual = (await modules.get("@/test/foo/foo.json")).default;
   const expected = { foo: "FOO" };
 
   if (!match(actual, expected)) {
@@ -106,7 +95,7 @@ export const test_json = async (unit_test) => {
 
 export const test_js_html = async (unit_test) => {
   const actual = (
-    await modules.get("@/test/foo/foo.js.html")
+    await modules.get("@/test/foo/foo.js.html", { format: "js.html" })
   ).foo;
   const expected = "FOO";
   if (actual !== expected) {
