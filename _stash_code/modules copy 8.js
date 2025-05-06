@@ -4,7 +4,6 @@ const PUBLIC = "/";
 const SRC = "@/";
 
 /* TODO
-- Perhaps refactor get to take kwargs rather than extension stuff
 - Build tool for mapping public assets
 - Perhaps break up into sub-modules
 - Perhaps create sub-classes:
@@ -42,8 +41,11 @@ class Modules {
   /* Returns import result. 
   NOTE
   - Syntactial Python-like alternative to 'get'. 
-  - Does NOT support relative imports. */
+  - Does NOT support relative imports.
+  - Currently, does NOT support secondary file types. */
   get import() {
+    /* TODO
+    - Implement support for secodary file types (formats) */
     let specifier;
     const modules = this;
     const terminators = ["css", "html", "js", "json"];
@@ -61,25 +63,16 @@ class Modules {
             }
             return get_proxy();
           }
-          /* Handle termination */
+          /* Handle extension without query */
           if (terminators.includes(part)) {
-            const terminator = ({ format, raw = false } = {}) => {
-              /* NOTE
-              - 'raw' is provided as an object item with a Boolean value to 
-                minimize the use of strings. 
-              - 'format' (secondary file type) is provided as an object item 
-                with a string value - difficult to avoid string, since possible 
-                values of 'format' are not known a priori (NOT critical!). */
-              if (format) {
-                part = `${format}.${part}`;
-              }
-              if (raw) {
-                part = `${part}?raw`;
-              }
-              specifier += `.${part}`;
-              return modules.get(specifier);
-            };
-            return terminator;
+            specifier += `.${part}`;
+            return modules.get(specifier);
+          }
+          /* Handle extension with query */
+          if (part.includes("$")) {
+            const [type, query] = part.split("$");
+            specifier += `.${type}?${query}`;
+            return modules.get(specifier);
           }
           /* Handle dir path */
           specifier += `/${part}`;

@@ -5,11 +5,14 @@ import "@/main.css";
 console.info("Vite environment:", import.meta.env.MODE);
 
 
+//const { bar } = await modules.import.src.test.bar.js
+//console.log('bar:', bar)
 
-const { foo } = await modules.import.public.test.foo.foo.js
+
+const { foo } = await modules.import.public.test.foo.foo.js()
 console.log('foo:', foo)
 
-const raw_foo = await modules.import.src.test.foo.foo.js$raw
+const raw_foo = await modules.import.src.test.foo.foo.js({raw: true})
 console.log('raw_foo:', raw_foo)
 
 /* Tests */
