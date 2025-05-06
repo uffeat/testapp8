@@ -7,6 +7,8 @@ import { vercel } from "@/rollovercel/vercel.js";
 import { component } from "@/rollo/component/component.js";
 import { Check } from "@/rolloui/components/form/check.js";
 
+import { module } from "@/rollo/tools/module.js";
+
 document.querySelector("html").dataset.bsTheme = "dark";
 
 document.body.append(Check());
@@ -20,6 +22,8 @@ console.log('raw_foo:', raw_foo)
 //console.log('foo:',(await modules.get(`/test/foo/foo.js`)).foo)
 console.log('foo:',(await modules.get(`/test/foo/foo.json`)))
 
+const text = await modules.import.public.test.foo.foo.js({raw: true})
+console.log('text:', text)
 
 
 /* Enable triggering of tests.
