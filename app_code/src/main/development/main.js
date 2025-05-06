@@ -2,6 +2,11 @@
 import "@/bootstrap.scss";
 import "@/main.css";
 
+import { component } from "@/rollo/component/component.js";
+
+
+
+
 console.info("Vite environment:", import.meta.env.MODE);
 
 const { bar } = await modules.import.src.test.bar.js()

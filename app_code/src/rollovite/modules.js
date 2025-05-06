@@ -1,7 +1,8 @@
 /* NOTE Do NOT import modules that uses 'modules' here! */
+
 import { Src } from "@/rollovite/tools/src.js";
 import { Processors } from "@/rollovite/tools/processors.js";
-import { Public } from "@/rollovite/tools/public.js";
+import { Public } from "@/rollovite/tools/public/public.js";
 
 /* TODO
 - Perhaps refactor get to take kwargs rather than extension stuff

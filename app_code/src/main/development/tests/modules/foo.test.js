@@ -19,23 +19,7 @@ const success = () => console.info("Success!");
     { raw: "html" }
   );
 
-  const cache = {};
-  modules.processors.add({
-    "js.html": async (path, html) => {
-      if (path in cache) {
-        return cache[path];
-      }
-      const element = component.div({ innerHTML: html });
-      const result = await module.from_text(
-        element
-          .querySelector("template[script]")
-          .content.querySelector("script")
-          .text.trim()
-      );
-      cache[path] = result;
-      return result;
-    },
-  });
+  
 })();
 
 export const test_raw_css = async (unit_test) => {
@@ -94,8 +78,33 @@ export const test_json = async (unit_test) => {
 };
 
 export const test_js_html = async (unit_test) => {
+
+  const key = "foo"
+  const cache = {};
+  const processor = modules.processors.add({
+    [key]: async (path, html) => {
+      if (path in cache) {
+        return cache[path];
+      }
+      const element = component.div({ innerHTML: html });
+      const result = await module.from_text(
+        element
+          .querySelector("template[script]")
+          .content.querySelector("script")
+          .text.trim()
+      );
+      cache[path] = result;
+      return result;
+    },
+  });
+
+
+
+
+
+
   const actual = (
-    await modules.get("@/test/foo/foo.js.html", { format: "js.html" })
+    await modules.get("@/test/foo/foo.js.html", { format: "foo" })
   ).foo;
   const expected = "FOO";
   if (actual !== expected) {
@@ -103,4 +112,6 @@ export const test_js_html = async (unit_test) => {
   } else if (unit_test) {
     success();
   }
+
+  modules.processors.remove(key, processor)
 };

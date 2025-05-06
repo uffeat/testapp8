@@ -31,7 +31,7 @@ const success = () => console.info("Success!");
 })();
 
 export const test_raw_css = async (unit_test) => {
-  const actual = await modules.get("/test/foo/foo.css", {raw: true});
+  const actual = await modules.get("/test/foo/foo.css", { raw: true });
   if (!actual.startsWith(".foo")) {
     console.error("Raw css did not import correctly!");
   } else if (unit_test) {
@@ -60,7 +60,7 @@ export const test_js = async (unit_test) => {
 };
 
 export const test_raw_js = async (unit_test) => {
-  const actual = (await modules.get("/test/foo/foo.js", {raw: true})).trim();
+  const actual = (await modules.get("/test/foo/foo.js", { raw: true })).trim();
   const expected = `export const foo = "FOO";`;
   if (actual !== expected) {
     console.error("Expected:", expected, "\nActual:", actual);
@@ -86,7 +86,9 @@ export const test_json = async (unit_test) => {
 };
 
 export const test_js_html = async (unit_test) => {
-  const actual = (await modules.get("/test/foo/foo.js.html", {format: 'js.html'})).foo;
+  const actual = (
+    await modules.get("/test/foo/foo.js.html", { format: "js.html" })
+  ).foo;
   const expected = "FOO";
   if (actual !== expected) {
     console.error("Expected:", expected, "\nActual:", actual);
