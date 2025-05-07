@@ -40,7 +40,7 @@ export const test_raw_css = async (unit_test) => {
 };
 
 export const test_html = async (unit_test) => {
-  const actual = (await modules.get("/test/foo/foo.html")).trim();
+  const actual = (await modules.get("/test/foo/foo.template.html")).trim();
   const expected = `<h1>FOO</h1>`;
   if (actual !== expected) {
     console.error("Expected:", expected, "\nActual:", actual);
