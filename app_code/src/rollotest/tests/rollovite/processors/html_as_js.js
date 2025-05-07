@@ -2,11 +2,11 @@ import { modules } from "@/rollovite/modules.js";
 import { module } from "@/rollo/tools/module.js";
 import { component } from "@/rollo/component/component.js";
 
-const format = "html_as_js";
+const extension = "js.html";
 const cache = {};
 
 modules.processors.add({
-  [format]: async (path, html) => {
+  [extension]: async (path, html) => {
     if (path in cache) {
       return cache[path];
     }

@@ -1,10 +1,12 @@
 /* NOTE Do NOT import modules that uses 'modules' here! */
+import { Config } from "@/rollovite/tools/config.js";
 import { Src } from "@/rollovite/tools/src.js";
 import { Processors } from "@/rollovite/tools/processors.js";
 import { Public } from "@/rollovite/tools/public/public.js";
 
 /* TODO
 - 
+  
 */
 
 /* Import utility.
@@ -24,23 +26,28 @@ NOTE
 - Usage of 'modules' requires that all mapped files use imports with extensions,
   i.e., cannot leave out '.js'. */
 class Modules {
-
-  /* XXX things that are not ideal (but not critical)...
-  - The syntax for registering loaders (modules.src.add()) is not super elegant.
+  /* XXX
+  - The syntax for registering loaders (modules.src.add) is not super elegant.
   - The kwargs of modules.get are not universally applicable, i.e., in certain 
     cases ignored or overwritten.
   - Loaders are registered in a single registry. This prevents dublicate loaders, 
     but introduces a copy-step from Vite native loaders and does not catch unintended overwrites.
   - The Python-like syntax (modules.import) works well, but its syntax for dealing with 
     "composite file types" is not elegant. */
+  #config;
   #src;
   #processors;
   #public;
 
   constructor() {
-    this.#src = new Src();
+    this.#config = new Config();
+    this.#src = new Src(this);
     this.#processors = new Processors();
     this.#public = new Public();
+  }
+
+  get config() {
+    return this.#config
   }
 
   /* Returns import result. 
@@ -49,10 +56,13 @@ class Modules {
   - Does NOT support relative imports. */
   get import() {
     let path;
-
     const modules = this;
-    const terminators = ["css", "html", "js", "json", "template"];
+    /* NOTE
+    -  */
 
+    //
+    //
+    const terminators = modules.config.types.types;
     /* */
     const get_proxy = () =>
       new Proxy(this, {
@@ -69,7 +79,7 @@ class Modules {
             return get_proxy();
           }
           /* Handle termination for simple file types */
-          if (terminators.includes(part)) {
+          if (terminators.has(part)) {
             path += `.${part}`;
             return (options = {}) => modules.get(path, options);
           }
@@ -102,7 +112,7 @@ class Modules {
   }
 
   /* Returns import result. */
-  async get(path, { format, raw = false } = {}) {
+  async get(path, { raw = false } = {}) {
     let result;
     if (path.startsWith("/")) {
       /* Import from files in /public */
@@ -113,14 +123,20 @@ class Modules {
     } else {
       /* Import from files in /src */
       result = await this.#src.get(path, { raw });
+      const type = path.split(".").reverse()[0];
+      //
+      //
+      if (type === "json") {
+        result = result.default;
+      }
     }
 
     /* Perform any processing and return result */
-    const processor = this.#processors.get(format);
+    const extension = get_extension(path);
+    const processor = this.#processors.get(extension);
     if (processor) {
       return await processor.call(this, path, result, {
         owner: this,
-        format,
         raw,
       });
     } else {
@@ -139,67 +155,14 @@ Object.defineProperty(window, "modules", {
   value: modules,
 });
 
-/* Define production-relevant universal loaders 
-NOTE
-- Excludes files in src/main/development.
-- To keep lean and idiomatic, does NOT include files with secondary file 
-  type, except for css imports (to support .module.css). Such special formats 
-  should be handled decentralized and perhaps env-dependent. */
-modules.src
-  /* Vite-native import of css, incl. css as text */
-  .add(import.meta.glob(["/src/**/*.css", "!/src/main/development/**/*.*"]))
-  .add(
-    import.meta.glob(
-      ["/src/**/*.css", "!/src/**/*.*.*", "!/src/main/development/**/*.*"],
-      {
-        import: "default",
-        query: "?raw",
-      }
-    ),
-    { raw: true }
-  )
-  /* Import of html as text */
-  .add(
-    import.meta.glob(
-      ["/src/**/*.html", "!/src/**/*.*.*", "!/src/main/development/**/*.*"],
-      {
-        import: "default",
-        query: "?raw",
-      }
-    ),
-    { raw: "html" }
-  )
-  /* Vite-native import of js as module and text */
-  .add(
-    import.meta.glob([
-      "/src/**/*.js",
-      "!/src/**/*.*.*",
-      "!/src/main/development/**/*.*",
-    ])
-  )
-  .add(
-    import.meta.glob(
-      ["/src/**/*.js", "!/src/**/*.*.*", "!/src/main/development/**/*.*"],
-      { import: "default", query: "?raw" }
-    ),
-    { raw: true }
-  )
-  /* Vite-native json import */
-  .add(
-    import.meta.glob([
-      "/src/**/*.json",
-      "!/src/**/*.*.*",
-      "!/src/main/development/**/*.*",
-    ])
-  )
-  /* Import of template as text */
-  .add(
-    import.meta.glob(
-      ["/src/**/*.template", "!/src/**/*.*.*", "!/src/main/development/**/*.*"],
-      {
-        import: "default",
-        query: "?raw",
-      }
-    ),
-    { raw: "template" }
-  );
+function get_extension(path) {
+  const file = path.split("/").reverse()[0];
+  const [stem, ...meta] = file.split(".");
+  return meta.join(".");
+}
+
+
+modules.config.types.add("css", "html", "js", "json", "template").freeze()
+modules.config.raw.add("html", "template").freeze()
+// TODO object
+modules.config.import.add('json', 'default').freeze()

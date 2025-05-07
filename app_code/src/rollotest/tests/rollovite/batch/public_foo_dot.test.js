@@ -67,7 +67,7 @@ export const test_template = async (unit_test) => {
 
 export const test_html_as_js = async (unit_test) => {
   const actual = (
-    await modules.import.public.test.foo.foo["js:html"]({ format: "html_as_js" })
+    await modules.import.public.test.foo.foo["js:html"]()
   ).foo;
   const expected = "FOO";
   if (actual !== expected) {

@@ -5,7 +5,12 @@ import "@/main.css";
 import { component } from "@/rollo/component/component.js";
 import { test } from "@/rollotest/test.js";
 
+
+
 console.info("Vite environment:", import.meta.env.MODE);
+
+
+
 
 /* Tests */
 await (async () => {

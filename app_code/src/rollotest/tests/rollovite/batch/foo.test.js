@@ -4,8 +4,8 @@ rollovite/batch/foo
 
 import { modules } from "@/rollovite/modules.js";
 import { match } from "@/rollo/tools/object/match.js";
-/* Add loader to handle .js.html files */
-import "@/rollotest/tests/rollovite/loaders/js.html.js";
+/* Add loader to handle files in /src/test */
+import "@/rollotest/tests/rollovite/loaders/test.js";
 /* Set up html_as_js processor */
 import "@/rollotest/tests/rollovite/processors/html_as_js.js";
 
@@ -51,7 +51,7 @@ export const test_html = async (unit_test) => {
 };
 
 export const test_json = async (unit_test) => {
-  const actual = (await modules.get("@/test/foo/foo.json")).default;
+  const actual = (await modules.get("@/test/foo/foo.json"));
   const expected = { foo: "FOO" };
 
   if (!match(actual, expected)) {
@@ -68,7 +68,7 @@ export const test_json = async (unit_test) => {
 
 export const test_html_as_js = async (unit_test) => {
   const actual = (
-    await modules.get("@/test/foo/foo.js.html", { format: "html_as_js" })
+    await modules.get("@/test/foo/foo.js.html")
   ).foo;
   const expected = "FOO";
   if (actual !== expected) {

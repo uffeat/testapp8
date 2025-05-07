@@ -7,19 +7,18 @@ rollovite/tools/src.js
 
 /* Util for managing src loaders. */
 export class Src {
-  #owner
   #raw = new Set();
   #registry = new Map();
-
-  constructor(owner) {
-    this.#owner = owner
-  }
 
   /* Adds loaders. Chainable. */
   add(loaders, { raw = false } = {}) {
     Object.entries(loaders).forEach(([path, load]) => {
-      this.#registry.set(create_key(raw, path), load);
-
+      this.#registry.set(raw ? `${path}?raw` : path, load);
+      if (typeof raw === "string") {
+        /* NOTE
+        - string -> Cue to always import raw */
+        this.#raw.add(raw);
+      }
     });
     return this;
   }
@@ -43,11 +42,9 @@ export class Src {
     const type = path.split(".").reverse()[0];
     path = normalize_path(path);
     /* */
-
-
-    if (this.#owner.config.raw.types.has(type)) {
-
-     
+    if (this.#raw.has(type)) {
+      /* NOTE
+      - string -> Always import raw regardless of arg */
       raw = true;
     }
     /* Create cache key */
@@ -61,7 +58,7 @@ export class Src {
     NOTE
     - Native Vite load functions do not take any params. 
       However, the load function may not be Vite-native.
-      The load function is therefore called bound with useful args passed in. */
+      The load functions is therefore called bound with useful args passed in. */
     return await load.call(this, { owner: this, path, raw });
   }
 

@@ -1,3 +1,5 @@
+import { modules } from "@/rollovite/modules";
+
 /* */
 export const test = new (class Test {
   #loaders = import.meta.glob("/src/rollotest/tests/**/*.test.js");
@@ -52,3 +54,7 @@ export const test = new (class Test {
     }
   }
 })();
+
+
+
+

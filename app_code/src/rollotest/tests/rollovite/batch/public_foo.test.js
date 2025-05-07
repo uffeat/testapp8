@@ -66,7 +66,7 @@ export const test_json = async (unit_test) => {
 
 export const test_html_as_js = async (unit_test) => {
   const actual = (
-    await modules.get("/test/foo/foo.js.html", { format: "html_as_js" })
+    await modules.get("/test/foo/foo.js.html")
   ).foo;
   const expected = "FOO";
   if (actual !== expected) {
