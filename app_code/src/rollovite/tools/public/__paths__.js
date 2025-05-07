@@ -1,4 +1,4 @@
-/* Auto-generated: 2025-05-06 22:48:57 */
+/* Auto-generated: 2025-05-07 10:44:39 */
 
 export default [
   "/favicon.svg",
@@ -24,7 +24,5 @@ export default [
   "/test/foo/foo.js",
   "/test/foo/foo.js.html",
   "/test/foo/foo.json",
-  "/tests/modules/foo.html",
-  "/tests/tools/main.css",
-  "/tests/tools/main.js",
+  "/tests/batch/foo.test.js",
 ];

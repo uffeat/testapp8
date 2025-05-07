@@ -1,5 +1,5 @@
 /*
-batch/serverless/stuff
+serverless/stuff
 */
 
 /* In-module error message to retain traceback */
