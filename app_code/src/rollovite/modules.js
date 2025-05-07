@@ -29,7 +29,10 @@ class Modules {
   - The syntax for registering loaders (modules.src.add()) is not super elegant.
   - The kwargs of modules.get are not universally applicable, i.e., in certain 
     cases ignored or overwritten.
-  -  */
+  - Loaders are registered in a single registry. This prevents dublicate loaders, 
+    but introduces a copy-step from Vite native loaders and does not catch unintended overwrites.
+  - The Python-like syntax (modules.import) works well, but its syntax for dealing with 
+    "composite file types" is not elegant. */
   #src;
   #processors;
   #public;
