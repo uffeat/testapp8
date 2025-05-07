@@ -27,7 +27,7 @@ def main():
 
     file = Path.cwd() / "app_code/src/rollovite/tools/public/__paths__.js"
     file.parent.mkdir(parents=True, exist_ok=True)
-    file.write_text(f"/* Auto-generated: {timestamp} */\n\nexport default {content};", encoding="utf-8")
+    file.write_text(f"/* Auto-generated: {timestamp} */\n\nexport default Object.freeze({content});", encoding="utf-8")
 
 
 if __name__ == "__main__":

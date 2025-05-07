@@ -1,11 +1,13 @@
 /*
 rollovite/tools/processors.js
-20250506
+20250507
 */
 
 /* NOTE Do NOT import modules that uses 'modules' here! */
 
-/* Util for managing processors  */
+/* Tool for managing processors. 
+NOTE
+- Primarily intended for use in 'modules'. */
 export class Processors {
   #registry = new Map();
 

@@ -1,15 +1,18 @@
 /*
 rollovite/tools/public/public.js
-20250506
+20250507
 */
 
 /* NOTE Do NOT import modules that uses 'modules' here! */
-import _paths from "@/rollovite/tools/public/__paths__.js";
-const paths = Object.freeze(_paths);
+import paths from "@/rollovite/tools/public/__paths__.js";
+
 /* Alternatively:
 const paths = Object.freeze(JSON.parse(await fetch_text(normalize_path("/__paths__.json"))));
 */
 
+/* Tool for managing files in '/public'. 
+NOTE
+- Primarily intended for use in 'modules'. */
 export class Public {
   #cache = {};
   #module_cache = {};
@@ -100,10 +103,15 @@ async function fetch_text(path) {
   return (await response.text()).trim();
 }
 
+/* Returns module created from text. 
+NOTE
+- Does NOT cache module. */
 async function create_module(text) {
   const blob = new Blob([text], { type: "text/javascript" });
-    const url = URL.createObjectURL(blob);
-    const module = await new Function(`return import("${url}")`)();
-    URL.revokeObjectURL(url);
-    return module;
+  const url = URL.createObjectURL(blob);
+  /* Access 'import' from constructed function to prevent Vite from barking 
+  at dynamic import */
+  const module = await Function(`return import("${url}")`)();
+  URL.revokeObjectURL(url);
+  return module;
 }
