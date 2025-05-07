@@ -4,7 +4,7 @@ import "@/main.css";
 
 import { component } from "@/rollo/component/component.js";
 
-
+console.log('FROM DEV')////
 
 
 console.info("Vite environment:", import.meta.env.MODE);

@@ -28,6 +28,6 @@ export const test_has_not = (unit_test) => {
 
 export const test_size = (unit_test) => {
   if (unit_test) {
-    console.log("Number of js load functions:", modules.public.size());
+    console.log("Number of files in public:", modules.public.size());
   }
 };

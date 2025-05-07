@@ -4,6 +4,7 @@ import { Processors } from "@/rollovite/tools/processors.js";
 import { Public } from "@/rollovite/tools/public/public.js";
 
 /* TODO
+- remove and manuel reg
 - Perhaps inject meta data into modules
 - Build tool for processed imports
 */
