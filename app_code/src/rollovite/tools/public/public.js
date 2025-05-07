@@ -4,9 +4,6 @@ rollovite/tools/public/public.js
 */
 
 /* NOTE Do NOT import modules that uses 'modules' here! */
-import { component } from "@/rollo/component/component.js";
-import { module } from "@/rollo/tools/module.js";
-
 import _paths from "@/rollovite/tools/public/__paths__.js";
 const paths = Object.freeze(_paths);
 /* Alternatively:
@@ -27,8 +24,14 @@ export class Public {
         !document.head.querySelector(`link[rel="stylesheet"][href="${path}"]`)
       ) {
         const { promise, resolve } = Promise.withResolvers();
-        const link = component.link({ href: path, rel: "stylesheet" });
-        link.handlers.add("load", (event) => resolve(), { once: true });
+        const link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = path;
+        const on_load = (event) => {
+          link.removeEventListener("load", on_load);
+          resolve();
+        };
+        link.addEventListener("load", on_load);
         document.head.append(link);
         await promise;
       }
@@ -40,7 +43,7 @@ export class Public {
         return this.#module_cache[path];
       }
       const text = await fetch_text(path);
-      const result = await module.from_text(text);
+      const result = await create_module(text);
       this.#module_cache[path] = result;
       return result;
     }
@@ -95,4 +98,12 @@ NOTE
 async function fetch_text(path) {
   const response = await fetch(path);
   return (await response.text()).trim();
+}
+
+async function create_module(text) {
+  const blob = new Blob([text], { type: "text/javascript" });
+    const url = URL.createObjectURL(blob);
+    const module = await new Function(`return import("${url}")`)();
+    URL.revokeObjectURL(url);
+    return module;
 }

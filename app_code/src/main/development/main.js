@@ -3,60 +3,13 @@ import "@/bootstrap.scss";
 import "@/main.css";
 
 import { component } from "@/rollo/component/component.js";
-
-console.log('FROM DEV')////
-
+import { test } from "@/rollotest/test.js";
 
 console.info("Vite environment:", import.meta.env.MODE);
 
-const { bar } = await modules.import.src.test.bar.js()
-console.log('bar:', bar)
-
-const { foo } = await modules.import.public.test.foo.foo.js();
-console.log('foo:', foo)
-
-const raw_foo = await modules.import.src.test.foo.foo.js({ raw: true });
-//const raw_foo = await modules.get('@/test/foo/foo.js', {raw: true})
-console.log('raw_foo:', raw_foo)
-
-const text = await modules.import.public.test.foo.foo.js({ raw: true });
-console.log('text:', text)
-
-//console.log("html:", await modules.get("@/test/foo/foo.html"));
-
 /* Tests */
 await (async () => {
-  const test = new (class Test {
-    #loaders = import.meta.glob("/src/main/development/tests/**/*.test.js");
-    constructor() {}
-
-    async batch() {
-      let count = 0;
-      for (const [path, load] of Object.entries(this.#loaders)) {
-        if (!path.includes("/batch/")) continue;
-        const module = await load();
-        const tests = Object.values(module);
-        for (const test of tests) {
-          count++;
-          test();
-        }
-      }
-      console.info(`Invoked ${count} test functions.`);
-    }
-
-    async unit(path) {
-      const load = this.#loaders[`/src/main/development/tests/${path}.test.js`];
-      if (!load) {
-        throw new Error(`Invalid path: ${path}`);
-      }
-      const module = await load();
-      const tests = Object.values(module);
-      for (const test of tests) {
-        await test(true);
-      }
-    }
-  })();
-
+  /* Unit tests by hash */
   await (async () => {
     const on_hash_change = async (event) => {
       const path = location.hash ? location.hash.slice(1) : null;

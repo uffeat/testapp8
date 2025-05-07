@@ -125,6 +125,8 @@ class Modules {
           )
         ) {
           const { promise, resolve } = Promise.withResolvers();
+
+          
           const link = document.createElement("link");
           link.rel = "stylesheet";
           link.href = path.path;
@@ -133,6 +135,8 @@ class Modules {
             resolve();
           };
           link.addEventListener("load", on_load);
+
+
           document.head.append(link);
           await promise;
         }
