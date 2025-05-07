@@ -9,9 +9,7 @@ rollovite/tools/processors.js
 export class Processors {
   #registry = new Map();
 
-  /* Adds one or more processors. 
-  Chainable, if multiple processors.
-  Returns processor, if single processor. */
+  /* Adds one or more processors. Chainable. */
   add(spec, { overwrite = false } = {}) {
     const entries = Object.entries(spec);
     entries.forEach(([key, processor]) => {
@@ -20,10 +18,6 @@ export class Processors {
       }
       this.#registry.set(key, processor);
     });
-    if (entries.length === 1) {
-      /* Return processor; handy for later removal, if provided inline */
-      return entries[1];
-    }
     return this;
   }
 

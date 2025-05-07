@@ -1,5 +1,5 @@
 /*
-modules/meta
+rollovite/batch/meta
 */
 
 import { modules } from "@/rollovite/modules.js";

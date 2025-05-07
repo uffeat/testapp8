@@ -4,40 +4,37 @@ import { Processors } from "@/rollovite/tools/processors.js";
 import { Public } from "@/rollovite/tools/public/public.js";
 
 /* TODO
-- 
+- remove and manuel reg
+- Perhaps inject meta data into modules
+- Build tool for processed imports
 */
 
-/* Import utility.
-NOTE
-- Builds on Vite's import features with a similar syntax and can be used
-  as a drop-in replacement for static and dynamic imports.
-- Adds platform-native features (e.g., truly dynamic imports).
-- Supports import of /src as well as /public files (regardless of environment).
-  Files can therefore (almost) without friction live in either /src or /public.
-  This can be used to adjust the trade-off between bundle size and import performance.
-- Can be configured 
+/* Import utility that
+- builds on Vite's import features with a similar syntax and can be used
+  as a drop-in replacement for static and dynamic imports
+- adds platform-native features (e.g., truly native dynamic imports)
+- supports import of /src as well as /public files (regardless of environment)
+- can be configured 
+  - for fine-grained import source control
   - to support native and synthetic files types
   - to post-process imports (hook-like mechanism)
+XXX
 - Changes to code that uses 'modules' are NOT picked up by Vite's HMR, i.e., 
   a manual browser refresh is required for Vite's dev server to pick up the 
   changes (restart of the dev server is NOT required).
 - Usage of 'modules' requires that all mapped files use imports with extensions,
   i.e., cannot leave out '.js'. */
 class Modules {
-
-  /* XXX things that are not ideal (but not critical)...
-  - The syntax for registering loaders (modules.src.add()) is not super elegant.
-  - The kwargs of modules.get are not universally applicable, i.e., in certain 
-    cases ignored or overwritten.
-  -  */
   #src;
   #processors;
-  #public;
+  #public
+  
 
   constructor() {
     this.#src = new Src();
     this.#processors = new Processors();
     this.#public = new Public();
+
   }
 
   /* Returns import result. 
@@ -46,7 +43,7 @@ class Modules {
   - Does NOT support relative imports. */
   get import() {
     let path;
-
+    const options = {};
     const modules = this;
     const terminators = ["css", "html", "js", "json", "template"];
 
@@ -65,16 +62,58 @@ class Modules {
             }
             return get_proxy();
           }
-          /* Handle termination for simple file types */
+          /* Handle termination */
           if (terminators.includes(part)) {
-            path += `.${part}`;
-            return (options = {}) => modules.get(path, options);
+            const terminator = ({ format, raw = false } = {}) => {
+              /* NOTE
+              - 'raw' is provided as an object item with a Boolean value to 
+                minimize the use of strings. 
+              - 'format' (secondary file type) is provided as an object item 
+                with a string value - difficult to avoid string, since possible 
+                values of 'format' are not known a priori (NOT critical!). */
+              if (format) {
+                options.format = format;
+              }
+              if (raw) {
+                options.raw = raw;
+              }
+              path += `.${part}`;
+              return modules.get(path, options);
+            };
+            return terminator;
           }
-          /* Handle termination for composite file types */
-          if (part.includes(":")) {
-            path += `.${part.replaceAll(":", ".")}`;
-            return (options = {}) => modules.get(path, options);
+
+
+
+          //
+          //
+          if (part.includes(':')) {
+            const terminator = ({ format, raw = false } = {}) => {
+              
+              if (format) {
+                options.format = format;
+              }
+              if (raw) {
+                options.raw = raw;
+              }
+
+              part = part.replaceAll(':', '.')
+
+
+              path += `.${part}`;
+              return modules.get(path, options);
+            };
+            return terminator;
           }
+
+          //
+          //
+
+
+
+
+
+
           /* Handle dir path */
           path += `/${part}`;
           return get_proxy();
@@ -199,4 +238,5 @@ modules.src
       }
     ),
     { raw: "template" }
-  );
+  )
+
