@@ -10,150 +10,64 @@ export const modules = new (class Modules {
 
   constructor() {
     this.#public = new (class Public {
-      #css;
-      #js;
-      #json;
-      #text;
-
-      /* NOTE
-      - Do NOT expose "type classes"; not necessary and they do not path-convert, so risk of misuse. */
-
-      constructor() {
-        this.#css = new (class Css {
-          #cache = {};
-          async get(path, { raw } = {}) {
-            if (raw) {
-              if (path.path in this.#cache) {
-                return this.#cache[path.path];
-              }
-              const text = await fetch_text(path.path);
-              this.#cache[path.path] = text;
-              return text;
-            }
-            /* Handle non-raw */
-            /* Mimic Vite's css import -> css becomes global (albeit via link) */
-            if (
-              !document.head.querySelector(
-                `link[rel="stylesheet"][href="${path.path}"]`
-              )
-            ) {
-              const { promise, resolve } = Promise.withResolvers();
-              const link = document.createElement("link");
-              link.rel = "stylesheet";
-              link.href = path.path;
-              const on_load = (event) => {
-                link.removeEventListener("load", on_load);
-                resolve();
-              };
-              link.addEventListener("load", on_load);
-              document.head.append(link);
-              await promise;
-            }
-          }
-        })();
-
-        this.#js = new (class Js {
-          #js_cache = {};
-          #text_cache = {};
-
-          async get(path, { name, raw } = {}) {
-            if (raw) {
-              if (name) {
-                throw new Error(`'name' N/A.`);
-              }
-              if (path.path in this.#text_cache) {
-                return this.#text_cache[path.path];
-              }
-              const text = await fetch_text(path.path);
-              this.#text_cache[path.path] = text;
-              return text;
-            }
-            /* Non-raw */
-            let module;
-            if (path.path in this.#js_cache) {
-              module = this.#js_cache[path.path];
-            } else {
-              let text;
-              if (path.path in this.#text_cache) {
-                text = this.#text_cache[path.path];
-              } else {
-                text = await fetch_text(path.path);
-                this.#text_cache[path.path] = text;
-              }
-              module = await text_to_module(text);
-              this.#js_cache[path.path] = module;
-            }
-            /* NOTE
-          - By convention, js modules that export default, should not export 
-            anything else. */
-            if ("default" in module) {
-              return module.default;
-            }
-            if (name) {
-              return module[name];
-            }
-            return module;
-          }
-        })();
-
-        this.#json = new (class Json {
-          #cache = {};
-
-          async get(path, { raw } = {}) {
-            let result;
-            if (path.path in this.#cache) {
-              result = this.#cache[path.path];
-            } else {
-              result = await fetch_text(path.path);
-              this.#cache[path.path] = result;
-            }
-            if (raw) {
-              return result;
-            }
-            /* Mimic Vite's json import -> uncached parsed json */
-            return JSON.parse(result);
-          }
-        })();
-
-        this.#text = new (class Text {
-          #cache = {};
-
-          async get(path) {
-            if (path.path in this.#cache) {
-              return this.#cache[path.path];
-            }
-            const text = await fetch_text(path.path);
-            this.#cache[path.path] = text;
-            return text;
-          }
-        })();
-      }
-
+      #js_cache = {};
+      #cache = {};
       async get(path, { name, raw } = {}) {
         if (!(path instanceof Path)) {
           path = new Path(path);
         }
-        /* Check, if name applies */
-        if (path.type !== "js" && name) {
-          throw new Error(`'name' N/A.`);
-        }
 
-        if (path.type === "css") {
-          return await this.#css.get(path, { raw });
+        let result;
+        if (path.type === "js" && !raw) {
+          /* Handle js module */
+          if (path.path in this.#js_cache) {
+            result = this.#js_cache[path.path];
+          }
+          result = await create_module(path.path);
+
+          /* NOTE
+          - By convention, js modules that export default, should not export 
+            anything else. */
+          if ("default" in result) {
+            result = result.default;
+          } else if (name) {
+            return result[name];
+          }
+
+          this.#js_cache[path.path] = result;
+        } else if (path.type === "css" && !raw) {
+          /* Mimic Vite's css import -> css becomes global (albeit via link) */
+          if (
+            !document.head.querySelector(
+              `link[rel="stylesheet"][href="${path.path}"]`
+            )
+          ) {
+            const { promise, resolve } = Promise.withResolvers();
+            const link = document.createElement("link");
+            link.rel = "stylesheet";
+            link.href = path.path;
+            const on_load = (event) => {
+              link.removeEventListener("load", on_load);
+              resolve();
+            };
+            link.addEventListener("load", on_load);
+            document.head.append(link);
+            await promise;
+          }
+        } else {
+          /* Handle all other types as text */
+          if (path.path in this.#cache) {
+            result = this.#cache[path.path];
+          } else {
+            result = await fetch_text(path.path);
+            this.#cache[path.path] = result;
+          }
         }
-        if (path.type === "js") {
-          return await this.#js.get(path, { name, raw });
+        /* Mimic Vite's json import -> uncached parsed json */
+        if (path.type === "json" && !raw) {
+          result = JSON.parse(result);
         }
-        if (path.type === "json") {
-          return await this.#json.get(path, { raw });
-        }
-        if (path.type === "html") {
-          throw new Error(`'html' not supported. Use 'template' instead.`);
-        }
-        if (raw) {
-          throw new Error(`'raw' N/A.`);
-        }
-        return await this.#text.get(path);
+        return result;
       }
     })();
 
@@ -223,8 +137,9 @@ export const modules = new (class Modules {
           }
 
           async get(path, { name } = {}) {
+            
             const module = await super.get(path);
-
+            
             if (name) {
               return module[name];
             }
@@ -286,16 +201,15 @@ export const modules = new (class Modules {
         if (!(path instanceof Path)) {
           path = new Path(path);
         }
-        if (path.type === "js") {
+        if (path.type === 'js') {
           return await this[path.type].get(path, { name });
         } else {
           if (name) {
-            throw new Error(
-              `'name' does not apply to type '${path.type}' modules.`
-            );
+            throw new Error(`'name' does not apply to type '${path.type}' modules.`)
           }
           return await this[path.type].get(path);
         }
+        
       }
     })();
   }
@@ -353,13 +267,18 @@ export const modules = new (class Modules {
 
   /* Returns import. */
   async get(path, { name, raw } = {}) {
+    ////console.log('path:', path)////
     path = new Path(path);
-    if (!path.public && raw) {
-      throw new Error(`'raw' N/A.`);
-    }
-    return path.public
+
+    const result = path.public
       ? await this.#public.get(path, { name, raw })
       : await this.#src.get(path, { name });
+
+    /* Check kwargs */
+    // TODO
+
+    /* Return non-object result */
+    return result;
   }
 })();
 
@@ -371,16 +290,21 @@ Object.defineProperty(window, "modules", {
   value: modules,
 });
 
-/* Returns text content of file in public by environment-adjusted path. */
+/* Returns text content of file in /public.
+NOTE
+- 'path' should be normalized, i.e., environment-adjusted. */
 async function fetch_text(path) {
   const response = await fetch(path);
   return (await response.text()).trim();
 }
 
-/* Returns module created from text. 
+
+
+/* Returns module created from path. 
 NOTE
 - Does NOT cache module. */
-async function text_to_module(text) {
+async function create_module(path) {
+  const text = await fetch_text(path)
   const blob = new Blob([text], { type: "text/javascript" });
   const url = URL.createObjectURL(blob);
   /* Access 'import' from constructed function to prevent Vite from barking 
@@ -388,7 +312,15 @@ async function text_to_module(text) {
   const module = await Function(`return import("${url}")`)();
   URL.revokeObjectURL(url);
   return module;
+
+
+
+
 }
+
+
+
+
 
 class Path {
   #path;
@@ -417,3 +349,5 @@ class Path {
     return this.#type;
   }
 }
+
+
