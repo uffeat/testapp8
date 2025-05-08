@@ -4,6 +4,8 @@ rollovite/modules.js
 */
 
 /* NOTE Do NOT import modules that uses 'modules' here! */
+import paths from "@/rollovite/tools/public/__paths__.js";
+
 export const modules = new (class Modules {
   #public;
   #src;
@@ -16,7 +18,8 @@ export const modules = new (class Modules {
       #text;
 
       /* NOTE
-      - Do NOT expose "type classes"; not necessary and they do not path-convert, so risk of misuse. */
+      - Do NOT expose "type classes"; not necessary and they do not path-convert, 
+        so risk of misuse. */
 
       constructor() {
         this.#css = new (class Css {
@@ -154,6 +157,14 @@ export const modules = new (class Modules {
           throw new Error(`'raw' N/A.`);
         }
         return await this.#text.get(path);
+      }
+
+      paths(filter) {
+        let result = paths;
+        if (filter) {
+          result = paths.filter(filter);
+        }
+        return result.length ? result : null;
       }
     })();
 

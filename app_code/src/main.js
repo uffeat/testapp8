@@ -25,6 +25,11 @@ console.log("template:", await modules.get("@/test/foo/foo.template")); ////
 console.log("template:", await modules.get("/test/foo/foo.template")); ////
 
 console.log("bar:", await modules.import.src.test.bar.bar.js({name: 'bar'})); ////
+
+console.log("Number of public files:", modules.public.paths().length); ////
+console.log("Number of js files in src:", modules.src.js.paths().length); ////
+
+
 //
 //
 
