@@ -10,29 +10,65 @@ export const modules = new (class Modules {
 
   constructor() {
     this.#public = new (class Public {
+      #js_cache = {};
       #cache = {};
       async get(path) {
-        if (path in this.#cache) {
-          return this.#cache[path];
+        const type = get_type(path);
+        let result;
+
+        if (type === "js") {
+          /* Handle js module */
+          if (path in this.#js_cache) {
+            result = this.#js_cache[path];
+          }
+          result = await create_module(path);
+          this.#js_cache[path] = result;
+        } else if (type === "css") {
+          /* Mimic Vite's css import -> css becomes global (albeit via link) */
+          if (
+            !document.head.querySelector(
+              `link[rel="stylesheet"][href="${path}"]`
+            )
+          ) {
+            const { promise, resolve } = Promise.withResolvers();
+            const link = document.createElement("link");
+            link.rel = "stylesheet";
+            link.href = path;
+            const on_load = (event) => {
+              link.removeEventListener("load", on_load);
+              resolve();
+            };
+            link.addEventListener("load", on_load);
+            document.head.append(link);
+            await promise;
+          }
+        } else {
+          /* Handle all other types as text */
+          if (path in this.#cache) {
+            result = this.#cache[path];
+          } else {
+            result = await fetch_text(path);
+            this.#cache[path] = result;
+          }
         }
-        const module = await create_module(path);
-        this.#cache[path] = module;
-        return module;
+        /* Mimic Vite's json import -> uncached parsed json */
+        if (type === "json") {
+          result = JSON.parse(result);
+        }
+        return result;
       }
     })();
 
     this.#src = new (class Src {
-
       /* NOTE
       - Types could probably be implemented in a leaner with a factory pattern,
         but this would also be less idiomatic. */
-
 
       #css;
       #html;
       #js;
       #json;
-      #sheet
+      #sheet;
       #template;
 
       constructor() {
@@ -98,40 +134,49 @@ export const modules = new (class Modules {
         })();
       }
 
+      /* Returns controller for css files in src. */
       get css() {
         return this.#css;
       }
 
+      /* Returns controller for html files in src. */
       get html() {
         return this.#html;
       }
 
+      /* Returns controller for js files in src. */
       get js() {
         return this.#js;
       }
 
+      /* Returns controller for json files in src. */
       get json() {
         return this.#json;
       }
 
+      /* Returns controller for sheet files in src. */
       get sheet() {
         return this.#sheet;
       }
 
+      /* Returns controller for template files in src. */
       get template() {
         return this.#template;
       }
 
+      /* Returns import from src. */
       async get(path) {
         return await this[get_type(path)].get(path);
       }
     })();
   }
 
+  /* Returns controller for files in public. */
   get public() {
     return this.#public;
   }
 
+  /* Returns controller for files in src. */
   get src() {
     return this.#src;
   }
@@ -177,21 +222,21 @@ export const modules = new (class Modules {
     return proxy();
   }
 
-  /* Returns import result. */
+  /* Returns import. */
   async get(path) {
     path = create_path(path);
     let result;
     if (path.startsWith("/src/")) {
-      /* Import module from /src */
+      /* Import from src */
       result = await this.#src.get(path);
     } else {
-      /* Import module from /public */
+      /* Import from public */
       result = await this.#public.get(path);
     }
 
     /* NOTE
     - By convention, js modules that export default, should not export anything else. */
-    if ("default" in result) {
+    if (typeof result === "object" && "default" in result) {
       result = result.default;
     }
     return result;

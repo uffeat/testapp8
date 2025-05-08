@@ -1,6 +1,4 @@
-/* Global styles */
-import "@/bootstrap.scss";
-import "@/main.css";
+
 
 //import { test } from "@/rollotest/test.js";
 
