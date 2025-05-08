@@ -1,6 +1,4 @@
-/* Global styles */
-import "@/bootstrap.scss";
-import "@/main.css";
+
 
 
 import { component } from "@/rollo/component/component.js";

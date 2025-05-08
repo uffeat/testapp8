@@ -22,9 +22,17 @@ export const modules = new (class Modules {
     })();
 
     this.#src = new (class Src {
+
+      /* NOTE
+      - Types could probably be implemented in a leaner with a factory pattern,
+        but this would also be less idiomatic. */
+
+
       #css;
+      #html;
       #js;
       #json;
+      #sheet
       #template;
 
       constructor() {
@@ -53,6 +61,18 @@ export const modules = new (class Modules {
           }
         }
 
+        this.#css = new (class Css extends Base {
+          constructor() {
+            super(import.meta.glob(["/src/**/*.css"]));
+          }
+        })();
+
+        this.#html = new (class Html extends Base {
+          constructor() {
+            super(import.meta.glob(["/src/**/*.html"], { query: "?raw" }));
+          }
+        })();
+
         this.#js = new (class Js extends Base {
           constructor() {
             super(import.meta.glob(["/src/**/*.js", "!/src/**/*.test.js"]));
@@ -65,9 +85,15 @@ export const modules = new (class Modules {
           }
         })();
 
+        this.#sheet = new (class Sheet extends Base {
+          constructor() {
+            super(import.meta.glob(["/src/**/*.sheet"], { query: "?raw" }));
+          }
+        })();
+
         this.#template = new (class Template extends Base {
           constructor() {
-            super(import.meta.glob(["/src/**/*.template"]));
+            super(import.meta.glob(["/src/**/*.template"], { query: "?raw" }));
           }
         })();
       }
@@ -76,12 +102,20 @@ export const modules = new (class Modules {
         return this.#css;
       }
 
+      get html() {
+        return this.#html;
+      }
+
       get js() {
         return this.#js;
       }
 
       get json() {
         return this.#json;
+      }
+
+      get sheet() {
+        return this.#sheet;
       }
 
       get template() {
@@ -146,18 +180,21 @@ export const modules = new (class Modules {
   /* Returns import result. */
   async get(path) {
     path = create_path(path);
-    let module;
+    let result;
     if (path.startsWith("/src/")) {
       /* Import module from /src */
-      module = await this.#src.get(path);
+      result = await this.#src.get(path);
     } else {
       /* Import module from /public */
-      module = await this.#public.get(path);
+      result = await this.#public.get(path);
     }
-    if ("default" in module) {
-      return module.default;
+
+    /* NOTE
+    - By convention, js modules that export default, should not export anything else. */
+    if ("default" in result) {
+      result = result.default;
     }
-    return module;
+    return result;
   }
 })();
 
