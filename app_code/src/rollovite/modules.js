@@ -5,10 +5,70 @@ v.2.1
 */
 
 /* NOTE Do NOT import modules that uses 'modules' here! */
+import { assign } from "@/rollo/tools/assign.js";
 import paths from "@/rollovite/tools/public/__paths__.js";
 import { Cache } from "@/rollo/tools/cache.js";
 
+const TYPES = ["css", "html", "js", "json", "sheet", "template"];
 
+/* Utility for parsing path. */
+class Path {
+  #extension;
+  #path;
+  #public;
+  #type;
+  constructor(path) {
+    if (path.startsWith("/")) {
+      this.#path = `${import.meta.env.BASE_URL}${path.slice("/".length)}`;
+      this.#public = true;
+    } else {
+      this.#path = `/src/${path.slice("@/".length)}`;
+      this.#public = false;
+    }
+    this.#type = path.split(".").reverse()[0];
+  }
+
+  get extension() {
+    if (this.#extension === undefined) {
+      const file = this.path.split("/").reverse()[0];
+      const [stem, ...meta] = file.split(".");
+      this.#extension = meta.join(".");
+    }
+    return this.#extension;
+  }
+
+  get path() {
+    return this.#path;
+  }
+
+  get public() {
+    return this.#public;
+  }
+
+  get type() {
+    return this.#type;
+  }
+}
+
+/* */
+export function importer(path) {
+  return (function proxy() {
+    return new Proxy(
+      {},
+      {
+        get: (target, part) => {
+          if (TYPES.includes(part))
+            return (options = {}) => modules.get((path += `.${part}`), options);
+          if (part.includes(":"))
+            return (options = {}) =>
+              modules.get((path += `.${part.replaceAll(":", ".")}`), options);
+          path += `/${part}`;
+          return proxy();
+        },
+      }
+    );
+  })();
+}
 
 /* Import utility.
 NOTE
@@ -68,8 +128,8 @@ export const modules = new (class Modules {
 
       /* Prevents addition of processors. Chainable. */
       freeze() {
-        Object.freeze(this.#registry)
-       
+        Object.freeze(this.#registry);
+
         return this;
       }
 
@@ -188,7 +248,7 @@ export const modules = new (class Modules {
         if (path.type !== "js" && name) {
           throw new Error(`'name' N/A.`);
         }
-        if (raw && !(['css', 'js', 'json'].includes(path.type))) {
+        if (raw && !["css", "js", "json"].includes(path.type)) {
           throw new Error(`'raw' N/A.`);
         }
 
@@ -254,8 +314,8 @@ export const modules = new (class Modules {
               return paths
                 .filter((path) => filter(normalize(path)))
                 .map(normalize);
-            } return paths.map(normalize);
-           
+            }
+            return paths.map(normalize);
           }
         }
 
@@ -372,7 +432,6 @@ export const modules = new (class Modules {
   get import() {
     let path;
     const modules = this;
-    const terminators = ["css", "html", "js", "json", "sheet", "template"];
     /* Builds up path by successive recursive calls until termination. */
     const proxy = () =>
       new Proxy(this, {
@@ -388,17 +447,17 @@ export const modules = new (class Modules {
             }
             return proxy();
           }
-          /* Handle termination for simple file types */
-          if (terminators.includes(part)) {
+          /* Termination for simple file types */
+          if (TYPES.includes(part)) {
             path += `.${part}`;
             return (options = {}) => modules.get(path, options);
           }
-          /* Handle termination for composite file types */
+          /* Termination for composite file types */
           if (part.includes(":")) {
             path += `.${part.replaceAll(":", ".")}`;
             return (options = {}) => modules.get(path, options);
           }
-          /* Handle dir path */
+          /* Buuld dir path */
           path += `/${part}`;
           return proxy();
         },
@@ -452,41 +511,30 @@ async function text_to_module(text) {
   return module;
 }
 
-/* Utility for parsing path. */
-class Path {
-  #extension;
-  #path;
-  #public;
-  #type;
-  constructor(path) {
-    if (path.startsWith("/")) {
-      this.#path = `${import.meta.env.BASE_URL}${path.slice("/".length)}`;
-      this.#public = true;
-    } else {
-      this.#path = `/src/${path.slice("@/".length)}`;
-      this.#public = false;
+
+/* Configure importers with Python-like-syntax */
+(() => {
+  const components = importer("@/components");
+  const rollo = importer("@/rollo");
+  const rolloanvil = importer("@/rolloanvil");
+  const rolloui = importer("@/rolloui");
+  assign(
+    modules,
+    class {
+      get components() {
+        return components;
+      }
+      get rollo() {
+        return rollo;
+      }
+      get rolloanvil() {
+        return rolloanvil;
+      }
+      get rolloui() {
+        return rolloui;
+      }
     }
-    this.#type = path.split(".").reverse()[0];
-  }
+  );
+})();
 
-  get extension() {
-    if (this.#extension === undefined) {
-      const file = this.path.split("/").reverse()[0];
-      const [stem, ...meta] = file.split(".");
-      this.#extension = meta.join(".");
-    }
-    return this.#extension;
-  }
-
-  get path() {
-    return this.#path;
-  }
-
-  get public() {
-    return this.#public;
-  }
-
-  get type() {
-    return this.#type;
-  }
-}
+console.log("assign:", await modules.rollo.tools.assign.js({ name: "assign" }));
