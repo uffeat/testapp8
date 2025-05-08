@@ -12,6 +12,7 @@ component.h1("foo.bar", { parent: document.body }, "Hello");
 
 console.log("html:", await modules.get("@/test/foo/foo.html")); ////
 
+
 console.log("foo:", (await modules.get("@/test/foo/foo.js", {name: 'foo'}))); ////
 console.log("foo:", (await modules.get("/test/foo/foo.js", {name: 'foo'}))); ////
 
@@ -27,7 +28,6 @@ console.log("template:", await modules.get("/test/foo/foo.template")); ////
 console.log("bar:", await modules.import.src.test.bar.bar.js({name: 'bar'})); ////
 
 console.log("Number of public files:", modules.public.paths().length); ////
-console.log("Number of js files in src:", modules.src.js.paths().length); ////
 
 
 //

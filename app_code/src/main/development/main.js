@@ -1,7 +1,7 @@
 
 
 import { component } from "@/rollo/component/component.js";
-//import { test } from "@/rollotest/test.js";
+import { test } from "@/rollotest/test.js";
 
 
 

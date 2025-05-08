@@ -1,35 +1,14 @@
 /*
 rollovite/modules.js
 20250508
-v.2.0.beta
+v.2.1
 */
 
 /* NOTE Do NOT import modules that uses 'modules' here! */
 import paths from "@/rollovite/tools/public/__paths__.js";
+import { Cache } from "@/rollo/tools/cache.js";
 
-class Cache {
-  #cache = new Map();
-  #creator;
 
-  constructor(creator) {
-    this.#creator = creator;
-  }
-
-  async get(key, creator) {
-    let cached = this.#cache.get(key);
-    if (cached) {
-      return cached;
-    }
-    if (creator) {
-      cached = await creator();
-    } else {
-      cached = await this.#creator(key);
-    }
-
-    this.#cache.set(key, cached);
-    return cached;
-  }
-}
 
 /* Import utility.
 NOTE
@@ -60,19 +39,66 @@ export const modules = new (class Modules {
   - The inner mechanics for handling different file types is relatively elegant 
     for src, but has a somewhat less declarative feel for public. Not critical,
     and can be refatored without changing the exposed API.
+  - Supported file-types are hard-coded (for src and for the Python-like syntax).
+    This is a deliberate trade-off for acieving 'zero-config', but does involve
+    tinkering with inner mechanics, if are to be added. Not critical.
   */
 
+  #processors;
   #public;
   #src;
 
   constructor() {
+    this.#processors = new (class Processors {
+      #registry = new Map();
+
+      /* */
+      add(spec) {
+        Object.entries(spec).forEach(([extension, processor]) => {
+          this.#registry.set(extension, processor);
+        });
+        return this;
+      }
+
+      /* Removes all processors. Chainable. */
+      clear() {
+        this.#registry.clear();
+        return this;
+      }
+
+      /* Prevents addition of processors. Chainable. */
+      freeze() {
+        Object.freeze(this.#registry)
+       
+        return this;
+      }
+
+      /* */
+      get(extension) {
+        return this.#registry.get(extension);
+      }
+
+      /* */
+      processors(filter) {
+        const result = Array.from(this.#registry.keys());
+        if (filter) {
+          return result.filter(filter);
+        }
+        return result;
+      }
+
+      /* Removes processor. Chainable. */
+      remove(key) {
+        this.#registry.delete(key);
+        return this;
+      }
+    })();
+
     this.#public = new (class Public {
       #css;
       #js;
       #json;
       #text;
-
-      
 
       /* NOTE
       - Do NOT expose "type classes"; not necessary and they do not path-convert, 
@@ -135,7 +161,7 @@ export const modules = new (class Modules {
           #cache = new Cache(fetch_text);
 
           async get(path, { raw } = {}) {
-            const result = await this.#cache.get(path.path)
+            const result = await this.#cache.get(path.path);
             if (raw) {
               return result;
             }
@@ -148,15 +174,12 @@ export const modules = new (class Modules {
           #cache = new Cache(fetch_text);
 
           async get(path) {
-            return await this.#cache.get(path.path)
+            return await this.#cache.get(path.path);
           }
         })();
-
-        
-
-
       }
 
+      /* */
       async get(path, { name, raw } = {}) {
         if (!(path instanceof Path)) {
           path = new Path(path);
@@ -165,7 +188,7 @@ export const modules = new (class Modules {
         if (path.type !== "js" && name) {
           throw new Error(`'name' N/A.`);
         }
-        if (path.type !== "js" && raw) {
+        if (raw && !(['css', 'js', 'json'].includes(path.type))) {
           throw new Error(`'raw' N/A.`);
         }
 
@@ -173,7 +196,6 @@ export const modules = new (class Modules {
           console.warn(`Use 'template' instead of 'html'.`);
         }
 
-        
         if (path.type === "css") {
           return await this.#css.get(path, { raw });
         }
@@ -186,12 +208,12 @@ export const modules = new (class Modules {
         return await this.#text.get(path);
       }
 
+      /* */
       paths(filter) {
-        let result = paths;
         if (filter) {
-          result = paths.filter(filter);
+          return paths.filter(filter);
         }
-        return result.length ? result : null;
+        return paths;
       }
     })();
 
@@ -228,15 +250,12 @@ export const modules = new (class Modules {
           paths(filter) {
             const paths = Object.keys(this.#loaders);
             const normalize = (path) => `@/${path.slice("/src/".length)}`;
-            let result;
             if (filter) {
-              result = paths
+              return paths
                 .filter((path) => filter(normalize(path)))
                 .map(normalize);
-            } else {
-              result = paths.map(normalize);
-            }
-            return result.length ? result : null;
+            } return paths.map(normalize);
+           
           }
         }
 
@@ -332,6 +351,11 @@ export const modules = new (class Modules {
     })();
   }
 
+  /* Returns controller for processors. */
+  get processors() {
+    return this.#processors;
+  }
+
   /* Returns controller for files in public. */
   get public() {
     return this.#public;
@@ -388,9 +412,16 @@ export const modules = new (class Modules {
     if (!path.public && raw) {
       throw new Error(`'raw' N/A.`);
     }
-    return path.public
-      ? await this.#public.get(path, { name, raw })
-      : await this.#src.get(path, { name });
+    const result = path.public
+      ? await this.public.get(path, { name, raw })
+      : await this.src.get(path, { name });
+
+    const processor = this.processors.get(path.extension);
+    if (processor) {
+      return await processor.call(null, path, result);
+    }
+
+    return result;
   }
 })();
 
@@ -423,6 +454,7 @@ async function text_to_module(text) {
 
 /* Utility for parsing path. */
 class Path {
+  #extension;
   #path;
   #public;
   #type;
@@ -435,6 +467,15 @@ class Path {
       this.#public = false;
     }
     this.#type = path.split(".").reverse()[0];
+  }
+
+  get extension() {
+    if (this.#extension === undefined) {
+      const file = this.path.split("/").reverse()[0];
+      const [stem, ...meta] = file.split(".");
+      this.#extension = meta.join(".");
+    }
+    return this.#extension;
   }
 
   get path() {

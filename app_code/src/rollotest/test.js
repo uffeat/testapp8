@@ -1,4 +1,4 @@
-import { modules } from "@/rollovite/modules";
+import { modules } from "@/rollovite/modules.js";
 
 /* */
 export const test = new (class Test {
@@ -54,7 +54,3 @@ export const test = new (class Test {
     }
   }
 })();
-
-
-
-
