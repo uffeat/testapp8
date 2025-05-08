@@ -1,5 +1,5 @@
 /*
-modules/public_css
+rollovite/public_css
 */
 
 import { component } from "@/rollo/component/component.js";

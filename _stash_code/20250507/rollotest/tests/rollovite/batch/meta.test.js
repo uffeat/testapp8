@@ -1,30 +1,14 @@
 /*
-modules/meta
+rollovite/batch/meta
 */
 
 import { modules } from "@/rollovite/modules.js";
+/* Add loader to handle files in /src/test */
+import "@/rollotest/tests/rollovite/loaders/test.js";
 
 const success = () => console.info("Success!");
 
-export const test_no_secondary = (unit_test) => {
-  const actual = modules.src.has("@/test/foo/foo.foo.js");
-  const expected = false;
-  if (actual !== expected) {
-    console.error(`'modules.src.has()' or 'modules' config failed!`);
-  } else if (unit_test) {
-    success();
-  }
-};
 
-export const test_no_development = (unit_test) => {
-  const actual = modules.src.has("@/main/development/main.js");
-  const expected = false;
-  if (actual !== expected) {
-    console.error(`'modules.src.has()' or 'modules' config failed!`);
-  } else if (unit_test) {
-    success();
-  }
-};
 
 export const test_has = (unit_test) => {
   const actual = modules.src.has("@/test/foo/foo.css");

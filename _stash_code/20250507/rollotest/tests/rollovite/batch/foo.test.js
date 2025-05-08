@@ -1,26 +1,15 @@
 /*
-modules/foo
+rollovite/batch/foo
 */
 
 import { modules } from "@/rollovite/modules.js";
-import { module } from "@/rollo/tools/module.js";
 import { match } from "@/rollo/tools/object/match.js";
-import { component } from "@/rollo/component/component.js";
+/* Add loader to handle files in /src/test */
+import "@/rollotest/tests/rollovite/loaders/test.js";
+/* Set up html_as_js processor */
+import "@/rollotest/tests/rollovite/processors/html_as_js.js";
 
 const success = () => console.info("Success!");
-
-/* Set up loader and processor to handle "js from html" */
-(() => {
-  modules.src.add(
-    import.meta.glob("/src/test/foo/**/*.js.html", {
-      import: "default",
-      query: "?raw",
-    }),
-    { raw: "html" }
-  );
-
-  
-})();
 
 export const test_raw_css = async (unit_test) => {
   const actual = await modules.get("@/test/foo/foo.css", { raw: true });
@@ -62,7 +51,7 @@ export const test_html = async (unit_test) => {
 };
 
 export const test_json = async (unit_test) => {
-  const actual = (await modules.get("@/test/foo/foo.json")).default;
+  const actual = (await modules.get("@/test/foo/foo.json"));
   const expected = { foo: "FOO" };
 
   if (!match(actual, expected)) {
@@ -77,34 +66,9 @@ export const test_json = async (unit_test) => {
   }
 };
 
-export const test_js_html = async (unit_test) => {
-
-  const key = "foo"
-  const cache = {};
-  const processor = modules.processors.add({
-    [key]: async (path, html) => {
-      if (path in cache) {
-        return cache[path];
-      }
-      const element = component.div({ innerHTML: html });
-      const result = await module.from_text(
-        element
-          .querySelector("template[script]")
-          .content.querySelector("script")
-          .text.trim()
-      );
-      cache[path] = result;
-      return result;
-    },
-  });
-
-
-
-
-
-
+export const test_html_as_js = async (unit_test) => {
   const actual = (
-    await modules.get("@/test/foo/foo.js.html", { format: "foo" })
+    await modules.get("@/test/foo/foo.js.html")
   ).foo;
   const expected = "FOO";
   if (actual !== expected) {
@@ -112,6 +76,14 @@ export const test_js_html = async (unit_test) => {
   } else if (unit_test) {
     success();
   }
+};
 
-  modules.processors.remove(key, processor)
+export const test_template = async (unit_test) => {
+  const actual = (await modules.get("@/test/foo/foo.template")).trim();
+  const expected = `<h1>FOO</h1>`;
+  if (actual !== expected) {
+    console.error("Expected:", expected, "\nActual:", actual);
+  } else if (unit_test) {
+    success();
+  }
 };

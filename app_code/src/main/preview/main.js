@@ -2,7 +2,7 @@
 import "@/bootstrap.scss";
 import "@/main.css";
 
-import { test } from "@/rollotest/test.js";
+//import { test } from "@/rollotest/test.js";
 
 import { component } from "@/rollo/component/component.js";
 import { Check } from "@/rolloui/components/form/check.js";
