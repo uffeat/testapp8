@@ -7,30 +7,6 @@ v.2.0.beta
 /* NOTE Do NOT import modules that uses 'modules' here! */
 import paths from "@/rollovite/tools/public/__paths__.js";
 
-class Cache {
-  #cache = new Map();
-  #creator;
-
-  constructor(creator) {
-    this.#creator = creator;
-  }
-
-  async get(key, creator) {
-    let cached = this.#cache.get(key);
-    if (cached) {
-      return cached;
-    }
-    if (creator) {
-      cached = await creator();
-    } else {
-      cached = await this.#creator(key);
-    }
-
-    this.#cache.set(key, cached);
-    return cached;
-  }
-}
-
 /* Import utility.
 NOTE
 - Intended for app-wide use and can be used as a drop-in replacement for static 
@@ -60,6 +36,8 @@ export const modules = new (class Modules {
   - The inner mechanics for handling different file types is relatively elegant 
     for src, but has a somewhat less declarative feel for public. Not critical,
     and can be refatored without changing the exposed API.
+  - Not sure, if mapping imports gloabally (as 'modules' currently does) has
+    a negative performance impact (treeshaking and other factors)???
   */
 
   #public;
@@ -72,18 +50,21 @@ export const modules = new (class Modules {
       #json;
       #text;
 
-      
-
       /* NOTE
       - Do NOT expose "type classes"; not necessary and they do not path-convert, 
         so risk of misuse. */
 
       constructor() {
         this.#css = new (class Css {
-          #cache = new Cache(fetch_text);
+          #cache = {};
           async get(path, { raw } = {}) {
             if (raw) {
-              return await this.#cache.get(path.path);
+              if (path.path in this.#cache) {
+                return this.#cache[path.path];
+              }
+              const text = await fetch_text(path.path);
+              this.#cache[path.path] = text;
+              return text;
             }
             /* Non-raw */
             /* Mimic Vite: css becomes global (albeit via link) */
@@ -108,13 +89,17 @@ export const modules = new (class Modules {
         })();
 
         this.#js = new (class Js {
-          #cache = new Cache();
+          #cache = {};
 
           async get(path, { name } = {}) {
-            const module = await this.#cache.get(path.path, async () => {
+            let module;
+            if (path.path in this.#cache) {
+              module = this.#cache[path.path];
+            } else {
               const text = await modules.public.get(path, { raw: true });
-              return await text_to_module(text);
-            });
+              module = await text_to_module(text);
+              this.#cache[path.path] = module;
+            }
             /* NOTE
             - Convention: Modules with default export, should not export 
               anything else. */
@@ -132,10 +117,16 @@ export const modules = new (class Modules {
         })();
 
         this.#json = new (class Json {
-          #cache = new Cache(fetch_text);
+          #cache = {};
 
           async get(path, { raw } = {}) {
-            const result = await this.#cache.get(path.path)
+            let result;
+            if (path.path in this.#cache) {
+              result = this.#cache[path.path];
+            } else {
+              result = await fetch_text(path.path);
+              this.#cache[path.path] = result;
+            }
             if (raw) {
               return result;
             }
@@ -145,35 +136,28 @@ export const modules = new (class Modules {
         })();
 
         this.#text = new (class Text {
-          #cache = new Cache(fetch_text);
+          #cache = {};
 
           async get(path) {
-            return await this.#cache.get(path.path)
+            if (path.path in this.#cache) {
+              return this.#cache[path.path];
+            }
+            const text = await fetch_text(path.path);
+            this.#cache[path.path] = text;
+            return text;
           }
         })();
-
-        
-
-
       }
 
       async get(path, { name, raw } = {}) {
         if (!(path instanceof Path)) {
           path = new Path(path);
         }
-        /* Check, if kwargs applies */
+        /* Check, if name applies */
         if (path.type !== "js" && name) {
           throw new Error(`'name' N/A.`);
         }
-        if (path.type !== "js" && raw) {
-          throw new Error(`'raw' N/A.`);
-        }
 
-        if (path.type === "html") {
-          console.warn(`Use 'template' instead of 'html'.`);
-        }
-
-        
         if (path.type === "css") {
           return await this.#css.get(path, { raw });
         }
@@ -182,6 +166,12 @@ export const modules = new (class Modules {
         }
         if (path.type === "json") {
           return await this.#json.get(path, { raw });
+        }
+        if (path.type === "html") {
+          throw new Error(`'html' not supported. Use 'template' instead.`);
+        }
+        if (path.type !== "js" && raw) {
+          throw new Error(`'raw' N/A.`);
         }
         return await this.#text.get(path);
       }
@@ -447,5 +437,24 @@ class Path {
 
   get type() {
     return this.#type;
+  }
+}
+
+class Cache {
+  #cache = new Map();
+  #creator;
+
+  constructor(creator) {
+    this.#creator = creator;
+  }
+
+  async get(key) {
+    let cached = this.#cache.get(key);
+    if (cached) {
+      return cached;
+    }
+    cached = await this.#creator();
+    this.#cache.set(key, cached);
+    return cached;
   }
 }
