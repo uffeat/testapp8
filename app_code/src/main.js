@@ -7,7 +7,7 @@ import "@/rollovite/modules.js";
 //
 import { component } from "@/rollo/component/component.js";
 await modules.get("@/test/foo/foo.css");
-await modules.get("/test/bar/bar.css");
+//await modules.get("/test/bar/bar.css");
 component.h1("foo.bar", { parent: document.body }, "Hello");
 
 console.log("html:", await modules.get("@/test/foo/foo.html")); ////
