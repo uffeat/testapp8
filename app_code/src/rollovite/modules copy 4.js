@@ -1,45 +1,12 @@
 /*
 rollovite/modules.js
 20250508
-v.2.0.beta
 */
 
 /* NOTE Do NOT import modules that uses 'modules' here! */
 import paths from "@/rollovite/tools/public/__paths__.js";
 
-/* Import utility.
-NOTE
-- Intended for app-wide use and can be used as a drop-in replacement for static 
-  and dynamic imports.
-- Supports truly dynamic imports.
-- Supports a fixed set of native and native-like file types.
-- Ignores .test.js src files.
-- Supports src as well as public files (regardless of environment) with similar syntax.
-  This can be used to adjust the trade-off between bundle size and import performance.
-- Changes to code that uses 'modules' are NOT picked up by Vite's HMR, i.e., 
-  manual browser refresh is required to pick up the changes. */
 export const modules = new (class Modules {
-  /* XXX
-  - The central modules.get accepts kwargs, some of which are only relevant 
-    for certain sources and file types. This is not ideal, but invalid provision 
-    of kwargs are handled via errors. The alternative, implementing more specific
-    methods, would be event more unelegant.
-  - While the exposed API provides similar syntax/features for src and public files, 
-    there are some differences:
-    - Attempts to provide the 'name' kwarg for public modules that export default
-      throws an error. This is not the case for src modules, where such incorrect
-      provision of a 'name' kwarg could lead to unpredictable results; not an 
-      outright bug, but does require some usage disciple.
-    - For src files, a more "low-level" API is provided (e.g., modules.src.js.get).
-      For public files, the API stops at modules.public. Not critical, not a bug,
-      but still a difference.
-  - The inner mechanics for handling different file types is relatively elegant 
-    for src, but has a somewhat less declarative feel for public. Not critical,
-    and can be refatored without changing the exposed API.
-  - Not sure, if mapping imports gloabally (as 'modules' currently does) has
-    a negative performance impact (treeshaking and other factors)???
-  */
-
   #public;
   #src;
 
@@ -89,24 +56,40 @@ export const modules = new (class Modules {
         })();
 
         this.#js = new (class Js {
-          #cache = {};
+          #js_cache = {};
+          #text_cache = {};
 
-          async get(path, { name } = {}) {
+          async get(path, { name, raw } = {}) {
+            if (raw) {
+              if (name) {
+                throw new Error(`'name' N/A.`);
+              }
+              if (path.path in this.#text_cache) {
+                return this.#text_cache[path.path];
+              }
+              const text = await fetch_text(path.path);
+              this.#text_cache[path.path] = text;
+              return text;
+            }
+            /* Non-raw */
             let module;
-            if (path.path in this.#cache) {
-              module = this.#cache[path.path];
+            if (path.path in this.#js_cache) {
+              module = this.#js_cache[path.path];
             } else {
-              const text = await modules.public.get(path, { raw: true });
+              let text;
+              if (path.path in this.#text_cache) {
+                text = this.#text_cache[path.path];
+              } else {
+                text = await fetch_text(path.path);
+                this.#text_cache[path.path] = text;
+              }
               module = await text_to_module(text);
-              this.#cache[path.path] = module;
+              this.#js_cache[path.path] = module;
             }
             /* NOTE
             - Convention: Modules with default export, should not export 
               anything else. */
             if ("default" in module) {
-              if (name) {
-                throw new Error(`'name' N/A.`);
-              }
               return module.default;
             }
             if (name) {
@@ -130,7 +113,7 @@ export const modules = new (class Modules {
             if (raw) {
               return result;
             }
-            /* Mimic Vite: Return uncached parsed json */
+            /* Mimic Vite's json import -> uncached parsed json */
             return JSON.parse(result);
           }
         })();
@@ -161,8 +144,8 @@ export const modules = new (class Modules {
         if (path.type === "css") {
           return await this.#css.get(path, { raw });
         }
-        if (path.type === "js" && !raw) {
-          return await this.#js.get(path, { name });
+        if (path.type === "js") {
+          return await this.#js.get(path, { name, raw });
         }
         if (path.type === "json") {
           return await this.#json.get(path, { raw });
@@ -170,7 +153,7 @@ export const modules = new (class Modules {
         if (path.type === "html") {
           throw new Error(`'html' not supported. Use 'template' instead.`);
         }
-        if (path.type !== "js" && raw) {
+        if (raw) {
           throw new Error(`'raw' N/A.`);
         }
         return await this.#text.get(path);
@@ -187,8 +170,9 @@ export const modules = new (class Modules {
 
     this.#src = new (class Src {
       /* NOTE
-      - Types could probably be implemented in a leaner way with a factory 
-        pattern, but that would also be less idiomatic and perhaps less clear. */
+      - Types could probably be implemented in a leaner with a factory pattern,
+        but this would also be less idiomatic. */
+
       #css;
       #html;
       #js;
@@ -202,19 +186,21 @@ export const modules = new (class Modules {
           constructor(loaders) {
             this.#loaders = loaders;
           }
+
           async get(path) {
             if (!(path instanceof Path)) {
               path = new Path(path);
             }
             const module = await this.#loaders[path.path]();
             /* NOTE
-            - Convention: Modules with default export, should not export 
+            - By convention, js modules that export default, should not export 
               anything else. */
             if ("default" in module) {
               return module.default;
             }
             return module;
           }
+
           paths(filter) {
             const paths = Object.keys(this.#loaders);
             const normalize = (path) => `@/${path.slice("/src/".length)}`;
@@ -246,11 +232,14 @@ export const modules = new (class Modules {
           constructor() {
             super(import.meta.glob(["/src/**/*.js", "!/src/**/*.test.js"]));
           }
+
           async get(path, { name } = {}) {
-            /* NOTE
-            - Overloaded to support name */
             const module = await super.get(path);
-            return name ? module[name] : module;
+
+            if (name) {
+              return module[name];
+            }
+            return module;
           }
         })();
 
@@ -334,7 +323,8 @@ export const modules = new (class Modules {
 
   /* Returns import result. 
   NOTE
-  - Syntactial Python-like alternative to 'get'. */
+  - Syntactial Python-like alternative to 'get'. 
+  - Does NOT support relative imports. */
   get import() {
     let path;
     const modules = this;
@@ -411,7 +401,6 @@ async function text_to_module(text) {
   return module;
 }
 
-/* Utility for parsing path. */
 class Path {
   #path;
   #public;
