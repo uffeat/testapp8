@@ -1,10 +1,20 @@
 /*
 rollovite/use.js
-20250500
+20250509
 v.0.1
 */
 
-/* NOTE Do NOT import modules that uses 'modules' here! */
+/* NOTE
+- Keep 'use' and related tools robust, lean and focused on the primary jobs:
+  1. Truly dynamic imports
+  2. Batch imports
+- Features such as post-processors, hooks etc.
+  do NOT belong here, but the dynamic nature of 'use' makes it possible to 
+  implement such features elsewhere. 
+- Do NOT integrate support for import of public files in 'use'.
+  Such integration should be done in a higher-level tool. */
+
+/* Do NOT import modules that uses 'modules' here! */
 import { assign } from "@/rollo/tools/assign.js";
 
 /* Loader registry. */
@@ -26,8 +36,6 @@ add(
   import.meta.glob(["/src/**/*.json"]),
   import.meta.glob(["/src/**/*.sheet"], { query: "?raw" })
 );
-
-
 
 /* Returns import.
 NOTE
@@ -112,8 +120,3 @@ assign(
     }
   );
 })();
-
-
-
-
-
