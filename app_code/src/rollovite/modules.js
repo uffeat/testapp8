@@ -10,6 +10,17 @@ import { assign } from "@/rollo/tools/assign.js";
 import { module } from "@/rollo/tools/module.js";
 import paths from "@/rollovite/tools/public/__paths__.js";
 
+/* Import utility.
+NOTE
+- Intended for app-wide use and can be used as a drop-in replacement for static 
+  and dynamic imports.
+- Supports truly dynamic imports.
+- Supports multiple file types.
+- Ignores .test.js src files.
+- Supports src as well as public files (regardless of environment) with similar syntax.
+  This can be used to adjust the trade-off between bundle size and import performance.
+- Changes to code that uses 'modules' are NOT picked up by Vite's HMR, i.e., 
+  manual browser refresh is required to pick up the changes. */
 export const modules = new (class Modules {
   #processors;
   #public;
