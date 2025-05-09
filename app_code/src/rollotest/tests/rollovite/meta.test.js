@@ -14,7 +14,7 @@ export const test_public = (unit_test) => {
 
 export const test_src = (unit_test) => {
   if (unit_test) {
-    console.log("Number of js files in src:", modules.src.js.paths().length);
+    console.log("Number of files in src:", modules.src.paths().length);
   }
 };
 

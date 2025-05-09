@@ -150,6 +150,9 @@ export const modules = new (class Modules {
       /* Returns import. */
       async get(path, { name } = {}) {
         const load = this.#registry.get(path);
+        if (!load) {
+          throw new Error(`Invalid path: ${path}`)
+        }
         const module = await load();
         /* NOTE
         - Convention: Modules with default export, should not export 
@@ -290,7 +293,8 @@ modules.src.add(
   import.meta.glob(["/src/**/*.html"], { query: "?raw" }),
   import.meta.glob(["/src/**/*.js", "!/src/**/*.test.js"]),
   import.meta.glob(["/src/**/*.json"]),
-  import.meta.glob(["/src/**/*.sheet"], { query: "?raw" })
+  import.meta.glob(["/src/**/*.sheet"], { query: "?raw" }),
+  import.meta.glob(["/src/**/*.template"], { query: "?raw" }),
 );
 
 /* Enable Python-like syntax for selected dirs. */

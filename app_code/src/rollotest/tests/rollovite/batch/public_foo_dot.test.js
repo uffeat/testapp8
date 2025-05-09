@@ -2,17 +2,17 @@
 rollovite/batch/public_foo_dot
 */
 
-import { modules, importer } from "@/rollovite/modules.js";
+import { modules } from "@/rollovite/modules.js";
 import { match } from "@/rollo/tools/object/match.js";
 /* Set up html_as_js processor */
 import "@/rollotest/tests/rollovite/processors/html_as_js.js";
 
-const test = importer("/test");
+
 
 const success = () => console.info("Success!");
 
 export const test_raw_css = async (unit_test) => {
-  const actual = await test.foo.foo.css({ raw: true });
+  const actual = await modules.import.public.test.foo.foo[':css']({ raw: true });
   if (!actual.startsWith(".foo")) {
     console.error("Raw css did not import correctly!");
   } else if (unit_test) {
@@ -21,7 +21,7 @@ export const test_raw_css = async (unit_test) => {
 };
 
 export const test_js = async (unit_test) => {
-  const actual = (await test.foo.foo.js()).foo;
+  const actual = (await modules.import.public.test.foo.foo[':js']()).foo;
   const expected = "FOO";
   if (actual !== expected) {
     console.error("Expected:", expected, "\nActual:", actual);
@@ -31,7 +31,7 @@ export const test_js = async (unit_test) => {
 };
 
 export const test_raw_js = async (unit_test) => {
-  const actual = await test.foo.foo.js({ raw: true });
+  const actual = await modules.import.public.test.foo.foo[':js']({ raw: true });
   const expected = `export const foo = "FOO";`;
   if (actual !== expected) {
     console.error("Expected:", expected, "\nActual:", actual);
@@ -41,7 +41,7 @@ export const test_raw_js = async (unit_test) => {
 };
 
 export const test_json = async (unit_test) => {
-  const actual = await test.foo.foo.json();
+  const actual = await modules.import.public.test.foo.foo[':json']();
   const expected = { foo: "FOO" };
 
   if (!match(actual, expected)) {
@@ -57,7 +57,7 @@ export const test_json = async (unit_test) => {
 };
 
 export const test_template = async (unit_test) => {
-  const actual = await test.foo.foo.template();
+  const actual = await modules.import.public.test.foo.foo[':template']();
   const expected = `<h1>FOO</h1>`;
   if (actual !== expected) {
     console.error("Expected:", expected, "\nActual:", actual);
@@ -69,7 +69,7 @@ export const test_template = async (unit_test) => {
 
 export const test_html_as_js = async (unit_test) => {
   const actual = (
-    await test.foo.foo["js:template"]()
+    await modules.import.public.test.foo.foo[":js:template"]()
   ).foo;
   const expected = "FOO";
   if (actual !== expected) {
