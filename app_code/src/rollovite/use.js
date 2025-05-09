@@ -22,6 +22,11 @@ const registry = new Map();
 
 /* Registers loaders. */
 function add(...loaders) {
+  /* NOTE
+  - Rather than using Vite's loader objects directly, these are copied into 
+    a central registry. While this does involve a copy-step it also guards 
+    against duplicate registration and provides initial adaption to the '@/'
+    syntax, rather than at each retrieval. */
   loaders.forEach((loader) =>
     Object.entries(loader).forEach(([path, load]) =>
       registry.set(`@/${path.slice("/src/".length)}`, load)
