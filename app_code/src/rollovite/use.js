@@ -1,17 +1,17 @@
 /*
 rollovite/use.js
 20250509
-v.0.1
+v.1.0
 */
 
 /* NOTE
 - Keep 'use' and related tools robust, lean and focused on the primary jobs:
   1. Truly dynamic imports
   2. Batch imports
-- Features such as post-processors, hooks etc.
+- Features such as aliases, post-processors, hooks etc.
   do NOT belong here, but the dynamic nature of 'use' makes it possible to 
   implement such features elsewhere. 
-- Do NOT integrate support for import of public files in 'use'.
+- Do NOT integrate support for import from public in 'use'.
   Such integration should be done in a higher-level tool. */
 
 /* Do NOT import modules that uses 'modules' here! */
@@ -58,7 +58,8 @@ export async function use(path, { name } = {}) {
     return module.default;
   }
   /* XXX
-  - 'name' kwarg only relevant for js modules with no default. */
+  - 'name' kwarg only relevant for js modules with no default.
+    Not worth managing this, but does require a little usage discipline. */
   if (name) {
     return module[name];
   }
@@ -69,13 +70,23 @@ export async function use(path, { name } = {}) {
 assign(
   use,
   class {
-    /* Enables Python-like syntax. */
+    /* Enables Python-like syntax. 
+    NOTE
+    - A general Python-like syntax can lead to long import statements. Therefore,
+      rather than supporting a general syntax, separate "importers" can be created
+      for selected "base dirs". */
     importer(path) {
       return (function proxy() {
         return new Proxy(
           {},
           {
             get: (target, part) => {
+              /* NOTE
+              - While other termination mechanisms (with less use of strings) 
+                are possible, the design choice has been made to use a single
+                termination logic with clear indication of the file part and with 
+                an option to pass in function args. This also does not require maintenance
+                of, e.g., "termination lists". */
               if (part.includes(":"))
                 return (options = {}) =>
                   use((path += `${part.replaceAll(":", ".")}`), options);
@@ -97,7 +108,7 @@ assign(
   }
 );
 
-/* Enable Python-like syntax for selected top-level dirs. */
+/* Enable Python-like syntax for selected dirs. */
 (() => {
   const components = use.importer("@/components");
   const rollo = use.importer("@/rollo");
@@ -125,3 +136,7 @@ assign(
     }
   );
 })();
+
+
+
+

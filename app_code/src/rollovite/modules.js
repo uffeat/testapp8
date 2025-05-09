@@ -1,109 +1,16 @@
 /*
 rollovite/modules.js
-20250508
-v.2.1
+20250509
+v.3.0
 */
 
-/* NOTE Do NOT import modules that uses 'modules' here! */
-import { assign } from "@/rollo/tools/assign.js";
-import paths from "@/rollovite/tools/public/__paths__.js";
+/* NOTE Do NOT import modules that uses 'modules'! */
 import { Cache } from "@/rollo/tools/cache.js";
+import { assign } from "@/rollo/tools/assign.js";
+import { module } from "@/rollo/tools/module.js";
+import paths from "@/rollovite/tools/public/__paths__.js";
 
-const TYPES = ["css", "html", "js", "json", "sheet", "template"];
-
-/* Utility for parsing path. */
-class Path {
-  #extension;
-  #path;
-  #public;
-  #type;
-  constructor(path) {
-    if (path.startsWith("/")) {
-      this.#path = `${import.meta.env.BASE_URL}${path.slice("/".length)}`;
-      this.#public = true;
-    } else {
-      this.#path = `/src/${path.slice("@/".length)}`;
-      this.#public = false;
-    }
-    this.#type = path.split(".").reverse()[0];
-  }
-
-  get extension() {
-    if (this.#extension === undefined) {
-      const file = this.path.split("/").reverse()[0];
-      const [stem, ...meta] = file.split(".");
-      this.#extension = meta.join(".");
-    }
-    return this.#extension;
-  }
-
-  get path() {
-    return this.#path;
-  }
-
-  get public() {
-    return this.#public;
-  }
-
-  get type() {
-    return this.#type;
-  }
-}
-
-/* */
-export function importer(path) {
-  return (function proxy() {
-    return new Proxy(
-      {},
-      {
-        get: (target, part) => {
-          if (TYPES.includes(part))
-            return (options = {}) => modules.get((path += `.${part}`), options);
-          if (part.includes(":"))
-            return (options = {}) =>
-              modules.get((path += `.${part.replaceAll(":", ".")}`), options);
-          path += `/${part}`;
-          return proxy();
-        },
-      }
-    );
-  })();
-}
-
-/* Import utility.
-NOTE
-- Intended for app-wide use and can be used as a drop-in replacement for static 
-  and dynamic imports.
-- Supports truly dynamic imports.
-- Supports a fixed set of native and native-like file types.
-- Ignores .test.js src files.
-- Supports src as well as public files (regardless of environment) with similar syntax.
-  This can be used to adjust the trade-off between bundle size and import performance.
-- Changes to code that uses 'modules' are NOT picked up by Vite's HMR, i.e., 
-  manual browser refresh is required to pick up the changes. */
 export const modules = new (class Modules {
-  /* XXX
-  - The central modules.get accepts kwargs, some of which are only relevant 
-    for certain sources and file types. This is not ideal, but invalid provision 
-    of kwargs are handled via errors. The alternative, implementing more specific
-    methods, would be event more unelegant.
-  - While the exposed API provides similar syntax/features for src and public files, 
-    there are some differences:
-    - Attempts to provide the 'name' kwarg for public modules that export default
-      throws an error. This is not the case for src modules, where such incorrect
-      provision of a 'name' kwarg could lead to unpredictable results; not an 
-      outright bug, but does require some usage disciple.
-    - For src files, a more "low-level" API is provided (e.g., modules.src.js.get).
-      For public files, the API stops at modules.public. Not critical, not a bug,
-      but still a difference.
-  - The inner mechanics for handling different file types is relatively elegant 
-    for src, but has a somewhat less declarative feel for public. Not critical,
-    and can be refatored without changing the exposed API.
-  - Supported file-types are hard-coded (for src and for the Python-like syntax).
-    This is a deliberate trade-off for acieving 'zero-config', but does involve
-    tinkering with inner mechanics, if are to be added. Not critical.
-  */
-
   #processors;
   #public;
   #src;
@@ -112,7 +19,7 @@ export const modules = new (class Modules {
     this.#processors = new (class Processors {
       #registry = new Map();
 
-      /* */
+      /* Adds one or more processors. Chainable. */
       add(spec) {
         Object.entries(spec).forEach(([extension, processor]) => {
           this.#registry.set(extension, processor);
@@ -129,16 +36,16 @@ export const modules = new (class Modules {
       /* Prevents addition of processors. Chainable. */
       freeze() {
         Object.freeze(this.#registry);
-
         return this;
       }
 
-      /* */
+      /* Returns processor. */
       get(extension) {
         return this.#registry.get(extension);
       }
 
-      /* */
+      /* Returns extensions, for which processors have been registered;
+      optionally, filtered. */
       processors(filter) {
         const result = Array.from(this.#registry.keys());
         if (filter) {
@@ -155,120 +62,55 @@ export const modules = new (class Modules {
     })();
 
     this.#public = new (class Public {
-      #css;
-      #js;
-      #json;
-      #text;
+      #cache = new Cache(fetch_text);
+      #js_cache = new Cache();
 
-      /* NOTE
-      - Do NOT expose "type classes"; not necessary and they do not path-convert, 
-        so risk of misuse. */
-
-      constructor() {
-        this.#css = new (class Css {
-          #cache = new Cache(fetch_text);
-          async get(path, { raw } = {}) {
-            if (raw) {
-              return await this.#cache.get(path.path);
-            }
-            /* Non-raw */
-            /* Mimic Vite: css becomes global (albeit via link) */
-            if (
-              !document.head.querySelector(
-                `link[rel="stylesheet"][href="${path.path}"]`
-              )
-            ) {
-              const { promise, resolve } = Promise.withResolvers();
-              const link = document.createElement("link");
-              link.rel = "stylesheet";
-              link.href = path.path;
-              const on_load = (event) => {
-                link.removeEventListener("load", on_load);
-                resolve();
-              };
-              link.addEventListener("load", on_load);
-              document.head.append(link);
-              await promise;
-            }
-          }
-        })();
-
-        this.#js = new (class Js {
-          #cache = new Cache();
-
-          async get(path, { name } = {}) {
-            const module = await this.#cache.get(path.path, async () => {
-              const text = await modules.public.get(path, { raw: true });
-              return await text_to_module(text);
-            });
-            /* NOTE
-            - Convention: Modules with default export, should not export 
-              anything else. */
-            if ("default" in module) {
-              if (name) {
-                throw new Error(`'name' N/A.`);
-              }
-              return module.default;
-            }
-            if (name) {
-              return module[name];
-            }
-            return module;
-          }
-        })();
-
-        this.#json = new (class Json {
-          #cache = new Cache(fetch_text);
-
-          async get(path, { raw } = {}) {
-            const result = await this.#cache.get(path.path);
-            if (raw) {
-              return result;
-            }
-            /* Mimic Vite: Return uncached parsed json */
-            return JSON.parse(result);
-          }
-        })();
-
-        this.#text = new (class Text {
-          #cache = new Cache(fetch_text);
-
-          async get(path) {
-            return await this.#cache.get(path.path);
-          }
-        })();
-      }
-
-      /* */
+      /* Returns import. */
       async get(path, { name, raw } = {}) {
-        if (!(path instanceof Path)) {
-          path = new Path(path);
+        path = normalize_path(path);
+        const type = get_type(path);
+        if (type === "js" && !raw) {
+          const result = await this.#js_cache.get(path, async () => {
+            const text = await fetch_text(path);
+            return await module.from_text(text);
+          });
+          /* NOTE
+          - Convention: Modules with default export, should not export 
+            anything else. */
+          if ("default" in result) {
+            return result.default;
+          }
+          if (name) {
+            return result[name];
+          }
+          return result;
         }
-        /* Check, if kwargs applies */
-        if (path.type !== "js" && name) {
-          throw new Error(`'name' N/A.`);
+        if (type === "css" && !raw) {
+          /* Mimic Vite: css becomes global (albeit via link) */
+          if (
+            !document.head.querySelector(
+              `link[rel="stylesheet"][href="${path}"]`
+            )
+          ) {
+            const { promise, resolve } = Promise.withResolvers();
+            const link = document.createElement("link");
+            link.rel = "stylesheet";
+            link.href = path;
+            link.onload = (event) => resolve();
+            document.head.append(link);
+            await promise;
+          }
+          return;
         }
-        if (raw && !["css", "js", "json"].includes(path.type)) {
-          throw new Error(`'raw' N/A.`);
+        const result = await this.#cache.get(path);
+        if (type === "json" && !raw) {
+          /* Mimic Vite: Return uncached parsed json */
+          return JSON.parse(result);
         }
-
-        if (path.type === "html") {
-          console.warn(`Use 'template' instead of 'html'.`);
-        }
-
-        if (path.type === "css") {
-          return await this.#css.get(path, { raw });
-        }
-        if (path.type === "js" && !raw) {
-          return await this.#js.get(path, { name });
-        }
-        if (path.type === "json") {
-          return await this.#json.get(path, { raw });
-        }
-        return await this.#text.get(path);
+        return result;
       }
 
-      /* */
+      /* Returns array of public paths, optionally subject to filter. */
       paths(filter) {
         if (filter) {
           return paths.filter(filter);
@@ -278,135 +120,49 @@ export const modules = new (class Modules {
     })();
 
     this.#src = new (class Src {
-      /* NOTE
-      - Types could probably be implemented in a leaner way with a factory 
-        pattern, but that would also be less idiomatic and perhaps less clear. */
-      #css;
-      #html;
-      #js;
-      #json;
-      #sheet;
-      #template;
+      #registry = new Map();
 
-      constructor() {
-        class Base {
-          #loaders;
-          constructor(loaders) {
-            this.#loaders = loaders;
-          }
-          async get(path) {
-            if (!(path instanceof Path)) {
-              path = new Path(path);
-            }
-            const module = await this.#loaders[path.path]();
-            /* NOTE
-            - Convention: Modules with default export, should not export 
-              anything else. */
-            if ("default" in module) {
-              return module.default;
-            }
-            return module;
-          }
-          paths(filter) {
-            const paths = Object.keys(this.#loaders);
-            const normalize = (path) => `@/${path.slice("/src/".length)}`;
-            if (filter) {
-              return paths
-                .filter((path) => filter(normalize(path)))
-                .map(normalize);
-            }
-            return paths.map(normalize);
-          }
-        }
-
-        this.#css = new (class Css extends Base {
-          constructor() {
-            super(import.meta.glob(["/src/**/*.css"]));
-          }
-        })();
-
-        this.#html = new (class Html extends Base {
-          constructor() {
-            super(import.meta.glob(["/src/**/*.html"], { query: "?raw" }));
-          }
-        })();
-
-        this.#js = new (class Js extends Base {
-          constructor() {
-            super(import.meta.glob(["/src/**/*.js", "!/src/**/*.test.js"]));
-          }
-          async get(path, { name } = {}) {
-            /* NOTE
-            - Overloaded to support name */
-            const module = await super.get(path);
-            return name ? module[name] : module;
-          }
-        })();
-
-        this.#json = new (class Json extends Base {
-          constructor() {
-            super(import.meta.glob(["/src/**/*.json"]));
-          }
-        })();
-
-        this.#sheet = new (class Sheet extends Base {
-          constructor() {
-            super(import.meta.glob(["/src/**/*.sheet"], { query: "?raw" }));
-          }
-        })();
-
-        this.#template = new (class Template extends Base {
-          constructor() {
-            super(import.meta.glob(["/src/**/*.template"], { query: "?raw" }));
-          }
-        })();
+      /* Registers loaders. */
+      add(...loaders) {
+        /* NOTE
+        - Rather than using Vite's loader objects directly, these are copied into 
+          a central registry. While this does involve a copy-step it also guards 
+          against duplicate registration and provides initial adaption to the '@/'
+          syntax, rather than at each retrieval. */
+        loaders.forEach((loader) =>
+          Object.entries(loader).forEach(([path, load]) =>
+            this.#registry.set(`@/${path.slice("/src/".length)}`, load)
+          )
+        );
       }
 
-      /* Returns controller for css files in src. */
-      get css() {
-        return this.#css;
-      }
-
-      /* Returns controller for html files in src. */
-      get html() {
-        return this.#html;
-      }
-
-      /* Returns controller for js files in src. */
-      get js() {
-        return this.#js;
-      }
-
-      /* Returns controller for json files in src. */
-      get json() {
-        return this.#json;
-      }
-
-      /* Returns controller for sheet files in src. */
-      get sheet() {
-        return this.#sheet;
-      }
-
-      /* Returns controller for template files in src. */
-      get template() {
-        return this.#template;
-      }
-
-      /* Returns import from src. */
+      /* Returns import. */
       async get(path, { name } = {}) {
-        if (!(path instanceof Path)) {
-          path = new Path(path);
+        const load = this.#registry.get(path);
+        const module = await load();
+        /* NOTE
+        - Convention: Modules with default export, should not export 
+          anything else. Also, provides a leaner syntax (and simpler registration)
+          for file types that inherently only exposes default. */
+        if ("default" in module) {
+          return module.default;
         }
-        if (path.type === "js") {
-          return await this[path.type].get(path, { name });
-        } else {
-          if (name) {
-            throw new Error(
-              `'name' does not apply to type '${path.type}' modules.`
-            );
-          }
-          return await this[path.type].get(path);
+        /* XXX
+        - 'name' kwarg only relevant for js modules with no default.
+          Not worth managing this, but does require a little usage discipline. */
+        if (name) {
+          return module[name];
         }
+        return module;
+      }
+
+      /* Returns array of registered paths, optionally subject to filter. */
+      paths(filter) {
+        const paths = Array.from(this.#registry.keys());
+        if (filter) {
+          return paths.filter(filter);
+        }
+        return paths;
       }
     })();
   }
@@ -426,98 +182,113 @@ export const modules = new (class Modules {
     return this.#src;
   }
 
-  /* Returns import result. 
-  NOTE
-  - Syntactial Python-like alternative to 'get'. */
+  /* Returns import with Python-like syntax. */
   get import() {
     let path;
     const modules = this;
-    /* Builds up path by successive recursive calls until termination. */
-    const proxy = () =>
-      new Proxy(this, {
-        get: (target, part) => {
-          /* Handle source */
-          if (path === undefined) {
-            if (part === "src") {
-              path = "@";
-            } else if (part === "public") {
-              path = "";
-            } else {
-              throw new Error(`Invalid source`);
+    return (function proxy() {
+      return new Proxy(
+        {},
+        {
+          get: (target, part) => {
+            /* Source */
+            if (path === undefined) {
+              if (part === "src") {
+                path = "@";
+              } else if (part === "public") {
+                path = "";
+              } else {
+                throw new Error(`Invalid source`);
+              }
+              return proxy();
             }
+            /* Termination */
+            if (part.includes(":"))
+              return (options = {}) =>
+                modules.get((path += `${part.replaceAll(":", ".")}`), options);
+            /* Build dir path */
+            path += `/${part}`;
             return proxy();
-          }
-          /* Termination for simple file types */
-          if (TYPES.includes(part)) {
-            path += `.${part}`;
-            return (options = {}) => modules.get(path, options);
-          }
-          /* Termination for composite file types */
-          if (part.includes(":")) {
-            path += `.${part.replaceAll(":", ".")}`;
-            return (options = {}) => modules.get(path, options);
-          }
-          /* Buuld dir path */
-          path += `/${part}`;
-          return proxy();
-        },
-      });
-    return proxy();
+          },
+        }
+      );
+    })();
+  }
+
+  /* Enables Python-like syntax from a given base path. */
+  importer(path) {
+    const modules = this;
+    return (function proxy() {
+      return new Proxy(
+        {},
+        {
+          get: (target, part) => {
+            if (part.includes(":"))
+              return (options = {}) =>
+                modules.get((path += `${part.replaceAll(":", ".")}`), options);
+            path += `/${part}`;
+            return proxy();
+          },
+        }
+      );
+    })();
   }
 
   /* Returns import. */
   async get(path, { name, raw } = {}) {
-    path = new Path(path);
-    if (!path.public && raw) {
-      throw new Error(`'raw' N/A.`);
-    }
-    const result = path.public
-      ? await this.public.get(path, { name, raw })
-      : await this.src.get(path, { name });
-
-    const processor = this.processors.get(path.extension);
+    const result = path.startsWith("@/")
+      ? await this.src.get(path, { name })
+      : await this.public.get(path, { name, raw });
+    const processor = this.processors.get(get_extension(path));
     if (processor) {
       return await processor.call(null, path, result);
     }
-
     return result;
   }
 })();
 
-/* Make modules global */
-Object.defineProperty(window, "modules", {
-  configurable: false,
-  enumerable: true,
-  writable: false,
-  value: modules,
-});
+/* Utilities... */
 
-/* Returns text content of file in public by environment-adjusted path. */
+/* Returns file type. */
+function get_type(path) {
+  return path.split(".").reverse()[0];
+}
+
+/* Returns env-adjusted public path. */
+function normalize_path(path) {
+  return `${import.meta.env.BASE_URL}${path.slice("/".length)}`;
+}
+
+/* Returns text content of file in public by env-adjusted path. */
 async function fetch_text(path) {
   const response = await fetch(path);
   return (await response.text()).trim();
 }
 
-/* Returns module created from text. 
-NOTE
-- Does NOT cache module. */
-async function text_to_module(text) {
-  const blob = new Blob([text], { type: "text/javascript" });
-  const url = URL.createObjectURL(blob);
-  /* Access 'import' from constructed function to prevent Vite from barking 
-  at dynamic import */
-  const module = await Function(`return import("${url}")`)();
-  URL.revokeObjectURL(url);
-  return module;
+function get_extension(path) {
+  const file = path.split("/").reverse()[0];
+  const [stem, ...meta] = file.split(".");
+  return meta.join(".");
 }
 
+/* Configure... */
 
-/* Configure importers with Python-like-syntax */
+/* Register global loaders */
+modules.src.add(
+  import.meta.glob(["/src/**/*.css"]),
+  import.meta.glob(["/src/**/*.html"], { query: "?raw" }),
+  import.meta.glob(["/src/**/*.js", "!/src/**/*.test.js"]),
+  import.meta.glob(["/src/**/*.json"]),
+  import.meta.glob(["/src/**/*.sheet"], { query: "?raw" })
+);
+
+/* Enable Python-like syntax for selected dirs. */
 (() => {
-  const components = importer("@/components");
-  const rollo = importer("@/rollo");
-  const rolloanvil = importer("@/rolloanvil");
-  const rolloui = importer("@/rolloui");
+  const components = modules.importer("@/components");
+  const rollo = modules.importer("@/rollo");
+  const rolloanvil = modules.importer("@/rolloanvil");
+  const rolloui = modules.importer("@/rolloui");
+  const test = modules.importer("@/test");
   assign(
     modules,
     class {
@@ -533,8 +304,9 @@ async function text_to_module(text) {
       get rolloui() {
         return rolloui;
       }
+      get test() {
+        return test;
+      }
     }
   );
 })();
-
-//console.log("assign:", await modules.rollo.tools.assign.js({ name: "assign" }));////
