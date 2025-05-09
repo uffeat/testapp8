@@ -203,9 +203,7 @@ export const modules = new (class Modules {
 
   /* Enables Python-like syntax from a given base path. */
   importer(path) {
-    return () => {
-      return this.#create_proxy(path);
-    };
+    return this.#create_proxy(path);
   }
 
   /* Returns import. */
@@ -281,56 +279,37 @@ modules.src.add(
   import.meta.glob(["/src/**/*.template"], { query: "?raw" })
 );
 
-/* Enable shorter Python-like syntax for selected dirs. */
-assign(
-  modules,
-  class {
-    get components() {
-      return modules.importer("@/components")();
+/* Enable Python-like syntax for selected dirs. */
+(() => {
+  const components = modules.importer("@/components");
+  const rollo = modules.importer("@/rollo");
+  const rolloanvil = modules.importer("@/rolloanvil");
+  const rolloui = modules.importer("@/rolloui");
+  const test = modules.importer("@/test");
+  assign(
+    modules,
+    class {
+      get components() {
+        return components;
+      }
+      get rollo() {
+        return rollo;
+      }
+      get rolloanvil() {
+        return rolloanvil;
+      }
+      get rolloui() {
+        return rolloui;
+      }
+      get test() {
+        return test;
+      }
     }
-    get rollo() {
-      return modules.importer("@/rollo")();
-    }
-    get rolloanvil() {
-      return modules.importer("@/rolloanvil")();
-    }
-    get rolloui() {
-      return modules.importer("@/rolloui")();
-    }
-    get test() {
-      return modules.importer("@/test")();
-    }
-  }
-);
+  );
+})();
 
-/* Experimental... */
-
-export async function use(path, { name, raw } = {}) {
-  return await modules.get(path, { name, raw });
-}
-assign(
-  use,
-  class {
-    get import() {
-      return modules.import;
-    }
-    get components() {
-      return modules.importer("@/components")();
-    }
-    get rollo() {
-      return modules.importer("@/rollo")();
-    }
-    get rolloanvil() {
-      return modules.importer("@/rolloanvil")();
-    }
-    get rolloui() {
-      return modules.importer("@/rolloui")();
-    }
-    get test() {
-      return modules.importer("@/test")();
-    }
-    path(...args) {
-      return modules.src.paths(...args)
-    }
-  }
-);
+export const components = modules.importer("@/components");
+export const rollo = modules.importer("@/rollo");
+export const rolloanvil = modules.importer("@/rolloanvil");
+export const rolloui = modules.importer("@/rolloui");
+export const test = modules.importer("@/test");
