@@ -3,6 +3,12 @@ import "@/bootstrap.scss";
 import "@/main.css";
 import { modules } from "@/rollovite/modules.js";
 
+
+import { Loaders } from "@/rollovite/tools/loaders";
+
+const test = Loaders(import.meta.glob(["/src/test/**/*.js"]),)
+console.log('foo:', (await test.import('@/test/foo/foo.js')).foo)
+
 /* Make 'modules' global */
 Object.defineProperty(window, "modules", {
   configurable: false,
