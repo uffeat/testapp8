@@ -3,22 +3,24 @@ import "@/bootstrap.scss";
 import "@/main.css";
 import { modules } from "@/rollovite/modules.js";
 
-
 import { Loaders } from "@/rollovite/tools/loaders";
 
-const test = Loaders(import.meta.glob(["/src/test/**/*.js"]),)
-console.log('foo:', (await test.import('@/test/foo/foo.js')).foo)
-console.log('foo:', (await test.path.test.foo.foo[':js']).foo)
-console.log('foo:', (await test.path.test.foo.foo[':js']).foo)
-console.log('modules:', (await test.batch()))
+const test = Loaders(import.meta.glob(["/src/test/**/*.js"]));
+console.log("foo:", (await test.import("@/test/foo/foo.js")).foo);
+console.log("foo:", (await test.path.test.foo.foo[":js"]).foo);
+console.log("foo:", (await test.path.test.foo.foo[":js"]).foo);
+console.log("paths:", test.paths());
+console.log(
+  "paths:",
+  test.paths((path) => path.includes("foo"))
+);
+console.log("modules:", await test.batch());
+console.log("copy:", test.copy());
 
-const test_importer = test.importer.create('@/test')
-console.log('foo:', (await test_importer.import('foo/foo.js')).foo)
-console.log('foo:', (await test_importer.path.foo.foo[':js']).foo)
-console.log('foo:', (await test_importer.path.foo.foo[':js']).foo)
-
-
-
+const test_importer = test.importer.create("@/test");
+console.log("foo:", (await test_importer.import("foo/foo.js")).foo);
+console.log("foo:", (await test_importer.path.foo.foo[":js"]).foo);
+console.log("foo:", (await test_importer.path.foo.foo[":js"]).foo);
 
 /* Make 'modules' global */
 Object.defineProperty(window, "modules", {

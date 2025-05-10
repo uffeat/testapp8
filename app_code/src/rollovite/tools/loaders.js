@@ -26,13 +26,19 @@ export const LoadersFactory = (parent = class {}) => {
                 });
               }.call(this, "");
             }
-
             import(path) {
               return self.import(`${base}/${path}`);
             }
           })();
         }
       })();
+    }
+
+    /* Returns object, from which a modules (or module defaults) can be imported 
+    from a given base dir with string-based or Python-like syntax. 
+    Enables shorter import statements. */
+    get importer() {
+      return this.#importer;
     }
 
     /* Returns object, from which a module (or module.default) can be imported 
@@ -48,20 +54,16 @@ export const LoadersFactory = (parent = class {}) => {
       }.call(this, "@");
     }
 
-    /* Returns object, from which a modules (or module defaults) can be imported 
-    from a given base dir with string-based or Python-like syntax. 
-    Enables shorter import statements. */
-    get importer() {
-      return this.#importer;
-    }
-
-    /* Registers loaders. Chainable. */
+    /* Registers loaders. Chainable. 
+    NOTE
+    - 'loaders' should (typically) be provided as return values of Vite's 
+      'import.meta.glob' function. */
     add(...loaders) {
       /* NOTE
-      - Rather than using Vite's loader objects directly, these are copied into 
+      - Rather than using Vite loader objects directly, these are copied into 
         a central registry. While this does involve a copy-step it also guards 
-        against duplicate registration and provides initial adaption to the '@/'
-        syntax, rather than at each retrieval. */
+        against duplicate registration and provides initial adaptation to the 
+        '@/' syntax, rather than at each retrieval. */
       loaders.forEach((loader) =>
         Object.entries(loader).forEach(([path, load]) =>
           this.#registry.set(`@/${path.slice("/src/".length)}`, load)
@@ -73,10 +75,8 @@ export const LoadersFactory = (parent = class {}) => {
     /* Imports and returns array of modules, optionally subject to filter. */
     async batch(filter) {
       const modules = [];
-      const paths = this.paths(filter);
-      for (const path of paths) {
-        const load = this.get(path);
-        modules.push(await load());
+      for (const path of this.paths(filter)) {
+        modules.push(await this.get(path)());
       }
       return modules;
     }
@@ -87,14 +87,17 @@ export const LoadersFactory = (parent = class {}) => {
       return this;
     }
 
-    /* Imports and returns module or module default. */
-    async import(path) {
-      const load = this.get(path);
-      const module = await load(path);
-      if (typeof module === "object" && "default" in module) {
-        return module.default;
-      }
-      return module;
+    /* Returns object copy of registry.
+    NOTE
+    - Intended for debugging and special cases. */
+    copy() {
+      return Object.fromEntries(this.#registry.entries());
+    }
+
+    /* Prevents subsequent addition of all loaders. Chainable */
+    freeze() {
+      Object.freeze(this.#registry);
+      return this;
     }
 
     /* Returns (async) load function. */
@@ -111,16 +114,23 @@ export const LoadersFactory = (parent = class {}) => {
       return this.#registry.has(path);
     }
 
-    /* Returns array of registered paths, optionally subject to filter. */
-    paths(filter) {
-      const paths = Array.from(this.#registry.keys());
-      if (filter) {
-        return paths.filter(filter);
+    /* Imports and returns module or module default. */
+    async import(path) {
+      const module = await this.get(path)();
+      if (typeof module === "object" && "default" in module) {
+        return module.default;
       }
-      return paths;
+      return module;
     }
 
-    /* Removes and returns load function. */
+    /* Returns array of registered paths, optionally subject to filter. */
+    paths(filter) {
+      return filter
+        ? Array.from(this.#registry.keys().filter(filter))
+        : Array.from(this.#registry.keys());
+    }
+
+    /* Removes and returns load function (if registered). */
     pop(path) {
       const load = this.#registry.get(path);
       if (load) {
@@ -137,10 +147,7 @@ export const LoadersFactory = (parent = class {}) => {
 
     /* Returns number of registered paths, optionally subject to filter. */
     size(filter) {
-      if (filter) {
-        return this.paths(filter).length;
-      }
-      return this.#registry.size;
+      return filter ? this.paths(filter).length : this.#registry.size;
     }
   };
 };
