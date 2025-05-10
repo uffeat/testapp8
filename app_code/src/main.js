@@ -8,6 +8,17 @@ import { Loaders } from "@/rollovite/tools/loaders";
 
 const test = Loaders(import.meta.glob(["/src/test/**/*.js"]),)
 console.log('foo:', (await test.import('@/test/foo/foo.js')).foo)
+console.log('foo:', (await test.path.test.foo.foo[':js']).foo)
+console.log('foo:', (await test.path.test.foo.foo[':js']).foo)
+console.log('modules:', (await test.batch()))
+
+const test_importer = test.importer.create('@/test')
+console.log('foo:', (await test_importer.import('foo/foo.js')).foo)
+console.log('foo:', (await test_importer.path.foo.foo[':js']).foo)
+console.log('foo:', (await test_importer.path.foo.foo[':js']).foo)
+
+
+
 
 /* Make 'modules' global */
 Object.defineProperty(window, "modules", {

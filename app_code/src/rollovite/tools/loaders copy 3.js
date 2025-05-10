@@ -1,58 +1,73 @@
-/* Returns Loaders class, optionally extended from parent. */
 export const LoadersFactory = (parent = class {}) => {
   return class Loaders extends parent {
     static name = "Loaders";
 
-    #importer;
     #registry = new Map();
 
     constructor(...loaders) {
       super();
       this.add(...loaders);
-
-      const self = this;
-      this.#importer = new (class Importer {
-        create(base) {
-          return new (class {
-            get path() {
-              return function factory(path) {
-                return new Proxy(this, {
-                  get: (_, part) => {
-                    if (!path) return factory.call(this, part);
-                    return part.includes(":")
-                      ? this.import(path + part.replaceAll(":", "."))
-                      : factory.call(this, path + `/${part}`);
-                  },
-                });
-              }.call(this, "");
-            }
-
-            import(path) {
-              return self.import(`${base}/${path}`);
-            }
-          })();
-        }
-      })();
     }
 
     /* Returns object, from which a module (or module.default) can be imported 
     with Python-like syntax. */
-    get path() {
-      return function factory(path) {
-        return new Proxy(this, {
-          get: (_, part) =>
-            part.includes(":")
-              ? this.import(path + part.replaceAll(":", "."))
-              : factory.call(this, path + `/${part}`),
-        });
-      }.call(this, "@");
+    get XXXpath() {
+      const self = this;
+      let path = "@";
+      return (function proxy() {
+        return new Proxy(
+          {},
+          {
+            get: (target, part) => {
+              if (part.includes(":")) {
+                //return (options) => self.import((path + part.replaceAll(":", ".")), options)
+                return self.import(path + part.replaceAll(":", "."));
+              }
+              path += `/${part}`;
+              return proxy();
+            },
+          }
+        );
+      })();
     }
 
-    /* Returns object, from which a modules (or module defaults) can be imported 
-    from a given base dir with string-based or Python-like syntax. 
-    Enables shorter import statements. */
-    get importer() {
-      return this.#importer;
+    get path() {
+      
+     
+      return (function factory(path) {
+        return new Proxy(this, {
+          get: (_, part) => {
+            return (part.includes(":")) ? this.import(path + part.replaceAll(":", ".")) : factory.call(this, path + `/${part}`)
+
+
+
+            
+          },
+        });
+      }).call(this, "@");
+    }
+
+    importer(base) {
+      const self = this;
+
+      return new (class {
+        get path() {
+          return function factory(path) {
+            return new Proxy(this, {
+              get: (_, part) => {
+                if (!path) return factory.call(this, part);
+                return part.includes(":")
+                  ? this.import(path + part.replaceAll(":", "."))
+                  : factory.call(this, path + `/${part}`);
+              },
+            });
+          }.call(this, "");
+        }
+
+        import(path) {
+          return self.import(`${base}/${path}`);
+        }
+      })();
     }
 
     /* Registers loaders. Chainable. */
