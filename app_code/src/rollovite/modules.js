@@ -9,7 +9,7 @@ v.3.1
 import { Loaders } from "@/rollovite/tools/loaders.js";
 import { factory } from "@/rollovite/tools/factory";
 
-import {assets} from "@/rollovite/tools/public/assets.js";
+import { assets } from "@/rollovite/tools/public/assets.js";
 
 /* Import utility.
 NOTE
@@ -76,7 +76,7 @@ export const modules = new (class Modules {
       }
     })();
 
-    this.#public = assets
+    this.#public = assets;
 
     this.#raw = Loaders();
     this.#src = Loaders();
@@ -131,16 +131,12 @@ export const modules = new (class Modules {
 
 /* Utilities... */
 
-
-
 /* Returns file extension. */
 function get_extension(path) {
   const file = path.split("/").reverse()[0];
   const [stem, ...meta] = file.split(".");
   return meta.join(".");
 }
-
-
 
 /* Configure... */
 
