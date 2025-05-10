@@ -10,15 +10,23 @@ export default defineConfig(({ mode }) => {
     /* Set base URL for dev and production */
     base: mode === "production" ? "./" : "/",
     define: {
+      /* Enable use of import.meta.env.VERCEL_ENV */
       "import.meta.env.VERCEL_ENV": JSON.stringify(process.env.VERCEL_ENV),
+      /* Enable use of import.meta.env.VERCEL_URL */
       "import.meta.env.VERCEL_URL": JSON.stringify(process.env.VERCEL_URL),
     },
     build: {
-      //minify: false, //
+      /* Enable /src outside /app_code */
       //emptyOutDir: true,//
+
       /* Enable manifest.json generation */
-      manifest: true, //
-      /* Enable features like top-level await, async imports, and smaller output */
+      manifest: true,
+      rollupOptions: {
+        /* Exclude files from bundle */
+        external: (id) =>
+          id.includes("/rollotest/") && !id.includes("/vercel/"),
+      },
+      /* Enable features such as top-level await and async imports */
       target: "es2022",
     },
     plugins: [],

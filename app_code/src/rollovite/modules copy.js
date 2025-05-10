@@ -233,8 +233,7 @@ export const modules = new (class Modules {
               return proxy();
             }
             if (part.includes(":")) {
-              return (options = {}) =>
-                modules.get(path + part.replaceAll(":", "."), options);
+              return (options = {}) => modules.get(path + part.replaceAll(":", "."), options);
             }
             path += `/${part}`;
             return proxy();

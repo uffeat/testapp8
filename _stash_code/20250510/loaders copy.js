@@ -4,14 +4,11 @@ rollovite/tools/loaders.js
 v.1.0
 */
 
-import { factory } from "@/rollovite/tools/factory";
-
 /* Returns Loaders class, optionally extended from parent. */
 export const LoadersFactory = (parent = class {}) => {
   return class Loaders extends parent {
     static name = "Loaders";
 
-    #factory = factory.call(this, "@");
     #importer;
     #registry = new Map();
 
@@ -19,20 +16,28 @@ export const LoadersFactory = (parent = class {}) => {
       super();
       this.add(...loaders);
 
-      const owner = this;
+      const self = this;
       this.#importer = new (class Importer {
         create(base) {
           return new (class {
-            #factory = factory.call(this);
-
-            /* Imports and returns module or module default with Python-like syntax. */
             get path() {
-              return this.#factory;
+
+              return function factory(path) {
+                return new Proxy(this, {
+                  get: (_, part) => {
+                    if (!path) return factory.call(this, part);
+                    return part.includes(":")
+                      ? this.import(path + part.replaceAll(":", "."))
+                      : factory.call(this, path + `/${part}`);
+                  },
+                });
+              }.call(this, "");
+
+
             }
 
-            /* Imports and returns module or module default. */
             import(path) {
-              return owner.import(`${base}/${path}`);
+              return self.import(`${base}/${path}`);
             }
           })();
         }
@@ -46,9 +51,23 @@ export const LoadersFactory = (parent = class {}) => {
       return this.#importer;
     }
 
-    /* Imports and returns module or module default with Python-like syntax. */
+    /* Returns object, from which a module (or module.default) can be imported 
+    with Python-like syntax. */
     get path() {
-      return this.#factory;
+
+
+      return function factory(path) {
+        return new Proxy(this, {
+          get: (_, part) => {
+            if (!path) return factory.call(this, part);
+            return part.includes(":")
+              ? this.import(path + part.replaceAll(":", "."))
+              : factory.call(this, path + `/${part}`);
+          },
+        });
+      }.call(this, "@");
+
+
     }
 
     /* Registers loaders. Chainable. 
@@ -112,15 +131,10 @@ export const LoadersFactory = (parent = class {}) => {
     }
 
     /* Imports and returns module or module default. */
-    async import(path, { name } = {}) {
+    async import(path) {
       const module = await this.get(path)();
-      if (typeof module === "object") {
-        if ("default" in module) {
-          return module.default;
-        }
-        if (name) {
-          return module[name];
-        }
+      if (typeof module === "object" && "default" in module) {
+        return module.default;
       }
       return module;
     }
@@ -156,4 +170,3 @@ export const LoadersFactory = (parent = class {}) => {
 
 /* Returns instance of Loaders, a utility for importing src files. */
 export const Loaders = (...args) => new (LoadersFactory())(...args);
-

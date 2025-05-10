@@ -1,5 +1,5 @@
 /*
-serverless/foo
+vercel/serverless/foo
 */
 
 /* In-module error message to retain traceback */
