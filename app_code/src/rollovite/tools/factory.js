@@ -5,7 +5,8 @@ export function factory(root) {
   return function factory(path) {
     return new Proxy(this, {
       get: (_, part) => {
-        if (!path) return factory.call(this, part);
+        //if (!path) return factory.call(this, part);
+        if (path === undefined) return factory.call(this, part);
         return part.includes(":")
           ? (...args) =>
               this.import(path + part.replaceAll(":", "."), ...args)

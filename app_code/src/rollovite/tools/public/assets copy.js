@@ -4,38 +4,10 @@ import { factory } from "@/rollovite/tools/factory.js";
 import paths from "@/rollovite/tools/public/__paths__.js";
 
 export const assets = new (class Assets {
-  #factory = factory.call(this, "");
   #cache = new Cache(fetch_text);
-  #js;
+  #js_cache = new Cache();
 
-  constructor() {
-    const assets = this;
-
-    this.#js = new (class Js {
-      #cache = new Cache();
-
-      async import(path, { name } = {}) {
-        const _module = await this.#cache.get(path, async () => {
-          const text = await assets.import(path, { raw: true });
-          return await module.from_text(text);
-        });
-        /* NOTE
-        - Convention: Modules with default export, should not export 
-          anything else. */
-        if ("default" in _module) {
-          if (name && typeof _module.default === "object") {
-            return _module.default[name];
-          }
-
-          return _module.default;
-        }
-        if (name) {
-          return _module[name];
-        }
-        return _module;
-      }
-    })();
-  }
+  #factory = factory.call(this, "");
 
   /* Returns import with Python-like syntax. */
   get path() {
@@ -44,15 +16,29 @@ export const assets = new (class Assets {
 
   /* Returns import. */
   async import(path, { name, raw } = {}) {
-    
-    const type = get_type(path);
-
-    if (type === "js" && !raw) {
-      return await this.#js.import(path, { name });
-    }
-
     path = normalize_path(path);
 
+    const type = get_type(path);
+    if (type === "js" && !raw) {
+      const _module = await this.#js_cache.get(path, async () => {
+        const text = await fetch_text(path);
+        return await module.from_text(text);
+      });
+      /* NOTE
+      - Convention: Modules with default export, should not export 
+        anything else. */
+      if ("default" in _module) {
+        if (name && typeof _module.default === "object") {
+          return _module.default[name];
+        }
+
+        return _module.default;
+      }
+      if (name) {
+        return _module[name];
+      }
+      return _module;
+    }
     if (type === "css" && !raw) {
       /* Mimic Vite: css becomes global (albeit via link) */
       if (

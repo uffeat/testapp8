@@ -4,7 +4,7 @@ rollovite/tools/loaders.js
 v.1.1
 */
 
-import { factory } from "@/rollovite/tools/factory";
+import { factory } from "@/rollovite/tools/factory.js";
 
 /* Returns Loaders class, optionally extended from parent. */
 export const LoadersFactory = (parent = class {}) => {
@@ -44,14 +44,14 @@ export const LoadersFactory = (parent = class {}) => {
       return this.#frozen;
     }
 
-    /* Returns object, from which modules (or module defaults) can be imported 
+    /* Returns object, from which modules (or module members) can be imported 
     from a given base dir with string-based or Python-like syntax. 
     Enables shorter import statements. */
     get importer() {
       return this.#importer;
     }
 
-    /* Imports and returns module or module default with Python-like syntax. */
+    /* Imports and returns module or module member with Python-like syntax. */
     get path() {
       return this.#factory;
     }
@@ -62,16 +62,15 @@ export const LoadersFactory = (parent = class {}) => {
       'import.meta.glob' function, but can be provided as other objects with 
        similar shape, e.g.:
          { 'my_path': () => import(my_path) }
-    - The 'raw' options should be set, if raw imports are needed for file types
+    - The 'raw' option should be set, if raw imports are needed for file types
       that Vite does not natively import as raw, including css, js and json.
-      In 'import.meta.glob' the { query: "?raw" } options should be used 
-      (without the 'add' raw option ) for file types that Vite's does not natively 
-      support, e.g. html. These rules are funky and are best illustrated by example;
-      see the 'example' function below.
-    */
+      In 'import.meta.glob' the { query: "?raw" } option should be used 
+      (without the 'add' {raw: true } option ) for file types that Vite's does 
+      not natively support, e.g. html. These rules are funky and are best 
+      illustrated by example;  see relevant test files. */
     add({ raw = false }, ...loaders) {
       /* NOTE
-      - Rather than using Vite loader objects directly, these are copied into 
+      - Rather than using loader objects directly, these are copied into 
         a central registry. While this does involve a copy-step it also guards
         against duplicate registration and provides initial path adaptation, 
         rather than at each retrieval. */
@@ -82,7 +81,7 @@ export const LoadersFactory = (parent = class {}) => {
             { query: "?raw" }) do NOT carry these options into the path key.   
             To avoid registry overwrites, 'add' options are serialized
             and appended to the applied key. 'add' only supports a 'raw' option
-            and the this option is (sensibly) added to the path key by brute 
+            and this option is (sensibly) added to the path key by brute 
             force. */
           const key = `@/${(raw ? path + "?raw" : path).slice("/src/".length)}`;
           if (this.#registry.has(key)) {
@@ -127,7 +126,7 @@ export const LoadersFactory = (parent = class {}) => {
         throw new Error(`Frozen.`);
       }
       this.#frozen = true;
-      /* Replace methods that can change registry with a chainable methods 
+      /* Replace methods that can change registry with chainable methods 
       that logs an error */
       const factory = (key) => () => {
         console.warn(`'${key}' cannot be used post-freeze.`);
@@ -155,26 +154,33 @@ export const LoadersFactory = (parent = class {}) => {
       return this.#registry.has(path);
     }
 
-    /* Imports module and returns module, module default or named module member.
-    If path invalid, an (unthrown) Error instance with the path as its message
+    /* Imports module and returns module or module member.
+    If path is invalid, an (unthrown) Error instance with the path as its message
     is returned. */
     async import(path, { name, raw } = {}) {
       /* XXX
-      - For file types that Vite does not handle natively, but have been configured to import as raw,
-        the 'raw' will return an error. This typically allied to html; see the 'example' function below */
+      - Depending on config and file type, import options ('name' and 'raw') 
+        could be ignored or result in error-return, e.g.:
+        - Use of 'raw' for types that already import as raw (natively or 
+          by config) will return an error.
+        - Attempts to use 'name' for raw imports will silently be ignored.
+        These issues are not critical, but usage does require a level of
+        reasonable discipline.
+      */
       if (raw && !path.endsWith("?raw")) {
         path += "?raw";
       }
 
       const load = this.get(path);
       if (load) {
-        const module = await this.get(path)();
+        const module = await load();
         if ("default" in module) {
-          /* */
+          /* NOTE
+          - Convention: Modules with default export, should not export 
+            anything else. */
           if (name && typeof module.default === "object") {
             return module.default[name];
           }
-
           return module.default;
         }
         if (name) {
@@ -182,7 +188,6 @@ export const LoadersFactory = (parent = class {}) => {
         }
         return module;
       }
-
       return new Error(path);
     }
 
@@ -231,11 +236,14 @@ NOTE
 - Uses the '@/' syntax.
 - Support 'importers' to enable shorter import statements for imports from a 
   given base dir. 
-- Supports an alternative Python-like syntac, incl. for importers.
+- Supports an alternative Python-like syntax, incl. for importers.
  */
 export const Loaders = (...args) => new (LoadersFactory())(...args);
 
-/* Example of Loaders instance with general-purpose configuration for @/test scope. */
+/* Example of Loaders instance with general-purpose configuration for @/test scope. 
+NOTE
+- Does not return anything; ONLY provided as "in-module" temp demo code, to be removed o
+nce transferred to formal tests. */
 const example = async () => {
   const loaders = Loaders()
     .add(
@@ -269,17 +277,15 @@ const example = async () => {
     console.log("raw:", await loaders.import("@/test/foo/foo.js?raw"));
     // Alternatively:
     console.log(
-      "raw js:",
+      "raw:",
       await loaders.import("@/test/foo/foo.js", { raw: true })
     );
-    console.log(
-      "raw js:",
-      await loaders.path.test.foo.foo[":js"]({ raw: true })
-    );
+    console.log("raw:", await loaders.path.test.foo.foo[":js"]({ raw: true }));
   })();
 
   await (async function json() {
     console.log("parsed:", await loaders.import("@/test/foo/foo.json"));
+    console.log("parsed:", await loaders.import("@/test/bar/bar.json"));
     console.log(
       "raw:",
       await loaders.import("@/test/foo/foo.json", { raw: true })
@@ -304,7 +310,36 @@ const example = async () => {
     console.log("html:", await await loaders.path.test.foo.foo[":html"]());
   })();
 
-   /* ANTI-PATTERNS */
+  await (async function css() {
+    console.log(
+      "raw:",
+      await loaders.import("@/test/foo/foo.css", { raw: true })
+    );
+    console.log("raw:", await loaders.path.test.foo.foo[":css"]({ raw: true }));
+  })();
+
+  await (async function batch() {
+    await loaders.batch((path) => path.includes("/batch/"));
+  })();
+
+  (function paths() {
+    console.log(
+      "paths:",
+      loaders.paths((path) => path.includes("bar"))
+    );
+  })();
+
+  (function size() {
+    console.log("size:", loaders.size());
+  })();
+
+  await (async function importer() {
+    const test = loaders.importer.create("@/test");
+    console.log("foo:", await test.import("foo/foo.js", { name: "foo" }));
+    console.log("foo:", (await test.path.foo.foo[":js"]()).foo);
+  })();
+
+  /* Anti-patterns */
   await (async function anti() {
     /* Will still import raw:*/
     console.log(
@@ -318,6 +353,4 @@ const example = async () => {
       await loaders.import("@/test/foo/foo.html", { raw: true })
     );
   })();
-
-
 };
