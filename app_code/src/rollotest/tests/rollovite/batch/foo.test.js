@@ -8,6 +8,32 @@ import { match } from "@/rollo/tools/object/match.js";
 /* Set up html_as_js processor */
 import "@/rollotest/tests/rollovite/processors/html_as_js.js";
 
+//
+//
+
+/* String syntax */
+console.log('foo:', await modules.import('@/test/foo/foo.js', { name: "foo" }))
+console.log('foo:', await modules.src.import('@/test/foo/foo.js', { name: "foo" }))
+console.log('foo:', await modules.import('/test/foo/foo.js', { name: "foo" }))
+console.log('raw foo:', await modules.import('@/test/foo/foo.js', { raw: true }))
+console.log('raw foo:', await modules.import('/test/foo/foo.js', { raw: true }))
+
+/* Python-like syntax */
+console.log('foo:', await modules.path.test.foo.foo[":js"]({ name: "foo" }))
+console.log('foo:', await modules.path.test.foo.foo[":js"]({ name: "foo" }))
+console.log('raw foo:', await modules.path.test.foo.foo[":js"]({ raw: true }))
+console.log('raw foo:', await modules.path.test.foo.foo[":js"]({ raw: true }))
+
+
+
+//
+//
+
+
+
+
+
+
 const success = () => console.info("Success!");
 
 export const test_sheet = async (unit_test) => {

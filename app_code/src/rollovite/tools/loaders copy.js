@@ -1,7 +1,7 @@
 /*
 rollovite/tools/loaders.js
 20250510
-v.1.1
+v.1.0
 */
 
 import { factory } from "@/rollovite/tools/factory";
@@ -12,13 +12,12 @@ export const LoadersFactory = (parent = class {}) => {
     static name = "Loaders";
 
     #factory = factory.call(this, "@");
-    #frozen = false;
     #importer;
-    #paths;
     #registry = new Map();
 
-    constructor() {
+    constructor(...loaders) {
       super();
+      this.add(...loaders);
 
       const owner = this;
       this.#importer = new (class Importer {
@@ -32,16 +31,12 @@ export const LoadersFactory = (parent = class {}) => {
             }
 
             /* Imports and returns module or module default. */
-            import(path, ...args) {
-              return owner.import(`${base}/${path}`, ...args);
+            import(path) {
+              return owner.import(`${base}/${path}`);
             }
           })();
         }
       })();
-    }
-
-    get frozen() {
-      return this.#frozen;
     }
 
     /* Returns object, from which modules (or module defaults) can be imported 
@@ -60,19 +55,16 @@ export const LoadersFactory = (parent = class {}) => {
     NOTE
     - 'loaders' should (typically) be provided as return values of Vite's 
       'import.meta.glob' function. */
-    add({ raw = false }, ...loaders) {
+    add(...loaders) {
       /* NOTE
       - Rather than using Vite loader objects directly, these are copied into 
         a central registry. While this does involve a copy-step it also guards 
-        against duplicate registration and provides initial path adaptation, 
-        rather than at each retrieval. */
+        against duplicate registration and provides initial adaptation to the 
+        '@/' syntax, rather than at each retrieval. */
       loaders.forEach((loader) =>
-        Object.entries(loader).forEach(([path, load]) => {
-          this.#registry.set(
-            `@/${(raw ? path + "?raw" : path).slice("/src/".length)}`,
-            load
-          );
-        })
+        Object.entries(loader).forEach(([path, load]) =>
+          this.#registry.set(`@/${path.slice("/src/".length)}`, load)
+        )
       );
       return this;
     }
@@ -99,24 +91,10 @@ export const LoadersFactory = (parent = class {}) => {
       return Object.fromEntries(this.#registry.entries());
     }
 
-    /* Retuns registry and prevents subsequent registry changes. */
+    /* Prevents subsequent addition of all loaders. Chainable */
     freeze() {
-      if (this.frozen) {
-        throw new Error(`Frozen.`);
-      }
-      this.#frozen = true;
-      const keys = ["add", "clear", "pop", "remove"];
-      keys.forEach((key) => {
-        Object.defineProperty(this, key, {
-          configurable: true,
-          enumerable: false,
-          get: () => {
-            throw new Error(`'${key}' not available post-freeze.`);
-          },
-        });
-      });
-      /* Enable post-freeze manipulation */
-      return this.#registry;
+      Object.freeze(this.#registry);
+      return this;
     }
 
     /* Returns (async) load function. */
@@ -134,10 +112,7 @@ export const LoadersFactory = (parent = class {}) => {
     }
 
     /* Imports and returns module or module default. */
-    async import(path, { name, raw } = {}) {
-      if (raw) {
-        path += "?raw";
-      }
+    async import(path, { name } = {}) {
       const module = await this.get(path)();
       if (typeof module === "object") {
         if ("default" in module) {
@@ -152,19 +127,12 @@ export const LoadersFactory = (parent = class {}) => {
 
     /* Returns array of registered paths, optionally subject to filter. */
     paths(filter) {
-      /* If frozen, paths do not need to be created at each call */
-      if (!this.#paths && this.frozen) {
-        this.#paths = Array.from(this.#registry.keys());
-      }
-
-      const paths = this.#paths || Array.from(this.#registry.keys());
-
-      return filter ? paths.filter(filter) : paths;
+      return filter
+        ? Array.from(this.#registry.keys().filter(filter))
+        : Array.from(this.#registry.keys());
     }
 
-    /* Removes and returns load function (if registered).
-    NOTE
-    - Not available post-freeze. */
+    /* Removes and returns load function (if registered). */
     pop(path) {
       const load = this.#registry.get(path);
       if (load) {
@@ -188,3 +156,4 @@ export const LoadersFactory = (parent = class {}) => {
 
 /* Returns instance of Loaders, a utility for importing src files. */
 export const Loaders = (...args) => new (LoadersFactory())(...args);
+

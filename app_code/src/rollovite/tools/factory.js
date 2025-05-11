@@ -7,8 +7,8 @@ export function factory(root) {
       get: (_, part) => {
         if (!path) return factory.call(this, part);
         return part.includes(":")
-          ? (options = {}) =>
-              this.import(path + part.replaceAll(":", "."), options)
+          ? (...args) =>
+              this.import(path + part.replaceAll(":", "."), ...args)
           : factory.call(this, path + `/${part}`);
       },
     });

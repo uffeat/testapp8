@@ -1,43 +1,58 @@
 /* Globals */
 import "@/bootstrap.scss";
 import "@/main.css";
-import { modules } from "@/rollovite/modules.js";
+//import { modules } from "@/rollovite/modules.js";
+import { Loaders } from "@/rollovite/tools/loaders.js";
 
-/* String syntax */
-console.log('foo:', await modules.import('@/test/foo/foo.js', { name: "foo" }))
-console.log('foo:', await modules.import('/test/foo/foo.js', { name: "foo" }))
-console.log('raw foo:', await modules.import('@/test/foo/foo.js', { raw: true }))
-console.log('raw foo:', await modules.import('/test/foo/foo.js', { raw: true }))
+const loaders = Loaders()
+.add({}, import.meta.glob(["/src/test/**/*.js"]))
+.add({raw: true}, import.meta.glob(["/src/test/**/*.js"], { query: "?raw" }))
 
-/* Python-like syntax */
-console.log('foo:', await modules.path.test.foo.foo[":js"]({ name: "foo" }))
-console.log('foo:', await modules.path.test.foo.foo[":js"]({ name: "foo" }))
-console.log('raw foo:', await modules.path.test.foo.foo[":js"]({ raw: true }))
-console.log('raw foo:', await modules.path.test.foo.foo[":js"]({ raw: true }))
+loaders.freeze()
+
+loaders.clear()
 
 
+console.log("bar:", (await loaders.import("@/test/bar/bar.js")).bar);
+console.log("bar:", (await loaders.import("@/test/bar/bar.js",{ name: "bar" })));
+console.log("bar:", await loaders.path.test.bar.bar[":js"]({ name: "bar" }));
+// Check that path resets:
+console.log("bar:", await loaders.path.test.bar.bar[":js"]({ name: "bar" }));
+
+console.log("raw bar:", (await loaders.import("@/test/bar/bar.js?raw")));
 
 
+/* Extras */
+console.log("paths:", loaders.paths());
+console.log(
+  "paths:",
+  loaders.paths((path) => path.includes("bar"))
+);
+console.log("modules:", await loaders.batch());
+console.log("copy:", loaders.copy());
 
 
-
-
-
-
-
-
-
-
+/* Importer */
+const test = loaders.importer.create("@/test");
+console.log("foo:", (await test.import("foo/foo.js")).foo);
+console.log("foo:", (await test.path.foo.foo[":js"]()).foo);
+// Check that path resets:
+console.log("foo:", (await test.path.foo.foo[":js"]()).foo);
 
 /* Make 'modules' global */
+
+/*
 Object.defineProperty(window, "modules", {
   configurable: false,
   enumerable: true,
   writable: false,
   value: modules,
 });
+*/
 
 /* NOTE Do NOT await import! */
+
+/*
 if (import.meta.env.VERCEL_ENV === "production") {
   import("@/main/production/main.js");
 } else if (import.meta.env.VERCEL_ENV === "preview") {
@@ -45,3 +60,4 @@ if (import.meta.env.VERCEL_ENV === "production") {
 } else {
   import("@/main/development/main.js");
 }
+  */
