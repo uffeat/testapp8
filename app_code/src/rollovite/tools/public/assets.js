@@ -5,9 +5,7 @@ import { module } from "@/rollo/tools/module.js";
 import { factory } from "@/rollovite/tools/factory.js";
 import paths from "@/rollovite/tools/public/__paths__.js";
 
-class Path {
-  
-}
+
 
 export const assets = new (class Assets {
   #css;
@@ -90,6 +88,10 @@ export const assets = new (class Assets {
 
   /* Returns import. */
   async import(path, { name, raw } = {}) {
+    if (!this.has(path)) {
+      return new Error(path);
+    }
+
     const type = path.split(".").reverse()[0];
 
     /* Handle path with query */
@@ -104,9 +106,7 @@ export const assets = new (class Assets {
     }
 
     path = normalize(path)
-    if (!assets.has(path)) {
-      return new Error(path);
-    }
+    
 
     if (type === "css" && !raw) {
       return await this.#css.import(path);
