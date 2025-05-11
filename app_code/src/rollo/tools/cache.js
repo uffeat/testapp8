@@ -4,30 +4,33 @@ NOTE
   (the basic standard case). 
 - Pass in in creator in 'get', if creator has another signature (the more 
   advanced and flexible case). */
-  export class Cache {
-    #registry = new Map();
-    #creator;
-  
-    constructor(creator) {
-      this.#creator = creator;
-    }
-  
-    /* Returns cached value created by 'creator'. 
+export class Cache {
+  #registry = new Map();
+  #creator;
+
+  constructor(creator) {
+    this.#creator = creator;
+  }
+
+  /* Returns cached value created by 'creator'. 
     NOTE
     - First invocation, creates, caches and returns value.
-    - Subsequent invocations returns value from cache. */
-    async get(key, creator) {
-      let value = this.#registry.get(key);
-      if (value) {
-        return value;
-      }
-      if (creator) {
-        value = await creator.call(null);
-      } else {
-        value = await this.#creator.call(null, key);
-      }
-  
-      this.#registry.set(key, value);
+    - Subsequent invocations returns value from cache.
+    - Never caches errors. */
+  async get(key, creator) {
+    let value = this.#registry.get(key);
+    if (value) {
       return value;
     }
+    if (creator) {
+      value = await creator.call(null);
+    } else {
+      value = await this.#creator.call(null, key);
+    }
+    if (!(value instanceof Error)) {
+      this.#registry.set(key, value);
+    }
+
+    return value;
   }
+}

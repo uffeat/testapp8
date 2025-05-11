@@ -1,20 +1,46 @@
+/* NOTE
+- Tightly coupled with pre-build tool for creation of '__paths__.js' */
 import { Cache } from "@/rollo/tools/cache.js";
 import { module } from "@/rollo/tools/module.js";
 import { factory } from "@/rollovite/tools/factory.js";
 import paths from "@/rollovite/tools/public/__paths__.js";
 
-export const assets = new (class Assets {
-  #factory = factory.call(this, "");
-  #cache = new Cache(async (path) => {
-    path = `${import.meta.env.BASE_URL}${path.slice("/".length)}`;
-    const response = await fetch(path);
-  return (await response.text()).trim();
+class Path {
+  
+}
 
-  });
+export const assets = new (class Assets {
+  #css;
+  #factory = factory.call(this, "");
+  #cache
   #js;
+  #json;
 
   constructor() {
     const assets = this;
+
+    this.#cache = new Cache(async (path) => {
+      const response = await fetch(path);
+      return (await response.text()).trim();
+    });
+
+    this.#css = new (class Css {
+      async import(path) {
+        /* Mimic Vite: css becomes global (albeit via link) */
+        if (
+          !document.head.querySelector(`link[rel="stylesheet"][href="${path}"]`)
+        ) {
+          const { promise, resolve } = Promise.withResolvers();
+          const link = document.createElement("link");
+          link.rel = "stylesheet";
+          link.href = normalize(path);
+          link.onload = (event) => resolve();
+          document.head.append(link);
+          await promise;
+        }
+        return;
+      }
+    })();
 
     this.#js = new (class Js {
       #cache = new Cache();
@@ -39,6 +65,17 @@ export const assets = new (class Assets {
         return _module;
       }
     })();
+
+    this.#json = new (class Json {
+      parse(json, { name } = {}) {
+        /* Mimic Vite: Return uncached parsed json */
+        const parsed = JSON.parse(json);
+        if (name && typeof parsed === "object") {
+          return parsed[name];
+        }
+        return parsed;
+      }
+    })();
   }
 
   /* Returns import with Python-like syntax. */
@@ -46,40 +83,39 @@ export const assets = new (class Assets {
     return this.#factory;
   }
 
+  /* Checks, if path is in public. */
+  has(path) {
+    return paths.includes(path);
+  }
+
   /* Returns import. */
   async import(path, { name, raw } = {}) {
-    
-    const type = get_type(path);
+    const type = path.split(".").reverse()[0];
+
+    /* Handle path with query */
+    if (path.includes("?")) {
+      const parts = path.split("?");
+      path = parts[0];
+      raw = parts[1];
+    }
 
     if (type === "js" && !raw) {
       return await this.#js.import(path, { name });
     }
 
-    
+    path = normalize(path)
+    if (!assets.has(path)) {
+      return new Error(path);
+    }
 
     if (type === "css" && !raw) {
-      /* Mimic Vite: css becomes global (albeit via link) */
-      if (
-        !document.head.querySelector(`link[rel="stylesheet"][href="${path}"]`)
-      ) {
-        const { promise, resolve } = Promise.withResolvers();
-        const link = document.createElement("link");
-        link.rel = "stylesheet";
-        link.href = path;
-        link.onload = (event) => resolve();
-        document.head.append(link);
-        await promise;
-      }
-      return;
+      return await this.#css.import(path);
     }
+
     const result = await this.#cache.get(path);
+
     if (type === "json" && !raw) {
-      /* Mimic Vite: Return uncached parsed json */
-      const parsed = JSON.parse(result);
-      if (name && typeof parsed === "object") {
-        return parsed[name];
-      }
-      return parsed;
+      return this.#json.parse(result, { name });
     }
     return result;
   }
@@ -91,22 +127,14 @@ export const assets = new (class Assets {
     }
     return paths;
   }
+
+  /* Returns number of public paths, optionally subject to filter. */
+  size(filter) {
+    return this.paths(filter).length;
+  }
 })();
 
-/* Utilities... */
-
-/* Returns file type. */
-function get_type(path) {
-  return path.split(".").reverse()[0];
-}
-
 /* Returns env-adjusted public path. */
-function normalize_path(path) {
+function normalize(path) {
   return `${import.meta.env.BASE_URL}${path.slice("/".length)}`;
-}
-
-/* Returns text content of file in public by env-adjusted path. */
-async function fetch_text(path) {
-  const response = await fetch(path);
-  return (await response.text()).trim();
 }
