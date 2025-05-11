@@ -58,8 +58,9 @@ export const LoadersFactory = (parent = class {}) => {
 
     /* Registers loaders. Chainable. 
     NOTE
-    - 'loaders' should (typically) be provided as return values of Vite's 
-      'import.meta.glob' function. */
+    - 'loaders' should typically be provided as objects returned by Vite's 
+      'import.meta.glob' function, but can be provided as other objects with 
+      similar shape. */
     add({ raw = false }, ...loaders) {
       /* NOTE
       - Rather than using Vite loader objects directly, these are copied into 
@@ -68,10 +69,11 @@ export const LoadersFactory = (parent = class {}) => {
         rather than at each retrieval. */
       loaders.forEach((loader) =>
         Object.entries(loader).forEach(([path, load]) => {
-          this.#registry.set(
-            `@/${(raw ? path + "?raw" : path).slice("/src/".length)}`,
-            load
-          );
+          const key = `@/${(raw ? path + "?raw" : path).slice("/src/".length)}`
+          if (this.#registry.has(key)) {
+            console.warn(`Overwriting key: ${key}`)
+          }
+          this.#registry.set(key, load);
         })
       );
       return this;
@@ -86,7 +88,9 @@ export const LoadersFactory = (parent = class {}) => {
       return modules;
     }
 
-    /* Removes all loaders. Chainable */
+    /* Removes all loaders. Chainable 
+    NOTE
+    -  Cannot be used post-freeze. */
     clear() {
       this.#registry.clear();
       return this;
@@ -99,33 +103,32 @@ export const LoadersFactory = (parent = class {}) => {
       return Object.fromEntries(this.#registry.entries());
     }
 
-    /* Retuns registry and prevents subsequent registry changes. */
+    /* Prevents subsequent registry changes. Chainable. */
     freeze() {
       if (this.frozen) {
         throw new Error(`Frozen.`);
       }
       this.#frozen = true;
+      /* Replace methods that can change registry with a chainable methods that logs an error */
+      const factory = (key) => () => {
+        console.warn(`'${key}' cannot be used post-freeze.`);
+        return this;
+      };
       const keys = ["add", "clear", "pop", "remove"];
       keys.forEach((key) => {
         Object.defineProperty(this, key, {
           configurable: true,
-          enumerable: false,
-          get: () => {
-            throw new Error(`'${key}' not available post-freeze.`);
-          },
+          enumerable: true,
+          writable: true,
+          value: factory(key),
         });
       });
-      /* Enable post-freeze manipulation */
-      return this.#registry;
+      return this;
     }
 
     /* Returns (async) load function. */
     get(path) {
-      const load = this.#registry.get(path);
-      if (!load) {
-        throw new Error(`Invalid path: ${path}`);
-      }
-      return load;
+      return this.#registry.get(path);
     }
 
     /* Checks, if path is in registry. */
@@ -135,19 +138,23 @@ export const LoadersFactory = (parent = class {}) => {
 
     /* Imports and returns module or module default. */
     async import(path, { name, raw } = {}) {
-      if (raw) {
+      if (raw && !path.endsWith("?raw")) {
         path += "?raw";
       }
-      const module = await this.get(path)();
-      if (typeof module === "object") {
+
+      const load = this.get(path);
+      if (load) {
+        const module = await this.get(path)();
         if ("default" in module) {
           return module.default;
         }
         if (name) {
           return module[name];
         }
+        return module;
       }
-      return module;
+
+      return new Error(`Invalid path: ${path}`)
     }
 
     /* Returns array of registered paths, optionally subject to filter. */
@@ -156,15 +163,13 @@ export const LoadersFactory = (parent = class {}) => {
       if (!this.#paths && this.frozen) {
         this.#paths = Array.from(this.#registry.keys());
       }
-
       const paths = this.#paths || Array.from(this.#registry.keys());
-
       return filter ? paths.filter(filter) : paths;
     }
 
     /* Removes and returns load function (if registered).
     NOTE
-    - Not available post-freeze. */
+    - Cannot be used post-freeze. */
     pop(path) {
       const load = this.#registry.get(path);
       if (load) {
@@ -173,7 +178,9 @@ export const LoadersFactory = (parent = class {}) => {
       }
     }
 
-    /* Removes one or more load functions. */
+    /* Removes one or more load functions. Chainable.
+    NOTE
+    -  Cannot be used post-freeze. */
     remove(...paths) {
       paths.forEach((path) => this.#registry.delete(path));
       return this;
@@ -186,5 +193,8 @@ export const LoadersFactory = (parent = class {}) => {
   };
 };
 
-/* Returns instance of Loaders, a utility for importing src files. */
+/* Returns instance of Loaders, a utility for importing src files as per file 
+type or as text (raw). 
+NOTE
+- Requires pre-use config*/
 export const Loaders = (...args) => new (LoadersFactory())(...args);

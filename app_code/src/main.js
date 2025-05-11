@@ -5,22 +5,30 @@ import "@/main.css";
 import { Loaders } from "@/rollovite/tools/loaders.js";
 
 const loaders = Loaders()
-.add({}, import.meta.glob(["/src/test/**/*.js"]))
-.add({raw: true}, import.meta.glob(["/src/test/**/*.js"], { query: "?raw" }))
+  .add(
+    {},
+    import.meta.glob("/src/test/**/*.css"),
+    import.meta.glob("/src/test/**/*.html", { query: "?raw" }),
+    import.meta.glob(["/src/test/**/*.js", "!/src/test/**/*.test.js"]),
+    import.meta.glob("/src/test/**/*.json")
+  )
+  .add(
+    { raw: true },
+    import.meta.glob("/src/test/**/*.css", { query: "?raw" }),
+    import.meta.glob("/src/test/**/*.js", { query: "?raw" }),
+    import.meta.glob("/src/test/**/*.json", { query: "?raw" })
+  )
+  .freeze();
 
-loaders.freeze()
-
-loaders.clear()
-
+//loaders.clear().remove()
 
 console.log("bar:", (await loaders.import("@/test/bar/bar.js")).bar);
-console.log("bar:", (await loaders.import("@/test/bar/bar.js",{ name: "bar" })));
+console.log("bar:", await loaders.import("@/test/bar/bar.js", { name: "bar" }));
 console.log("bar:", await loaders.path.test.bar.bar[":js"]({ name: "bar" }));
 // Check that path resets:
 console.log("bar:", await loaders.path.test.bar.bar[":js"]({ name: "bar" }));
 
-console.log("raw bar:", (await loaders.import("@/test/bar/bar.js?raw")));
-
+console.log("raw bar:", await loaders.import("@/test/bar/bar.js?raw"));
 
 /* Extras */
 console.log("paths:", loaders.paths());
@@ -30,7 +38,6 @@ console.log(
 );
 console.log("modules:", await loaders.batch());
 console.log("copy:", loaders.copy());
-
 
 /* Importer */
 const test = loaders.importer.create("@/test");
