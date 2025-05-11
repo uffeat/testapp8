@@ -196,5 +196,28 @@ export const LoadersFactory = (parent = class {}) => {
 /* Returns instance of Loaders, a utility for importing src files as per file 
 type or as text (raw). 
 NOTE
-- Requires pre-use config*/
+- Requires pre-use config with 'add'. */
 export const Loaders = (...args) => new (LoadersFactory())(...args);
+
+
+
+
+export const create = () => {
+  const loaders = Loaders()
+  .add(
+    {},
+    import.meta.glob("/src/test/**/*.css"),
+    import.meta.glob("/src/test/**/*.html", { query: "?raw" }),
+    import.meta.glob(["/src/test/**/*.js", "!/src/test/**/*.test.js"]),
+    import.meta.glob("/src/test/**/*.json")
+  )
+  .add(
+    { raw: true },
+    import.meta.glob("/src/test/**/*.css", { query: "?raw" }),
+    import.meta.glob("/src/test/**/*.js", { query: "?raw" }),
+    import.meta.glob("/src/test/**/*.json", { query: "?raw" })
+  )
+  .freeze();
+  return loaders
+
+}

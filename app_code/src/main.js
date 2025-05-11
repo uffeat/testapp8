@@ -2,23 +2,9 @@
 import "@/bootstrap.scss";
 import "@/main.css";
 //import { modules } from "@/rollovite/modules.js";
-import { Loaders } from "@/rollovite/tools/loaders.js";
+import { Loaders, create } from "@/rollovite/tools/loaders.js";
 
-const loaders = Loaders()
-  .add(
-    {},
-    import.meta.glob("/src/test/**/*.css"),
-    import.meta.glob("/src/test/**/*.html", { query: "?raw" }),
-    import.meta.glob(["/src/test/**/*.js", "!/src/test/**/*.test.js"]),
-    import.meta.glob("/src/test/**/*.json")
-  )
-  .add(
-    { raw: true },
-    import.meta.glob("/src/test/**/*.css", { query: "?raw" }),
-    import.meta.glob("/src/test/**/*.js", { query: "?raw" }),
-    import.meta.glob("/src/test/**/*.json", { query: "?raw" })
-  )
-  .freeze();
+const loaders = create()
 
 //loaders.clear().remove()
 
