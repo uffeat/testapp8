@@ -2,7 +2,7 @@ export const module = new (class Module {
   /* Returns a JS module constructed from text. 
   NOTE
   - Any caching should be handled in consuming code. */
-  async from_text(text) {
+  async construct(text) {
     const blob = new Blob([text], { type: "text/javascript" });
     const url = URL.createObjectURL(blob);
     const module = await this.import(url);

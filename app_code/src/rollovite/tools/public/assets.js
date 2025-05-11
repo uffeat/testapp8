@@ -5,7 +5,12 @@ import paths from "@/rollovite/tools/public/__paths__.js";
 
 export const assets = new (class Assets {
   #factory = factory.call(this, "");
-  #cache = new Cache(fetch_text);
+  #cache = new Cache(async (path) => {
+    path = `${import.meta.env.BASE_URL}${path.slice("/".length)}`;
+    const response = await fetch(path);
+  return (await response.text()).trim();
+
+  });
   #js;
 
   constructor() {
@@ -17,7 +22,7 @@ export const assets = new (class Assets {
       async import(path, { name } = {}) {
         const _module = await this.#cache.get(path, async () => {
           const text = await assets.import(path, { raw: true });
-          return await module.from_text(text);
+          return await module.construct(text);
         });
         /* NOTE
         - Convention: Modules with default export, should not export 
@@ -26,7 +31,6 @@ export const assets = new (class Assets {
           if (name && typeof _module.default === "object") {
             return _module.default[name];
           }
-
           return _module.default;
         }
         if (name) {
@@ -51,7 +55,7 @@ export const assets = new (class Assets {
       return await this.#js.import(path, { name });
     }
 
-    path = normalize_path(path);
+    
 
     if (type === "css" && !raw) {
       /* Mimic Vite: css becomes global (albeit via link) */

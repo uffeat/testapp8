@@ -6,10 +6,18 @@ import { assets } from "@/rollovite/tools//public/assets.js";
 
 
 await (async function js() {
-  /* Import named member of js module */
+  
   console.log("foo:", (await assets.import("/test/foo/foo.js")).foo);
   console.log("foo:", await assets.import("/test/foo/foo.js", { name: "foo" }));
   console.log("foo:", await assets.path.test.foo.foo[":js"]({ name: "foo" }));
+  console.log("foo:", await assets.path.test.foo.foo[":js"]({ name: "foo" }));
+})();
+
+await (async function template() {
+  
+  console.log("foo:", (await assets.import("/test/foo/foo.template")));
+  console.log("foo:", await assets.path.test.foo.foo[":template"]());
+  console.log("foo:", await assets.path.test.foo.foo[":template"]());
 })();
 
 /* Make 'modules' global */
