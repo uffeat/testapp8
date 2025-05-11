@@ -5,6 +5,16 @@ import { module } from "@/rollo/tools/module.js";
 import { factory } from "@/rollovite/tools/factory.js";
 import paths from "@/rollovite/tools/public/__paths__.js";
 
+class Path {
+  #path
+  #raw
+  #type
+
+  constructor(path) {
+
+  }
+
+}
 
 
 export const assets = new (class Assets {
@@ -88,9 +98,7 @@ export const assets = new (class Assets {
 
   /* Returns import. */
   async import(path, { name, raw } = {}) {
-    if (!this.has(path)) {
-      return new Error(path);
-    }
+    
 
     const type = path.split(".").reverse()[0];
 
@@ -101,10 +109,15 @@ export const assets = new (class Assets {
       raw = parts[1];
     }
 
+    if (!this.has(path)) {
+      return new Error(path);
+    }
+
     if (type === "js" && !raw) {
       return await this.#js.import(path, { name });
     }
 
+    /* */
     path = normalize(path)
     
 
