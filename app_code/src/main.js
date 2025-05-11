@@ -2,19 +2,83 @@
 import "@/bootstrap.scss";
 import "@/main.css";
 //import { modules } from "@/rollovite/modules.js";
-import { Loaders, create } from "@/rollovite/tools/loaders.js";
+import { Loaders } from "@/rollovite/tools/loaders.js";
 
-const loaders = create()
+const loaders = Loaders()
+  .add(
+    {},
+    import.meta.glob("/src/test/**/*.css"),
+    import.meta.glob("/src/test/**/*.html", { query: "?raw" }),
+    import.meta.glob(["/src/test/**/*.js", "!/src/test/**/*.test.js"]),
+    import.meta.glob("/src/test/**/*.json")
+  )
+  .add(
+    { raw: true },
+    import.meta.glob("/src/test/**/*.css", { query: "?raw" }),
+    import.meta.glob("/src/test/**/*.js", { query: "?raw" }),
+    import.meta.glob("/src/test/**/*.json", { query: "?raw" })
+  )
+  .freeze();
 
 //loaders.clear().remove()
 
-console.log("bar:", (await loaders.import("@/test/bar/bar.js")).bar);
-console.log("bar:", await loaders.import("@/test/bar/bar.js", { name: "bar" }));
-console.log("bar:", await loaders.path.test.bar.bar[":js"]({ name: "bar" }));
-// Check that path resets:
-console.log("bar:", await loaders.path.test.bar.bar[":js"]({ name: "bar" }));
 
-console.log("raw bar:", await loaders.import("@/test/bar/bar.js?raw"));
+
+await (async function js() {
+  /* Import named member of js module */
+  console.log("foo:", (await loaders.import("@/test/foo/foo.js")).foo);
+  console.log(
+    "foo:",
+    await loaders.import("@/test/foo/foo.js", { name: "foo" })
+  );
+  console.log("foo:", await loaders.path.test.foo.foo[":js"]({ name: "foo" }));
+  console.log("raw:", await loaders.import("@/test/foo/foo.js?raw"));
+  // Alternatively:
+  console.log(
+    "raw js:",
+    await loaders.import("@/test/foo/foo.js", { raw: true })
+  );
+  console.log("raw js:", await loaders.path.test.foo.foo[":js"]({ raw: true }));
+})();
+
+await (async function json() {
+  console.log("parsed:", await loaders.import("@/test/foo/foo.json"));
+  console.log("parsed:", await loaders.import("@/test/bar/bar.json"));
+  console.log(
+    "raw:",
+    await loaders.import("@/test/foo/foo.json", { raw: true })
+  );
+  console.log("raw:", await loaders.path.test.foo.foo[":json"]({ raw: true }));
+  console.log("foo:", (await loaders.import("@/test/foo/foo.json")).foo);
+  console.log(
+    "foo:",
+    await loaders.import("@/test/foo/foo.json", { name: "foo" })
+  );
+  console.log(
+    "foo:",
+    await loaders.path.test.foo.foo[":json"]({ name: "foo" })
+  );
+})();
+
+await (async function html() {
+  console.log("html:", await loaders.import("@/test/foo/foo.html"));
+  console.log("html:", await await loaders.path.test.foo.foo[":html"]());
+})();
+
+/* ANTI-PATTERNS */
+await (async function anti() {
+  /* Will still import raw:*/
+  console.log(
+    "raw:",
+    await loaders.import("@/test/foo/foo.js", { name: "foo", raw: true })
+  );
+
+  /* Returns an error: */
+  console.log(
+    "html:",
+    await loaders.import("@/test/foo/foo.html", { raw: true })
+  );
+})();
 
 /* Extras */
 console.log("paths:", loaders.paths());
