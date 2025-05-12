@@ -13,10 +13,8 @@ await (async function css() {
 })();
 
 await (async function link() {
-  await assets.import("/test/foo/foo.css")
+  await assets.import("/test/foo/foo.css");
   component.h1("foo", { parent: document.body }, "FOO");
-  
-  
 })();
 
 await (async function js() {
@@ -28,23 +26,17 @@ await (async function js() {
 
 await (async function json() {
   console.log("parsed:", await assets.import("/test/foo/foo.json"));
-  console.log(
-    "raw:",
-    await assets.import("/test/foo/foo.json", { raw: true })
-  );
-  console.log(
-    "raw:",
-    await assets.path.test.foo.foo[":json"]({ raw: true })
-  );
+  console.log("raw:", await assets.import("/test/foo/foo.json", { raw: true }));
+  console.log("raw:", await assets.path.test.foo.foo[":json"]({ raw: true }));
   console.log("foo:", (await assets.import("/test/foo/foo.json")).foo);
   console.log(
     "foo:",
     await assets.import("/test/foo/foo.json", { name: "foo" })
   );
-  console.log(
-    "foo:",
-    await assets.path.test.foo.foo[":json"]({ name: "foo" })
-  );
+  console.log("foo:", await assets.path.test.foo.foo[":json"]({ name: "foo" }));
+
+  console.log("parsed:", await assets.import("/test/bar/bar.json"));
+  console.log("3:", await assets.import("/test/bar/bar.json", { name: 2 }));
 })();
 
 await (async function template() {
@@ -59,11 +51,8 @@ await (async function batch() {
 
 await (async function invalid() {
   console.log("invalid:", await assets.import("/blabla.template"));
-  console.log("invalid:", (await assets.import("/blabla.js")));
-  
+  console.log("invalid:", await assets.import("/blabla.js"));
 })();
-
-
 
 /* Make 'modules' global */
 

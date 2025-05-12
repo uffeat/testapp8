@@ -169,17 +169,22 @@ export const LoadersFactory = (parent = class {}) => {
         These issues are not critical, but usage does require a level of
         reasonable discipline.
       */
+     const type = path.split(".").reverse()[0];
+
+
       if (raw && !path.endsWith("?raw")) {
         path += "?raw";
       }
 
       const load = this.get(path);
       if (load) {
+
+        /* TODO
+        - Only do this for non-js
+        */
         const module = await load();
         if ("default" in module) {
-          /* NOTE
-          - Convention: Modules with default export, should not export 
-            anything else. */
+          
           if (name && typeof module.default === "object") {
             return module.default[name];
           }
