@@ -1,26 +1,27 @@
 /*
-rollovite/tools/loaders.js
-20250512
+import { Loaders } from "@/rollovite/tools/loaders.js";
 v.1.2
+20250512
 */
 
 import { compose } from "@/rollo/tools/cls/compose.js";
 import { importer } from "@/rollovite/factories/importer.js";
 import { path } from "@/rollovite/factories/path.js";
 
-class cls extends compose(null, {base: '@'}, importer, path) {
+class cls extends compose(null, { base: "@" }, importer, path) {
   static name = "Loaders";
-  #paths;
-  #registry
+
+  #registry;
   #store = new Map();
 
   constructor() {
     super();
-
+    /* NOTE
+    - #store is kept in outer scope to enable direct access (if ever needed) */
     const owner = this;
-
     this.#registry = new (class Registry {
       #frozen = false;
+      #paths;
 
       get frozen() {
         return this.#frozen;
@@ -107,6 +108,26 @@ class cls extends compose(null, {base: '@'}, importer, path) {
         return this;
       }
 
+      /* Returns (async) load function. */
+      get(path) {
+        return owner.#store.get(path);
+      }
+
+      /* Checks, if path is in registry. */
+      has(path) {
+        return owner.#store.has(path);
+      }
+
+      /* Returns array of registered paths, optionally subject to filter. */
+      paths(filter) {
+        /* If frozen, paths do not need to be created at each call */
+        if (!this.#paths && this.frozen) {
+          this.#paths = Array.from(owner.#store.keys());
+        }
+        const paths = this.#paths || Array.from(owner.#store.keys());
+        return filter ? paths.filter(filter) : paths;
+      }
+
       /* Removes and returns load function (if registered).
       NOTE
       - Cannot be used post-freeze. */
@@ -133,8 +154,9 @@ class cls extends compose(null, {base: '@'}, importer, path) {
     })();
   }
 
+  /* Returns controller for managing module registration. */
   get registry() {
-    return this.#registry
+    return this.#registry;
   }
 
   /* Imports and returns array of modules, optionally subject to filter. 
@@ -142,20 +164,10 @@ class cls extends compose(null, {base: '@'}, importer, path) {
   - Primarily intended for side-effect imports, but does provide return. */
   async batch(filter) {
     const modules = [];
-    for (const path of this.paths(filter)) {
-      modules.push(await this.get(path)());
+    for (const path of this.registry.paths(filter)) {
+      modules.push(await this.registry.get(path)());
     }
     return modules;
-  }
-
-  /* Returns (async) load function. */
-  get(path) {
-    return this.#store.get(path);
-  }
-
-  /* Checks, if path is in registry. */
-  has(path) {
-    return this.#store.has(path);
   }
 
   /* Imports module and returns module or module member.
@@ -171,40 +183,19 @@ class cls extends compose(null, {base: '@'}, importer, path) {
       These issues are not critical, but usage does require a level of
       reasonable discipline.
     */
-    const type = path.split(".").reverse()[0];
 
     if (raw && !path.endsWith("?raw")) {
       path += "?raw";
     }
-
-    const load = this.get(path);
+    const load = this.registry.get(path);
     if (load) {
-      /* TODO
-      - Only do this for non-js
-      */
       const module = await load();
-      if ("default" in module) {
-        if (name && typeof module.default === "object") {
-          return module.default[name];
-        }
-        return module.default;
-      }
       if (name) {
         return module[name];
       }
       return module;
     }
     return new Error(path);
-  }
-
-  /* Returns array of registered paths, optionally subject to filter. */
-  paths(filter) {
-    /* If frozen, paths do not need to be created at each call */
-    if (!this.#paths && this.frozen) {
-      this.#paths = Array.from(this.#store.keys());
-    }
-    const paths = this.#paths || Array.from(this.#store.keys());
-    return filter ? paths.filter(filter) : paths;
   }
 }
 
@@ -220,118 +211,3 @@ NOTE
 - Supports an alternative Python-like syntax, incl. for importers.
  */
 export const Loaders = () => new cls();
-
-/* Example of Loaders instance with general-purpose configuration for @/test scope. 
-NOTE
-- Does not return anything; ONLY provided as "in-module" temp demo code, to be removed o
-nce transferred to formal tests. */
-const example = async () => {
-  const loaders = Loaders()
-    .add(
-      {},
-      import.meta.glob("/src/test/**/*.css"),
-      import.meta.glob("/src/test/**/*.html", { query: "?raw" }),
-      import.meta.glob(["/src/test/**/*.js", "!/src/test/**/*.test.js"]),
-      import.meta.glob("/src/test/**/*.json")
-    )
-    .add(
-      { raw: true },
-      import.meta.glob("/src/test/**/*.css", { query: "?raw" }),
-      import.meta.glob("/src/test/**/*.js", { query: "?raw" }),
-      import.meta.glob("/src/test/**/*.json", { query: "?raw" })
-    )
-    .freeze();
-
-  /* Usage */
-
-  await (async function js() {
-    /* Import named member of js module */
-    console.log("foo:", (await loaders.import("@/test/foo/foo.js")).foo);
-    console.log(
-      "foo:",
-      await loaders.import("@/test/foo/foo.js", { name: "foo" })
-    );
-    console.log(
-      "foo:",
-      await loaders.path.test.foo.foo[":js"]({ name: "foo" })
-    );
-    console.log("raw:", await loaders.import("@/test/foo/foo.js?raw"));
-    // Alternatively:
-    console.log(
-      "raw:",
-      await loaders.import("@/test/foo/foo.js", { raw: true })
-    );
-    console.log("raw:", await loaders.path.test.foo.foo[":js"]({ raw: true }));
-  })();
-
-  await (async function json() {
-    console.log("parsed:", await loaders.import("@/test/foo/foo.json"));
-    console.log("parsed:", await loaders.import("@/test/bar/bar.json"));
-    console.log(
-      "raw:",
-      await loaders.import("@/test/foo/foo.json", { raw: true })
-    );
-    console.log(
-      "raw:",
-      await loaders.path.test.foo.foo[":json"]({ raw: true })
-    );
-    console.log("foo:", (await loaders.import("@/test/foo/foo.json")).foo);
-    console.log(
-      "foo:",
-      await loaders.import("@/test/foo/foo.json", { name: "foo" })
-    );
-    console.log(
-      "foo:",
-      await loaders.path.test.foo.foo[":json"]({ name: "foo" })
-    );
-  })();
-
-  await (async function html() {
-    console.log("html:", await loaders.import("@/test/foo/foo.html"));
-    console.log("html:", await await loaders.path.test.foo.foo[":html"]());
-  })();
-
-  await (async function css() {
-    console.log(
-      "raw:",
-      await loaders.import("@/test/foo/foo.css", { raw: true })
-    );
-    console.log("raw:", await loaders.path.test.foo.foo[":css"]({ raw: true }));
-  })();
-
-  await (async function batch() {
-    await loaders.batch((path) => path.includes("/batch/"));
-  })();
-
-  (function paths() {
-    console.log(
-      "paths:",
-      loaders.paths((path) => path.includes("bar"))
-    );
-  })();
-
-  (function size() {
-    console.log("size:", loaders.size());
-  })();
-
-  await (async function importer() {
-    const test = loaders.importer.create("@/test");
-    console.log("foo:", await test.import("foo/foo.js", { name: "foo" }));
-    console.log("foo:", (await test.path.foo.foo[":js"]()).foo);
-  })();
-
-  /* Anti-patterns */
-  await (async function anti() {
-    /* Will still import raw:*/
-    console.log(
-      "raw:",
-      await loaders.import("@/test/foo/foo.js", { name: "foo", raw: true })
-    );
-
-    /* Returns an error: */
-    console.log(
-      "html:",
-      await loaders.import("@/test/foo/foo.html", { raw: true })
-    );
-  })();
-};
