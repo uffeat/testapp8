@@ -1,18 +1,11 @@
 /* NOTE
 - Tightly coupled with pre-build tool for creation of '__paths__.js' */
-import { component } from "@/rollo/component/component.js";
+import { Cache } from "@/rollo/tools/cache.js";
 import { module } from "@/rollo/tools/module.js";
 import { factory } from "@/rollovite/tools/factory.js";
-import paths from "@/rollovite/tools/public/__manifest__.js";
+import paths from "@/rollovite/tools/public/__paths__.js";
 
 class Path {
-  static create = (path) => {
-    if (path instanceof Path) {
-      return path;
-    }
-    return new Path(path);
-  };
-
   #path;
   #raw;
   #type;
@@ -49,54 +42,32 @@ export const assets = new (class Assets {
   #cache;
   #js;
   #json;
-  #paths;
 
   constructor() {
     const assets = this;
 
-    this.#cache = new (class Cache {
-      #registry = new Map();
-
-      async get(path) {
-        path = Path.create(path);
-        let result = this.#registry.get(path.path);
-        if (result) {
-          return result;
-        }
-        const response = await fetch(path.path);
-        result = (await response.text()).trim();
-        this.#registry.set(path.path, result);
-        return result;
-      }
-    })();
+    this.#cache = new Cache(async (path) => {
+      const response = await fetch(path.path);
+      return (await response.text()).trim();
+    });
 
     this.#css = new (class Css {
       async import(path) {
-        path = Path.create(path);
+        if (!(path instanceof Path)) {
+          path = new Path(path);
+        }
         /* Mimic Vite: css becomes global (albeit via link) */
-        const href = path.path;
-        const rel = "stylesheet";
-        const selector = `link[rel="${rel}"][href="${path.path}"]`;
-
-        if (!document.head.querySelector(selector)) {
+        if (
+          !document.head.querySelector(
+            `link[rel="stylesheet"][href="${path.path}"]`
+          )
+        ) {
           const { promise, resolve } = Promise.withResolvers();
-
-          const link = component.link({
-            href,
-            rel,
-            parent: document.head,
-            onload: (event) => resolve(),
-          });
-
-          /*
-          // Alternative without 'component'
           const link = document.createElement("link");
           link.rel = "stylesheet";
           link.href = path.path;
           link.onload = (event) => resolve();
           document.head.append(link);
-          */
-
           await promise;
         }
         return;
@@ -104,45 +75,29 @@ export const assets = new (class Assets {
     })();
 
     this.#js = new (class Js {
-      #cache;
-
-      constructor() {
-        this.#cache = new (class Cache {
-          #registry = new Map();
-
-          async get(path) {
-            path = Path.create(path);
-            let result = this.#registry.get(path.path);
-            if (result) {
-              return result;
-            }
-            const text = await assets.import(path, { raw: true });
-            result = await module.construct(text);
-
-            this.#registry.set(path.path, result);
-            return result;
-          }
-        })();
-      }
+      #cache = new Cache();
 
       async import(path, { name } = {}) {
-        path = Path.create(path);
-
-        const result = await this.#cache.get(path);
-
+        if (!(path instanceof Path)) {
+          path = new Path(path);
+        }
+        const _module = await this.#cache.get(path.path, async () => {
+          const text = await assets.import(path, { raw: true });
+          return await module.construct(text);
+        });
         /* NOTE
         - Convention: Modules with default export, should not export 
           anything else. */
-        if ("default" in result) {
-          if (name && typeof result.default === "object") {
-            return result.default[name];
+        if ("default" in _module) {
+          if (name && typeof _module.default === "object") {
+            return _module.default[name];
           }
-          return result.default;
+          return _module.default;
         }
         if (name) {
-          return result[name];
+          return _module[name];
         }
-        return result;
+        return _module;
       }
     })();
 
@@ -169,12 +124,14 @@ export const assets = new (class Assets {
 
   /* Checks, if path is in public. */
   has(path) {
-    return paths.has(path);
+    return paths.includes(path);
   }
 
   /* Returns import. */
   async import(path, { name, raw } = {}) {
-    path = Path.create(path);
+    if (!(path instanceof Path)) {
+      path = new Path(path);
+    }
     raw = path.raw || raw;
     if (!this.has(path.path)) {
       return new Error(path.path);
@@ -198,14 +155,10 @@ export const assets = new (class Assets {
 
   /* Returns array of public paths, optionally subject to filter. */
   paths(filter) {
-    if (!this.#paths) {
-      this.#paths = Object.freeze(Array.from(paths));
-    }
-
     if (filter) {
-      return this.#paths.filter(filter);
+      return paths.filter(filter);
     }
-    return this.#paths;
+    return paths;
   }
 
   /* Returns number of public paths, optionally subject to filter. */

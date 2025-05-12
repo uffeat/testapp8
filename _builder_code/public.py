@@ -1,5 +1,5 @@
 """
-20250506
+20250512
 """
 
 import datetime as dt
@@ -7,7 +7,7 @@ import json
 from pathlib import Path
 
 SOURCE = Path.cwd() / "app_code/public"
-NAME = "__paths__.json"
+NAME = "__manifest__.json"
 
 
 def main():
@@ -21,13 +21,16 @@ def main():
     ]
     content = json.dumps(paths)
 
-    file = Path.cwd() / "app_code/public/__paths__.json"
+    file = SOURCE / NAME
     file.parent.mkdir(parents=True, exist_ok=True)
     file.write_text(content, encoding="utf-8")
 
-    file = Path.cwd() / "app_code/src/rollovite/tools/public/__paths__.js"
+    file = Path.cwd() / "app_code/src/rollovite/tools/public/__manifest__.js"
     file.parent.mkdir(parents=True, exist_ok=True)
-    file.write_text(f"/* Auto-generated: {timestamp} */\n\nexport default Object.freeze({content});", encoding="utf-8")
+    file.write_text(
+        f"/* Auto-generated: {timestamp} */\n\nexport default Object.freeze(new Set({content}));",
+        encoding="utf-8",
+    )
 
 
 if __name__ == "__main__":

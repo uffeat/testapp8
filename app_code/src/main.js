@@ -3,12 +3,20 @@ import "@/bootstrap.scss";
 import "@/main.css";
 //import { modules } from "@/rollovite/modules.js";
 import { assets } from "@/rollovite/tools//public/assets.js";
+import { component } from "@/rollo/component/component.js";
 
 await (async function css() {
   console.log("css:", await assets.import("/test/foo/foo.css", { raw: true }));
   console.log("css:", await assets.import("/test/foo/foo.css?raw"));
   console.log("css:", await assets.path.test.foo.foo[":css"]({ raw: true }));
   console.log("css:", await assets.path.test.foo.foo[":css"]({ raw: true }));
+})();
+
+await (async function link() {
+  await assets.import("/test/foo/foo.css")
+  component.h1("foo", { parent: document.body }, "FOO");
+  
+  
 })();
 
 await (async function js() {
