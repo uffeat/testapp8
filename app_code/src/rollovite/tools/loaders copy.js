@@ -4,137 +4,70 @@ rollovite/tools/loaders.js
 v.1.2
 */
 
+
 import { compose } from "@/rollo/tools/cls/compose.js";
+
 import { importer } from "@/rollovite/factories/importer.js";
 import { path } from "@/rollovite/factories/path.js";
 
-class cls extends compose(null, {base: '@'}, importer, path) {
+class cls extends compose(null, {}, importer, path) {
   static name = "Loaders";
+
+ 
+  #frozen = false;
+  
   #paths;
-  #registry
-  #store = new Map();
+  #registry = new Map();
 
   constructor() {
     super();
+    
+    
+  }
 
-    const owner = this;
+  get frozen() {
+    return this.#frozen;
+  }
 
-    this.#registry = new (class Registry {
-      #frozen = false;
+ 
 
-      get frozen() {
-        return this.#frozen;
-      }
+  
 
-      /* Registers loaders. Chainable. 
-      NOTE
-      - 'loaders' should typically be provided as objects returned by Vite's 
-        'import.meta.glob' function, but can be provided as other objects with 
-        similar shape, e.g.:
-          { 'my_path': () => import(my_path) }
-      - The 'raw' option should be set, if raw imports are needed for file types
-        that Vite does not natively import as raw, including css, js and json.
-        In 'import.meta.glob' the { query: "?raw" } option should be used 
-        (without the 'add' {raw: true } option ) for file types that Vite's does 
-        not natively support, e.g. html. These rules are funky and are best 
-        illustrated by example;  see relevant test files. */
-      add({ raw = false }, ...loaders) {
+  /* Registers loaders. Chainable. 
+  NOTE
+  - 'loaders' should typically be provided as objects returned by Vite's 
+    'import.meta.glob' function, but can be provided as other objects with 
+     similar shape, e.g.:
+       { 'my_path': () => import(my_path) }
+  - The 'raw' option should be set, if raw imports are needed for file types
+    that Vite does not natively import as raw, including css, js and json.
+    In 'import.meta.glob' the { query: "?raw" } option should be used 
+    (without the 'add' {raw: true } option ) for file types that Vite's does 
+    not natively support, e.g. html. These rules are funky and are best 
+    illustrated by example;  see relevant test files. */
+  add({ raw = false }, ...loaders) {
+    /* NOTE
+    - Rather than using loader objects directly, these are copied into 
+      a central registry. While this does involve a copy-step it also guards
+      against duplicate registration and provides initial path adaptation, 
+      rather than at each retrieval. */
+    loaders.forEach((loader) =>
+      Object.entries(loader).forEach(([path, load]) => {
         /* NOTE
-        - Rather than using loader objects directly, these are copied into 
-          a central registry. While this does involve a copy-step it also guards
-          against duplicate registration and provides initial path adaptation, 
-          rather than at each retrieval. */
-        loaders.forEach((loader) =>
-          Object.entries(loader).forEach(([path, load]) => {
-            /* NOTE
         - Objects created with 'import.meta.glob' and options (e.g., 
           { query: "?raw" }) do NOT carry these options into the path key.   
           To avoid registry overwrites, 'add' options are serialized
           and appended to the applied key. 'add' only supports a 'raw' option
           and this option is (sensibly) added to the path key by brute 
           force. */
-            const key = `@/${(raw ? path + "?raw" : path).slice(
-              "/src/".length
-            )}`;
-            if (owner.#store.has(key)) {
-              console.warn(`Overwriting key: ${key}`);
-            }
-            owner.#store.set(key, load);
-          })
-        );
-        return this;
-      }
-
-      /* Removes all loaders. Chainable 
-      NOTE
-      -  Cannot be used post-freeze. */
-      clear() {
-        owner.#store.clear();
-        return this;
-      }
-
-      /* Returns object copy of registry.
-      NOTE
-      - Intended for debugging and special cases. */
-      copy() {
-        return Object.fromEntries(owner.#store.entries());
-      }
-
-      /* Prevents subsequent registry changes. Chainable. 
-      NOTE
-      - Also sets the 'frozen' flag, which can be used by other members to 
-        optimize performance. */
-      freeze() {
-        if (this.frozen) {
-          throw new Error(`Frozen.`);
+        const key = `@/${(raw ? path + "?raw" : path).slice("/src/".length)}`;
+        if (this.#registry.has(key)) {
+          console.warn(`Overwriting key: ${key}`);
         }
-        this.#frozen = true;
-        /* Replace methods that can change registry with chainable methods 
-        that logs an error */
-        const factory = (key) => () => {
-          console.warn(`'${key}' cannot be used post-freeze.`);
-          return this;
-        };
-        const keys = ["add", "clear", "pop", "remove"];
-        keys.forEach((key) => {
-          Object.defineProperty(this, key, {
-            configurable: true,
-            enumerable: true,
-            writable: true,
-            value: factory(key),
-          });
-        });
-        return this;
-      }
-
-      /* Removes and returns load function (if registered).
-      NOTE
-      - Cannot be used post-freeze. */
-      pop(path) {
-        const load = owner.#store.get(path);
-        if (load) {
-          owner.#store.delete(path);
-          return load;
-        }
-      }
-
-      /* Removes one or more load functions. Chainable.
-      NOTE
-      -  Cannot be used post-freeze. */
-      remove(...paths) {
-        paths.forEach((path) => owner.#store.delete(path));
-        return this;
-      }
-
-      /* Returns number of registered paths, optionally subject to filter. */
-      size(filter) {
-        return filter ? owner.paths(filter).length : owner.#store.size;
-      }
-    })();
-  }
-
-  get registry() {
-    return this.#registry
+        this.#registry.set(key, load);
+      })
+    );
+    return this;
   }
 
   /* Imports and returns array of modules, optionally subject to filter. 
@@ -148,14 +81,56 @@ class cls extends compose(null, {base: '@'}, importer, path) {
     return modules;
   }
 
+  /* Removes all loaders. Chainable 
+  NOTE
+  -  Cannot be used post-freeze. */
+  clear() {
+    this.#registry.clear();
+    return this;
+  }
+
+  /* Returns object copy of registry.
+  NOTE
+  - Intended for debugging and special cases. */
+  copy() {
+    return Object.fromEntries(this.#registry.entries());
+  }
+
+  /* Prevents subsequent registry changes. Chainable. 
+  NOTE
+  - Also sets the 'frozen' flag, which can be used by other members to 
+    optimize performance. */
+  freeze() {
+    if (this.frozen) {
+      throw new Error(`Frozen.`);
+    }
+    this.#frozen = true;
+    /* Replace methods that can change registry with chainable methods 
+    that logs an error */
+    const factory = (key) => () => {
+      console.warn(`'${key}' cannot be used post-freeze.`);
+      return this;
+    };
+    const keys = ["add", "clear", "pop", "remove"];
+    keys.forEach((key) => {
+      Object.defineProperty(this, key, {
+        configurable: true,
+        enumerable: true,
+        writable: true,
+        value: factory(key),
+      });
+    });
+    return this;
+  }
+
   /* Returns (async) load function. */
   get(path) {
-    return this.#store.get(path);
+    return this.#registry.get(path);
   }
 
   /* Checks, if path is in registry. */
   has(path) {
-    return this.#store.has(path);
+    return this.#registry.has(path);
   }
 
   /* Imports module and returns module or module member.
@@ -171,7 +146,8 @@ class cls extends compose(null, {base: '@'}, importer, path) {
       These issues are not critical, but usage does require a level of
       reasonable discipline.
     */
-    const type = path.split(".").reverse()[0];
+   const type = path.split(".").reverse()[0];
+
 
     if (raw && !path.endsWith("?raw")) {
       path += "?raw";
@@ -179,11 +155,13 @@ class cls extends compose(null, {base: '@'}, importer, path) {
 
     const load = this.get(path);
     if (load) {
+
       /* TODO
       - Only do this for non-js
       */
       const module = await load();
       if ("default" in module) {
+        
         if (name && typeof module.default === "object") {
           return module.default[name];
         }
@@ -201,12 +179,36 @@ class cls extends compose(null, {base: '@'}, importer, path) {
   paths(filter) {
     /* If frozen, paths do not need to be created at each call */
     if (!this.#paths && this.frozen) {
-      this.#paths = Array.from(this.#store.keys());
+      this.#paths = Array.from(this.#registry.keys());
     }
-    const paths = this.#paths || Array.from(this.#store.keys());
+    const paths = this.#paths || Array.from(this.#registry.keys());
     return filter ? paths.filter(filter) : paths;
   }
-}
+
+  /* Removes and returns load function (if registered).
+  NOTE
+  - Cannot be used post-freeze. */
+  pop(path) {
+    const load = this.#registry.get(path);
+    if (load) {
+      this.#registry.delete(path);
+      return load;
+    }
+  }
+
+  /* Removes one or more load functions. Chainable.
+  NOTE
+  -  Cannot be used post-freeze. */
+  remove(...paths) {
+    paths.forEach((path) => this.#registry.delete(path));
+    return this;
+  }
+
+  /* Returns number of registered paths, optionally subject to filter. */
+  size(filter) {
+    return filter ? this.paths(filter).length : this.#registry.size;
+  }
+};
 
 /* Returns instance of Loaders, a utility for importing src files as per file 
 type or as text (raw). 
