@@ -49,6 +49,12 @@ await (async function batch() {
   await assets.batch((path) => path.includes("/batch/"));
 })();
 
+await (async function importer() {
+  const test = assets.importer.create("/test");
+  console.log("foo:", await test.import("foo/foo.js", { name: "foo" }));
+  console.log("foo:", (await test.path.foo.foo[":js"]()).foo);
+})();
+
 await (async function invalid() {
   console.log("invalid:", await assets.import("/blabla.template"));
   console.log("invalid:", await assets.import("/blabla.js"));

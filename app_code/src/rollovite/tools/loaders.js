@@ -19,7 +19,7 @@ export const LoadersFactory = (parent = class {}) => {
 
     constructor() {
       super();
-
+      /* Enable ref to 'this' from composition classes */
       const owner = this;
       this.#importer = new (class Importer {
         create(base) {
@@ -44,9 +44,9 @@ export const LoadersFactory = (parent = class {}) => {
       return this.#frozen;
     }
 
-    /* Returns object, from which modules (or module members) can be imported 
-    from a given base dir with string-based or Python-like syntax. 
-    Enables shorter import statements. */
+    /* Returns object, from which imports can be made from a given base 
+    dir with string-based or Python-like syntax. Enables shorter import 
+    statements. */
     get importer() {
       return this.#importer;
     }
