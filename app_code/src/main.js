@@ -53,6 +53,10 @@ await (async function template() {
   console.log("foo:", await assets.path.test.foo.foo[":template"]());
 })();
 
+await (async function batch() {
+  await assets.batch((path) => path.includes("/batch/"));
+})();
+
 await (async function invalid() {
   console.log("invalid:", await assets.import("/blabla.template"));
   console.log("invalid:", (await assets.import("/blabla.js")));

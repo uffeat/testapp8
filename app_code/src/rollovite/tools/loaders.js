@@ -93,7 +93,9 @@ export const LoadersFactory = (parent = class {}) => {
       return this;
     }
 
-    /* Imports and returns array of modules, optionally subject to filter. */
+    /* Imports and returns array of modules, optionally subject to filter. 
+    NOTE
+    - Primarily intended for side-effect imports, but does provide return. */
     async batch(filter) {
       const modules = [];
       for (const path of this.paths(filter)) {

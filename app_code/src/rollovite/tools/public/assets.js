@@ -1,5 +1,13 @@
-/* NOTE
-- Tightly coupled with pre-build tool for creation of '__paths__.js' */
+/*
+rollovite/tools/public/assets.js
+v.1.0
+20250512
+
+NOTE
+- Relies pre-build tool for creation of '__manifest__.js'
+*/
+
+
 import { component } from "@/rollo/component/component.js";
 import { module } from "@/rollo/tools/module.js";
 import { factory } from "@/rollovite/tools/factory.js";
@@ -117,7 +125,8 @@ export const assets = new (class Assets {
               return result;
             }
             const text = await assets.import(path, { raw: true });
-            result = await module.construct(text);
+            
+            result = await module.construct(`${text}\n//# sourceURL=${path.path}`);
 
             this.#registry.set(path.path, result);
             return result;
@@ -127,18 +136,7 @@ export const assets = new (class Assets {
 
       async import(path, { name } = {}) {
         path = Path.create(path);
-
         const result = await this.#cache.get(path);
-
-        /* NOTE
-        - Convention: Modules with default export, should not export 
-          anything else. */
-        if ("default" in result) {
-          if (name && typeof result.default === "object") {
-            return result.default[name];
-          }
-          return result.default;
-        }
         if (name) {
           return result[name];
         }
@@ -163,8 +161,15 @@ export const assets = new (class Assets {
     return this.#factory;
   }
 
+  /* Imports and returns array of modules, optionally subject to filter. 
+    NOTE
+    - Primarily intended for side-effect imports, but does provide return. */
   async batch(filter) {
-    //TODO
+    const modules = [];
+    for (const path of this.paths(filter)) {
+      modules.push(await this.import(path));
+    }
+    return modules;
   }
 
   /* Checks, if path is in public. */
