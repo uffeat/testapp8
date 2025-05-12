@@ -21,6 +21,7 @@ class Path {
     return new Path(path);
   };
 
+  #key
   #path;
   #raw;
   #type;
@@ -32,10 +33,18 @@ class Path {
       path = parts[0];
       this.#raw = parts[1];
     }
+
+    this.#key = path
+
+
     /* Env-adjusted public path. */
     this.#path = `${import.meta.env.BASE_URL}${path.slice("/".length)}`;
 
     this.#type = path.split(".").reverse()[0];
+  }
+
+  get key() {
+    return this.#key;
   }
 
   get path() {
@@ -174,14 +183,16 @@ export const assets = new (class Assets {
 
   /* Checks, if path is in public. */
   has(path) {
-    return paths.has(path);
+    path = Path.create(path);
+    return paths.has(path.key);
   }
 
   /* Returns import. */
   async import(path, { name, raw } = {}) {
     path = Path.create(path);
     raw = path.raw || raw;
-    if (!this.has(path.path)) {
+
+    if (!this.has(path)) {
       return new Error(path.path);
     }
 
