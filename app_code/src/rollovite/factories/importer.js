@@ -30,9 +30,12 @@ export const importer = (parent, config, ...factories) => {
       })();
     }
 
-    /* Returns import with Python-like syntax. */
+    /* Returns controller for creating objects that allow import from a base 
+    dir. */
     get importer() {
       return this.#importer;
     }
   };
 };
+
+

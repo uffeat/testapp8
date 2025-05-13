@@ -37,8 +37,6 @@ await (async function js() {
   );
   console.log("foo:", await modules.src.test.foo.foo[":js"]({ name: "foo" }));
   /* src raw */
-  console.log("raw:", await modules.import("@/test/foo/foo.js?raw"));
-  // Alternatively:
   console.log("raw:", await modules.import("@/test/foo/foo.js", { raw: true }));
   console.log("raw:", await modules.src.test.foo.foo[":js"]({ raw: true }));
   /* public */
@@ -55,8 +53,6 @@ await (async function js() {
     await modules.public.test.foo.foo[":js"]({ name: "foo" })
   );
   /* public raw */
-  console.log("raw:", await modules.import("/test/foo/foo.js?raw"));
-  // Alternatively:
   console.log("raw:", await modules.import("/test/foo/foo.js", { raw: true }));
   console.log("raw:", await modules.public.test.foo.foo[":js"]({ raw: true }));
 })();

@@ -173,7 +173,7 @@ class LoadersType extends compose(null, { base: "@" }, importer, path) {
     return modules;
   }
 
-  /* Imports module and returns module or module member.
+  /* Returns import.
   If path is invalid, an (unthrown) Error instance with the path as its message
   is returned. */
   async import(path, { name, raw } = {}) {
@@ -197,10 +197,6 @@ class LoadersType extends compose(null, { base: "@" }, importer, path) {
       if (name) {
         return module[name];
       }
-
-      
-
-
 
       return module;
     }
