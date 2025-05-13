@@ -1,31 +1,43 @@
 /*
 import { use } from "@/rollovite/use.js";
 20250513
-v.3.4
+v.1.0
 */
 
-const registry = {
-  default: import.meta.glob([
-    "/src/**/*.css",
-    "/src/**/*.js",
-    "/src/**/*.json",
-    "!/src/rollotest/**/*.*",
-  ]),
-  raw: import.meta.glob(
-    ["/src/**/*.html", "/src/**/*.sheet", "!/src/rollotest/**/*.*"],
-    { query: "?raw", import: "default" }
-  ),
-};
+const config = {
+  default: {
+    registry: import.meta.glob([
+      "/src/**/*.css",
+      "/src/**/*.js",
+      "/src/**/*.json",
+      "!/src/rollotest/**/*.*",
+    ]),
+    types: new Set(["css", "js", "json"]),
+  },
+  raw: {
+    registry: import.meta.glob(
+      ["/src/**/*.html", "/src/**/*.sheet", "!/src/rollotest/**/*.*"],
+      { query: "?raw", import: "default" }
+    ),
+    types: new Set(["html", "sheet"]),
+  },
 
-const natives = new Set(["css", "js", "json"]);
+  
+};
 
 export const use = async (path) => {
   const type = path.split(".").reverse()[0];
   path = `/src/${path.slice("@/".length)}`;
 
-  if (natives.has(type)) {
-    return await registry.default[path]();
+  if (config.default.types.has(type)) {
+    return await config.default.registry[path]();
   }
 
-  return await registry.raw[path]();
+  if (config.raw.types.has(type)) {
+    return await config.raw.registry[path]();
+  }
+
+  
+
+  throw new Error(`Invalid path: ${path}`);
 };

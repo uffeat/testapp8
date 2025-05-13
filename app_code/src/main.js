@@ -2,13 +2,16 @@
 import "@/bootstrap.scss";
 import "@/main.css";
 import { use } from "@/rollovite/use.js";
+import { url } from "@/rollovite/url.js";
 import { is_module } from "@/rollo/tools/is/is_module.js";
 import { component } from "@/rollo/component/component.js";
 
-import stuff from "@/assets/images/bevel.jpg";
-console.log(stuff)
+//import stuff from "@/assets/images/bevel.jpg";
+//console.log(stuff)
 
-component.img({src: stuff, parent: document.body})
+
+component.img({src: (await url("@/assets/images/bevel.jpg")), parent: document.body})
+component.img({src: (url("/images/sprocket.jpg")), parent: document.body})
 
 
 
