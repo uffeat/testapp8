@@ -1,18 +1,20 @@
 import { Loaders } from "@/rollovite/tools/loaders.js";
 
 const loaders = Loaders()
+
+loaders.registry
     .add(
       {},
       import.meta.glob("/src/test/**/*.css"),
-      import.meta.glob("/src/test/**/*.html", { query: "?raw" }),
+      import.meta.glob("/src/test/**/*.html", { query: "?raw", import: 'default' }),
       import.meta.glob(["/src/test/**/*.js", "!/src/test/**/*.test.js"]),
-      import.meta.glob("/src/test/**/*.json")
+      import.meta.glob("/src/test/**/*.json", { import: 'default' })
     )
     .add(
       { raw: true },
-      import.meta.glob("/src/test/**/*.css", { query: "?raw" }),
-      import.meta.glob("/src/test/**/*.js", { query: "?raw" }),
-      import.meta.glob("/src/test/**/*.json", { query: "?raw" })
+      import.meta.glob("/src/test/**/*.css", { query: "?raw", import: 'default' }),
+      import.meta.glob("/src/test/**/*.js", { query: "?raw", import: 'default' }),
+      import.meta.glob("/src/test/**/*.json", { query: "?raw", import: 'default' })
     )
     .freeze();
 
@@ -80,12 +82,12 @@ const loaders = Loaders()
   (function paths() {
     console.log(
       "paths:",
-      loaders.paths((path) => path.includes("bar"))
+      loaders.registry.paths((path) => path.includes("bar"))
     );
   })();
 
   (function size() {
-    console.log("size:", loaders.size());
+    console.log("size:", loaders.registry.size());
   })();
 
   await (async function importer() {

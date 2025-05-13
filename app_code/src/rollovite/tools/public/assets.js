@@ -1,5 +1,5 @@
 /*
-rollovite/tools/public/assets.js
+import { assets } from "@/rollovite/tools//public/assets.js";
 v.1.0
 20250512
 

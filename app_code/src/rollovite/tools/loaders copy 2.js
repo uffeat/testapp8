@@ -11,13 +11,12 @@ import { path } from "@/rollovite/factories/path.js";
 class LoadersType extends compose(null, { base: "@" }, importer, path) {
   static name = "LoadersType";
 
-  #registry;
-  #store = new Map();
-
+  #imported;
   #registries = {
     imported: new WeakMap(),
     loaders: new Map(),
   };
+  #registry;
 
   constructor() {
     super();
@@ -60,10 +59,10 @@ class LoadersType extends compose(null, { base: "@" }, importer, path) {
             const key = `@/${(raw ? path + "?raw" : path).slice(
               "/src/".length
             )}`;
-            if (owner.#store.has(key)) {
+            if (owner.#registries.loaders.has(key)) {
               console.warn(`Overwriting key: ${key}`);
             }
-            owner.#store.set(key, load);
+            owner.#registries.loaders.set(key, load);
           })
         );
         return this;
@@ -73,7 +72,7 @@ class LoadersType extends compose(null, { base: "@" }, importer, path) {
       NOTE
       -  Cannot be used post-freeze. */
       clear() {
-        owner.#store.clear();
+        owner.#registries.loaders.clear();
         return this;
       }
 
@@ -81,7 +80,7 @@ class LoadersType extends compose(null, { base: "@" }, importer, path) {
       NOTE
       - Intended for debugging and special cases. */
       copy() {
-        return Object.fromEntries(owner.#store.entries());
+        return Object.fromEntries(owner.#registries.loaders.entries());
       }
 
       /* Prevents subsequent registry changes. Chainable. 
@@ -113,21 +112,21 @@ class LoadersType extends compose(null, { base: "@" }, importer, path) {
 
       /* Returns (async) load function. */
       get(path) {
-        return owner.#store.get(path);
+        return owner.#registries.loaders.get(path);
       }
 
       /* Checks, if path is in registry. */
       has(path) {
-        return owner.#store.has(path);
+        return owner.#registries.loaders.has(path);
       }
 
       /* Returns array of registered paths, optionally subject to filter. */
       paths(filter) {
         /* If frozen, paths do not need to be created at each call */
         if (!this.#paths && this.frozen) {
-          this.#paths = Array.from(owner.#store.keys());
+          this.#paths = Array.from(owner.#registries.loaders.keys());
         }
-        const paths = this.#paths || Array.from(owner.#store.keys());
+        const paths = this.#paths || Array.from(owner.#registries.loaders.keys());
         return filter ? paths.filter(filter) : paths;
       }
 
@@ -135,9 +134,9 @@ class LoadersType extends compose(null, { base: "@" }, importer, path) {
       NOTE
       - Cannot be used post-freeze. */
       pop(path) {
-        const load = owner.#store.get(path);
+        const load = owner.#registries.loaders.get(path);
         if (load) {
-          owner.#store.delete(path);
+          owner.#registries.loaders.delete(path);
           return load;
         }
       }
@@ -146,15 +145,30 @@ class LoadersType extends compose(null, { base: "@" }, importer, path) {
       NOTE
       -  Cannot be used post-freeze. */
       remove(...paths) {
-        paths.forEach((path) => owner.#store.delete(path));
+        paths.forEach((path) => owner.#registries.loaders.delete(path));
         return this;
       }
 
       /* Returns number of registered paths, optionally subject to filter. */
       size(filter) {
-        return filter ? owner.paths(filter).length : owner.#store.size;
+        return filter ? owner.paths(filter).length : owner.#registries.loaders.size;
       }
     })();
+
+    this.#imported = new (class {
+      has(module) {
+        return owner.#registries.imported.has(module);
+      }
+
+      get(module) {
+        return owner.#registries.imported.get(module);
+      }
+    })();
+  }
+
+  /* Returns . */
+  get imported() {
+    return this.#imported;
   }
 
   /* Returns controller for managing module registration. */
@@ -194,14 +208,24 @@ class LoadersType extends compose(null, { base: "@" }, importer, path) {
     if (load) {
       const module = await load();
 
-      if (name) {
-        return module[name];
+      if (typeof module === "object") {
+
+        const meta = Object.freeze({ path, timestamp: Date.now() })
+        const synthetic = {__meta__: Object.freeze({ path, timestamp: Date.now() }), ...module}
+        this.#registries.imported.set(
+          module, meta
+        );
+
+        
+
+        if (name) {
+          return module[name];
+        }
+
+        return synthetic ////
       }
 
       
-
-
-
       return module;
     }
     return new Error(path);

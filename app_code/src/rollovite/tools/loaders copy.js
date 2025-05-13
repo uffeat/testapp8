@@ -197,11 +197,6 @@ class LoadersType extends compose(null, { base: "@" }, importer, path) {
       if (name) {
         return module[name];
       }
-
-      
-
-
-
       return module;
     }
     return new Error(path);
