@@ -16,7 +16,9 @@ component.img({src: (url("/images/sprocket.jpg")), parent: document.body})
 
 
 console.log("foo:", (await use("@/test/foo/foo.js")).foo);
+console.log("foo:", (await use("/test/foo/foo.js")).foo);
 console.log("html:", (await use("@/test/foo/foo.html")));
+console.log("html:", (await use("/test/foo/foo.template")));
 
 
 /* Make 'use' global */
