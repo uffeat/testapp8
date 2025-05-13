@@ -6,7 +6,9 @@ import { use } from  "@/rollovite/use.js";
 import { component } from "@/rollo/component/component.js";
 
 
-
+component.h1("foo.bar", { parent: document.body }, "FOO");
+await use("@/test/foo/foo.css")
+console.log("raw css:", (await use("@/test/foo/foo.css?raw")));
 
 
 
@@ -34,7 +36,7 @@ console.log("html:", (await use("@/test/foo/foo.html")));
 //console.log("size:", paths.size());
 
 await (async function batch() {
-  //await use.batch((path) => path.includes("@/test/batch/"));
+  await use((path) => path.includes("@/test/batch/"));
   
 })();
 

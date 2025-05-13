@@ -2,50 +2,106 @@
 import { use } from  "@/rollovite/use.js";
 20250513
 v.1.1
-Suite of utilities for using assets.
+Suite of utilities for importing assets.
 */
 
 /* Do NOT import files that uses 'use'! */
 
-class ImportMap {
+/* Wrapped for Vite import maps (loaders). 
+NOTE
+- Wrapped loaders should be single-file type.
+- 'key' should match the file type and any query, e.g.,
+  'js' or 'js?raw'. Since loader keys are paths without any query information,
+  'key' enables construction of unique path specifiers and provides a way
+  to identify relevant registry from path specifier.
+- Although tyically used for wrapping Vite loaders, i.e., objects returned by 
+  'import.meta.glob', custom objects with similar shape can also be used.  */
+class Registry {
+  #key;
   #loaders;
   #paths;
-  constructor(loaders) {
+  constructor(key, loaders) {
+    this.#key = key;
     this.#loaders = loaders;
     this.#paths = Object.keys(loaders);
   }
 
+  /* Returns (async) load function. */
   get(path) {
-    if (typeof path === "string") {
-      const load = this.#loaders[`/src/${path.slice("@/".length)}`];
-      return load;
-    }
-    /* 'path' is a filter function */
-    const filter = path;
-    const paths = this.#paths.filter((path) =>
-      filter(`@/${path.slice("/src/".length)}`)
+    const load = this.#loaders[`/src/${path.slice("@/".length)}`];
+    return load;
+  }
+
+  /* Returns array of import specifiers, optionally subject to filtering. 
+  NOTE
+  - Enables batch-import. */
+  specifiers(filter) {
+    /* NOTE
+    - No attempt is made at initial "path-transformations" of at caching such.
+      Hence, no risk of memory leaks and fast initial loads - at the expense of
+      slower batch imports. Here's the rationale for this trade-off:
+      - Most registies will never participate in batch imports
+      - The primary job of the utility suite is to provide truly dynamic imports
+        with minimum performance overhead. Batch-import is a key feature, but 
+        secondary. */
+    const query = this.#key.includes("?")
+      ? `?${this.#key.split("?").reverse()[0]}`
+      : "";
+    const specifiers = this.#paths.map(
+      (path) => `@/${path.slice("/src/".length)}${query}`
     );
-    return paths.map((path) => this.get(path));
+    if (filter) {
+      return specifiers.filter(filter);
+    }
+    return specifiers;
   }
 }
 
-class ImportMaps {
+/* Utility for managing multipe registries. 
+NOTE
+- Sub-registries should be unique with respect to key/type combinations. */
+class Registries {
   #registry = new Map();
 
   constructor(spec) {
     Object.entries(spec).forEach(([key, loaders]) => {
-      this.#registry.set(key, new ImportMap(loaders))
-    }
-      
-    );
+      this.#registry.set(key, new Registry(key, loaders));
+    });
   }
 
-  get(key) {
-    return this.#registry.get(key);
+  /* Returns (async) load function. */
+  get(key, path) {
+    const registry = this.#registry.get(key);
+    if (!registry) {
+      throw new Error(`Invalid key: ${key}`);
+    }
+    const load = registry.get(path);
+    if (!load) {
+      throw new Error(`Invalid path: ${path}`);
+    }
+    return load;
+  }
+
+  /* Returns array of import specifiers across registries, optionally subject 
+  to filtering. 
+  NOTE
+  - Enables batch-import. */
+  specifiers(filter) {
+    const specifiers = [];
+    for (const registry of this.#registry.values()) {
+      specifiers.push(...registry.specifiers(filter));
+    }
+    return specifiers;
   }
 }
 
-const import_maps = new ImportMaps({
+/* Configure global-scope registries for common file types, incl. raw where relevant.  */
+const registries = new Registries({
+  css: import.meta.glob(["/src/**/*.css", "!/src/rollotest/**/*.*"]),
+  "css?raw": import.meta.glob(["/src/**/*.css", "!/src/rollotest/**/*.*"], {
+    query: "?raw",
+    import: "default",
+  }),
   html: import.meta.glob(["/src/**/*.html", "!/src/rollotest/**/*.*"], {
     query: "?raw",
     import: "default",
@@ -66,52 +122,77 @@ const import_maps = new ImportMaps({
 
 /* Returns import.
 NOTE
-- Supports common file types globally (as per config), src and public.
+- Supports common file types globally (as per config).
 - Allows truly dynamic imports.
-- Uses the '@/'-syntax for src files and the '/'-syntax for public files.
-- Supports alternative Python-like syntax (for src files only).
+- Support import of src and public files; use the '@/'-prefix for src files 
+  and the '/'-prefix for public files.
+- Supports an alternative Python-like syntax (src files only).
 - Code changes are NOT picked up by Vite's HMR, i.e., manual browser refresh 
   is required. 
-- Supports batch-imports with async 'use.batch()' (for src files only). 
-- Throws error for invalid src paths, but not for invalid public paths. */
-
-/* TODO
-- path as func -> batch import */
-export const use = async (path) => {
-  /*  */
-  const raw = (() => {
-    if (path.endsWith("?raw")) {
-      path = path.slice(0, -"?raw".length);
-      return true;
+- Supports batch-imports by passing a filter function into 'use()' 
+  (src files only). 
+- Throws error for invalid src paths, but not for invalid public paths.
+- 'use' is the central import engine of Rollo apps and should be added to the
+  global namespace. This enables import of src (and public) assets from
+  public and constructed assets.
+- Support for serialization (raw) provides many opportunities, incl. sending over 
+  the wire, posting to workers, local storage and deep string-based asset 
+  construction. 
+- The similar API for src and public means that deliberate trade-off between 
+  bundle size and import performance can be made by changing a single character
+  ('@') in import statements. 
+- '__manifest__.js' can be used to compensate for the sligtly reduced 
+  feature set for public imports (likely not relevant). */
+export const use = async (specifier) => {
+  if (typeof specifier === "string") {
+    let [path, raw] = specifier.endsWith("?raw")
+      ? [specifier.slice(0, -"?raw".length), true]
+      : [specifier, false];
+    const type = path.split(".").reverse()[0];
+    /* Import from src */
+    if (path.startsWith("@/")) {
+      const key = raw ? `${type}?raw` : type;
+      const load = registries.get(key, path);
+      return await load();
     }
-    return false;
-  })();
-  const type = path.split(".").reverse()[0];
-
-  if (path.startsWith("@/")) {
-    const key = raw ? `${type}?raw` : type;
-
-    const import_map = import_maps.get(key);
-    if (!import_map) {
+    /* Import from public */
+    path = `${import.meta.env.BASE_URL}${path.slice("/".length)}`;
+    if (!raw && type === "js") {
+      return await pub.import(path);
     }
-
-    const load = import_map.get(path);
-
-    if (!load) {
-      throw new Error(`Invalid path: ${path}`);
+    if (!raw && type === "css") {
+      /* Mimic Vite: css becomes global (albeit via link) */
+      const href = path.path;
+      const rel = "stylesheet";
+      const selector = `link[rel="${rel}"][href="${path.path}"]`;
+      let link = document.head.querySelector(selector);
+      /* Check, if sheet already added */
+      if (!link) {
+        const { promise, resolve } = Promise.withResolvers();
+        link = document.createElement("link");
+        link.rel = rel;
+        link.href = href;
+        link.onload = (event) => resolve();
+        document.head.append(link);
+        /* Await link load */
+        await promise;
+      }
+      return link;
     }
-    return await load();
+    const text = await pub.fetch(path);
+    if (!raw && type === "json") {
+      /* Mimic Vite: Return uncached parsed json */
+      return JSON.parse(text);
+    }
+    return text;
   }
-  /* Import from public */
-  path = `${import.meta.env.BASE_URL}${path.slice("/".length)}`;
-  if (!raw && type === "js") {
-    return await pub.import(path);
+  /* Batch-import from src */
+  const filter = specifier;
+  const modules = [];
+  for (const path of registries.specifiers(filter)) {
+    modules.push(await use(path));
   }
-  const text = await pub.fetch(path);
-  if (!raw && type === "json") {
-    return JSON.parse(text);
-  }
-  return text;
+  return modules;
 };
 
 /* Enable Python-like syntax. */
@@ -133,7 +214,10 @@ Object.defineProperty(use, "$", {
   },
 });
 
-/* Utility for importing public files. */
+/* Utility for importing public files. 
+NOTE
+- Intended as a slight;y more low-level (and less critical) feature;
+  therefore kept very compact.*/
 const pub = new (class {
   #fetch;
   #import;
