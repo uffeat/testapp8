@@ -1,13 +1,11 @@
 /* Globals */
 import "@/bootstrap.scss";
 import "@/main.css";
-import { use } from "@/rollovite/use.js";
-import { url } from "@/rollovite/url.js";
-import { is_module } from "@/rollo/tools/is/is_module.js";
+import { url, use } from  "@/rollovite/rollovite.js";
+
 import { component } from "@/rollo/component/component.js";
 
-//import stuff from "@/assets/images/bevel.jpg";
-//console.log(stuff)
+
 
 
 component.img({src: (await url("@/assets/images/bevel.jpg")), parent: document.body})
@@ -20,14 +18,31 @@ console.log("foo:", (await use("/test/foo/foo.js")).foo);
 console.log("html:", (await use("@/test/foo/foo.html")));
 console.log("html:", (await use("/test/foo/foo.template")));
 
+console.log("foo:", (await use.$.test.foo.foo[':js']).foo);
+console.log("foo:", (await use.$.test.foo.foo[':js']).foo);
+console.log("bar:", (await use.$.test.bar.bar[':js']).bar);
+
+
+//console.log("paths:", use.paths.paths());
+console.log("size:", use.paths.size());
+
+await (async function batch() {
+  await use.batch((path) => path.includes("@/test/batch/"));
+  
+})();
+
+
+
 
 /* Make 'use' global */
+/*
 Object.defineProperty(window, "use", {
   configurable: false,
   enumerable: true,
   writable: false,
   value: use,
 });
+*/
 
 /* NOTE Do NOT await import! */
 
