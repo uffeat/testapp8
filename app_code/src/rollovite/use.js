@@ -126,6 +126,10 @@ NOTE
 - Allows truly dynamic imports.
 - Support import of src and public files; use the '@/'-prefix for src files 
   and the '/'-prefix for public files.
+- Support standard and raw imports. File types that are inherently raw, such 
+  as html imports as raw by default. For file types  that are typically not,
+  but can be, imported as raw, such as js, raw imports are controlled with
+  the '?raw' query.
 - Supports an alternative Python-like syntax (src files only).
 - Code changes are NOT picked up by Vite's HMR, i.e., manual browser refresh 
   is required. 
@@ -133,17 +137,19 @@ NOTE
   (src files only). 
 - Throws error for invalid src paths, but not for invalid public paths.
 - 'use' is the central import engine of Rollo apps and should be added to the
-  global namespace. This enables import of src (and public) assets from
-  public and constructed assets.
-- Support for serialization (raw) provides many opportunities, incl. sending over 
-  the wire, posting to workers, local storage and deep string-based asset 
-  construction. 
-- The similar API for src and public means that deliberate trade-off between 
-  bundle size and import performance can be made by changing a single character
-  ('@') in import statements. 
+  global namespace to enable import of src (and public) assets from public 
+  and constructed assets.
 - '__manifest__.js' can be used to compensate for the sligtly reduced 
   feature set for public imports (likely not relevant). */
 export const use = async (specifier) => {
+  /* NOTE
+  - Support for serialization (raw) provides many opportunities, incl. sending over 
+  the wire, posting to workers, local storage and deep string-based asset 
+  construction. 
+  - The similar API for src and public means that deliberate trade-off between 
+    bundle size and import performance can be made by changing a single character
+    ('@') in import statements. 
+  */
   if (typeof specifier === "string") {
     let [path, raw] = specifier.endsWith("?raw")
       ? [specifier.slice(0, -"?raw".length), true]
@@ -162,7 +168,7 @@ export const use = async (specifier) => {
     }
     if (!raw && type === "css") {
       /* Mimic Vite: css becomes global (albeit via link) */
-      const href = path.path;
+      const href = path;
       const rel = "stylesheet";
       const selector = `link[rel="${rel}"][href="${path.path}"]`;
       let link = document.head.querySelector(selector);
@@ -196,21 +202,39 @@ export const use = async (specifier) => {
 };
 
 /* Enable Python-like syntax. */
-Object.defineProperty(use, "$", {
+(() => {
+  const proxy = syntax();
+  Object.defineProperty(use, "$", {
+    configurable: false,
+    enumerable: false,
+    get: () => {
+      return proxy;
+    },
+  });
+})();
+
+/* Enable import from a base dir (shorter statements).
+NOTE
+- For ad-hoc use (no memory leaks).
+- Applies to src as weel as to public (set up separately);
+- Also enables Python-like syntax (also for public).  */
+Object.defineProperty(use, "importer", {
   configurable: false,
-  enumerable: false,
-  get: () => {
-    return (function factory(path) {
-      return new Proxy(
-        {},
-        {
-          get: (_, part) =>
-            part.includes(":")
-              ? use(path + part.replaceAll(":", "."))
-              : factory(path + `/${part}`),
-        }
-      );
-    })("@");
+  enumerable: true,
+  writable: false,
+  value: (base) => {
+    const proxy = syntax(base);
+    return new (class {
+      /* Returns import with Python-like syntax. */
+      get path() {
+        return proxy;
+      }
+
+      /* Returns import. */
+      async import(path) {
+        return await use(`${base}/${path}`);
+      }
+    })();
   },
 });
 
@@ -270,3 +294,20 @@ const pub = new (class {
     return await this.#import.get(path);
   }
 })();
+
+/* Returns proxy factory.
+NOTE
+- Yep... it's a factory-factory :-) */
+function syntax(base = "@") {
+  return (function factory(path) {
+    return new Proxy(
+      {},
+      {
+        get: (_, part) =>
+          part.includes(":")
+            ? use(path + part.replaceAll(":", "."))
+            : factory(path + `/${part}`),
+      }
+    );
+  })(base);
+}

@@ -1,57 +1,94 @@
 /* Globals */
 import "@/bootstrap.scss";
 import "@/main.css";
-import { use } from  "@/rollovite/use.js";
-
-import { component } from "@/rollo/component/component.js";
-
-
-component.h1("foo.bar", { parent: document.body }, "FOO");
-await use("@/test/foo/foo.css")
-console.log("raw css:", (await use("@/test/foo/foo.css?raw")));
-
-
-
-
-console.log("foo:", (await use("@/test/foo/foo.js")).foo);
-//console.log("foo:", (await use("/test/foo/foo.js")).foo);
-console.log("raw js:", (await use("@/test/foo/foo.js?raw")));
-//console.log("raw:", (await use("/test/foo/foo.js?raw")));
-
-console.log("parsed json:", (await use("@/test/foo/foo.json")));
-//console.log("json:", (await use("/test/foo/foo.json")));
-
-console.log("raw json:", (await use("@/test/foo/foo.json?raw")));
-
-console.log("html:", (await use("@/test/foo/foo.html")));
-//console.log("html:", (await use("/test/foo/foo.template")));
-
-//console.log("foo:", (await use.$.test.foo.foo[':js']).foo);
-//console.log("foo:", (await use.$.test.foo.foo[':js']).foo);
-//console.log("raw:", (await use.$.test.foo.foo[':js?raw']));
-//console.log("bar:", (await use.$.test.bar.bar[':js']).bar);
-
-
-//console.log("paths:", paths.paths());
-//console.log("size:", paths.size());
-
-await (async function batch() {
-  await use((path) => path.includes("@/test/batch/"));
-  
-})();
-
-
-
-
+import { use } from "@/rollovite/use.js";
 /* Make 'use' global */
-/*
 Object.defineProperty(window, "use", {
   configurable: false,
   enumerable: true,
   writable: false,
   value: use,
 });
-*/
+
+import { component } from "@/rollo/component/component.js";
+import { match } from "@/rollo/tools/object/match.js";
+import { modules } from "@/rollovite/modules.js";
+import { is_module } from "@/rollo/tools/is/is_module.js";
+
+const success = () => console.info("Success!");
+
+await (async function css(unit_test) {
+  component.h1("foo.bar", { parent: document.body }, "FOO");
+  await use.$.test.foo.foo[":css"];
+  await use("/test/bar/bar.css");
+})();
+
+await (async function css_raw(unit_test) {
+  console.log("raw css:", await use("@/test/foo/foo.css?raw"));
+ 
+})();
+
+await (async function css(unit_test) {
+  console.log("raw css:", await use("@/test/foo/foo.css?raw"));
+  console.log("raw css:", await use("/test/foo/foo.css?raw"));
+  console.log("raw css:", await use.$.test.foo.foo[":css?raw"]);
+  console.log("raw css:", await use.$.test.foo.foo[":css?raw"]);
+})();
+
+await (async function html(unit_test) {
+  console.log("html:", await use("@/test/foo/foo.html"));
+  console.log("html:", await use("/test/foo/foo.template"));
+  console.log("html:", await use.$.test.foo.foo[":html"]);
+})();
+
+await (async function js(unit_test) {
+  console.log("foo:", (await use("@/test/foo/foo.js")).foo);
+  console.log("foo:", (await use("/test/foo/foo.js")).foo);
+  console.log("Re-exported foo:", (await use("/test/bar/bar.js")).foo);
+  console.log("foo:", (await use.$.test.foo.foo[":js"]).foo);
+  console.log("foo:", (await use.$.test.foo.foo[":js"]).foo);
+  console.log("bar:", (await use.$.test.bar.bar[":js"]).bar);
+})();
+
+await (async function js_raw(unit_test) {
+  console.log("raw js:", await use("@/test/foo/foo.js?raw"));
+  console.log("raw js:", await use("/test/foo/foo.js?raw"));
+  console.log("raw js:", await use.$.test.foo.foo[":js?raw"]);
+})();
+
+await (async function json(unit_test) {
+  console.log("parsed json:", await use("/test/foo/foo.json"));
+  console.log("parsed json:", await use("@/test/foo/foo.json"));
+  console.log("parsed json:", await use.$.test.bar.bar[":json"]);
+})();
+
+await (async function json_raw(unit_test) {
+  console.log("raw json:", await use("@/test/foo/foo.json?raw"));
+  console.log("raw json:", await use("/test/foo/foo.json?raw"));
+  console.log("raw json:", await use.$.test.bar.bar[":json?raw"]);
+})();
+
+
+await (async function batch(unit_test) {
+  const modules = await use((path) => path.includes("@/test/batch/") && !path.endsWith("?raw"));
+  console.log("modules:", modules);
+})();
+
+await (async function importer_test(unit_test) {
+  /* src */
+  const test = use.importer("@/test");
+  console.log("foo:", (await test.import("foo/foo.js")).foo);
+  console.log("foo:", (await test.path.foo.foo[":js"]).foo);
+  console.log("foo:", (await test.path.foo.foo[":js"]).foo);
+})();
+
+await (async function importer_test(unit_test) {
+  /* public */
+  const test = use.importer("/test");
+  console.log("foo:", (await test.import("foo/foo.js")).foo);
+  console.log("foo:", (await test.path.foo.foo[":js"]).foo);
+  console.log("foo:", (await test.path.foo.foo[":js"]).foo);
+})();
 
 /* NOTE Do NOT await import! */
 
