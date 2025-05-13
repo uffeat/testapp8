@@ -1,33 +1,40 @@
 /* Globals */
 import "@/bootstrap.scss";
 import "@/main.css";
-import { url, use } from  "@/rollovite/rollovite.js";
+import { use } from  "@/rollovite/use.js";
 
 import { component } from "@/rollo/component/component.js";
 
 
 
 
-component.img({src: (await url("@/assets/images/bevel.jpg")), parent: document.body})
-component.img({src: (url("/images/sprocket.jpg")), parent: document.body})
 
 
 
 console.log("foo:", (await use("@/test/foo/foo.js")).foo);
-console.log("foo:", (await use("/test/foo/foo.js")).foo);
+//console.log("foo:", (await use("/test/foo/foo.js")).foo);
+console.log("raw js:", (await use("@/test/foo/foo.js?raw")));
+//console.log("raw:", (await use("/test/foo/foo.js?raw")));
+
+console.log("parsed json:", (await use("@/test/foo/foo.json")));
+//console.log("json:", (await use("/test/foo/foo.json")));
+
+console.log("raw json:", (await use("@/test/foo/foo.json?raw")));
+
 console.log("html:", (await use("@/test/foo/foo.html")));
-console.log("html:", (await use("/test/foo/foo.template")));
+//console.log("html:", (await use("/test/foo/foo.template")));
 
-console.log("foo:", (await use.$.test.foo.foo[':js']).foo);
-console.log("foo:", (await use.$.test.foo.foo[':js']).foo);
-console.log("bar:", (await use.$.test.bar.bar[':js']).bar);
+//console.log("foo:", (await use.$.test.foo.foo[':js']).foo);
+//console.log("foo:", (await use.$.test.foo.foo[':js']).foo);
+//console.log("raw:", (await use.$.test.foo.foo[':js?raw']));
+//console.log("bar:", (await use.$.test.bar.bar[':js']).bar);
 
 
-//console.log("paths:", use.paths.paths());
-console.log("size:", use.paths.size());
+//console.log("paths:", paths.paths());
+//console.log("size:", paths.size());
 
 await (async function batch() {
-  await use.batch((path) => path.includes("@/test/batch/"));
+  //await use.batch((path) => path.includes("@/test/batch/"));
   
 })();
 

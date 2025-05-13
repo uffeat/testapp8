@@ -5,7 +5,7 @@ v.1.0
 Suite of utilities for using assets.
 */
 
-/* Do NOT import files that uses 'use'! */
+/* Do NOT import files that use 'use'! */
 
 /* Create import maps and related data */
 const config = {
@@ -27,25 +27,10 @@ const config = {
     },
     raw: {
       registry: import.meta.glob(
-        [
-          "/src/**/*.css",
-          "/src/**/*.js",
-          "/src/**/*.json",
-          "!/src/rollotest/**/*.*",
-        ],
-        {
-          query: "?raw",
-          import: "default",
-        }
-      ),
-      types: new Set(["css", "js", "json"]),
-    },
-    text: {
-      registry: import.meta.glob(
-        ["/src/**/*.html",  "!/src/rollotest/**/*.*"],
+        ["/src/**/*.html", "/src/**/*.sheet", "!/src/rollotest/**/*.*"],
         { query: "?raw", import: "default" }
       ),
-      types: new Set(["html"]),
+      types: new Set(["html", "sheet"]),
     },
   },
 };
@@ -70,8 +55,7 @@ export const paths = new (class {
         [
           ...Object.keys(config.url.registry),
           ...Object.keys(config.use.default.registry),
-          ...Object.keys(config.use.raw.registry).map((path) => `${path}?raw`),
-          ...Object.keys(config.use.text.registry),
+          ...Object.keys(config.use.raw.registry),
         ].map((path) => `@/${path.slice("/src/".length)}`)
       );
     }
@@ -107,34 +91,19 @@ NOTE
 - Supports alternative Python-like syntax (for src files only).
 - Code changes are NOT picked up by Vite's HMR, i.e., manual browser refresh 
   is required. 
+- 'use.path' provides access to the 'path' utility.
 - Supports batch-imports with async 'use.batch()' (for src files only). 
 - Throws error for invalid src paths, but not for invalid public paths. */
-
-
-/* TODO
-- path as func -> batch import */
 export const use = async (path) => {
-  /*  */
-  const raw = (() => {
-    if (path.endsWith("?raw")) {
-      path = path.slice(0, -"?raw".length);
-      return true;
-    }
-    return false;
-  })();
   const type = path.split(".").reverse()[0];
-
   if (path.startsWith("@/")) {
     path = `/src/${path.slice("@/".length)}`;
     let load;
-    if (!raw && config.use.default.types.has(type)) {
+    if (config.use.default.types.has(type)) {
       load = config.use.default.registry[path];
-    } else if (!raw && config.use.text.types.has(type)) {
-      load = config.use.text.registry[path];
-    } else if (raw && config.use.raw.types.has(type)) {
+    } else if (config.use.raw.types.has(type)) {
       load = config.use.raw.registry[path];
     }
-
     if (!load) {
       throw new Error(`Invalid path: ${path}`);
     }
@@ -142,17 +111,18 @@ export const use = async (path) => {
   }
   /* Import from public */
   path = `${import.meta.env.BASE_URL}${path.slice("/".length)}`;
-  if (!raw && type === "js") {
+  if (type === "js") {
     return await pub.import(path);
   }
-  const text = await pub.fetch(path);
-  if (!raw && type === "json") {
-    return JSON.parse(text)
-  }
-  return text
+  return await pub.fetch(path);
 };
 
-
+/* Enable access to the 'path' utility from 'use' */
+Object.defineProperty(use, "paths", {
+  configurable: false,
+  enumerable: false,
+  get: () => paths,
+});
 
 /* Enable Python-like syntax. */
 Object.defineProperty(use, "$", {
