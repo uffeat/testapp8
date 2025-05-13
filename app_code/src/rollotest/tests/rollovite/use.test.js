@@ -1,6 +1,3 @@
-/* Globals */
-import "@/bootstrap.scss";
-import "@/main.css";
 import { use } from "@/rollovite/modules.js";
 import { is_module } from "@/rollo/tools/is/is_module.js";
 import { component } from "@/rollo/component/component.js";
@@ -97,23 +94,3 @@ await (async function importer() {
   console.log("foo:", await test.import("foo/foo.js", { name: "foo" }));
   console.log("foo:", (await test.path.foo.foo[":js"]()).foo);
 })();
-
-/* Make 'use' global */
-Object.defineProperty(window, "use", {
-  configurable: false,
-  enumerable: true,
-  writable: false,
-  value: use,
-});
-
-/* NOTE Do NOT await import! */
-
-/*
-if (import.meta.env.VERCEL_ENV === "production") {
-  import("@/main/production/main.js");
-} else if (import.meta.env.VERCEL_ENV === "preview") {
-  import("@/main/preview/main.js");
-} else {
-  import("@/main/development/main.js");
-}
-  */

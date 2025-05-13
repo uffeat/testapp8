@@ -26,7 +26,17 @@ loaders.registry
   )
   .freeze();
 
-/* */
+/* Utility for importing src and public files as per file type or as text. 
+NOTE
+- Enables truly dynamic imports.
+- Supports batch imports.
+- Uses the '@/' and '/ syntax.
+- Support 'importers' to enable shorter import statements for imports from a 
+  given base dir. 
+- Supports an alternative Python-like syntax, incl. for importers.
+- Can be configured to support post-processors.
+- Changes to code that uses 'modules' are NOT picked up by Vite's HMR, i.e., 
+  manual browser refresh is required to pick up the changes. */
 export const modules = new (class Modules {
   #batch;
   #importer;
@@ -36,12 +46,10 @@ export const modules = new (class Modules {
 
   constructor() {
     this.#batch = new (class {
-      /* */
       async public(filter) {
         return await assets.batch(filter);
       }
 
-      /* */
       async src(filter) {
         return await loaders.batch(filter);
       }
@@ -153,3 +161,18 @@ function get_extension(path) {
   const [stem, ...meta] = file.split(".");
   return meta.join(".");
 }
+
+export const use = async (path, { name, raw } = {}) =>
+  await modules.import(path, { name, raw });
+
+["batch", "importer", "processors", "public", "src"].forEach((name) => {
+  Object.defineProperty(use, name, {
+    configurable: false,
+    enumerable: true,
+    writable: false,
+    value: modules[name],
+  });
+});
+
+
+/* Importer directly onto 'use' */
