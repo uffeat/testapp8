@@ -27,7 +27,7 @@ def main():
     file.parent.mkdir(parents=True, exist_ok=True)
     file.write_text(content, encoding="utf-8")
 
-    file = ROOT / "src/rollovite/tools/public" / f"{MANIFEST}.js"
+    file = ROOT / "src/rollovite/public" / f"{MANIFEST}.js"
     file.parent.mkdir(parents=True, exist_ok=True)
     file.write_text(
         f"/* Auto-generated: {timestamp} */\n\nexport default Object.freeze(new Set({content}));",

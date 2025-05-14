@@ -1,18 +1,12 @@
 /* Globals */
 import "@/bootstrap.scss";
 import "@/main.css";
-import { use } from "@/rollovite/use.js";
-/* Make 'use' global */
-Object.defineProperty(window, "use", {
-  configurable: false,
-  enumerable: true,
-  writable: false,
-  value: use,
-});
+import "@/rollovite/use.js";
+
 
 import { component } from "@/rollo/component/component.js";
 import { match } from "@/rollo/tools/object/match.js";
-import { modules } from "@/rollovite/modules.js";
+
 import { is_module } from "@/rollo/tools/is/is_module.js";
 
 const stuff = (key) => {
