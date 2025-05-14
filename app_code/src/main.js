@@ -15,6 +15,15 @@ import { match } from "@/rollo/tools/object/match.js";
 import { modules } from "@/rollovite/modules.js";
 import { is_module } from "@/rollo/tools/is/is_module.js";
 
+const stuff = (key) => {
+  const [type, query] = key.split("?");
+
+  console.log('type:', type)
+  console.log('query:', query)
+};
+
+stuff('js?raw')
+
 const success = () => console.info("Success!");
 
 await (async function css(unit_test) {
@@ -25,7 +34,6 @@ await (async function css(unit_test) {
 
 await (async function css_raw(unit_test) {
   console.log("raw css:", await use("@/test/foo/foo.css?raw"));
- 
 })();
 
 await (async function css(unit_test) {
@@ -68,9 +76,10 @@ await (async function json_raw(unit_test) {
   console.log("raw json:", await use.$.test.bar.bar[":json?raw"]);
 })();
 
-
 await (async function batch(unit_test) {
-  const modules = await use((path) => path.includes("@/test/batch/") && !path.endsWith("?raw"));
+  const modules = await use(
+    (specifier) => ["@/test/batch/a.js", "@/test/batch/b.js"].includes(specifier)
+  );
   console.log("modules:", modules);
 })();
 

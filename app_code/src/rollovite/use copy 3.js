@@ -7,10 +7,8 @@ Suite of utilities for importing assets.
 
 /* Do NOT import files that uses 'use'! */
 
-/* . 
-NOTE
-- Keep private. */
-class Path {
+/* */
+export class Path {
   static PUBLIC_PREFIX = "/";
   static RAW_QUERY = "?raw";
   static SRC_PREFIX = "@/";
@@ -108,110 +106,67 @@ class Path {
   }
 }
 
-/* . 
+/* Wrapped for Vite import maps (loaders). 
 NOTE
-- Keep private. */
-class Processor {
-  #owner
-  #processor;
-  #cache = new Map();
-
-  constructor(owner, processor) {
-    this.#owner = owner
-    this.#processor = processor;
-  }
-
-  get cache() {
-    return this.#cache;
-  }
-
-  get owner() {
-    return this.#owner;
-  }
-
-  get processor() {
-    return this.#processor;
-  }
-
-  set processor(processor) {
-    this.#processor = processor;
-  }
-
-  /*
-  NOTE
-  - Called as post-processor. */
-  async call(context, path, result) {
-    /* NOTE
-    - 'path' is a Path instance. */
-    if (this.#cache.has(path.path)) {
-      return this.#cache.get(path.path);
-    }
-    const processed = await this.processor.call(this, result, {
-      owner: this,
-      path,
-    });
-    this.#cache.set(path.path, processed);
-    return processed;
-  }
-}
-
-/* Controller for Vite loaders (results of 'import.meta.glob'). 
-NOTE
-- Supports the '@/' syntax.
-- Provides meta data.
-- Supports batch imports.
-- Option for cached preprocessing.
-- Loaders should be single-file type.
+- Wrapped loaders should be single-file type.
 - 'key' should match the file type and any query, e.g.,
   'js' or 'js?raw'. Since loader keys are paths without any query information,
-  'key' enables construction of unique path specifiers and provides a key 
-  suitable for registration of the instance in parent registries.
-- Although tyically used for wrapping Vite loaders, custom objects with similar 
-  shape can also be used.  */
+  'key' enables construction of unique path specifiers and provides a way
+  to identify relevant registry from path specifier.
+- Although tyically used for wrapping Vite loaders, i.e., objects returned by 
+  'import.meta.glob', custom objects with similar shape can also be used.  */
 export class Modules {
   #key;
   #loaders;
-  #processor;
+  #paths;
   #query;
+  #processor;
+  #specifiers;
   #type;
 
   constructor(key, loaders) {
     this.#key = key;
     this.#loaders = loaders;
 
+    this.#paths = Object.keys(loaders);
     const [type, query] = key.split("?");
     this.#type = type;
     this.#query = query ? `?${query}` : "";
   }
 
-  /* Returns key (type and query combination). */
+  /* */
   get key() {
     return this.#key;
   }
 
-  /* Returns query with '?'-prefix. Retuns empty string, if no query. */
+  /* */
   get query() {
     return this.#query;
   }
 
-  /* Constructs, sets and returns processor class from function (or object 
-  with a call method) for post-processing import results.
-  NOTE
-  - 'processor' can be async.
-  - Supports (exposed) caching.
-  - Supports highly dynamic patterns. 
-  - undefined processor results are ignored as a means to selective 
-    processing. */
-  processor(processor) {
-    if (processor) {
-      this.#processor = new Processor(processor);
-    } else {
-      if (this.#processor instanceof Processor) {
-        this.#processor.cache.clear()
-      }
-      this.#processor = null;
-    }
+  /* */
+  get processor() {
     return this.#processor;
+  }
+
+  /* */
+  set processor(processor) {
+    if (processor) {
+      this.#processor = new (class {
+        #registry = new Map();
+
+        async call(context, path, result) {
+          if (this.#registry.has(path.path)) {
+            return this.#registry.get(path.path);
+          }
+          const processed = await processor.call(context, result, { path });
+          this.#registry.set(path.path, processed);
+          return processed;
+        }
+      })();
+    } else {
+      this.#processor = undefined;
+    }
   }
 
   /* */
@@ -220,33 +175,32 @@ export class Modules {
   }
 
   /* */
+  consolidate() {
+    this.#specifiers = this.#_specifiers();
+    return this;
+  }
+
+  /* */
   async import(specifier) {
-    if (typeof specifier === "function") {
-      /* Batch-import by filter */
-      const filter = specifier;
-      const specifiers = Object.keys(this.#loaders).filter((path) =>
-        /* Convert to specifier before passing in to filter; enables filtering 
-        based on the '@/' syntax and on queries */
-        filter(`@/${path.slice("/src/".length)}${this.query}`)
-      );
-      const imports = [];
-      for (const specifier of specifiers) {
-        imports.push(await this.import(specifier));
+    if (typeof specifier === "string") {
+      const path = Path.create(specifier);
+      const load = this.get(path);
+      const result = await load.call(this, path);
+      if (this.processor) {
+        const processed = await this.processor.call(this, path, result);
+        if (processed !== undefined) {
+          return processed;
+        }
       }
-      return imports;
+      return result;
     }
-    const path = Path.create(specifier);
-    const load = this.get(path);
-    /* Vite loaders */
-    const result = await load.call(null, path);
-    if (this.processor) {
-      /* NOTE
-      -  */
-      const processed = await this.processor.call(this, path, result);
-      /* */
-      if (processed !== undefined) {
-        return processed;
-      }
+
+    /* Batch-import by filter */
+    const filter = specifier;
+    const result = [];
+    //const specifiers = this.specifiers(filter)
+    for (const specifier of this.specifiers(filter)) {
+      result.push(await this.import(specifier));
     }
     return result;
   }
@@ -259,6 +213,33 @@ export class Modules {
       throw new Error(`Invalid path: ${path.path}`);
     }
     return load;
+  }
+
+  /* Returns array of import specifiers, optionally subject to filtering. 
+  NOTE
+  - Enables batch-import. */
+  specifiers(filter) {
+    /* NOTE
+    - No attempt is made at initial "path-transformations" of at caching such.
+      Hence, no risk of memory leaks and fast initial loads - at the expense of
+      slower batch imports. Here's the rationale for this trade-off:
+      - Most registies will never participate in batch imports
+      - The primary job of the utility suite is to provide truly dynamic imports
+        with minimum performance overhead. Batch-import is a key feature, but 
+        secondary. */
+
+    const specifiers = this.#specifiers || this.#_specifiers();
+
+    if (filter) {
+      return specifiers.filter(filter);
+    }
+    return specifiers;
+  }
+
+  #_specifiers() {
+    return this.#paths.map(
+      (path) => `@/${path.slice("/src/".length)}${this.query}`
+    );
   }
 }
 
@@ -283,12 +264,16 @@ class Registries {
     return modules;
   }
 
-  keys() {
-    return his.#registry.keys();
-  }
-
-  values() {
-    return this.#registry.values();
+  /* Returns array of import specifiers across registries, optionally subject 
+  to filtering. 
+  NOTE
+  - Enables batch-import. */
+  specifiers(filter) {
+    const specifiers = [];
+    for (const registry of this.#registry.values()) {
+      specifiers.push(...registry.specifiers(filter));
+    }
+    return specifiers;
   }
 }
 
@@ -347,51 +332,53 @@ export const use = async (specifier) => {
     bundle size and import performance can be made by changing a single character
     ('@') in import statements. 
   */
-  if (typeof specifier === "function") {
-    /* Batch-import by filter */
-    const filter = specifier;
-    const result = [];
-    for (const modules of registries.values()) {
-      const imports = await modules.import(filter);
-      imports.forEach((item) => result.push(item));
+  if (typeof specifier === "string") {
+    const path = Path.create(specifier);
+
+    /* Import from src */
+    if (path.src) {
+      const modules = registries.get(path.key);
+      return await modules.import(path);
     }
-    return result;
-  }
-  const path = Path.create(specifier);
-  /* Import from src */
-  if (path.src) {
-    const modules = registries.get(path.key);
-    return await modules.import(path);
-  }
-  /* Import from public */
-  if (!path.raw && path.type === "js") {
-    return await pub.import(path.path);
-  }
-  if (!path.raw && path.type === "css") {
-    /* Mimic Vite: css becomes global (albeit via link) */
-    const href = path.path;
-    const rel = "stylesheet";
-    const selector = `link[rel="${rel}"][href="${path.path}"]`;
-    let link = document.head.querySelector(selector);
-    /* Check, if sheet already added */
-    if (!link) {
-      const { promise, resolve } = Promise.withResolvers();
-      link = document.createElement("link");
-      link.rel = rel;
-      link.href = href;
-      link.onload = (event) => resolve();
-      document.head.append(link);
-      /* Await link load */
-      await promise;
+
+    /* Import from public */
+
+    if (!path.raw && path.type === "js") {
+      return await pub.import(path.path);
     }
-    return link;
+    if (!path.raw && path.type === "css") {
+      /* Mimic Vite: css becomes global (albeit via link) */
+      const href = path.path;
+      const rel = "stylesheet";
+      const selector = `link[rel="${rel}"][href="${path.path}"]`;
+      let link = document.head.querySelector(selector);
+      /* Check, if sheet already added */
+      if (!link) {
+        const { promise, resolve } = Promise.withResolvers();
+        link = document.createElement("link");
+        link.rel = rel;
+        link.href = href;
+        link.onload = (event) => resolve();
+        document.head.append(link);
+        /* Await link load */
+        await promise;
+      }
+      return link;
+    }
+    const text = await pub.fetch(path.path);
+    if (!path.raw && path.type === "json") {
+      /* Mimic Vite: Return uncached parsed json */
+      return JSON.parse(text);
+    }
+    return text;
   }
-  const text = await pub.fetch(path.path);
-  if (!path.raw && path.type === "json") {
-    /* Mimic Vite: Return uncached parsed json */
-    return JSON.parse(text);
+  /* Batch-import from src */
+  const filter = specifier;
+  const modules = [];
+  for (const path of registries.specifiers(filter)) {
+    modules.push(await use(path));
   }
-  return text;
+  return modules;
 };
 
 /* Enable Python-like syntax. */
