@@ -1,3 +1,0 @@
-/* Auto-generated: 2025-05-15 12:17:21 */
-
-export default Object.freeze(new Set(["/favicon.svg", "/routes.json", "/rollo.md", "/images/bevel-low.jpg", "/images/bevel.jpg", "/images/decor.jpg", "/images/engine.jpg", "/images/handle.jpg", "/images/mirror.jpg", "/images/sprocket-low.jpg", "/images/sprocket.jpg", "/images/decor-low.jpg", "/images/handle-low.jpg", "/images/mirror-low.jpg", "/images/engine-low.jpg", "/brython/brython.html", "/brython/core.js", "/brython/std.js", "/test/foo/foo.css", "/test/foo/foo.js", "/test/foo/foo.json", "/test/foo/foo.template", "/test/bar/bar.css", "/test/bar/bar.js", "/test/bar/bar.json", "/test/batch/a.js", "/test/batch/b.js", "/tests/batch/foo.test.js"]));

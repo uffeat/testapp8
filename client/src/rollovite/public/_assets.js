@@ -1,3 +1,9 @@
+/* TODO
+- Actively use rollometa/__manifest__.json. 
+  This file is now actively maintain and should be used to enable batch imports */
+
+
+
 /* Utility for importing public files. 
 NOTE
 - Part of Rollo's import system.

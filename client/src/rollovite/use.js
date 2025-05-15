@@ -144,6 +144,13 @@ export const registry = new (class {
 })(
   /* Configure global-scope Module instances for common file types, incl. raw 
   where relevant. */
+
+  /* TODO
+  - Refactor to use `new Modules(...)` instead - for consistency
+  - Exlcude more top-level dirs, incl.
+    - rollometa
+    - rollovite */
+
   {
     css: import.meta.glob(["/src/**/*.css", "!/src/rollotest/**/*.*"]),
     "css?raw": import.meta.glob(["/src/**/*.css", "!/src/rollotest/**/*.*"], {
@@ -189,6 +196,13 @@ NOTE
 - Code changes are NOT picked up by Vite's HMR, i.e., manual browser refresh 
   is required. */
 export const use = (() => {
+
+
+  /* TODO
+  - Simplyfy Path and perhaps integrate here. No longer used elsewhere. */
+
+
+
   const use = async (specifier) => {
     if (typeof specifier === "function") {
       /* Batch-import by filter */
@@ -205,11 +219,7 @@ export const use = (() => {
     if (path.src) {
       const modules = registry.get(path.key);
 
-
-
-      let result = await modules.import(specifier);////
-
-
+      let result = await modules.import(specifier);
 
       if (registry.processors.has(path.key)) {
         const processor = registry.processors.get(path.key);
