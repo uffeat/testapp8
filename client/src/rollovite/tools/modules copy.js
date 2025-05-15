@@ -4,11 +4,15 @@ import { Modules } from "@/rollovite/tools/modules.js";
 v.1.1
 */
 
+/* TODO
+- base
+- public */
+
 /* BUG (perhaps)
 - batch import in non-DEV */
 
+import { Path } from "@/rollovite/tools/_path.js";
 import { Processor } from "@/rollovite/tools/_processor.js";
-import { syntax } from "@/rollovite/tools/_syntax.js";
 
 /* Controller for Vite loaders (results of 'import.meta.glob'). 
 NOTE
@@ -28,15 +32,13 @@ NOTE
 - Although tyically used for wrapping Vite loaders, custom objects with similar 
   shape can also be used. */
 export class Modules {
-  #base;
   #key;
   #loaders;
   #processor;
-  #proxy;
   #query;
   #type;
 
-  constructor(key, loaders, { base, processor } = {}) {
+  constructor(key, loaders, {processor} = {}) {
     this.#key = key;
     this.#loaders = loaders;
 
@@ -44,25 +46,9 @@ export class Modules {
     this.#type = type;
     this.#query = query ? `?${query}` : "";
 
-    if (base) {
-      this.#base = base;
-      this.#proxy = syntax(`/src/${base}`);
-    } else {
-      this.#proxy = syntax("@");
-    }
-
     if (processor) {
-      this.processor(processor);
+      this.processor(processor)
     }
-  }
-
-  get $() {
-    return this.#proxy;
-  }
-
-  /* Returns base. */
-  get base() {
-    return this.#base;
   }
 
   /* Returns key (type and query combination). */
@@ -70,7 +56,7 @@ export class Modules {
     return this.#key;
   }
 
-  /* Returns query with '?'-prefix. Returns empty string, if no query. */
+  /* Returns query with '?'-prefix. Retuns empty string, if no query. */
   get query() {
     return this.#query;
   }
@@ -103,45 +89,23 @@ export class Modules {
   /* Returns import.
   NOTE
   - Supports batch-imports by passing a filter function into 'import()' */
-  async import(path) {
-    if (typeof path === "function") {
+  async import(specifier) {
+    if (typeof specifier === "function") {
       /* Batch-import by filter */
-      const filter = path;
+      const filter = specifier;
+      const specifiers = Object.keys(this.#loaders).filter((path) =>
+        /* Convert to specifier before passing in to filter; enables filtering 
+        based on the '@/' syntax and on queries */
+        filter(`@/${path.slice("/src/".length)}${this.query}`)
+      );
       const imports = [];
-      for (const path of Object.keys(this.#loaders)) {
-        let specifier;
-        if (this.base) {
-          /* Correct for base */
-          specifier = path.slice(this.base);
-        } else {
-          /* Correct for "@/"-syntax */
-          specifier = `@/${path.slice("/src/".length)}`;
-        }
-        /* Add any query */
-        if (this.query) {
-          specifier = `${specifier}${this.query}`;
-        }
-
-        if (filter(specifier)) {
-          imports.push(await this.import(path));
-        }
+      for (const specifier of specifiers) {
+        imports.push(await this.import(specifier));
       }
-
       return imports;
     }
-    if (path.startsWith("@/")) {
-      /* Correct for "@/"-syntax */
-      path = `/src/${path.slice("@/".length)}`;
-    } else if (!path.startsWith("/src/") && this.base) {
-      /* Correct for base */
-      path = `/src/${this.base}/${path}`;
-    }
-    /* Remove any query */
-    if (this.query) {
-      path = path.slice(0, -this.query.length);
-    }
-
-    const load = this.#get(path);
+    const path = Path.create(specifier);
+    const load = this.get(path);
     /* Vite loaders */
     const result = await load.call(null, path);
     if (this.#processor) {
@@ -155,13 +119,12 @@ export class Modules {
   }
 
   /* Returns (async) load function. */
-  #get(path) {
-    const load = this.#loaders[path];
+  get(path) {
+    path = Path.create(path);
+    const load = this.#loaders[path.path];
     if (!load) {
-      throw new Error(`Invalid path: ${path}`);
+      throw new Error(`Invalid path: ${path.path}`);
     }
     return load;
   }
-
-  
 }

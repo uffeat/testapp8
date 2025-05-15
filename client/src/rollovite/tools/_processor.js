@@ -44,16 +44,15 @@ export class Processor {
     NOTE
     - Called as post-processor. */
   async call(context, path, result) {
-    /* NOTE
-      - 'path' is a Path instance. */
-    if (this.#cache.has(path.path)) {
-      return this.#cache.get(path.path);
+   
+    if (this.#cache.has(path)) {
+      return this.#cache.get(path);
     }
     const processed = await this.#processor.call(this, result, {
       owner: this,
       path,
     });
-    this.#cache.set(path.path, processed);
+    this.#cache.set(path, processed);
     return processed;
   }
 }

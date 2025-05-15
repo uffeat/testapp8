@@ -6,7 +6,7 @@ import datetime as dt
 import json
 from pathlib import Path
 
-ROOT = Path.cwd() / "app_code"
+ROOT = Path.cwd() / "client"
 SOURCE = ROOT / "public"
 
 

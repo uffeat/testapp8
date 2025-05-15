@@ -45,8 +45,8 @@ export class Modules {
     this.#query = query ? `?${query}` : "";
 
     if (base) {
-      this.#base = base;
-      this.#proxy = syntax(`/src/${base}`);
+      this.#base = `/src/${base}`;
+      this.#proxy = syntax(this.#base);
     } else {
       this.#proxy = syntax("@");
     }
@@ -103,38 +103,29 @@ export class Modules {
   /* Returns import.
   NOTE
   - Supports batch-imports by passing a filter function into 'import()' */
-  async import(path) {
-    if (typeof path === "function") {
+  async import(specifier) {
+    if (typeof specifier === "function") {
       /* Batch-import by filter */
-      const filter = path;
+      const filter = specifier;
       const imports = [];
       for (const path of Object.keys(this.#loaders)) {
-        let specifier;
-        if (this.base) {
-          /* Correct for base */
-          specifier = path.slice(this.base);
-        } else {
-          /* Correct for "@/"-syntax */
-          specifier = `@/${path.slice("/src/".length)}`;
-        }
-        /* Add any query */
-        if (this.query) {
-          specifier = `${specifier}${this.query}`;
-        }
-
+        const specifier = `@/${path.slice("/src/".length)}${this.query}`;
         if (filter(specifier)) {
-          imports.push(await this.import(path));
+          imports.push(await this.import(specifier));
         }
       }
 
       return imports;
     }
-    if (path.startsWith("@/")) {
-      /* Correct for "@/"-syntax */
-      path = `/src/${path.slice("@/".length)}`;
-    } else if (!path.startsWith("/src/") && this.base) {
+
+    let path;
+
+    if (this.base) {
       /* Correct for base */
-      path = `/src/${this.base}/${path}`;
+      path = `${this.base}/${specifier}`;
+    } else {
+      /* Correct for "@/"-syntax */
+      path = `/src/${specifier.slice("@/".length)}`;
     }
     /* Remove any query */
     if (this.query) {
@@ -162,6 +153,4 @@ export class Modules {
     }
     return load;
   }
-
-  
 }

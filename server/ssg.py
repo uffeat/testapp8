@@ -13,7 +13,7 @@ from anvil.server import (
 
 from tools.connect import connect
 
-ROOT = Path.cwd() / "app_code"
+ROOT = Path.cwd() / "client"
 TARGET = ROOT / "public/__static__"
 
 timestamp = f"{dt.datetime.now():%Y-%m-%d %H:%M:%S}"

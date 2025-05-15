@@ -204,10 +204,16 @@ export const use = (() => {
     /* Import from src */
     if (path.src) {
       const modules = registry.get(path.key);
-      let result = await modules.import(path);
+
+
+
+      let result = await modules.import(specifier);////
+
+
+
       if (registry.processors.has(path.key)) {
         const processor = registry.processors.get(path.key);
-        const processed = await processor.call(null, path, result);
+        const processed = await processor.call(null, path.path, result);
         /* Ignore undefined */
         if (processed !== undefined) {
           return processed;

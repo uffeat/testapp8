@@ -7,9 +7,14 @@ import { registry } from "@/rollovite/use.js";
 
 import { component } from "@/rollo/component/component.js";
 import { match } from "@/rollo/tools/object/match.js";
-import { Modules } from "@/rollovite/tools/modules";
+import { Modules } from "@/rollovite/tools/modules.js";
 
 import { is_module } from "@/rollo/tools/is/is_module.js";
+
+
+/* TODO move to main/development/main.js */
+import "@/rollometa/init.js";
+
 
 
 //registry.processors.add({ html: (result) => `${result}ADDED` });
@@ -23,8 +28,6 @@ registry.modules.add(
   )
 );
 
-
-
 registry.modules.add(
   new Modules(
     "md",
@@ -35,8 +38,6 @@ registry.modules.add(
     { processor: (result) => marked.parse(result) }
   )
 );
-//.processor((result) => marked.parse(result)),
-//registry.processors.add({ md: (result) => marked.parse(result) });
 
 const success = () => console.info("Success!");
 
@@ -121,4 +122,14 @@ await (async function importer_test(unit_test) {
   console.log("foo:", (await test.path.foo.foo[":js"]).foo);
 })();
 
+/* NOTE Do NOT await import! */
 
+/*
+if (import.meta.env.VERCEL_ENV === "production") {
+  import("@/main/production/main.js");
+} else if (import.meta.env.VERCEL_ENV === "preview") {
+  import("@/main/preview/main.js");
+} else {
+  import("@/main/development/main.js");
+}
+  */
