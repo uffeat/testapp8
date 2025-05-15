@@ -5,7 +5,7 @@ https://testapp8dev.anvil.app/_/api/asset?path=src/rollo/components/shadow.js
 import { Img } from "rollo/components/img.js";
 */
 
-import { url_for } from "@/rollovite/url_for.js";
+import { url } from "@/rollovite/url.js";
 import { Reactive } from "@/rollo/reactive/value.js";
 
 import { component } from "@/rollo/component/component.js";
@@ -62,7 +62,7 @@ class cls extends compose(
   }
 
   set src(src) {
-    super.src = this.#src = url_for(src);
+    super.src = this.#src = url(src);
 
     const on_load = (event) => {
       this.#loaded.current = true;
