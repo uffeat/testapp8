@@ -11,17 +11,11 @@ import { Modules } from "@/rollovite/tools/modules";
 
 import { is_module } from "@/rollo/tools/is/is_module.js";
 
-import { server } from "@/rolloanvil/server.js";
 
-if (import.meta.env.DEV) {
-  try {
-    const result = await server.public();
-    console.log("result:", result);
-  } catch {
-    console.clear()
-    console.warn("Public manifest not updated");
-  }
-}
+/* TODO move to main/development/main.js */
+import "@/rollometa/init.js";
+
+
 
 //registry.processors.add({ html: (result) => `${result}ADDED` });
 registry.modules.add(
