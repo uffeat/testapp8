@@ -1,24 +1,59 @@
 /* Globals */
 import "@/bootstrap.scss";
 import "@/main.css";
-import "@/rollovite/use.js";
+import { marked } from "marked";
 
+import { registry } from "@/rollovite/use.js";
 
 import { component } from "@/rollo/component/component.js";
 import { match } from "@/rollo/tools/object/match.js";
+import { Modules } from "@/rollovite/tools/modules";
 
 import { is_module } from "@/rollo/tools/is/is_module.js";
 
-const stuff = (key) => {
-  const [type, query] = key.split("?");
+import { server } from "@/rolloanvil/server.js";
 
-  console.log('type:', type)
-  console.log('query:', query)
-};
+if (import.meta.env.DEV) {
+  try {
+    const result = await server.public();
+    console.log("result:", result);
+  } catch {
+    console.clear()
+    console.warn("Public manifest not updated");
+  }
+}
 
-stuff('js?raw')
+//registry.processors.add({ html: (result) => `${result}ADDED` });
+registry.modules.add(
+  new Modules(
+    "py",
+    import.meta.glob("/src/test/**/*.py", {
+      query: "?raw",
+      import: "default",
+    })
+  )
+);
+
+registry.modules.add(
+  new Modules(
+    "md",
+    import.meta.glob("/src/test/**/*.md", {
+      query: "?raw",
+      import: "default",
+    }),
+    { processor: (result) => marked.parse(result) }
+  )
+);
 
 const success = () => console.info("Success!");
+
+await (async function md(unit_test) {
+  console.log("md -> html:", await use("@/test/foo/foo.md"));
+})();
+
+await (async function py(unit_test) {
+  console.log("py:", await use("@/test/foo/foo.py"));
+})();
 
 await (async function css(unit_test) {
   component.h1("foo.bar", { parent: document.body }, "FOO");
@@ -71,8 +106,8 @@ await (async function json_raw(unit_test) {
 })();
 
 await (async function batch(unit_test) {
-  const modules = await use(
-    (specifier) => ["@/test/batch/a.js", "@/test/batch/b.js"].includes(specifier)
+  const modules = await use((specifier) =>
+    ["@/test/batch/a.js", "@/test/batch/b.js"].includes(specifier)
   );
   console.log("modules:", modules);
 })();
