@@ -56,6 +56,7 @@ export class Modules {
     }
   }
 
+  /* Returns import with Python-like-syntax. */
   get $() {
     return this.#proxy;
   }
@@ -102,44 +103,29 @@ export class Modules {
 
   /* Returns import.
   NOTE
-  - Supports batch-imports by passing a filter function into 'import()' */
+  - Should be used with the "@/"-syntax or with base path, if set up
+    (but also supports the native "/src/"-format).
+  - Should be used with any query prefix as per instance construction
+  - Uses of base path, if set up (but can be used without).
+  - Supports batch-imports by passing a filter function into 'import()'
+    Filter functions receives a path arg that has been converted to the 
+    "@/"-format or any base path, if set up. */
   async import(path) {
     if (typeof path === "function") {
       /* Batch-import by filter */
       const filter = path;
       const imports = [];
       for (const path of Object.keys(this.#loaders)) {
-        let specifier;
-        if (this.base) {
-          /* Correct for base */
-          specifier = path.slice(this.base);
-        } else {
-          /* Correct for "@/"-syntax */
-          specifier = `@/${path.slice("/src/".length)}`;
-        }
-        /* Add any query */
-        if (this.query) {
-          specifier = `${specifier}${this.query}`;
-        }
-
+        /* Ensure that the filter function receives a path arg that is in 
+        agrement with the API */
+        const specifier = this.#unparse(path);
         if (filter(specifier)) {
           imports.push(await this.import(path));
         }
       }
-
       return imports;
     }
-    if (path.startsWith("@/")) {
-      /* Correct for "@/"-syntax */
-      path = `/src/${path.slice("@/".length)}`;
-    } else if (!path.startsWith("/src/") && this.base) {
-      /* Correct for base */
-      path = `/src/${this.base}/${path}`;
-    }
-    /* Remove any query */
-    if (this.query) {
-      path = path.slice(0, -this.query.length);
-    }
+    path = this.#parse(path);
 
     const load = this.#get(path);
     /* Vite loaders */
@@ -163,5 +149,32 @@ export class Modules {
     return load;
   }
 
-  
+  /* Returns interpretation of 'path' from "@/"-format, use of base path and 
+  path query to native "/src/"-format. */
+  #parse(path) {
+    if (path.startsWith("@/")) {
+      /* Correct for "@/"-syntax */
+      path = `/src/${path.slice("@/".length)}`;
+    } else if (!path.startsWith("/src/") && this.base) {
+      /* Correct for base */
+      path = `/src/${this.base}/${path}`;
+    }
+    /* Remove any query */
+    return this.query ? path.slice(0, -this.query.length) : path;
+  }
+
+  /* Returns interpretation of 'path' from native "/src/"-format to a format
+  that uses the "@/"-syntax, takes into account base path and adds any query. */
+  #unparse(path) {
+    if (this.base) {
+      /* Correct for base */
+      path = path.slice(this.base);
+    } else {
+      /* Correct for "@/"-syntax */
+      path = `@/${path.slice("/src/".length)}`;
+    }
+    /* Add any query */
+    
+    return (this.query && path.endsWith(this.query)) ? `${path}${this.query}` : path;
+  }
 }

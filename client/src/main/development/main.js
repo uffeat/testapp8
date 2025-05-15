@@ -20,11 +20,7 @@ console.log("raw js:", await use("/test/foo/foo.js?raw"));
 await test.import("foo.test.js");
 //await test.$.foo[':test:js']
 
-const stuff = new Modules("js", import.meta.glob("/src/test/**/*.js"));
-console.log('STUFF...')
-console.log("foo:", (await stuff.import("@/test/foo/foo.js")).foo);
-console.log("foo:", (await stuff.$.test.foo.foo[":js"]).foo);
-//console.log("foo:", (await stuff.$.test.foo.foo[":js"]).foo);
+
 
 
 const thing = new Modules("js", import.meta.glob("/src/test/**/*.js"), {base: 'test'});
@@ -34,12 +30,7 @@ console.log("foo:", (await thing.$.foo.foo[":js"]).foo);
 console.log("foo:", (await thing.$.foo.foo[":js"]).foo);
 
 
-await (async function batch() {
-  const modules = await stuff.import((specifier) =>
-    ["@/test/batch/a.js", "@/test/batch/b.js"].includes(specifier)
-  );
-  console.log("modules:", modules);
-})();
+
 
 
 
