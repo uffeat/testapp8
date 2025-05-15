@@ -4,9 +4,6 @@ import { Modules } from "@/rollovite/tools/modules.js";
 v.1.1
 */
 
-/* BUG (perhaps)
-- batch import in non-DEV */
-
 import { Processor } from "@/rollovite/tools/_processor.js";
 import { syntax } from "@/rollovite/tools/_syntax.js";
 
@@ -37,6 +34,34 @@ export class Modules {
   #type;
 
   constructor(key, loaders, { base, processor } = {}) {
+    this.#processor = new (class {
+      #processor;
+
+      /* Creates, sets and returns Processor instance from function (or object 
+      with a call method) for post-processing import results.
+      NOTE
+      - 'processor' can be async.
+      - Supports (exposed) caching.
+      - Supports highly dynamic patterns. 
+      - undefined processor results are ignored as a means to selective 
+        processing. */
+      define(source) {
+        if (source) {
+          this.#processor = new Processor(this, source);
+        } else {
+          if (this.#processor instanceof Processor) {
+            this.#processor.cache.clear();
+          }
+          this.#processor = null;
+        }
+        return this.#processor;
+      }
+
+      get() {
+        return this.#processor;
+      }
+    })();
+
     this.#key = key;
     this.#loaders = loaders;
 
@@ -52,7 +77,7 @@ export class Modules {
     }
 
     if (processor) {
-      this.processor(processor);
+      this.processor.define(processor);
     }
   }
 
@@ -76,24 +101,10 @@ export class Modules {
     return this.#query;
   }
 
-  /* Creates, sets and returns Processor instance from function (or object 
-  with a call method) for post-processing import results.
-  NOTE
-  - 'processor' can be async.
-  - Supports (exposed) caching.
-  - Supports highly dynamic patterns. 
-  - undefined processor results are ignored as a means to selective 
-    processing. */
-  processor(processor) {
-    if (processor) {
-      this.#processor = new Processor(this, processor);
-    } else {
-      if (this.#processor instanceof Processor) {
-        this.#processor.cache.clear();
-      }
-      this.#processor = null;
-    }
-    return this;
+  
+  get processor() {
+    return this.#processor
+    
   }
 
   /* Returns file type, for which the instance applies. */
@@ -130,13 +141,16 @@ export class Modules {
     const load = this.#get(path);
     /* Vite loaders */
     const result = await load.call(null, path);
-    if (this.#processor) {
-      const processed = await this.#processor.call(this, path, result);
+
+    const processor = this.processor.get()
+    if (processor) {
+      const processed = await processor.call(this, path, result);
       /* Ignore undefined */
       if (processed !== undefined) {
         return processed;
       }
     }
+
     return result;
   }
 
@@ -174,7 +188,9 @@ export class Modules {
       path = `@/${path.slice("/src/".length)}`;
     }
     /* Add any query */
-    
-    return (this.query && path.endsWith(this.query)) ? `${path}${this.query}` : path;
+
+    return this.query && path.endsWith(this.query)
+      ? `${path}${this.query}`
+      : path;
   }
 }

@@ -4,15 +4,8 @@ import { Modules } from "@/rollovite/tools/modules.js";
 v.1.1
 */
 
-/* TODO
-- base
-- public */
-
-/* BUG (perhaps)
-- batch import in non-DEV */
-
-import { Path } from "@/rollovite/tools/_path.js";
 import { Processor } from "@/rollovite/tools/_processor.js";
+import { syntax } from "@/rollovite/tools/_syntax.js";
 
 /* Controller for Vite loaders (results of 'import.meta.glob'). 
 NOTE
@@ -32,13 +25,20 @@ NOTE
 - Although tyically used for wrapping Vite loaders, custom objects with similar 
   shape can also be used. */
 export class Modules {
+  #base;
   #key;
   #loaders;
   #processor;
+  #proxy;
   #query;
   #type;
 
-  constructor(key, loaders, {processor} = {}) {
+  constructor(key, loaders, { base, processor } = {}) {
+
+   
+
+
+
     this.#key = key;
     this.#loaders = loaders;
 
@@ -46,9 +46,26 @@ export class Modules {
     this.#type = type;
     this.#query = query ? `?${query}` : "";
 
-    if (processor) {
-      this.processor(processor)
+    if (base) {
+      this.#base = base;
+      this.#proxy = syntax(`/src/${base}`);
+    } else {
+      this.#proxy = syntax("@");
     }
+
+    if (processor) {
+      this.processor(processor);
+    }
+  }
+
+  /* Returns import with Python-like-syntax. */
+  get $() {
+    return this.#proxy;
+  }
+
+  /* Returns base. */
+  get base() {
+    return this.#base;
   }
 
   /* Returns key (type and query combination). */
@@ -56,7 +73,7 @@ export class Modules {
     return this.#key;
   }
 
-  /* Returns query with '?'-prefix. Retuns empty string, if no query. */
+  /* Returns query with '?'-prefix. Returns empty string, if no query. */
   get query() {
     return this.#query;
   }
@@ -78,7 +95,7 @@ export class Modules {
       }
       this.#processor = null;
     }
-    return this;
+    return this.#processor;
   }
 
   /* Returns file type, for which the instance applies. */
@@ -88,26 +105,34 @@ export class Modules {
 
   /* Returns import.
   NOTE
-  - Supports batch-imports by passing a filter function into 'import()' */
-  async import(specifier) {
-    if (typeof specifier === "function") {
+  - Should be used with the "@/"-syntax or with base path, if set up
+    (but also supports the native "/src/"-format).
+  - Should be used with any query prefix as per instance construction
+  - Uses of base path, if set up (but can be used without).
+  - Supports batch-imports by passing a filter function into 'import()'
+    Filter functions receives a path arg that has been converted to the 
+    "@/"-format or any base path, if set up. */
+  async import(path) {
+    if (typeof path === "function") {
       /* Batch-import by filter */
-      const filter = specifier;
-      const specifiers = Object.keys(this.#loaders).filter((path) =>
-        /* Convert to specifier before passing in to filter; enables filtering 
-        based on the '@/' syntax and on queries */
-        filter(`@/${path.slice("/src/".length)}${this.query}`)
-      );
+      const filter = path;
       const imports = [];
-      for (const specifier of specifiers) {
-        imports.push(await this.import(specifier));
+      for (const path of Object.keys(this.#loaders)) {
+        /* Ensure that the filter function receives a path arg that is in 
+        agrement with the API */
+        const specifier = this.#unparse(path);
+        if (filter(specifier)) {
+          imports.push(await this.import(path));
+        }
       }
       return imports;
     }
-    const path = Path.create(specifier);
-    const load = this.get(path);
+    path = this.#parse(path);
+
+    const load = this.#get(path);
     /* Vite loaders */
     const result = await load.call(null, path);
+
     if (this.#processor) {
       const processed = await this.#processor.call(this, path, result);
       /* Ignore undefined */
@@ -115,16 +140,46 @@ export class Modules {
         return processed;
       }
     }
+
+
     return result;
   }
 
   /* Returns (async) load function. */
-  get(path) {
-    path = Path.create(path);
-    const load = this.#loaders[path.path];
+  #get(path) {
+    const load = this.#loaders[path];
     if (!load) {
-      throw new Error(`Invalid path: ${path.path}`);
+      throw new Error(`Invalid path: ${path}`);
     }
     return load;
+  }
+
+  /* Returns interpretation of 'path' from "@/"-format, use of base path and 
+  path query to native "/src/"-format. */
+  #parse(path) {
+    if (path.startsWith("@/")) {
+      /* Correct for "@/"-syntax */
+      path = `/src/${path.slice("@/".length)}`;
+    } else if (!path.startsWith("/src/") && this.base) {
+      /* Correct for base */
+      path = `/src/${this.base}/${path}`;
+    }
+    /* Remove any query */
+    return this.query ? path.slice(0, -this.query.length) : path;
+  }
+
+  /* Returns interpretation of 'path' from native "/src/"-format to a format
+  that uses the "@/"-syntax, takes into account base path and adds any query. */
+  #unparse(path) {
+    if (this.base) {
+      /* Correct for base */
+      path = path.slice(this.base);
+    } else {
+      /* Correct for "@/"-syntax */
+      path = `@/${path.slice("/src/".length)}`;
+    }
+    /* Add any query */
+    
+    return (this.query && path.endsWith(this.query)) ? `${path}${this.query}` : path;
   }
 }

@@ -9,12 +9,12 @@ NOTE
 - Part of Rollo's import system. */
 export class Processor {
   #owner;
-  #processor;
+  #source;
   #cache = new Map();
 
-  constructor(owner, processor) {
+  constructor(owner, source) {
     this.#owner = owner;
-    this.#processor = processor;
+    this.#source = source;
   }
 
   /* Provides full exposure of cache. */
@@ -27,17 +27,17 @@ export class Processor {
     return this.#owner;
   }
 
-  /* Returns processor callable. */
-  get processor() {
-    return this.#processor;
+  /* Returns source callable. */
+  get source() {
+    return this.#source;
   }
 
-  /* Sets processor callable.
+  /* Sets source callable.
     NOTE
-    - Can be replaced from inside the processor function itself via the 'owner' 
+    - Can be replaced from inside the source function itself via the 'owner' 
       kwarg. */
-  set processor(processor) {
-    this.#processor = processor;
+  set source(source) {
+    this.#source = source;
   }
 
   /* Invokes post-processing of import.
@@ -48,7 +48,7 @@ export class Processor {
     if (this.#cache.has(path)) {
       return this.#cache.get(path);
     }
-    const processed = await this.#processor.call(this, result, {
+    const processed = await this.#source.call(this, result, {
       owner: this,
       path,
     });

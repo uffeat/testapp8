@@ -79,12 +79,12 @@ export const registry = new (class {
       #registry = new Map();
 
       add(spec) {
-        Object.entries(spec).forEach(([key, processor]) => {
+        Object.entries(spec).forEach(([key, source]) => {
           /* Enforce no-duplication */
           if (this.#registry.has(key)) {
             throw new Error(`Duplicate key: ${key}`);
           }
-          this.#registry.set(key, new Processor(owner, processor));
+          this.#registry.set(key, new Processor(owner, source));
         });
         return this;
       }

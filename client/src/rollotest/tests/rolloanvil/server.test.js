@@ -1,6 +1,5 @@
 /*
-anvil/server
-@/rollotest/tests/anvil/server.test.js
+rolloanvil/server
 */
 
 import { server } from "@/rolloanvil/server.js";
