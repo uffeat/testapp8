@@ -5,21 +5,38 @@ console.info("Vite environment:", import.meta.env.MODE);
 
 /* Tests */
 await (async () => {
-  /* */
-  const factory = (unit) => {
-    return async (module) => {
-      for (const test of Object.values(module)) {
-        await test.call?.(this, unit);
+  const processor = test.processor.get();
+  console.log('processor:', processor);////
+
+  const unit = async (module) => {
+        const tests = Object.values(module);
+        for (const test of tests) {
+          await test.call?.(this, true);
+        }
       }
-    };
-  };
+      async (module) => {
+        const tests = Object.values(module);
+        for (const test of tests) {
+          await test.call?.(this, true);
+        }
+      }
+
+  const batch = async (module) => {
+        const tests = Object.values(module);
+        for (const test of tests) {
+          await test.call?.(this);
+        }
+      }
+
+
+
 
   /* Unit tests by hash */
   (() => {
     const on_hash_change = async (event) => {
       /* Call tests as unit tests */
-      test.processor.define(factory(true));
-      /* */
+      processor.source = unit
+
       const path = location.hash ? location.hash.slice(1) : null;
       if (path) {
         await test.import(`${path}.test.js`);
@@ -31,19 +48,16 @@ await (async () => {
 
   /* Unit tests by prompt */
   await (async () => {
-
     const KEY = "unit_test";
     let path = localStorage.getItem(KEY) || "";
-
     window.addEventListener("keydown", async (event) => {
       if (event.code === "KeyU" && event.shiftKey) {
         /* Call tests as unit tests */
-        test.processor.define(factory(true));
+        processor.source = unit
+
         path = prompt("Path:", path);
         if (path) {
-
           localStorage.setItem(KEY, path);
-          
           await test.import(`${path}.test.js`);
         }
       }
@@ -54,8 +68,9 @@ await (async () => {
   window.addEventListener("keydown", async (event) => {
     if (event.code === "KeyT" && event.shiftKey) {
       /* Call tests as non-unit tests */
-      test.processor.define(factory());
-      /* */
+      processor.source = batch
+      
+
       test.import((path) => path.includes("/batch/"));
     }
   });

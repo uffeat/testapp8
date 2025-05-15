@@ -28,7 +28,7 @@ export class Modules {
   #base;
   #key;
   #loaders;
-  #processor;
+  #processor = null;
   #proxy;
   #query;
   #type;
@@ -47,7 +47,12 @@ export class Modules {
         processing. */
       define(source) {
         if (source) {
-          this.#processor = new Processor(this, source);
+          if (source instanceof Processor) {
+            this.#processor = source
+          } else {
+            this.#processor = new Processor(this, source);
+          }
+          
         } else {
           if (this.#processor instanceof Processor) {
             this.#processor.cache.clear();
@@ -57,6 +62,7 @@ export class Modules {
         return this.#processor;
       }
 
+      /* Return Processor instance, if set up; otherwise null */
       get() {
         return this.#processor;
       }

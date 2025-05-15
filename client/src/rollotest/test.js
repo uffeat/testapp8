@@ -8,5 +8,12 @@ export const test = new Modules(
   ]),
   {
     base: "rollotest/tests",
+
+    processor: async (module) => {
+        const tests = Object.values(module);
+        for (const test of tests) {
+          await test.call?.(this, true);
+        }
+      }
   }
 );
