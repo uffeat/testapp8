@@ -8,34 +8,38 @@ import { registry } from "@/rollovite/tools/registry.js";
 import { Processor } from "@/rollovite/tools/_processor.js";
 import { syntax } from "@/rollovite/tools/_syntax.js";
 
-/* Controller for Vite loaders (results of 'import.meta.glob'). 
+/* Controller for Vite import maps (results of 'import.meta.glob'). 
 NOTE
 - Intended as a key part of Rollo's central import engine, but can be used 
   stand-alone in a more local/specialized context or to extend the central 
   import engine.
-- Supports the '@/' syntax.
+- Supports the '@/'-syntax.
 - Supports batch imports.
 - Option for cached preprocessing.
-- Loader coverage should be single-file type (unfortunately not enforcable).
+
+- Import map coverage should be single-file type (unfortunately not enforcable).
 - Provides meta data. However, since it's not possible to introspect Vite loaders',
   meta props such as 'type' relies on correct setting of 'key' at construction.
 - 'key' should match the file type and any query, e.g.,
   'js' or 'js?raw'. Since loader keys are paths without any query information,
   'key' enables construction of unique path specifiers and provides a key 
   suitable for registration of the instance in parent registries.
-- Although tyically used for wrapping Vite loaders, custom objects with similar 
+
+  
+- Although tyically used for wrapping Vite import maps, custom objects with similar 
   shape can also be used. */
 export class Modules {
   #base;
-
-  #registry = new Set();
-  #processor = null;
-  #query;
+  #processor;
   #proxy;
+  #query;
+  #registry = new Set();
+  #type
 
-  constructor(map, { base, processor, query = "" } = {}) {
+  constructor(map, { base, processor, query = "", type } = {}) {
+    /* Create processor prop */
     this.#processor = new (class {
-      #processor;
+      #processor = null;
 
       /* Creates, sets and returns Processor instance from function (or object 
       with a call method) for post-processing import results.
@@ -68,9 +72,17 @@ export class Modules {
     })();
 
     this.#base = base;
+    if (processor) {
+      this.processor.define(processor);
+    }
     this.#query = query;
+    this.#type = type
 
     for (const [path, load] of Object.entries(map)) {
+      /* Check type */
+      if (!path.endsWith(`.${type}`)) {
+        throw new Error(`Invalid type for path: ${path}`)
+      }
       const naked = path.slice("/src/".length);
       /* Global registry */
       const key = `@/${naked}${query}`;
@@ -87,15 +99,8 @@ export class Modules {
       }
     }
 
-    if (base) {
-      this.#proxy = syntax(``, this);
-    } else {
-      this.#proxy = syntax("@", this);
-    }
-
-    if (processor) {
-      this.processor.define(processor);
-    }
+    /* Enable Python-like syntax */
+    this.#proxy = base ? syntax(``, this) : syntax("@", this);
   }
 
   /* Returns import with Python-like-syntax. */
@@ -108,8 +113,19 @@ export class Modules {
     return this.#base;
   }
 
+  /* Returns processor controller. */
   get processor() {
     return this.#processor;
+  }
+
+  /* Returns query. */
+  get query() {
+    return this.#query;
+  }
+
+  /* Returns type. */
+  get type() {
+    return this.#type;
   }
 
   /* Batch-imports by filter. */
@@ -132,12 +148,12 @@ export class Modules {
       throw new Error(`Invalid path: ${key}`);
     }
 
-  
-
-    const load = registry.get((() => {
-      let result = `${key}${this.#query}`;
-      return this.#base ? `${this.#base}/${result}` : result;
-    })());
+    const load = registry.get(
+      (() => {
+        let result = `${key}${this.#query}`;
+        return this.#base ? `${this.#base}/${result}` : result;
+      })()
+    );
 
     const result = await load();
 
