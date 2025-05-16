@@ -8,51 +8,34 @@ import { registry } from "@/rollovite/tools/registry.js";
 import { Processor } from "@/rollovite/tools/_processor.js";
 import { syntax } from "@/rollovite/tools/_syntax.js";
 
-/* Controller for Vite import map (result of 'import.meta.glob'). 
+/* Controller for Vite import maps (results of 'import.meta.glob'). 
 NOTE
 - Intended as a key part of Rollo's central import engine, but can be used 
-  stand-alone or to extend the engine.
-- Modes:
-  - Non-local (default):
-    - Import map items are registered and retrieved centrally to prevent 
-      duplication (duplicates are silently ignored).
-    - Path keys are registered locally to provide fast batch imports and to 
-      guard against misuse of processors.
-  - Local:
-    - Import map items are registered and retrieved locally to provide 
-      slightly faster imports - at the expense of potential redundant items.
+  stand-alone or to extend the central import engine.
 - Supports the '@/'-syntax and import from base.
 - Supports batch imports.
 - Option for cached preprocessing.
-- 'strict' option (default) enforces single-file type import map to 
-  guard against misuse of processors and for general organization discipline.
-  Also allows use of ''import' without file type.
-  If 'type' is not provided expilcitly provided at construction, it is inferred.
-- Best practices:
-  - Use 'strict' and provide 'type' explicitly.
-  - Call 'import' with file type.
-  - For non-global import maps, always use the 'base' option.
-  - 'import.meta.glob' should be used with
-      `{ query: "?raw", import: "default" }` kwargs for raw imports
-    or
-      no kwargs for non-raw imports.
-    Other combinations will likely work, but may not leverage the full 
-    potential of 'Modules'.
+
+- Import map coverage should be single-file type (unfortunately not enforcable).
+- Provides meta data. However, since it's not possible to introspect Vite loaders',
+  meta props such as 'type' relies on correct setting of 'key' at construction.
+- 'key' should match the file type and any query, e.g.,
+  'js' or 'js?raw'. Since loader keys are paths without any query information,
+  'key' enables construction of unique path specifiers and provides a key 
+  suitable for registration of the instance in parent registries.
+
+  
 - Although tyically used for wrapping Vite import maps, custom objects with similar 
   shape can also be used. */
 export class Modules {
   #base;
-  #local;
   #processor;
   #proxy;
   #query;
-  #registry;
-  #type;
+  #registry = new Set();
+  #type
 
-  constructor(
-    map,
-    { base, local = false, processor, query = "", type, strict = true } = {}
-  ) {
+  constructor(map, { base, processor, query = "", type } = {}) {
     /* Create processor prop */
     this.#processor = new (class {
       #processor = null;
@@ -88,49 +71,35 @@ export class Modules {
     })();
 
     this.#base = base;
-    this.#local = local;
     if (processor) {
       this.processor.define(processor);
     }
     this.#query = query;
-    this.#type = type;
+    this.#type = type
 
-    /* Helpers for parsing map */
-    const check_type = (path) => {
-      if (!strict) {
-        return
+    for (const [path, load] of Object.entries(map)) {
+      /* Check type */
+      if (!path.endsWith(`.${type}`)) {
+        throw new Error(`Invalid type for path: ${path}`)
       }
-      if (!this.#type) {
-        this.#type = path.split(".").reverse()[0];
+      const naked = path.slice("/src/".length);
+      /* Global registry */
+      const key = `@/${naked}${query}`;
+      if (registry.has(key)) {
+        console.warn(`Duplicate key: ${key}`);
+      } else {
+        registry.add(key, load);
       }
-      if (!path.endsWith(`.${this.#type}`)) {
-        throw new Error(`Invalid type for path: ${path}`);
-      }
-    };
-    const get_naked = (path) => path.slice("/src/".length);
-    const create_key = (naked) =>
-      base ? naked.slice(base.length - 1) : `@/${naked}`;
-    /* Parse map */
-    if (local) {
-      this.#registry = new Map();
-      for (const [path, load] of Object.entries(map)) {
-        check_type(path);
-        this.#registry.set(create_key(get_naked(path)), load);
-      }
-    } else {
-      this.#registry = new Set();
-      for (const [path, load] of Object.entries(map)) {
-        check_type(path);
-        const naked = get_naked(path);
-        /* Global registry */
-        registry.add(`@/${naked}${query}`, load);
-        /* Local registry */
-        this.#registry.add(create_key(naked));
+      /* Local registry */
+      if (base) {
+        this.#registry.add(naked.slice(base.length - 1));
+      } else {
+        this.#registry.add(`@/${naked}`);
       }
     }
 
     /* Enable Python-like syntax */
-    this.#proxy = base ? syntax(``, this, this.#type) : syntax("@", this, this.#type);
+    this.#proxy = base ? syntax(``, this) : syntax("@", this);
   }
 
   /* Returns import with Python-like-syntax. */
@@ -141,11 +110,6 @@ export class Modules {
   /* Returns base. */
   get base() {
     return this.#base;
-  }
-
-  /* Returns local mode. */
-  get local() {
-    return this.#local;
   }
 
   /* Returns processor controller. */
@@ -179,21 +143,16 @@ export class Modules {
     if (typeof key === "function") {
       return await this.batch(key);
     }
-    if (!key.endsWith(`.${this.type}`)) {
-      key = `${key}.${this.type}`
-    }
     if (!this.#registry.has(key)) {
       throw new Error(`Invalid path: ${key}`);
     }
 
-    const load = this.local
-      ? this.#registry.get(key)
-      : registry.get(
-          (() => {
-            let result = `${key}${this.query}`;
-            return this.base ? `${this.base}/${result}` : result;
-          })()
-        );
+    const load = registry.get(
+      (() => {
+        let result = `${key}${this.#query}`;
+        return this.#base ? `${this.#base}/${result}` : result;
+      })()
+    );
 
     const result = await load();
 

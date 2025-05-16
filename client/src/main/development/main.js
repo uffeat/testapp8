@@ -7,7 +7,7 @@ console.info("Vite environment:", import.meta.env.MODE);
 
 await (async () => {
   const modules = new Modules(import.meta.glob("/src/test/foo/**/*.js"), {base: '@/test/foo', type: 'js'});
-  console.log("foo:", (await modules.import("foo.js")).foo);
+  console.log("foo:", (await modules.import("foo")).foo);
   console.log("foo:", (await modules.import("foo.js")).foo);
   console.log("foo:", (await modules.$.foo[':js']).foo);
   console.log("foo:", (await modules.$.foo[':js']).foo);
@@ -16,7 +16,7 @@ await (async () => {
 await (async () => {
   const modules = new Modules(import.meta.glob("/src/test/bar/**/*.js"), {type: 'js'});
   console.log("bar:", (await modules.import("@/test/bar/bar.js")).bar);
-  console.log("bar:", (await modules.$.test.bar.bar[':js']).bar);
+  console.log("bar:", (await modules.$.test.bar.bar.js).bar);
   console.log("bar:", (await modules.$.test.bar.bar[':js']).bar);
 
 })();
@@ -25,14 +25,11 @@ await (async () => {
 
 await (async () => {
   const modules = new Modules(
-    import.meta.glob("/src/test/**/*.html", {
-      query: "?raw",
-      import: "default",
-    }),
-    { query: "?raw", type: 'html' }
+    import.meta.glob("/src/test/**/*.html", { query: "?raw", import: "default" }),
+    { base: '@/test', query: "?raw" }
   );
-  console.log("foo:", await modules.import("@/test/foo/foo.html"));
-  console.log("foo:", await modules.import("@/test/foo/foo.html"));
+  console.log("html:", await modules.import("foo/foo"));
+  console.log("html:", await modules.import("foo/foo.html"));
 })();
 
 /* Tests */

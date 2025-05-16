@@ -8,23 +8,26 @@ export const registry = new (class {
   #registry = new Map();
 
   add(key, load) {
-    this.#registry.set(key, load);
+    if (!this.#registry.has(key)) {
+      this.#registry.set(key, load);
+    } 
+
     return this;
   }
 
   get(key) {
-    return this.#registry.get(key)
+    return this.#registry.get(key);
   }
 
   has(key) {
-    return this.#registry.has(key)
+    return this.#registry.has(key);
   }
 
   keys(filter) {
-    const keys = Array.from(this.#registry.keys())
+    const keys = Array.from(this.#registry.keys());
     if (filter) {
-      return keys.filter(filter)
+      return keys.filter(filter);
     }
-    return keys
+    return keys;
   }
 })();
