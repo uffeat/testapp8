@@ -43,16 +43,16 @@ export class Processor {
   /* Invokes post-processing of import.
     NOTE
     - Called as post-processor. */
-  async call(context, path, result) {
+  async call(context, key, result) {
    
-    if (this.#cache.has(path)) {
-      return this.#cache.get(path);
+    if (this.#cache.has(key)) {
+      return this.#cache.get(key);
     }
     const processed = await this.#source.call(this, result, {
       owner: this,
-      path,
+      key,
     });
-    this.#cache.set(path, processed);
+    this.#cache.set(key, processed);
     return processed;
   }
 }

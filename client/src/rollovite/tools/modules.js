@@ -1,9 +1,10 @@
 /*
 import { Modules } from "@/rollovite/tools/modules.js";
-20250515
-v.1.1
+20250516
+v.2.0
 */
 
+import { registry } from "@/rollovite/tools/registry.js";
 import { Processor } from "@/rollovite/tools/_processor.js";
 import { syntax } from "@/rollovite/tools/_syntax.js";
 
@@ -26,14 +27,13 @@ NOTE
   shape can also be used. */
 export class Modules {
   #base;
-  #key;
-  #loaders;
-  #processor = null;
-  #proxy;
-  #query;
-  #type;
 
-  constructor(key, loaders, { base, processor } = {}) {
+  #registry = new Set();
+  #processor = null;
+  #query;
+  #proxy;
+
+  constructor(map, { base, processor, query = "" } = {}) {
     this.#processor = new (class {
       #processor;
 
@@ -48,11 +48,10 @@ export class Modules {
       define(source) {
         if (source) {
           if (source instanceof Processor) {
-            this.#processor = source
+            this.#processor = source;
           } else {
             this.#processor = new Processor(this, source);
           }
-          
         } else {
           if (this.#processor instanceof Processor) {
             this.#processor.cache.clear();
@@ -68,18 +67,30 @@ export class Modules {
       }
     })();
 
-    this.#key = key;
-    this.#loaders = loaders;
+    this.#base = base;
+    this.#query = query;
 
-    const [type, query] = key.split("?");
-    this.#type = type;
-    this.#query = query ? `?${query}` : "";
+    for (const [path, load] of Object.entries(map)) {
+      const naked = path.slice("/src/".length);
+      /* Global registry */
+      const key = `@/${naked}${query}`;
+      if (registry.has(key)) {
+        console.warn(`Duplicate key: ${key}`);
+      } else {
+        registry.add(key, load);
+      }
+      /* Local registry */
+      if (base) {
+        this.#registry.add(naked.slice(base.length - 1));
+      } else {
+        this.#registry.add(`@/${naked}`);
+      }
+    }
 
     if (base) {
-      this.#base = base;
-      this.#proxy = syntax(`/src/${base}`);
+      this.#proxy = syntax(``, this);
     } else {
-      this.#proxy = syntax("@");
+      this.#proxy = syntax("@", this);
     }
 
     if (processor) {
@@ -97,60 +108,42 @@ export class Modules {
     return this.#base;
   }
 
-  /* Returns key (type and query combination). */
-  get key() {
-    return this.#key;
+  get processor() {
+    return this.#processor;
   }
 
-  /* Returns query with '?'-prefix. Returns empty string, if no query. */
-  get query() {
-    return this.#query;
+  /* Batch-imports by filter. */
+  async batch(filter) {
+    /* Batch-import by filter */
+    const imports = [];
+    const keys = Array.from(this.#registry.keys()).filter(filter);
+    for (const key of keys) {
+      imports.push(await this.import(key));
+    }
+    return imports;
   }
+
+  /* Returns import. */
+  async import(key) {
+    if (typeof key === "function") {
+      return await this.batch(key);
+    }
+    if (!this.#registry.has(key)) {
+      throw new Error(`Invalid path: ${key}`);
+    }
 
   
-  get processor() {
-    return this.#processor
-    
-  }
 
-  /* Returns file type, for which the instance applies. */
-  get type() {
-    return this.#type;
-  }
+    const load = registry.get((() => {
+      let result = `${key}${this.#query}`;
+      return this.#base ? `${this.#base}/${result}` : result;
+    })());
 
-  /* Returns import.
-  NOTE
-  - Should be used with the "@/"-syntax or with base path, if set up
-    (but also supports the native "/src/"-format).
-  - Should be used with any query prefix as per instance construction
-  - Uses of base path, if set up (but can be used without).
-  - Supports batch-imports by passing a filter function into 'import()'
-    Filter functions receives a path arg that has been converted to the 
-    "@/"-format or any base path, if set up. */
-  async import(path) {
-    if (typeof path === "function") {
-      /* Batch-import by filter */
-      const filter = path;
-      const imports = [];
-      for (const path of Object.keys(this.#loaders)) {
-        /* Ensure that the filter function receives a path arg that is in 
-        agrement with the API */
-        const specifier = this.#unparse(path);
-        if (filter(specifier)) {
-          imports.push(await this.import(path));
-        }
-      }
-      return imports;
-    }
-    path = this.#parse(path);
+    const result = await load();
 
-    const load = this.#get(path);
-    /* Vite loaders */
-    const result = await load.call(null, path);
-
-    const processor = this.processor.get()
+    const processor = this.processor.get();
     if (processor) {
-      const processed = await processor.call(this, path, result);
+      const processed = await processor.call(this, key, result);
       /* Ignore undefined */
       if (processed !== undefined) {
         return processed;
@@ -158,45 +151,5 @@ export class Modules {
     }
 
     return result;
-  }
-
-  /* Returns (async) load function. */
-  #get(path) {
-    const load = this.#loaders[path];
-    if (!load) {
-      throw new Error(`Invalid path: ${path}`);
-    }
-    return load;
-  }
-
-  /* Returns interpretation of 'path' from "@/"-format, use of base path and 
-  path query to native "/src/"-format. */
-  #parse(path) {
-    if (path.startsWith("@/")) {
-      /* Correct for "@/"-syntax */
-      path = `/src/${path.slice("@/".length)}`;
-    } else if (!path.startsWith("/src/") && this.base) {
-      /* Correct for base */
-      path = `/src/${this.base}/${path}`;
-    }
-    /* Remove any query */
-    return this.query ? path.slice(0, -this.query.length) : path;
-  }
-
-  /* Returns interpretation of 'path' from native "/src/"-format to a format
-  that uses the "@/"-syntax, takes into account base path and adds any query. */
-  #unparse(path) {
-    if (this.base) {
-      /* Correct for base */
-      path = path.slice(this.base);
-    } else {
-      /* Correct for "@/"-syntax */
-      path = `@/${path.slice("/src/".length)}`;
-    }
-    /* Add any query */
-
-    return this.query && path.endsWith(this.query)
-      ? `${path}${this.query}`
-      : path;
   }
 }
