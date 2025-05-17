@@ -1,136 +1,32 @@
 /*
 import { Modules } from "@/rollovite/tools/modules.js";
-20250516
-v.2.0
+20250517
+v.3.0
 */
 
-import { registry } from "@/rollovite/tools/registry.js";
 import { Processor } from "@/rollovite/tools/_processor.js";
 import { syntax } from "@/rollovite/tools/_syntax.js";
 
-/* Controller for Vite import map (result of 'import.meta.glob'). 
-NOTE
-- Intended as a key part of Rollo's central import engine, but can be used 
-  stand-alone or to extend the engine.
-- Modes:
-  - Non-local (default):
-    - Import map items are registered and retrieved centrally to prevent 
-      duplication (duplicates are silently ignored).
-    - Path keys are registered locally to provide fast batch imports and to 
-      guard against misuse of processors.
-  - Local:
-    - Import map items are registered and retrieved locally to provide 
-      slightly faster imports - at the expense of potential redundant items.
-- Supports the '@/'-syntax and import from base.
-- Supports batch imports.
-- Option for cached preprocessing.
-- 'strict' option (default) enforces single-file type import map to 
-  guard against misuse of processors and for general organization discipline.
-  Also allows use of ''import' without file type.
-  If 'type' is not provided expilcitly provided at construction, it is inferred.
-- Best practices:
-  - Use 'strict' and provide 'type' explicitly.
-  - Call 'import' with file type.
-  - For non-global import maps, always use the 'base' option.
-  - 'import.meta.glob' should be used with
-      `{ query: "?raw", import: "default" }` kwargs for raw imports
-    or
-      no kwargs for non-raw imports.
-    Other combinations will likely work, but may not leverage the full 
-    potential of 'Modules'.
-- Although tyically used for wrapping Vite import maps, custom objects with similar 
-  shape can also be used. */
-export class Modules {
+export class Base {
   #base;
-  #local;
-  #processor;
+  #processor = null;
   #proxy;
   #query;
-  #registry;
   #type;
 
   constructor(
     map,
-    { base, local = false, processor, query = "", type, strict = true } = {}
+    { base, processor, query = "", type = 'js' } = {}
   ) {
-    /* Create processor prop */
-    this.#processor = new (class {
-      #processor = null;
-
-      /* Creates, sets and returns Processor instance from function (or object 
-      with a call method) for post-processing import results.
-      NOTE
-      - 'processor' can be async.
-      - Supports (exposed) caching.
-      - Supports highly dynamic patterns. 
-      - undefined processor results are ignored as a means to selective 
-        processing. */
-      define(source) {
-        if (source) {
-          if (source instanceof Processor) {
-            this.#processor = source;
-          } else {
-            this.#processor = new Processor(this, source);
-          }
-        } else {
-          if (this.#processor instanceof Processor) {
-            this.#processor.cache.clear();
-          }
-          this.#processor = null;
-        }
-        return this.#processor;
-      }
-
-      /* Return Processor instance, if set up; otherwise null */
-      get() {
-        return this.#processor;
-      }
-    })();
-
     this.#base = base;
-    this.#local = local;
     if (processor) {
-      this.processor.define(processor);
+      this.processor(processor);
     }
     this.#query = query;
     this.#type = type;
 
-    /* Helpers for parsing map */
-    const check_type = (path) => {
-      if (!strict) {
-        return
-      }
-      if (!this.#type) {
-        this.#type = path.split(".").reverse()[0];
-      }
-      if (!path.endsWith(`.${this.#type}`)) {
-        throw new Error(`Invalid type for path: ${path}`);
-      }
-    };
-    const get_naked = (path) => path.slice("/src/".length);
-    const create_key = (naked) =>
-      base ? naked.slice(base.length - 1) : `@/${naked}`;
-    /* Parse map */
-    if (local) {
-      this.#registry = new Map();
-      for (const [path, load] of Object.entries(map)) {
-        check_type(path);
-        this.#registry.set(create_key(get_naked(path)), load);
-      }
-    } else {
-      this.#registry = new Set();
-      for (const [path, load] of Object.entries(map)) {
-        check_type(path);
-        const naked = get_naked(path);
-        /* Global registry */
-        registry.add(`@/${naked}${query}`, load);
-        /* Local registry */
-        this.#registry.add(create_key(naked));
-      }
-    }
-
     /* Enable Python-like syntax */
-    this.#proxy = base ? syntax(``, this, this.#type) : syntax("@", this, this.#type);
+    this.#proxy = syntax(base ? "" : "@", this, (part) => part === type);
   }
 
   /* Returns import with Python-like-syntax. */
@@ -143,14 +39,208 @@ export class Modules {
     return this.#base;
   }
 
-  /* Returns local mode. */
-  get local() {
-    return this.#local;
+  
+
+  /* Returns query. */
+  get query() {
+    return this.#query;
   }
 
-  /* Returns processor controller. */
-  get processor() {
+  /* Returns type. */
+  get type() {
+    return this.#type;
+  }
+
+  
+
+  
+
+  /* Combined getter/setter for 'processor':
+  - If no arg, returns Processor instance, or null, if not set up.
+  - If source, creates, sets and returns Processor instance from function.
+  - If null arg, removes processor.
+  NOTE
+  - 'source' should be a (optionally) async function with the signature:
+      (this, result, { owner: this, key })
+    Can also be an object with a 'call' method or a Processor instance.
+  - Supports (exposed) caching.
+  - Supports highly dynamic patterns. 
+  - undefined processor results are ignored as a means to selective 
+    processing. */
+  processor(source) {
+    if (source) {
+      if (source instanceof Processor) {
+        this.#processor = source;
+      } else {
+        this.#processor = new Processor(this, source);
+      }
+    } else {
+      if (source === null) {
+        /* Clean up and remove processor */
+        if (this.#processor instanceof Processor) {
+          this.#processor.cache.clear();
+        }
+        this.#processor = null;
+      }
+    }
     return this.#processor;
+  }
+}
+
+/* 
+NOTE
+- For global scope
+- Zero registries beyond import map. */
+export class Modules {
+  #registry;
+  #processor = null;
+  #proxy;
+  #query;
+  #type;
+
+  constructor(map, { processor, query = "", type } = {}) {
+    this.#registry = map;
+
+    if (processor) {
+      this.processor(processor);
+    }
+    this.#query = query;
+    this.#type = type;
+
+    /* Enable Python-like syntax */
+    this.#proxy = syntax("@", this, (part) => part === type);
+  }
+
+  /* Returns import with Python-like-syntax. */
+  get $() {
+    return this.#proxy;
+  }
+
+  /* Returns query. */
+  get query() {
+    return this.#query;
+  }
+
+  /* Returns type. */
+  get type() {
+    return this.#type;
+  }
+
+  /* Returns import. */
+  async import(path) {
+    /* Allow paths with query */
+    if (this.query && path.endsWith(this.query)) {
+      path = path.slice(0, -this.query.length);
+    }
+    /* Allow paths without type */
+    if (this.type && !path.endsWith(`.${this.type}`)) {
+      path = `${path}.${this.type}`;
+    }
+    
+    const load = this.#registry[path];
+    const result = await load();
+    const processor = this.processor();
+    if (processor) {
+      const processed = await processor.call(this, path, result);
+      /* Ignore undefined */
+      if (processed !== undefined) {
+        return processed;
+      }
+    }
+    return result;
+  }
+
+  /* Returns paths, optionally filtered. */
+  paths(filter) {
+    const paths = Object.keys(this.#registry);
+    if (filter) {
+      return paths.filter(filter);
+    }
+    return paths;
+  }
+
+  /* Combined getter/setter for 'processor':
+  - If no arg, returns Processor instance, or null, if not set up.
+  - If source, creates, sets and returns Processor instance from function.
+  - If null arg, removes processor.
+  NOTE
+  - 'source' should be a (optionally) async function with the signature:
+      (this, result, { owner: this, key })
+    Can also be an object with a 'call' method or a Processor instance.
+  - Supports (exposed) caching.
+  - Supports highly dynamic patterns. 
+  - undefined processor results are ignored as a means to selective 
+    processing. */
+  processor(source) {
+    if (source) {
+      if (source instanceof Processor) {
+        this.#processor = source;
+      } else {
+        this.#processor = new Processor(this, source);
+      }
+    } else {
+      if (source === null) {
+        /* Clean up and remove processor */
+        if (this.#processor instanceof Processor) {
+          this.#processor.cache.clear();
+        }
+        this.#processor = null;
+      }
+    }
+    return this.#processor;
+  }
+}
+
+/* 
+NOTE
+- Intended for non-global scope
+- Single created registry
+- Use with base */
+export class LocalModules {
+  #base;
+
+  #processor = null;
+  #proxy;
+  #query;
+  #registry = new Map();
+  #type;
+
+  constructor(map, { base, processor, query = "", type = "js" } = {}) {
+    if (!base) {
+      throw new Error(`'base' not provided`);
+    }
+
+    this.#base = base;
+
+    if (processor) {
+      this.processor(processor);
+    }
+    this.#query = query;
+    this.#type = type;
+
+    /* Build registry from map */
+    for (const [path, load] of Object.entries(map)) {
+      /* Check type */
+      if (!path.endsWith(`.${type}`)) {
+        throw new Error(`Invalid type for path: ${path}`);
+      }
+      const naked = path.slice("/src/".length);
+      const key = naked.slice(base.length - 1);
+      this.#registry.set(key, load);
+    }
+
+    /* Enable Python-like syntax */
+    this.#proxy = syntax("", this, (part) => part === type);
+  }
+
+  /* Returns import with Python-like-syntax. */
+  get $() {
+    return this.#proxy;
+  }
+
+  /* Returns base. */
+  get base() {
+    return this.#base;
   }
 
   /* Returns query. */
@@ -165,9 +255,8 @@ export class Modules {
 
   /* Batch-imports by filter. */
   async batch(filter) {
-    /* Batch-import by filter */
     const imports = [];
-    const keys = Array.from(this.#registry.keys()).filter(filter);
+    const keys = this.paths(filter)
     for (const key of keys) {
       imports.push(await this.import(key));
     }
@@ -179,25 +268,23 @@ export class Modules {
     if (typeof key === "function") {
       return await this.batch(key);
     }
-    if (!key.endsWith(`.${this.type}`)) {
-      key = `${key}.${this.type}`
+    /* Allow paths with query */
+    if (this.query && key.endsWith(this.query)) {
+      key = key.slice(0, -this.query.length);
     }
+     /* Allow paths without type */
+    if (!key.endsWith(`.${this.type}`)) {
+      key = `${key}.${this.type}`;
+    }
+    /* Check path */
     if (!this.#registry.has(key)) {
       throw new Error(`Invalid path: ${key}`);
     }
 
-    const load = this.local
-      ? this.#registry.get(key)
-      : registry.get(
-          (() => {
-            let result = `${key}${this.query}`;
-            return this.base ? `${this.base}/${result}` : result;
-          })()
-        );
-
+    const load = this.#registry.get(key)
     const result = await load();
 
-    const processor = this.processor.get();
+    const processor = this.processor();
     if (processor) {
       const processed = await processor.call(this, key, result);
       /* Ignore undefined */
@@ -207,5 +294,45 @@ export class Modules {
     }
 
     return result;
+  }
+
+  /* Returns paths, optionally filtered. */
+  paths(filter) {
+    const paths = Array.from(this.#registry.keys());
+    if (filter) {
+      return paths.filter(filter);
+    }
+    return paths;
+  }
+
+  /* Combined getter/setter for 'processor':
+  - If no arg, returns Processor instance, or null, if not set up.
+  - If source, creates, sets and returns Processor instance from function.
+  - If null arg, removes processor.
+  NOTE
+  - 'source' should be a (optionally) async function with the signature:
+      (this, result, { owner: this, key })
+    Can also be an object with a 'call' method or a Processor instance.
+  - Supports (exposed) caching.
+  - Supports highly dynamic patterns. 
+  - undefined processor results are ignored as a means to selective 
+    processing. */
+  processor(source) {
+    if (source) {
+      if (source instanceof Processor) {
+        this.#processor = source;
+      } else {
+        this.#processor = new Processor(this, source);
+      }
+    } else {
+      if (source === null) {
+        /* Clean up and remove processor */
+        if (this.#processor instanceof Processor) {
+          this.#processor.cache.clear();
+        }
+        this.#processor = null;
+      }
+    }
+    return this.#processor;
   }
 }

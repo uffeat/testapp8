@@ -20,35 +20,60 @@ NOTE
   - Act as a broker registry between 'Modules' instances and 'use'.
   - Enable addition of features to the central Rollo import engine in a way 
     that does not affect the performance and robustness of its core features. */
-export const _use = new (class {
-  #paths
+export const registry = new (class {
+  #modules;
   #processors;
-  #registry = new Map();
+  #registry;
 
   constructor(spec) {
+    this.#registry = new Map();
 
-    // TODO on-demand - or even better not a hard registry = the registries are already there
-    // ...A CASE FOR DOM AS REG?
-    this.#paths = []
-    assets.paths.forEach((path) => {
-      this.#paths.push(path)
-      if (path.endsWith('css') || path.endsWith('js') || path.endsWith('json')) {
-        this.#paths.push(`${path}?raw`)
-      }
-    })
-
-
-    Object.entries(spec).forEach(([key, modules]) => {
-      this.#registry.set(key, modules);
-
-      modules.paths.forEach((path) => this.#paths.push(`${path}${modules.query}`) )
-
+    Object.entries(spec).forEach(([key, loaders]) => {
+      this.#registry.set(key, new Modules(key, loaders));
     });
 
-    
-
-
     const owner = this;
+
+    this.#modules = new (class {
+      #registry = new Map();
+
+      add(...spec) {
+        spec.forEach((modules) => {
+          /* Enforce no-duplication */
+          if (this.#registry.has(modules.key) || owner.has(modules.key)) {
+            throw new Error(`Duplicate key: ${modules.key}`);
+          }
+          if (!(modules instanceof Modules)) {
+            console.error("value:", modules);
+            throw new Error(`Expected Modules instance.`);
+          }
+          this.#registry.set(modules.key, modules);
+        });
+        return this;
+      }
+
+      clear() {
+        this.#registry.clear();
+        return this;
+      }
+
+      get(key) {
+        return this.#registry.get(key);
+      }
+
+      has(key) {
+        return this.#registry.has(key);
+      }
+
+      keys() {
+        return this.#registry.keys();
+      }
+
+      remove(key) {
+        this.#registry.delete(key);
+        return this;
+      }
+    })();
 
     this.#processors = new (class {
       #registry = new Map();
@@ -88,134 +113,66 @@ export const _use = new (class {
     })();
   }
 
+  get modules() {
+    return this.#modules;
+  }
+
   get processors() {
     return this.#processors;
   }
 
-  async batch(filter) {}
-
-  async import(path) {
-    const type = path.split(".").reverse()[0];
-    const raw = (() => {
-      if (path.endsWith("?raw")) {
-        path = path.slice(0, -"?raw".length);
-        return true;
-      }
-    })();
-    let result;
-    if (path.startsWith("@/")) {
-      const key = raw ? `${type}?raw` : type;
-      const modules = this.#registry.get(key);
-      if (!modules) {
-        throw new Error(`Invalid key: ${key}`);
-      }
-      result = await modules.import(path)
-    } else {
-      result = await assets.import(raw ? `${path}?raw` : path);
+  /* Returns 'Modules' instance. */
+  get(key) {
+    const modules = this.#registry.get(key) || this.modules.get(key);
+    if (!modules) {
+      throw new Error(`Invalid key: ${key}`);
     }
-
-    if (this.processors.has(path.key)) {
-        const processor = this.processors.get(path.key);
-        const processed = await processor.call(null, path, result);
-        /* Ignore undefined */
-        if (processed !== undefined) {
-          return processed;
-        }
-      }
-      return result;
-    
-
+    return modules;
   }
 
-  
-
-  has(path) {
-    
+  has(key) {
+    return this.#registry.has(key);
   }
 
-  paths(filter) {
-
-   
+  keys() {
+    return this.#registry.keys();
   }
 
-  
+  values() {
+    return this.#registry.values();
+  }
 })(
   /* Configure global-scope Module instances for common file types, incl. raw 
   where relevant. */
 
   /* TODO
-  - No need to explicitly set keys - construct from modules; and feed as ars instead;
-  - Perhaps exlcude more top-level dirs, incl.
+  - Refactor to use `new Modules(...)` instead - for consistency
+  - Exlcude more top-level dirs, incl.
     - rollometa
     - rollovite */
 
   {
-    css: new Modules(
-      import.meta.glob(["/src/**/*.css", "!/src/rollotest/**/*.*"]),
-      {
-        type: 'css',
-        strict: false,
-      }
-    ),
-    "css?raw": new Modules(
-      import.meta.glob(["/src/**/*.css", "!/src/rollotest/**/*.*"], {
-        query: "?raw",
-        import: "default",
-      }),
-      {
-        query: "?raw",
-        type: 'css',
-        strict: false,
-      }
-    ),
-    html: new Modules(
-      import.meta.glob(["/src/**/*.html", "!/src/rollotest/**/*.*"], {
-        query: "?raw",
-        import: "default",
-      }),
-      {
-        query: "?raw",
-        type: 'html',
-        strict: false,
-      }
-    ),
-    js: new Modules(
-      import.meta.glob(["/src/**/*.js", "!/src/rollotest/**/*.*"]),
-      {
-        strict: false,
-      }
-    ),
-    "js?raw": new Modules(
-      import.meta.glob(["/src/**/*.js", "!/src/rollotest/**/*.*"], {
-        query: "?raw",
-        import: "default",
-      }),
-      {
-        query: "?raw",
-        type: 'js',
-        strict: false,
-      }
-    ),
-    json: new Modules(
-      import.meta.glob(["/src/**/*.json", "!/src/rollotest/**/*.*"], {
-        import: "default",
-      }),
-      {
-        type: 'json',
-        strict: false,
-      }
-    ),
-    "json?raw": new Modules(
-      import.meta.glob(["/src/**/*.json", "!/src/rollotest/**/*.*"], {
-        query: "?raw",
-        import: "default",
-      }),
-      {
-        query: "?raw",
-        type: 'json',
-        strict: false,
-      }
-    ),
+    css: import.meta.glob(["/src/**/*.css", "!/src/rollotest/**/*.*"]),
+    "css?raw": import.meta.glob(["/src/**/*.css", "!/src/rollotest/**/*.*"], {
+      query: "?raw",
+      import: "default",
+    }),
+    html: import.meta.glob(["/src/**/*.html", "!/src/rollotest/**/*.*"], {
+      query: "?raw",
+      import: "default",
+    }),
+    js: import.meta.glob(["/src/**/*.js", "!/src/rollotest/**/*.*"]),
+    "js?raw": import.meta.glob(["/src/**/*.js", "!/src/rollotest/**/*.*"], {
+      query: "?raw",
+      import: "default",
+    }),
+    json: import.meta.glob(["/src/**/*.json", "!/src/rollotest/**/*.*"], {
+      import: "default",
+    }),
+    "json?raw": import.meta.glob(["/src/**/*.json", "!/src/rollotest/**/*.*"], {
+      query: "?raw",
+      import: "default",
+    }),
   }
 );
 
@@ -239,8 +196,12 @@ NOTE
 - Code changes are NOT picked up by Vite's HMR, i.e., manual browser refresh 
   is required. */
 export const use = (() => {
+
+
   /* TODO
-  - Simplyfy Path. No longer used elsewhere. */
+  - Simplyfy Path and perhaps integrate here. No longer used elsewhere. */
+
+
 
   const use = async (specifier) => {
     if (typeof specifier === "function") {

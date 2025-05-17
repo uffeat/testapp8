@@ -1,7 +1,7 @@
-import origins from "@/rolloanvil/origins.json";
+import origins from "@/rollometa/__origins__.json";
 
 /* Util for Anvil-related stuff. */
-export const anvil = new (class Anvil {
+export const anvil = new (class {
   #URL;
   constructor() {
     if (import.meta.env.VERCEL_ENV === "production") {

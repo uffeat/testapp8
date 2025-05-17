@@ -48,10 +48,7 @@ export class Processor {
     if (this.#cache.has(key)) {
       return this.#cache.get(key);
     }
-    const processed = await this.#source.call(this, result, {
-      owner: this,
-      key,
-    });
+    const processed = await this.#source.call(this, result, { owner: this, key });
     this.#cache.set(key, processed);
     return processed;
   }
