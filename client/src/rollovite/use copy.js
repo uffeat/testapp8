@@ -6,7 +6,7 @@ Suite of utilities for importing assets.
 */
 
 /* Do NOT import files that uses 'use'! */
-import { Modules } from "@/rollovite/tools/modules.js";
+import { Modules } from "@/rollovite/modules.js";
 import { Path } from "@/rollovite/tools/_path.js";
 import { Processor } from "@/rollovite/tools/_processor.js";
 import { syntax } from "@/rollovite/tools/_syntax.js";

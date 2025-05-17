@@ -1,7 +1,7 @@
 /*
 rollovite/batch/local_modules
 */
-import { LocalModules } from "@/rollovite/tools/modules.js";
+import { LocalModules } from "@/rollovite/modules.js";
 
 
 await (async () => {

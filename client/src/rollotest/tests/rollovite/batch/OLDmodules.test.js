@@ -2,7 +2,7 @@
 rollovite/batch/modules
 */
 
-import { Modules } from "@/rollovite/tools/modules.js";
+import { Modules } from "@/rollovite/modules.js";
 
 /* Does base work without parent path? */
 export const dong = async (unit) => {

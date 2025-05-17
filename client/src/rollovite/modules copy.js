@@ -7,17 +7,14 @@ v.3.0
 import { Processor } from "@/rollovite/tools/_processor.js";
 import { syntax } from "@/rollovite/tools/_syntax.js";
 
-export class Base {
+class Base {
   #base;
   #processor = null;
   #proxy;
   #query;
   #type;
 
-  constructor(
-    map,
-    { base, processor, query = "", type = 'js' } = {}
-  ) {
+  constructor({ base, processor, query = "", type = "js" } = {}) {
     this.#base = base;
     if (processor) {
       this.processor(processor);
@@ -39,8 +36,6 @@ export class Base {
     return this.#base;
   }
 
-  
-
   /* Returns query. */
   get query() {
     return this.#query;
@@ -50,10 +45,6 @@ export class Base {
   get type() {
     return this.#type;
   }
-
-  
-
-  
 
   /* Combined getter/setter for 'processor':
   - If no arg, returns Processor instance, or null, if not set up.
@@ -136,7 +127,7 @@ export class Modules {
     if (this.type && !path.endsWith(`.${this.type}`)) {
       path = `${path}.${this.type}`;
     }
-    
+
     const load = this.#registry[path];
     const result = await load();
     const processor = this.processor();
@@ -150,7 +141,9 @@ export class Modules {
     return result;
   }
 
-  /* Returns paths, optionally filtered. */
+  /* Returns paths, optionally filtered. 
+  NOTE
+  - */
   paths(filter) {
     const paths = Object.keys(this.#registry);
     if (filter) {
@@ -256,7 +249,7 @@ export class LocalModules {
   /* Batch-imports by filter. */
   async batch(filter) {
     const imports = [];
-    const keys = this.paths(filter)
+    const keys = this.paths(filter);
     for (const key of keys) {
       imports.push(await this.import(key));
     }
@@ -272,7 +265,7 @@ export class LocalModules {
     if (this.query && key.endsWith(this.query)) {
       key = key.slice(0, -this.query.length);
     }
-     /* Allow paths without type */
+    /* Allow paths without type */
     if (!key.endsWith(`.${this.type}`)) {
       key = `${key}.${this.type}`;
     }
@@ -281,7 +274,7 @@ export class LocalModules {
       throw new Error(`Invalid path: ${key}`);
     }
 
-    const load = this.#registry.get(key)
+    const load = this.#registry.get(key);
     const result = await load();
 
     const processor = this.processor();
