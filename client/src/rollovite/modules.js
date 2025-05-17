@@ -9,13 +9,17 @@ import { syntax } from "@/rollovite/tools/_syntax.js";
 
 /* */
 class Base {
-  #_ = {
-    query: "",
-    type: "js",
-  };
+  #_ = {};
+ 
 
-  __new__({ processor, ...props } = {}) {
-    Object.assign(this.#_, props);
+  __new__({ base, get, processor, query = "", type = "js" }) {
+    this.#_.base = base;
+    this.#_.get = get;
+    this.#_.query = query;
+    this.#_.type = type;
+
+   
+
     if (processor) {
       this.processor(processor);
     }
@@ -40,7 +44,7 @@ class Base {
 
   /* Returns query. */
   get query() {
-    this.#_.query;
+    return this.#_.query;
   }
 
   /* Returns type. */
@@ -114,7 +118,7 @@ NOTE
 export class Modules extends Base {
   #registry;
 
-  constructor(map, { processor, query = "", type = "js" } = {}) {
+  constructor(map, { processor, query, type } = {}) {
     super();
     this.#registry = map;
     this.__new__({
@@ -149,10 +153,9 @@ NOTE
 - Intended for non-global scope
 - Use with base */
 export class LocalModules extends Base {
-  #paths = [];
   #registry = new Map();
 
-  constructor(map, { base, processor, query = "", type = "js" } = {}) {
+  constructor(map, { base, processor, query, type } = {}) {
     super();
 
     /* Check base */
@@ -166,10 +169,9 @@ export class LocalModules extends Base {
         throw new Error(`Invalid type for path: ${path}`);
       }
       const key = path.slice("/src".length + base.length);
-      this.#paths.push(key);
+
       this.#registry.set(key, load);
     }
-    Object.freeze(this.#paths);
 
     this.__new__({
       base,
@@ -208,6 +210,143 @@ export class LocalModules extends Base {
 
   /* Returns paths, optionally filtered. */
   paths(filter) {
-    return filter ? this.#paths.filter(filter) : this.#paths;
+    const paths = Array.from(this.#registry.keys());
+    return filter ? paths.filter(filter) : paths;
   }
 }
+
+/* */
+export const modules = new (class {
+  #processors;
+  #registry = new Map();
+  constructor(...spec) {
+    const owner = this;
+
+    this.#processors = new (class {
+      #registry = new Map();
+
+      add(spec) {
+        Object.entries(spec).forEach(([key, source]) => {
+          /* Enforce no-duplication */
+          if (this.#registry.has(key)) {
+            throw new Error(`Duplicate key: ${key}`);
+          }
+          this.#registry.set(key, new Processor(owner, source));
+        });
+        return this;
+      }
+
+      clear() {
+        this.#registry.clear();
+        return this;
+      }
+
+      get(key) {
+        return this.#registry.get(key);
+      }
+
+      has(key) {
+        return this.#registry.has(key);
+      }
+
+      keys() {
+        return this.#registry.keys();
+      }
+
+      remove(key) {
+        this.#registry.delete(key);
+        return this;
+      }
+    })();
+
+    spec.forEach((modules) => {
+      const key = modules.query
+        ? `${modules.type}${modules.query}`
+        : modules.type;
+      this.#registry.set(key, modules);
+    });
+  }
+
+  get processors() {
+    return this.#processors;
+  }
+
+  async import(path) {
+    let result;
+    const key = path.split(".").reverse()[0];
+    if (path.startsWith("@/")) {
+      const modules = this.#registry.get(key);
+      if (!modules) {
+        throw new Error(`Invalid key: ${key}`);
+      }
+      result = await modules.import(path);
+    } else {
+      /* public */
+      // TODO
+    }
+    /* Process */
+    if (this.processors.has(key)) {
+      const processor = this.processors.get(key);
+      const processed = await processor.call(this, path, result);
+      if (processed !== undefined) {
+        return processed;
+      }
+    }
+    return result;
+  }
+})(
+  new Modules(import.meta.glob(["/src/**/*.css", "!/src/rollotest/**/*.*"]), {
+    type: "css",
+  }),
+  new Modules(
+    import.meta.glob(["/src/**/*.css", "!/src/rollotest/**/*.*"], {
+      query: "?raw",
+      import: "default",
+    }),
+    {
+      query: "?raw",
+      type: "css",
+    }
+  ),
+  new Modules(
+    import.meta.glob(["/src/**/*.html", "!/src/rollotest/**/*.*"], {
+      query: "?raw",
+      import: "default",
+    }),
+    {
+      query: "?raw",
+      type: "html",
+    }
+  ),
+  new Modules(import.meta.glob(["/src/**/*.js", "!/src/rollotest/**/*.*"]), {
+    type: "js",
+  }),
+  new Modules(
+    import.meta.glob(["/src/**/*.js", "!/src/rollotest/**/*.*"], {
+      query: "?raw",
+      import: "default",
+    }),
+    {
+      query: "?raw",
+      type: "js",
+    }
+  ),
+  new Modules(
+    import.meta.glob(["/src/**/*.json", "!/src/rollotest/**/*.*"], {
+      import: "default",
+    }),
+    {
+      type: "json",
+    }
+  ),
+  new Modules(
+    import.meta.glob(["/src/**/*.json", "!/src/rollotest/**/*.*"], {
+      query: "?raw",
+      import: "default",
+    }),
+    {
+      query: "?raw",
+      type: "json",
+    }
+  )
+);

@@ -3,32 +3,14 @@
 
 console.info("Vite environment:", import.meta.env.MODE);
 
-import { LocalModules } from "@/rollovite/modules.js";
-
-
-import { Modules } from "@/rollovite/modules.js";
+import { modules } from "@/rollovite/modules.js";
 
 await (async () => {
-  const modules = new Modules(import.meta.glob("/src/test/**/*.js"), {
-    type: "js",
-  });
+  
   console.log("foo:", (await modules.import("@/test/foo/foo.js")).foo);
-  console.log("foo:", (await modules.$.test.foo.foo.js).foo);
+ 
 })();
 
-
-
-
-await (async () => {
-  const modules = new LocalModules(import.meta.glob("/src/test/foo/**/*.js"), {
-    base: "@/test/foo",
-    type: "js",
-  });
-  console.log("foo:", (await modules.import("foo")).foo);
-  console.log("foo:", (await modules.import("foo.js")).foo);
-  console.log("foo:", (await modules.$.foo.js).foo);
-  console.log("foo:", (await modules.$.foo[":js"]).foo);
-})();
 
 /* Tests */
 await (async () => {
