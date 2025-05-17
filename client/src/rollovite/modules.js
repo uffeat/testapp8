@@ -4,21 +4,19 @@ import { Modules } from "@/rollovite/tools/modules.js";
 v.3.0
 */
 
+import { assets } from "@/rollovite/tools/assets";
 import { Processor } from "@/rollovite/tools/_processor.js";
 import { syntax } from "@/rollovite/tools/_syntax.js";
 
 /* */
 class Base {
   #_ = {};
- 
 
   __new__({ base, get, processor, query = "", type = "js" }) {
     this.#_.base = base;
     this.#_.get = get;
     this.#_.query = query;
     this.#_.type = type;
-
-   
 
     if (processor) {
       this.processor(processor);
@@ -218,7 +216,9 @@ export class LocalModules extends Base {
 /* */
 export const modules = new (class {
   #processors;
+  #public;
   #registry = new Map();
+  #src;
   constructor(...spec) {
     const owner = this;
 
@@ -263,12 +263,33 @@ export const modules = new (class {
       const key = modules.query
         ? `${modules.type}${modules.query}`
         : modules.type;
+      /* Enforce no-duplication */
+      if (this.#registry.has(key)) {
+        throw new Error(`Duplicate key: ${key}`);
+      }
       this.#registry.set(key, modules);
     });
+
+    //
+    //
+    this.#public = syntax("/", this, (part) =>
+      ["ccs", "ccs?raw", "js", "js?raw", "json", "json?raw", "template"].includes(part)
+    ); 
+    //
+    //
+    this.#src = syntax("@", this, (part) => this.#registry.has(part));
   }
 
   get processors() {
     return this.#processors;
+  }
+
+  get public() {
+    return this.#public;
+  }
+
+  get src() {
+    return this.#src;
   }
 
   async import(path) {
@@ -282,7 +303,7 @@ export const modules = new (class {
       result = await modules.import(path);
     } else {
       /* public */
-      // TODO
+      result = await assets.import(path);
     }
     /* Process */
     if (this.processors.has(key)) {

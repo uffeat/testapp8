@@ -1,5 +1,14 @@
+import manifest from "@/rollometa/__manifest__.json";
 import { Processor } from "@/rollovite/tools/_processor.js";
 import { syntax } from "@/rollovite/tools/_syntax.js";
+
+const __paths__ = Object.freeze(new Set(manifest));
+
+//console.log('__paths__:', __paths__)////
+
+const __types__ = Object.freeze(
+  new Set(manifest.map((path) => path.split(".").reverse()[0]))
+);
 
 /* Utility for importing public files. 
 NOTE
@@ -7,19 +16,15 @@ NOTE
 export const assets = new (class {
   #fetch;
   #import;
-
+  #paths
   #proxy;
 
   constructor() {
     const owner = this;
 
-    //
-    //
-    this.#proxy = syntax("/", this, (part) =>
-      new Set(["css", "js", "json", "template"]).has(part)
-    );
-    //
-    //
+    this.#paths = Object.freeze(Array.from(__paths__))
+
+    this.#proxy = syntax("/", this, (part) => __types__.has(part));
 
     this.#fetch = new (class {
       #cache = new Map();
@@ -63,13 +68,34 @@ export const assets = new (class {
     return this.#proxy;
   }
 
+  /* Returns paths. */
+  get paths() {
+    return this.#paths;
+  }
+
+  /* Batch-imports by filter. */
+  async batch(filter) {
+    const imports = [];
+    const paths = Array.from(__paths__).filter(filter);
+    for (const path of paths) {
+      imports.push(await this.import(path));
+    }
+    return imports;
+  }
+
   async import(path) {
+    if (typeof path === "function") {
+      return await this.batch(path);
+    }
     const raw = (() => {
       if (path.endsWith("?raw")) {
         path = path.slice(0, -"?raw".length);
         return true;
       }
     })();
+    if (!__paths__.has(path)) {
+      throw new Error(`Invalid path: ${path}`);
+    }
 
     const type = path.split(".").reverse()[0];
     if (!raw && type === "js") {
@@ -77,7 +103,10 @@ export const assets = new (class {
     }
 
     /* */
-    path = `${import.meta.env.BASE_URL}${path.slice("/".length)}`;
+    path = `${import.meta.env.BASE_URL}${path.slice("/".length)}`
+
+
+
 
     if (!raw && type === "css") {
       /* Mimic Vite: css becomes global (albeit via link) */
@@ -97,21 +126,25 @@ export const assets = new (class {
         await promise;
       }
       return link;
+      
+      
+
+     
     }
     const result = await this.#fetch.get(path);
     if (!raw && type === "json") {
-      return JSON.parse(result);
+      return JSON.parse(result)
     }
-    return result;
+    return result
   }
 })();
 
-export class LocalAssets {
+export class Assets {
   #base;
   #processor = null;
   #proxy;
   #query;
-
+  #registry;
   #type;
 
   constructor({ base = "", processor, query = "", type = "js" } = {}) {
@@ -124,6 +157,24 @@ export class LocalAssets {
     }
     this.#query = query;
     this.#type = type;
+
+    this.#registry = Array.from(__paths__).filter(
+      (path) => !path.includes(".test.")
+    );
+
+    if (type) {
+      this.#registry = this.#registry.filter((path) =>
+        path.endsWith(`.${type}`)
+      );
+    }
+
+    if (base) {
+      this.#registry = this.#registry
+        .filter((path) => path.startsWith(base))
+        .map((path) => path.slice(base.length + 1));
+    }
+
+    Object.freeze(this.#registry);
   }
 
   /* Returns import with Python-like-syntax. */
@@ -136,6 +187,11 @@ export class LocalAssets {
     return this.#base;
   }
 
+  /* Returns paths. */
+  get paths() {
+    return this.#registry;
+  }
+
   /* Returns query. */
   get query() {
     return this.#query;
@@ -146,23 +202,43 @@ export class LocalAssets {
     return this.#type;
   }
 
+  /* Batch-imports by filter. */
+  async batch(filter) {
+    const imports = [];
+
+    const paths = this.#registry.filter(filter);
+
+    for (const path of paths) {
+      imports.push(await this.import(path));
+    }
+    return imports;
+  }
+
   /* Returns import. */
   async import(path) {
+    if (typeof path === "function") {
+      return await this.batch(path);
+    }
     if (this.type && !path.endsWith(`.${this.type}`)) {
       path = `${path}.${this.type}`;
     }
 
+    if (!this.paths.includes(path)) {
+      throw new Error(`Invalid path: ${path}`);
+    }
+
+    /*
     if (this.type) {
       const type = path.split(".").reverse()[0];
       if (this.type !== type) {
-        throw new Error(`Invalid type for path: ${path}`);
+        throw new Error(`Invalid type for path: ${path}`)
       }
     }
+      */
 
     const result = await assets.import(`${this.base}/${path}${this.query}`);
 
-    /* Process */
-    const processor = this.processor();
+    const processor = this.processor.get();
     if (processor) {
       const processed = await processor.call(this, path, result);
       /* Ignore undefined */
