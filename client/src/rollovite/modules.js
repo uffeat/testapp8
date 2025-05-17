@@ -8,13 +8,17 @@ import { assets } from "@/rollovite/tools/assets";
 import { Processor } from "@/rollovite/tools/_processor.js";
 import { syntax } from "@/rollovite/tools/_syntax.js";
 
-/* */
+/*
+NOTE
+- Provides code reuse and also similar API for Modules and LocalModules.  */
 class Base {
   #_ = {};
 
   __new__({ base, get, processor, query = "", type = "js" }) {
     this.#_.base = base;
     this.#_.get = get;
+    /* NOTE
+    - Critial for aggregators that no query is specified as an empty string! */
     this.#_.query = query;
     this.#_.type = type;
 
@@ -52,7 +56,9 @@ class Base {
 
   /* Returns import. */
   async import(path) {
-    /* Remove query */
+    /* Remove query 
+    NOTE
+    - Critial for aggregators that import can be called with query! */
     if (this.query && path.endsWith(this.query)) {
       path = path.slice(0, -this.query.length);
     }
@@ -141,7 +147,9 @@ export class Modules extends Base {
   - Can be used for batch imports.
   - Consuming code should cache, if performance-critical. */
   paths(filter) {
-    const paths = Object.keys(this.#registry);
+    const paths = Object.keys(this.#registry).map(
+      (path) => `@/${path.slice("/src/".length)}${this.query ? this.query : ""}`
+    );
     return filter ? paths.filter(filter) : paths;
   }
 }
@@ -273,8 +281,16 @@ export const modules = new (class {
     //
     //
     this.#public = syntax("/", this, (part) =>
-      ["ccs", "ccs?raw", "js", "js?raw", "json", "json?raw", "template"].includes(part)
-    ); 
+      [
+        "ccs",
+        "ccs?raw",
+        "js",
+        "js?raw",
+        "json",
+        "json?raw",
+        "template",
+      ].includes(part)
+    );
     //
     //
     this.#src = syntax("@", this, (part) => this.#registry.has(part));
@@ -315,6 +331,32 @@ export const modules = new (class {
     }
     return result;
   }
+
+  /* 
+  function -> filter acrocess all paths
+  undefined -> all paths */
+  paths(arg) {
+    if (arg === undefined || typeof arg === "function") {
+      const filter = arg;
+      const result = [];
+      this.#registry
+        .values()
+        .forEach((modules) => result.push(...modules.paths(filter)));
+      return result;
+    }
+    if (typeof arg === 'string') {
+      const key = arg
+      const modules = this.#registry.get(key);
+      if (!modules) {
+        throw new Error(`Invalid key: ${key}`);
+      }
+      return modules.paths()
+    }
+    if (Array.isArray(arg)) {
+      const keys = arg
+      return keys.flatMap((key) => this.paths(key))
+    }
+  }
 })(
   new Modules(import.meta.glob(["/src/**/*.css", "!/src/rollotest/**/*.*"]), {
     type: "css",
@@ -335,7 +377,7 @@ export const modules = new (class {
       import: "default",
     }),
     {
-      query: "?raw",
+      /* NOTE Do NOT register query! */
       type: "html",
     }
   ),

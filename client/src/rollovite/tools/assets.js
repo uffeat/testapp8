@@ -1,5 +1,9 @@
+import __types__ from "@/rollometa/public/__types__.json";
 import { Processor } from "@/rollovite/tools/_processor.js";
 import { syntax } from "@/rollovite/tools/_syntax.js";
+
+/* TODO 
+- Use Base OR only expose via 'modules' */
 
 /* Utility for importing public files. 
 NOTE
@@ -13,13 +17,7 @@ export const assets = new (class {
   constructor() {
     const owner = this;
 
-    //
-    //
-    this.#proxy = syntax("/", this, (part) =>
-      new Set(["css", "js", "json", "template"]).has(part)
-    );
-    //
-    //
+    this.#proxy = syntax("/", this, (part) => new Set(__types__).has(part));
 
     this.#fetch = new (class {
       #cache = new Map();
@@ -104,7 +102,35 @@ export const assets = new (class {
     }
     return result;
   }
+
+  /*
+  MOTE
+  -  */
+  async paths(arg) {
+    const paths = await this.import("/__manifest__.json");
+
+    if (typeof arg === "function") {
+      const filter = arg;
+      return paths.filter(filter);
+    }
+    if (typeof arg === 'string') {
+      const type = arg
+      // TODO
+      
+    }
+
+    if (Array.isArray(arg)) {
+      const types = arg
+      // TODO
+
+    }
+
+    return paths;
+  }
 })();
+
+/* TODO 
+- Use Base - or go for factories! */
 
 export class LocalAssets {
   #base;

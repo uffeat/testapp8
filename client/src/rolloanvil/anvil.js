@@ -1,4 +1,4 @@
-import origins from "@/rollometa/__origins__.json";
+import origins from "@/rollometa/rolloanvil/__origins__.json";
 
 /* Util for Anvil-related stuff. */
 export const anvil = new (class {

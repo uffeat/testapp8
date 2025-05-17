@@ -3,19 +3,25 @@
 
 console.info("Vite environment:", import.meta.env.MODE);
 
-import { modules } from "@/rollovite/modules.js";
+import { assets } from "@/rollovite/tools/assets";
 
+/* */
 await (async () => {
-  console.log("foo:", (await modules.import("@/test/foo/foo.js")).foo);
-  console.log("foo:", (await modules.src.test.foo.foo.js).foo);
+  console.log("foo:", (await assets.import("/test/foo/foo.js")).foo);
+  console.log("foo:", (await assets.$.test.foo.foo.js).foo);
 })();
 
+/* */
 await (async () => {
-  console.log("foo:", (await modules.import("/test/foo/foo.js")).foo);
-  console.log("foo:", (await modules.public.test.foo.foo.js).foo);
+  console.log("foo:", await assets.import("/test/foo/foo.js?raw"));
+  console.log("foo:", await assets.$.test.foo.foo[':js?raw']);
 })();
 
-
+/* */
+await (async () => {
+  console.log("paths:", await assets.paths());
+  
+})();
 
 /* Tests */
 await (async () => {

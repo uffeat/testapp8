@@ -39,7 +39,7 @@ def main():
     content = json.dumps(paths)
 
     write("public/__manifest__.json", content)
-    write("src/rollometa/__manifest__.json", content)
+    
 
     message = f"Created manifest with {len(paths)} paths."
     print(message)
