@@ -5,7 +5,6 @@ v.1.0
 */
 
 import __types__ from "@/rollometa/public/__types__.json";
-
 import { Base } from "@/rollovite/tools/modules.js";
 import { Processors } from "@/rollovite/tools/_processors.js";
 import { pub } from "@/rollovite/tools/_pub.js";
@@ -13,8 +12,12 @@ import { syntax } from "@/rollovite/tools/_syntax.js";
 
 /* Controller for Vite import maps.
 NOTE
-- Intended for global scope.
-- Zero registries beyond import map, therefore performant import. */
+- Scope:
+  - Global
+  - Multiple file types
+  - Raw/non-raw
+  - Multiple key-specific processors.
+- Import maps are not copied, therefore performant construction. */
 export class Modules extends Base {
   #registry;
 
@@ -22,8 +25,9 @@ export class Modules extends Base {
     super();
     this.#registry = map;
     /* NOTE
-    -  */
-    this.__new__({
+    -  Pass kwargs into 'super.__new__' (rather than 'super') to enable config 
+       of parent with own 'this' members. */
+    super.__new__({
       /* Returns load function. */
       get: (path) => {
         const key = `/src/${path.slice("@/".length)}`;
@@ -41,7 +45,8 @@ export class Modules extends Base {
   }
 }
 
-/* Consider moving to app component */
+/* TODO
+- Consider moving to app component */
 
 /* */
 export const app = new (class {
@@ -49,9 +54,10 @@ export const app = new (class {
   #public;
   #registry = new Map();
   #src;
-  constructor(...spec) {
-    this.#processors = new Processors(this);
-
+  constructor(processors, ...spec) {
+    /* Build processors */
+    this.#processors = new Processors(this, processors);
+    /* Build modules registry */
     spec.forEach((modules) => {
       /* Enforce no-duplication */
       if (this.#registry.has(modules.key)) {
@@ -59,7 +65,6 @@ export const app = new (class {
       }
       this.#registry.set(modules.key, modules);
     });
-
     /* Enable Python-like import syntax */
     (() => {
       const types = new Set(__types__);
@@ -68,19 +73,22 @@ export const app = new (class {
     this.#src = syntax("@", this, (part) => this.#registry.has(part));
   }
 
+  /* Return processors controller. */
   get processors() {
     return this.#processors;
   }
 
+  /* Returns import from public (subject to any processing) with Python-like 
+  syntax. */
   get public() {
     return this.#public;
   }
 
+  /* Returns import from src (subject to any processing) with Python-like 
+  syntax. */
   get src() {
     return this.#src;
   }
-
-  
 
   /* Returns import from src or public, subject to any processing. */
   async import(path) {
@@ -106,7 +114,14 @@ export const app = new (class {
     }
     return result;
   }
+
+  importer(base) {
+    return async (path) => await this.import(`${base}/${path}`);
+  }
 })(
+  /* Define processors */
+  {},
+  /* Define modules */
   new Modules(import.meta.glob(["/src/**/*.css", "!/src/rollotest/**/*.*"]), {
     type: "css",
   }),
@@ -162,3 +177,29 @@ export const app = new (class {
     }
   )
 );
+
+const use = async (path) => await app.import(path);
+
+Object.defineProperty(use, "src", {
+  configurable: false,
+  enumerable: false,
+  get: () => {
+    return app.src;
+  },
+});
+
+Object.defineProperty(use, "public", {
+  configurable: false,
+  enumerable: false,
+  get: () => {
+    return app.public;
+  },
+});
+
+/* Make 'use' global */
+Object.defineProperty(window, "use", {
+  configurable: false,
+  enumerable: true,
+  writable: false,
+  value: use,
+});

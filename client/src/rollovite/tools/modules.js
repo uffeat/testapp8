@@ -28,18 +28,9 @@ export class Base {
       const source = processor;
       this.#_.processor = new Processor(this, source);
     }
-    this.#_.$ = syntax(
-      this.base ? "" : "@",
-      this,
-      (part) => part === this.type
-    );
+
     /* Prevent __new__ from being called again */
     delete this.__new__;
-  }
-
-  /* Returns import with Python-like-syntax. */
-  get $() {
-    return this.#_.$;
   }
 
   /* Returns base. */
@@ -105,14 +96,17 @@ NOTE
   - single base dir
   - single file type
   - single query (optional)
-  - single procesor (optional)
+  - single processor (optional)
 - Import map filtering beyod the inclusion/exclusion syntax of 'import.meta.glob'.
 - Provides paths introspection.
 - Supports batch import. 
-- Can be used for non-Vite imports maps, i.e., for objects with the same shape.
-- Rollo import engine member. */
+- Alternative Python-like import syntax.
+- Can be used for non-Vite imports maps, i.e., for objects with the same shape. 
+*/
 export class Modules extends Base {
-  #registry = new Map();
+  #_ = {
+    registry: new Map(),
+  };
 
   constructor(map, { base, filter, processor, query, type } = {}) {
     super();
@@ -120,6 +114,8 @@ export class Modules extends Base {
     if (!base) {
       throw new Error(`'base' not provided`);
     }
+    /* Enable Python-like import syntax */
+    this.#_.$ = syntax("", this, (part) => part === this.type);
 
     /* Build registry from map */
     Object.entries(map).forEach(([path, load]) => {
@@ -129,7 +125,7 @@ export class Modules extends Base {
         if (type && !path.endsWith(`.${type}`)) {
           throw new Error(`Invalid type for path: ${path}`);
         }
-        this.#registry.set(key, load);
+        this.#_.registry.set(key, load);
       }
     });
 
@@ -140,7 +136,7 @@ export class Modules extends Base {
       base,
       /* Returns load function. */
       get: (path) => {
-        const load = this.#registry.get(path);
+        const load = this.#_.registry.get(path);
         /* Error, if invalid path */
         if (!load) {
           throw new Error(`Invalid path: ${path}`);
@@ -151,6 +147,11 @@ export class Modules extends Base {
       query,
       type,
     });
+  }
+
+  /* Returns import with Python-like-syntax. */
+  get $() {
+    return this.#_.$;
   }
 
   /* Batch-imports, optionally by filter. */
@@ -166,6 +167,6 @@ export class Modules extends Base {
   NOTE
   - */
   paths() {
-    return Array.from(this.#registry.keys());
+    return Array.from(this.#_.registry.keys());
   }
 }
