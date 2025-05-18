@@ -5,7 +5,8 @@ v.1.0
 */
 
 import __types__ from "@/rollometa/public/__types__.json";
-import { Base } from "@/rollovite/tools/_base.js";
+
+import { Base } from "@/rollovite/tools/modules.js";
 import { Processors } from "@/rollovite/tools/_processors.js";
 import { pub } from "@/rollovite/tools/_pub.js";
 import { syntax } from "@/rollovite/tools/_syntax.js";
@@ -49,26 +50,21 @@ export const app = new (class {
   #registry = new Map();
   #src;
   constructor(...spec) {
-    
-
     this.#processors = new Processors(this);
 
     spec.forEach((modules) => {
-      const key = modules.query
-        ? `${modules.type}${modules.query}`
-        : modules.type;
       /* Enforce no-duplication */
-      if (this.#registry.has(key)) {
-        throw new Error(`Duplicate key: ${key}`);
+      if (this.#registry.has(modules.key)) {
+        throw new Error(`Duplicate key: ${modules.key}`);
       }
-      this.#registry.set(key, modules);
+      this.#registry.set(modules.key, modules);
     });
 
+    /* Enable Python-like import syntax */
     (() => {
       const types = new Set(__types__);
       this.#public = syntax("/", this, (part) => types.has(part));
     })();
-
     this.#src = syntax("@", this, (part) => this.#registry.has(part));
   }
 
@@ -84,21 +80,9 @@ export const app = new (class {
     return this.#src;
   }
 
-  /* 
-  NOTE
-  -  */
-  async batch(filter, key) {
-    const imports = [];
-    const paths = this.paths(key).filter(filter);
-    for (const path of paths) {
-      imports.push(await this.import(path));
-    }
-    return imports;
-  }
+  
 
-  /* Returns import from src or public, subject to any processing.
-  NOTE
-  -  */
+  /* Returns import from src or public, subject to any processing. */
   async import(path) {
     let result;
     const key = path.split(".").reverse()[0];
@@ -122,8 +106,6 @@ export const app = new (class {
     }
     return result;
   }
-
-  
 })(
   new Modules(import.meta.glob(["/src/**/*.css", "!/src/rollotest/**/*.*"]), {
     type: "css",

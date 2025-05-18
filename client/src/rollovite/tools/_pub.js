@@ -6,7 +6,7 @@ v.1.0
 
 /* Utility for importing public files.
 NOTE
-- Part of the Rollo import engine. 
+- Rollo import engine member. 
 - Can, but should typically not, be used stand-alone. */
 export const pub = new (class {
   #fetch;

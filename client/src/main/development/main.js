@@ -3,46 +3,42 @@
 
 console.info("Vite environment:", import.meta.env.MODE);
 
-import { app } from "@/rollovite/app.js";
+import { Modules } from "@/rollovite/tools/modules.js";
 
-/* src js */
 await (async () => {
-  console.log("foo:", (await app.import("@/test/foo/foo.js")).foo);
-  console.log("foo:", (await app.src.test.foo.foo.js).foo);
+  const modules = new Modules(import.meta.glob("/src/test/foo/**/*.js"), {
+    base: "@/test/foo",
+    type: "js",
+  });
+  console.log("foo:", (await modules.import("foo")).foo);
+  console.log("foo:", (await modules.import("foo.js")).foo);
+  console.log("foo:", (await modules.$.foo.js).foo);
+  console.log("foo:", (await modules.$.foo[":js"]).foo);
 })();
 
-/* src raw js */
 await (async () => {
-  console.log("foo:", await app.import("@/test/foo/foo.js?raw"));
-  console.log("foo:", await app.src.test.foo.foo[':js?raw']);
+  const modules = new Modules(import.meta.glob("/src/test/**/*.js"), {
+    base: "@/test",
+
+    type: "js",
+  });
+  console.log("foo:", (await modules.import("foo/foo")).foo);
+  console.log("foo:", (await modules.import("foo/foo.js")).foo);
+  console.log("foo:", (await modules.$.foo.foo.js).foo);
+  console.log("foo:", (await modules.$.foo.foo[":js"]).foo);
 })();
 
-/* public js */
 await (async () => {
-  console.log("foo:", (await app.import("/test/foo/foo.js")).foo);
-  console.log("foo:", (await app.public.test.foo.foo.js).foo);
+  const modules = new Modules(
+    import.meta.glob("/src/test/**/*.html", {
+      query: "?raw",
+      import: "default",
+    }),
+    { base: "@/test", query: "?raw", type: "html" }
+  );
+  console.log("html:", await modules.import("foo/foo"));
+  console.log("html:", await modules.import("foo/foo.html"));
 })();
-
-/* public raw js */
-await (async () => {
-  console.log("foo:", await app.import("/test/foo/foo.js?raw"));
-  console.log("foo:", await app.public.test.foo.foo[':js?raw']);
-})();
-
-/* src html */
-await (async () => {
-  console.log("html:", await app.import("@/test/foo/foo.html"));
-  console.log("html:", await app.src.test.foo.foo.html);
-})();
-
-/* public template */
-await (async () => {
-  console.log("template:", await app.import("/test/foo/foo.template"));
-  console.log("template:", await app.public.test.foo.foo.template);
-})();
-
-
-
 
 /* Tests */
 await (async () => {
