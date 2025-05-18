@@ -1,11 +1,11 @@
 /*
 rollovite/batch/local_modules
 */
-import { LocalModules } from "@/rollovite/modules.js";
+import { Modules } from "@/rollovite/tools/modules.js";
 
 
 await (async () => {
-  const modules = new LocalModules(import.meta.glob("/src/test/foo/**/*.js"), {
+  const modules = new Modules(import.meta.glob("/src/test/foo/**/*.js"), {
     base: "@/test/foo",
     type: "js",
   });
@@ -16,7 +16,7 @@ await (async () => {
 })();
 
 await (async () => {
-  const modules = new LocalModules(import.meta.glob("/src/test/**/*.js"), {
+  const modules = new Modules(import.meta.glob("/src/test/**/*.js"), {
     base: "@/test",
     local: true,
     type: "js",
@@ -30,7 +30,7 @@ await (async () => {
 
 
 await (async () => {
-  const modules = new LocalModules(
+  const modules = new Modules(
     import.meta.glob("/src/test/**/*.html", {
       query: "?raw",
       import: "default",

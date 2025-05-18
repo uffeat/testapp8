@@ -1,4 +1,4 @@
-import { Modules } from "@/rollovite/modules.js";
+import { Modules } from "@/rollovite/tools/modules.js";
 
 export const test = new Modules(
   "js",
