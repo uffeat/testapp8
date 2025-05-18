@@ -54,8 +54,21 @@ class Base {
     return this.#_.type;
   }
 
+  /* Batch-imports by filter. */
+  async batch(filter) {
+    const imports = [];
+    const paths = this.paths().filter(filter);
+    for (const path of paths) {
+      imports.push(await this.import(path));
+    }
+    return imports;
+  }
+
   /* Returns import. */
   async import(path) {
+    if (typeof path === "function") {
+      return await this.batch(path);
+    }
     /* Remove query 
     NOTE
     - Critial for aggregators that import can be called with query! */
@@ -142,15 +155,14 @@ export class Modules extends Base {
     });
   }
 
-  /* Returns paths, optionally filtered. 
+  /* Returns paths. 
   NOTE
   - Can be used for batch imports.
   - Consuming code should cache, if performance-critical. */
-  paths(filter) {
-    const paths = Object.keys(this.#registry).map(
+  paths() {
+    return Object.keys(this.#registry).map(
       (path) => `@/${path.slice("/src/".length)}${this.query ? this.query : ""}`
     );
-    return filter ? paths.filter(filter) : paths;
   }
 }
 
@@ -196,28 +208,13 @@ export class LocalModules extends Base {
     });
   }
 
-  /* Batch-imports by filter. */
-  async batch(filter) {
-    const imports = [];
-    const keys = this.paths(filter);
-    for (const key of keys) {
-      imports.push(await this.import(key));
-    }
-    return imports;
-  }
+  
 
-  /* Returns import. */
-  async import(path) {
-    if (typeof path === "function") {
-      return await this.batch(path);
-    }
-    return await super.import(path);
-  }
+  
 
-  /* Returns paths, optionally filtered. */
-  paths(filter) {
-    const paths = Array.from(this.#registry.keys());
-    return filter ? paths.filter(filter) : paths;
+  /* Returns paths. */
+  paths() {
+    return Array.from(this.#registry.keys());
   }
 }
 
@@ -308,6 +305,17 @@ export const modules = new (class {
     return this.#src;
   }
 
+  async batch(filter, key) {
+    const imports = [];
+    const paths = this.paths(key).filter(filter)
+    for (const path of paths) {
+      imports.push(await this.import(path));
+    }
+    return imports;
+    
+
+  }
+
   async import(path) {
     let result;
     const key = path.split(".").reverse()[0];
@@ -333,28 +341,28 @@ export const modules = new (class {
   }
 
   /* 
-  function -> filter acrocess all paths
-  undefined -> all paths */
-  paths(arg) {
-    if (arg === undefined || typeof arg === "function") {
-      const filter = arg;
+
+  undefined -> all paths
+  NOTE
+  - Only applies to src files */
+  paths(key) {
+    if (key === undefined) {
       const result = [];
       this.#registry
         .values()
-        .forEach((modules) => result.push(...modules.paths(filter)));
+        .forEach((modules) => result.push(...modules.paths()));
       return result;
     }
-    if (typeof arg === 'string') {
-      const key = arg
+    if (typeof key === "string") {
       const modules = this.#registry.get(key);
       if (!modules) {
         throw new Error(`Invalid key: ${key}`);
       }
-      return modules.paths()
+      return modules.paths();
     }
-    if (Array.isArray(arg)) {
-      const keys = arg
-      return keys.flatMap((key) => this.paths(key))
+    if (Array.isArray(key)) {
+      const keys = key;
+      return keys.flatMap((key) => this.paths(key));
     }
   }
 })(

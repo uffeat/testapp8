@@ -43,7 +43,7 @@ export const assets = new (class {
 
     this.#import = new (class {
       #cache = new Map();
-      async get(path) {
+      async get(path, { cache = true } = {}) {
         let module = this.#cache.get(path);
         if (module) {
           return module;
@@ -104,25 +104,26 @@ export const assets = new (class {
   }
 
   /*
-  MOTE
+  NOTE
   -  */
   async paths(arg) {
-    const paths = await this.import("/__manifest__.json");
+    const paths = await manifest();
 
     if (typeof arg === "function") {
       const filter = arg;
       return paths.filter(filter);
     }
-    if (typeof arg === 'string') {
-      const type = arg
-      // TODO
-      
+    if (typeof arg === "string") {
+      const type = arg;
+      return await this.paths((path) => path.endsWith(`.${type}`));
     }
 
     if (Array.isArray(arg)) {
-      const types = arg
-      // TODO
-
+      const types = arg;
+      return await this.paths((path) => {
+        const type = path.split(".").reverse()[0];
+        return path.endsWith(`.${type}`);
+      });
     }
 
     return paths;
@@ -200,18 +201,13 @@ export class LocalAssets {
     return result;
   }
 
-  /* Combined getter/setter for 'processor':
-  - If no arg, returns Processor instance, or null, if not set up.
-  - If source, creates, sets and returns Processor instance from function.
-  - If null arg, removes processor.
-  NOTE
-  - 'source' should be a (optionally) async function with the signature:
-      (this, result, { owner: this, key })
-    Can also be an object with a 'call' method or a Processor instance.
-  - Supports (exposed) caching.
-  - Supports highly dynamic patterns. 
-  - undefined processor results are ignored as a means to selective 
-    processing. */
+  
+  async paths(arg) {
+    throw new Error(`Not yet implemented.`)
+  }
+
+
+  /* TODO Reuse from Base */
   processor(source) {
     if (source) {
       if (source instanceof Processor) {
@@ -231,3 +227,12 @@ export class LocalAssets {
     return this.#processor;
   }
 }
+
+/* */
+export async function manifest() {
+  const path = `${import.meta.env.BASE_URL}__manifest__.json`;
+  const response = await fetch(path);
+  return await response.json();
+}
+
+//console.log('manifest:', await manifest())
