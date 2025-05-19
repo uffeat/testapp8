@@ -3,27 +3,33 @@ import { server } from "@/rolloanvil/server.js";
 import { Modules } from "@/rollovite/modules.js";
 import { map } from "@/rollo/tools/object/map.js";
 
-const src = new Modules(
-  import.meta.glob("/src/main/development/ssg/src/**/*.md", {
+/* TODO
+- Experiment markdown features, incl.
+  - images
+  - links
+*/
+
+const modules = new Modules(
+  import.meta.glob("/src/main/development/ssg/md/src/**/*.md", {
     query: "?raw",
     import: "default",
   }),
   {
-    base: "@/main/development/ssg/src",
+    base: "@/main/development/ssg/md/src",
     processor: (result) => marked.parse(result).trim(),
     type: "md",
   }
 );
 
-const data = map(await src.batch(), ([path, content]) => [
+const data = map(await modules.batch(), ([path, content]) => [
   path.replace(".md", ".html"),
   content,
 ]);
 
 try {
-  const result = await server.ssg(data);
+  const result = await server.md(data);
   //console.log("data:", data); ////
   console.log("result:", result);
 } catch {
-  console.warn("'ssg' endpoint could not be reached");
+  console.warn("Endpoint could not be reached");
 }

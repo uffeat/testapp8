@@ -3,7 +3,7 @@ import { test } from "@/rollotest/test.js";
 
 console.info("Vite environment:", import.meta.env.MODE);
 
-import "@/main/development/ssg/ssg.js"
+import "@/main/development/ssg/md/md.js"
 
 
 /* Tests */
