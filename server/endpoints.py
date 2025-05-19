@@ -11,7 +11,7 @@ def main():
     - Relaxes cors restrictions
     - Enables 'peek'."""
 
-    wait_forever = connect()
+    keep_connection = connect()
 
     @callable_
     def cors():
@@ -21,7 +21,7 @@ def main():
     def peek(*args):
         print(*args)
 
-    wait_forever()
+    keep_connection()
 
 
 if __name__ == "__main__":

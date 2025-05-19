@@ -31,5 +31,5 @@ try {
   //console.log("data:", data); ////
   console.log("result:", result);
 } catch {
-  console.warn("Endpoint could not be reached");
+  console.warn("Endpoint failed");
 }

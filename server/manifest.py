@@ -9,25 +9,31 @@ from anvil.server import (
     http_endpoint,
 )
 
-from tools.manifest import main as write
+from tools.endpoint import endpoint
 from tools.connect import connect
+
+
+# TODO Refactor to use write
+from tools.manifest import main as write
+
 
 
 def main():
     """Spins up a local Anvil server that serves 'manifest' endpoint."""
 
-    wait_forever = connect()
+    keep_connection = connect()
 
-    @http_endpoint("/manifest", methods=["POST"])
-    def manifest(*args, **kwargs):
+    @endpoint
+    def manifest(data, submission: int = None) -> dict:
         """Creates or updates manifest for '/public'."""
-        http_response = HttpResponse(status=200)
-        http_response.headers["Access-Control-Allow-Origin"] = "*"
+        
         message = write()
-        http_response.body = json.dumps({"ok": True, "message": message})
-        return http_response
+        
+        
+        return dict({"ok": True, "message": message})
+        
 
-    wait_forever()
+    keep_connection()
 
 
 if __name__ == "__main__":

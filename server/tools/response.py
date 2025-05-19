@@ -8,3 +8,4 @@ def create_response(**data) -> HttpResponse:
     http_response.headers["Access-Control-Allow-Origin"] = "*"
     http_response.body = json.dumps(data)
     return http_response
+
