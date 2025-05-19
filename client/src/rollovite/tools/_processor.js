@@ -53,14 +53,14 @@ export class Processor {
   }
 
   /* Returns processed result.*/
-  async call(context, key, result) {
-    if (this.#cache.has(key)) return this.#cache.get(key);
-    const processed = await this.source.call(null, result, {
+  async call(context, path, result) {
+    if (this.#cache.has(path)) return this.#cache.get(path);
+    const processed = await this.source.call(context, result, {
       context,
       owner: this,
-      key,
+      path,
     });
-    this.#cache.set(key, processed);
+    this.#cache.set(path, processed);
     return processed;
   }
 

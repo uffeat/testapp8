@@ -1,6 +1,10 @@
-export const query = new (class Query {
+/*
+import { query } from "@/rollo/tools/query.js";
+*/
+
+export const query = new (class {
   /* Returns object representation of query string. */
-  objectify(text) {
+  parse(text) {
     const result = {};
     for (const [key, value] of new URLSearchParams(text).entries()) {
       if (value === "false") {

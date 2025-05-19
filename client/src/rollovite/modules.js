@@ -77,13 +77,13 @@ export class Base {
     /* Get load function from native path key */
     const load = this.#_.get(path);
     /* Import */
-    const result = await load();
+    let result = await load();
     /* Process */
     if (this.processor) {
       const processed = await this.processor.call(this, path, result);
       /* Ignore undefined */
       if (processed !== undefined) {
-        return processed;
+        result = processed;
       }
     }
     return result;
@@ -108,7 +108,7 @@ export class Modules extends Base {
     registry: new Map(),
   };
 
-  constructor(map, { base, filter, processor, query, type } = {}) {
+  constructor(map, { base, filter, onbatch, processor, query, type } = {}) {
     super();
     /* Check base */
     if (!base) {
@@ -116,7 +116,6 @@ export class Modules extends Base {
     }
     /* Enable Python-like import syntax */
     this.#_.$ = syntax("", this, (part) => part === this.type);
-
     /* Build registry from map */
     Object.entries(map).forEach(([path, load]) => {
       const key = path.slice("/src".length + base.length);
@@ -128,6 +127,8 @@ export class Modules extends Base {
         this.#_.registry.set(key, load);
       }
     });
+
+    this.#_.onbatch = onbatch;
 
     /* NOTE
     -  Pass kwargs into 'super.__new__' (rather than 'super') to enable config 
@@ -154,11 +155,22 @@ export class Modules extends Base {
     return this.#_.$;
   }
 
+  get onbatch() {
+    return this.#_.onbatch;
+  }
+
+  set onbatch(onbatch) {
+    this.#_.onbatch = onbatch;
+  }
+
   /* Batch-imports, optionally by filter. */
   async batch(filter) {
-    const imports = [];
+    const imports = {};
     for (const path of filter ? this.paths().filter(filter) : this.paths()) {
-      imports.push(await this.import(path));
+      imports[path] = await this.import(path);
+    }
+    if (this.onbatch) {
+      await this.onbatch.call(this, imports, { owner: this });
     }
     return imports;
   }
@@ -167,6 +179,6 @@ export class Modules extends Base {
   NOTE
   - */
   paths() {
-    return Array.from(this.#_.registry.keys());
+    return this.#_.registry.keys();
   }
 }

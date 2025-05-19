@@ -2,7 +2,7 @@
 rollovite/batch/modules
 */
 
-import { Modules } from "@/rollovite/tools/modules.js";
+import { Modules } from "@/rollovite/modules.js";
 
 /* js */
 await (async () => {
@@ -50,4 +50,43 @@ await (async () => {
   );
   console.log("html:", await modules.import("foo/foo"));
   console.log("html:", await modules.import("foo/foo.html"));
+})();
+
+
+
+/* batch */
+await (async () => {
+  const modules = new Modules(import.meta.glob("/src/test/batch/*.js"), {
+    base: "@/test/batch",
+    onbatch: (imports, { owner }) => {
+      console.log(`Imported ${Object.keys(imports).length} modules`);
+      owner.onbatch = null
+    },
+    type: "js",
+  });
+  console.log("imported:", await modules.batch());
+  console.log("imported:", await modules.batch());
+})();
+
+/* process */
+await (async () => {
+  const modules = new Modules(
+    import.meta.glob("/src/test/**/*.js", { query: "?raw", import: "default" }),
+    {
+      base: "@/test",
+      processor: async (result, { path }) => {
+        const text = `export const __path__ = "${path}";\n${result}`;
+        const url = URL.createObjectURL(
+          new Blob([text], { type: "text/javascript" })
+        );
+        const module = await new Function(`return import("${url}")`)();
+        URL.revokeObjectURL(url);
+        return module;
+      },
+      type: "js",
+    }
+  );
+
+  console.log("__path__:", (await modules.import("foo/foo.js")).__path__);
+  console.log("__path__:", (await modules.import("foo/foo.js")).__path__);
 })();

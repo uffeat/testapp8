@@ -1,3 +1,7 @@
+/*
+import { map } from "@/rollo/tools/object/map.js";
+*/
+
 /* Returns an object derived from mapping target entries as per provided function. 
 NOTE
 - Intended for flat objects with primitive values. */

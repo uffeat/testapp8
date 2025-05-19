@@ -4,8 +4,8 @@ rolloanvil/server
 
 import { server } from "@/rolloanvil/server.js";
 
-export const test = async () => {
-  const data = {
+await (async () => {
+ const data = {
     email: "name@company.com",
     score: 8,
     accept: true,
@@ -18,5 +18,8 @@ export const test = async () => {
   
   const raw = await server.foo(data, { raw: true });
   console.log("raw:", raw);
-}
+})();
+
+
+
 

@@ -1,11 +1,11 @@
 /*
-import { app } from "@/rollovite/app.js";
+import { app } from "@/rollovite/_app.js";
 20250518
 v.1.0
 */
 
 import __types__ from "@/rollometa/public/__types__.json";
-import { Base } from "@/rollovite/tools/modules.js";
+import { Base } from "@/rollovite/modules.js";
 import { Processors } from "@/rollovite/tools/_processors.js";
 import { pub } from "@/rollovite/tools/_pub.js";
 import { syntax } from "@/rollovite/tools/_syntax.js";
@@ -45,8 +45,6 @@ export class Modules extends Base {
   }
 }
 
-/* TODO
-- Consider moving to app component */
 
 /* */
 export const app = new (class {
@@ -177,29 +175,3 @@ export const app = new (class {
     }
   )
 );
-
-const use = async (path) => await app.import(path);
-
-Object.defineProperty(use, "src", {
-  configurable: false,
-  enumerable: false,
-  get: () => {
-    return app.src;
-  },
-});
-
-Object.defineProperty(use, "public", {
-  configurable: false,
-  enumerable: false,
-  get: () => {
-    return app.public;
-  },
-});
-
-/* Make 'use' global */
-Object.defineProperty(window, "use", {
-  configurable: false,
-  enumerable: true,
-  writable: false,
-  value: use,
-});
