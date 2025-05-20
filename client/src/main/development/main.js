@@ -1,31 +1,39 @@
-////import "@/main/development/meta/init.js";
+//import "@/main/development/rollomd/__init__.js";
+//import "@/main/development/rollometa/__init__.js";
 import { test } from "@/rollotest/test.js";
 
 console.info("Vite environment:", import.meta.env.MODE);
 
-import "@/main/development/ssg/md/md.js"
-
+console.log("foo:", await use("/rollomd/foo/foo.template"));
 
 /* Tests */
-await (async () => {
-  /* Unit tests */
-  await (async () => {
-    const KEY = "unit_test";
-    let path = localStorage.getItem(KEY) || "";
-    window.addEventListener("keydown", async (event) => {
-      if (event.code === "KeyU" && event.shiftKey) {
-        path = prompt("Path:", path);
-        if (path) {
-          await test.import(`${path}.test.js`);
-          localStorage.setItem(KEY, path);
-        }
-      }
-    });
-  })();
-  /* Batch tests */
+(() => {
   window.addEventListener("keydown", async (event) => {
+    /* Runs unit test */
+    if (event.code === "KeyU" && event.shiftKey) {
+      const path = prompt("Path:", localStorage.getItem("unit_test") || "");
+      if (path) {
+        await test.import(`${path}.test.js`);
+        localStorage.setItem("unit_test", path);
+      }
+      return;
+    }
+    /* Runs batch tests */
     if (event.code === "KeyT" && event.shiftKey) {
       await test.batch((path) => path.includes("/batch/"));
+      return;
+    }
+    /* Builds md-parsed files */
+    if (event.code === "KeyD" && event.shiftKey) {
+      await import("@/main/development/rollomd/__init__.js");
+      console.info(`Built md-parsed files.`);
+      return;
+    }
+    /* Updates files in 'src/rollometa' */
+    if (event.code === "KeyM" && event.shiftKey) {
+      await import("@/main/development/rollometa/__init__.js");
+      console.info(`Updated meta files.`);
+      return;
     }
   });
 })();

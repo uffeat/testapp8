@@ -18,8 +18,13 @@ from tools.manifest import main as write
 
 
 
+
+
+
 def main():
     """Spins up a local Anvil server that serves 'manifest' endpoint."""
+
+   
 
     keep_connection = connect()
 

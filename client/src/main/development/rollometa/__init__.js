@@ -1,8 +1,8 @@
 import { server } from "@/rolloanvil/server.js";
 
 try {
-    const result = await server.manifest();
+    const result = await server.meta();
     console.log("result:", result);
   } catch {
-    console.warn("manifest not updated");
+    console.warn("Endpoint failed");
   }

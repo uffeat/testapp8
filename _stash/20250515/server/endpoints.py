@@ -7,8 +7,9 @@ from tools.connect import connect
 
 
 def main():
-    """Spins up a local Anvil server that relaxes cors restrictions and 
-    enables 'peek'."""
+    """Spins up a local Anvil server that
+    - Relaxes cors restrictions
+    - Enables 'peek'. """
 
     keep_connection = connect()
 

@@ -10,19 +10,19 @@ import { map } from "@/rollo/tools/object/map.js";
 */
 
 const modules = new Modules(
-  import.meta.glob("/src/main/development/ssg/md/src/**/*.md", {
+  import.meta.glob("/src/main/development/rollomd/src/**/*.md", {
     query: "?raw",
     import: "default",
   }),
   {
-    base: "@/main/development/ssg/md/src",
+    base: "@/main/development/rollomd/src",
     processor: (result) => marked.parse(result).trim(),
     type: "md",
   }
 );
 
 const data = map(await modules.batch(), ([path, content]) => [
-  path.replace(".md", ".html"),
+  path.replace(".md", ".template"),
   content,
 ]);
 

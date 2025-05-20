@@ -13,11 +13,7 @@ NOTE
 export class Base {
   #_ = {};
 
-  /* NOTE
-  - 'processor' should be a function or object with a 'call' method 
-    (optionally async) with the signature:
-      (this, result, { owner: this, key })
-  */
+
   __new__({ base, get, processor, query = "", type = "js" }) {
     this.#_.base = base;
     this.#_.get = get;
@@ -52,7 +48,7 @@ export class Base {
 
   /* Returns query. 
   NOTE
-  - Critial for aggregators that 'no query' is an empty string!*/
+  - Critial for aggregators that 'no query' is an empty string! */
   get query() {
     return this.#_.query || "";
   }
