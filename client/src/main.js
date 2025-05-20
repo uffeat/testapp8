@@ -3,7 +3,7 @@ import "@/bootstrap.scss";
 import "@/main.css";
 import "@/rollovite/__init__.js";
 
-
+console.log("foo:", await use("/rollomd/foo/foo.template"));
 
 
 /* NOTE Do NOT await import! */

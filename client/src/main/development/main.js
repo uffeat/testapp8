@@ -4,7 +4,7 @@ import { test } from "@/rollotest/test.js";
 
 console.info("Vite environment:", import.meta.env.MODE);
 
-console.log("foo:", await use("/rollomd/foo/foo.template"));
+
 
 /* Tests */
 (() => {
