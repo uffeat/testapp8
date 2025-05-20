@@ -23,10 +23,7 @@ export default defineConfig(({ mode }) => {
       manifest: true,
       rollupOptions: {
         /* Exclude files from bundle */
-        external: (path) =>
-          path.includes("/rollotest/") &&
-          !path.includes("/vercel/") &&
-          !path.includes("/preview/"),
+        external: (path) => path.endsWith(".test.js"),
       },
       /* Enable features such as top-level await and async imports */
       target: "es2022",
