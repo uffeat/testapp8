@@ -9,7 +9,8 @@ and link href. */
 export const url = (path) => {
   if (path.startsWith("@/")) {
     path = path.slice("@/".length);
-    path = `${import.meta.env.BASE_URL}src/assets/${path}`
+    const url = import.meta.env.VERCEL_URL || '/'
+    path = `${url}src/assets/${path}`
 
    
     return path;
