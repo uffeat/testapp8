@@ -184,6 +184,11 @@ export class Modules extends Base {
     return imports;
   }
 
+  /* Checks, if valid path. */
+  has(path) {
+    return this.#_.registry.has(path)
+   }
+
   /* Returns import. */
   async import(path) {
     const result = await super.import(path)

@@ -1,24 +1,9 @@
+import "@/rollotest/__init__.js";
+
 console.info("Vite environment:", import.meta.env.MODE);
 
-/* Test and build */
-(() => {
-  window.addEventListener("keydown", async (event) => {
-    /* Runs unit test */
-    if (event.code === "KeyU" && event.shiftKey) {
-      const path = prompt("Path:", localStorage.getItem("unit_test") || "");
-      if (path) {
-        await use(`/rollotest/${path}.test.js`);
-        localStorage.setItem("unit_test", path);
-      }
-      return;
-    }
-    /* Runs batch tests */
-    if (event.code === "KeyT" && event.shiftKey) {
-      for (const path of await use("/rollotest/batch/__manifest__.json")) {
-        await use(path);
-      }
-      return;
-    }
+/* Trigger build */
+window.addEventListener("keydown", async (event) => {
     /* Builds md-parsed files */
     if (event.code === "KeyD" && event.shiftKey) {
       await import("@/main/development/rollomd/__init__.js");
@@ -32,4 +17,3 @@ console.info("Vite environment:", import.meta.env.MODE);
       return;
     }
   });
-})();
