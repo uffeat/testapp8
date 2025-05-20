@@ -15,13 +15,15 @@ SOURCE = ROOT / "public"
 
 
 def main():
-    """Spins up a local Anvil server that serves 'meta' endpoint."""
+    """Serves 'meta' endpoint."""
 
     keep_connection = connect()
 
     @endpoint
     def meta(data: dict, submission: int = None) -> dict:
-        """Updates files in 'src/rollometa'."""
+        """Updates meta files."""
+
+        # Update "src/rollometa/public/__types__.json"
         types = list(
             set([file.suffix[1:] for file in SOURCE.rglob("*.*") if not file.is_dir()])
         )
@@ -30,7 +32,37 @@ def main():
             f"src/rollometa/public/__types__.json",
             json.dumps(types),
         )
+
+        # Update "/rollotest/batch/__manifest__.json"
+        paths = [
+            f"/{file.relative_to(SOURCE).as_posix()}"
+            for file in (SOURCE / 'rollotest/batch').rglob("*.test.js")
+            
+        ]
+        print('paths: ', paths) ##
+        write(
+            (SOURCE /"rollotest/batch/__manifest__.json"),
+            json.dumps(paths),
+        )
+
+        # Update "/rollotest/vercel/__manifest__.json"
+        paths = [
+            f"/{file.relative_to(SOURCE).as_posix()}"
+            for file in (SOURCE / 'rollotest/vercel').rglob("*.test.js")
+            
+        ]
+        print('paths: ', paths) ##
+        write(
+            (SOURCE /"rollotest/vercel/__manifest__.json"),
+            json.dumps(paths),
+        )
+
+
+
+
         return dict(ok=True)
+    
+
 
     keep_connection()
 

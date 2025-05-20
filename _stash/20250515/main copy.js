@@ -1,4 +1,17 @@
+import { test } from "@/main/development/test.js";
+
 console.info("Vite environment:", import.meta.env.MODE);
+
+
+await use('/rollotest/rollovite/url.test.js');
+
+const paths = await use('/rollotest/__manifest__.json');
+console.log('paths:', paths);
+
+
+
+
+
 
 /* Test and build */
 (() => {
@@ -7,16 +20,14 @@ console.info("Vite environment:", import.meta.env.MODE);
     if (event.code === "KeyU" && event.shiftKey) {
       const path = prompt("Path:", localStorage.getItem("unit_test") || "");
       if (path) {
-        await use(`/rollotest/${path}.test.js`);
+        await test.import(`${path}.test.js`);
         localStorage.setItem("unit_test", path);
       }
       return;
     }
     /* Runs batch tests */
     if (event.code === "KeyT" && event.shiftKey) {
-      for (const path of await use("/rollotest/batch/__manifest__.json")) {
-        await use(path);
-      }
+      await test.batch((path) => path.includes("/batch/"));
       return;
     }
     /* Builds md-parsed files */
