@@ -4,13 +4,20 @@ import { url } from  "@/rollovite/url.js";
 v.1.0
 */
 
+const registry = import.meta.glob(["/src/assets/**/*.*"], {
+  query: "?url",
+  import: "default",
+})
+
 /* Returns environment- and source-adjusted url suitable for e.g., img src 
 and link href. */
 export const url = (path) => {
   if (path.startsWith("@/")) {
     path = path.slice("@/".length);
-    const url = import.meta.env.VERCEL_URL || '/'
-    path = `${url}src/assets/${path}`
+   
+    path = `/src/assets/${path}`
+
+    return registry[path]();
 
    
     return path;
