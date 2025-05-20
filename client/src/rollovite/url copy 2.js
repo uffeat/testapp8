@@ -9,7 +9,7 @@ and link href. */
 export const url = (path) => {
   if (path.startsWith("@/")) {
     path = path.slice("@/".length);
-    path = `${import.meta.env.BASE_URL}src/assets/${path}`
+    path = `/src/assets/${path}`
 
    
     return path;
