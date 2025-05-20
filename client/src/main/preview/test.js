@@ -6,7 +6,7 @@ export const test = new Modules(
     "/src/rollotest/vercel/**/*.test.js",
   ]),
   {
-    base: "@/rollotest/tests",
+    base: "@/rollotest",
     //filter: (path) => path.includes('/preview/') || path.includes('/vercel/'),
     type: "js",
   }
