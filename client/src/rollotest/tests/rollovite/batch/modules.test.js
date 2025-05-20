@@ -10,7 +10,14 @@ await (async () => {
     base: "@/test",
     type: "js",
   });
-  console.log("foo:", (await modules.import("foo/foo")).foo);
+
+  modules.onimport = (result, { owner, path }) => {
+    console.log("foo from onimport:", result.foo);
+    console.log("path from onimport:", path);
+    owner.onimport = null
+  };
+
+ 
   console.log("foo:", (await modules.import("foo/foo.js")).foo);
   console.log("foo:", (await modules.$.foo.foo.js).foo);
   console.log("foo:", (await modules.$.foo.foo[":js"]).foo);
@@ -52,15 +59,13 @@ await (async () => {
   console.log("html:", await modules.import("foo/foo.html"));
 })();
 
-
-
 /* batch */
 await (async () => {
   const modules = new Modules(import.meta.glob("/src/test/batch/*.js"), {
     base: "@/test/batch",
     onbatch: (imports, { owner }) => {
       console.log(`Imported ${Object.keys(imports).length} modules`);
-      owner.onbatch = null
+      owner.onbatch = null;
     },
     type: "js",
   });
@@ -86,7 +91,6 @@ await (async () => {
       type: "js",
     }
   );
-
   console.log("__path__:", (await modules.import("foo/foo.js")).__path__);
   console.log("__path__:", (await modules.import("foo/foo.js")).__path__);
 })();

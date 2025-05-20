@@ -14,7 +14,7 @@ export class Base {
   #_ = {};
 
 
-  __new__({ base, get, processor, query = "", type = "js" }) {
+  __new__({ base, get, processor, query, type }) {
     this.#_.base = base;
     this.#_.get = get;
     this.#_.query = query;
@@ -38,7 +38,7 @@ export class Base {
   NOTE
   - Convenient for aggregators. */
   get key() {
-    return `${this.type}${this.query}`;
+    return `${this.type || ""}${this.query}`;
   }
 
   /* Returns processor. */
@@ -55,7 +55,7 @@ export class Base {
 
   /* Returns type. */
   get type() {
-    return this.#_.type || "js";
+    return this.#_.type;
   }
 
   /* Returns import. */
@@ -67,7 +67,7 @@ export class Base {
       path = path.slice(0, -this.query.length);
     }
     /* Add type */
-    if (!path.endsWith(`.${this.type}`)) {
+    if (this.type && !path.endsWith(`.${this.type}`)) {
       path = `${path}.${this.type}`;
     }
     /* Get load function from native path key */
@@ -104,7 +104,7 @@ export class Modules extends Base {
     registry: new Map(),
   };
 
-  constructor(map, { base, filter, onbatch, processor, query, type } = {}) {
+  constructor(map, { base, filter, onbatch, onimport, processor, query, type } = {}) {
     super();
     /* Check base */
     if (!base) {
@@ -125,6 +125,7 @@ export class Modules extends Base {
     });
 
     this.#_.onbatch = onbatch;
+    this.#_.onimport = onimport;
 
     /* NOTE
     -  Pass kwargs into 'super.__new__' (rather than 'super') to enable config 
@@ -151,12 +152,24 @@ export class Modules extends Base {
     return this.#_.$;
   }
 
+  /* Returns onbatch hook. */
   get onbatch() {
     return this.#_.onbatch;
   }
 
+  /* Sets onbatch hook. */
   set onbatch(onbatch) {
     this.#_.onbatch = onbatch;
+  }
+
+  /* Returns onimport hook. */
+  get onimport() {
+    return this.#_.onimport;
+  }
+
+  /* Sets onimport hook. */
+  set onimport(onimport) {
+    this.#_.onimport = onimport;
   }
 
   /* Batch-imports, optionally by filter. */
@@ -171,9 +184,16 @@ export class Modules extends Base {
     return imports;
   }
 
-  /* Returns paths. 
-  NOTE
-  - */
+  /* Returns import. */
+  async import(path) {
+    const result = await super.import(path)
+    if (this.onimport) {
+      await this.onimport.call(this, result, { owner: this, path });
+    }
+    return result
+  }
+
+  /* Returns paths. */
   paths() {
     return this.#_.registry.keys();
   }

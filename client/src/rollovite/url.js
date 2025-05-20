@@ -1,29 +1,19 @@
 /*
 import { url } from  "@/rollovite/url.js";
-20250513
+20250520
 v.1.0
 */
 
-/* Create import maps and related data */
-const registry = import.meta.glob(["/src/assets/**/*.*"], {
-  query: "?url",
-  import: "default",
-})
-
-
-
 /* Returns environment- and source-adjusted url suitable for e.g., img src 
-and link href.
-NOTE
-- Uses the '@/'-syntax for urls in src and the '/'-syntax for urls in public.
-- Returns promise for urls in src, i.e., should be used with await; 
-  not the case for urls in public. */
+and link href. */
 export const url = (path) => {
   if (path.startsWith("@/")) {
-    path = `/src/${path.slice("@/".length)}`;
-    return registry[path]();
+    path = path.slice("@/".length);
+    path = `/src/assets/${path}`
+
+   
+    return path;
   } else {
     return `${import.meta.env.BASE_URL}${path.slice("/".length)}`;
   }
 };
-
