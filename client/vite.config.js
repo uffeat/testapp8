@@ -16,15 +16,17 @@ export default defineConfig(({ mode }) => {
       "import.meta.env.VERCEL_URL": JSON.stringify(process.env.VERCEL_URL),
     },
     build: {
-      /* Enable /src outside /app_code */
+      /* Enable /src outside /client */
       //emptyOutDir: true,//
 
       /* Enable manifest.json generation */
       manifest: true,
       rollupOptions: {
         /* Exclude files from bundle */
-        external: (id) =>
-          id.includes("/rollotest/") && !id.includes("/vercel/"),
+        external: (path) =>
+          path.includes("/rollotest/") &&
+          !path.includes("/vercel/") &&
+          !path.includes("/preview/"),
       },
       /* Enable features such as top-level await and async imports */
       target: "es2022",

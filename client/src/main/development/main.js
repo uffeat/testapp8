@@ -1,12 +1,8 @@
-//import "@/main/development/rollomd/__init__.js";
-//import "@/main/development/rollometa/__init__.js";
-import { test } from "@/rollotest/test.js";
+import { test } from "@/main/development/test.js";
 
 console.info("Vite environment:", import.meta.env.MODE);
 
-
-
-/* Tests */
+/* Test and build */
 (() => {
   window.addEventListener("keydown", async (event) => {
     /* Runs unit test */

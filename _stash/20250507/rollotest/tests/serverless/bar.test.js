@@ -1,5 +1,5 @@
 /*
-serverless/bar
+vercel/bar
 */
 
 export const test = async (unit_test) => {
