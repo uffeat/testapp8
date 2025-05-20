@@ -1,7 +1,7 @@
 /*
 import { Processor } from "@/rollovite/tools/_processor.js";
-20250518
-v.1.1
+20250520
+v.4.0
 */
 
 /* Utility for post-processing import result.

@@ -1,7 +1,7 @@
 /*
 import { url } from  "@/rollovite/url.js";
 20250520
-v.1.0
+v.4.0
 */
 
 const registry = import.meta.glob(["/src/assets/**/*.*"], {

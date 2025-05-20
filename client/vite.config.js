@@ -22,7 +22,7 @@ export default defineConfig(({ mode }) => {
       /* Enable manifest.json generation */
       manifest: true,
       rollupOptions: {
-        /* Exclude files from bundle */
+        /* Exclude files from bundle (likely redundant due to treeshaking) */
         external: (path) => path.endsWith(".test.js"),
       },
       /* Enable features such as top-level await and async imports */

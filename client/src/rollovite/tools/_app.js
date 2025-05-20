@@ -1,7 +1,7 @@
 /*
 import { app } from "@/rollovite/_app.js";
-20250518
-v.1.0
+20250520
+v.4.0
 */
 
 import __types__ from "@/rollometa/public/__types__.json";

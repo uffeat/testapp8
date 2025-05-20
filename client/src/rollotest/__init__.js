@@ -5,6 +5,11 @@ const PUBLIC_BATCH_PATHS = Object.freeze(
 );
 const STORAGE_KEY = "unit_test";
 
+/* Utility for importing test modules.
+NOTE
+- Test modules should reside in public. However, for special cases, where test
+  modules uses build-related features, test modules should reside in rollotests.
+  'test' manages such tests. */
 const test = new Modules(import.meta.glob(["/src/rollotest/**/*.test.js"]), {
   base: "@/rollotest",
   type: "js",
@@ -35,3 +40,7 @@ window.addEventListener("keydown", async (event) => {
     return;
   }
 });
+
+
+
+      

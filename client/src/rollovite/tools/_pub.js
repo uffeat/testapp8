@@ -1,7 +1,7 @@
 /*
 import { pub } from "@/rollovite/tools/_pub.js";
-20250518
-v.1.0
+20250520
+v.4.0
 */
 
 /* Utility for importing public files.

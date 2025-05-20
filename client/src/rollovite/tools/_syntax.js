@@ -1,3 +1,9 @@
+/*
+import { syntax } from "@/rollovite/tools/_syntax.js";
+20250520
+v.4.0
+*/
+
 /* Returns proxy factory for enabling Python-like import syntax.
 NOTE
 - Rollo import engine member. 

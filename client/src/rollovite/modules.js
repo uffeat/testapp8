@@ -1,7 +1,7 @@
 /*
 import { Base, Modules } from "@/rollovite/tools/modules.js";
-20250518
-v.3.0
+20250520
+v.4.0
 */
 
 import { Processor } from "@/rollovite/tools/_processor.js";
@@ -12,7 +12,6 @@ NOTE
 - Rollo import engine member. */
 export class Base {
   #_ = {};
-
 
   __new__({ base, get, processor, query, type }) {
     this.#_.base = base;
@@ -88,16 +87,20 @@ export class Base {
 
 /* Vite import map controller (result of 'import.meta.glob').
 NOTE
-- Scoped to
-  - single base dir
+- Scoped to:
+  - Single base dir
   - single file type
-  - single query (optional)
-  - single processor (optional)
-- Import map filtering beyod the inclusion/exclusion syntax of 'import.meta.glob'.
-- Provides paths introspection.
-- Supports batch import. 
-- Alternative Python-like import syntax.
-- Can be used for non-Vite imports maps, i.e., for objects with the same shape. 
+  - Single query (optional)
+  - Single processor (optional)
+- Supports:
+  - Import map filtering beyod the inclusion/exclusion syntax of 'import.meta.glob'.
+  - Introspection.
+  - Batch import.
+  - Post-processing.
+  - Hooks.
+  - Alternative Python-like import syntax.
+- Can be used for non-Vite imports maps, i.e., for objects with the same shape.
+- Not a Rollo import engine member, but can play a supplementing role.
 */
 export class Modules extends Base {
   #_ = {
