@@ -7,7 +7,7 @@ v.4.0
 /* Returns proxy factory for enabling Python-like import syntax.
 NOTE
 - Rollo import engine member. 
-- Can, but should typically not, be used stand-alone.
+- Can, but should typically not, safely be used stand-alone.
 - Yep... it's a factory-factory :-) */
 export function syntax(base, owner, terminate) {
   return (function factory(path) {

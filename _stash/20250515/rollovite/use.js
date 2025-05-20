@@ -186,8 +186,7 @@ NOTE
   can be used ad hoc without performance overhead. Applies to src as well as
   public. Also supports Python-like syntax.
 - Throws error for invalid src paths, but not for invalid public paths.
-- Code changes are NOT picked up by Vite's HMR, i.e., manual browser refresh 
-  is required. */
+-  */
 export const use = (() => {
   const use = async (specifier) => {
     if (typeof specifier === "function") {

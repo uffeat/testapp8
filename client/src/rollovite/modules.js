@@ -9,7 +9,12 @@ import { syntax } from "@/rollovite/tools/_syntax.js";
 
 /* Base class for Vite import map controller.
 NOTE
-- Rollo import engine member. */
+- Rollo import engine member. 
+- When using Vite import maps:
+  - Code changes are NOT picked up by Vite's HMR, 
+    i.e., manual browser refresh is required.
+  - All (native) import statemenets in modules covered by an import map
+    must include file extension. */
 export class Base {
   #_ = {};
 
@@ -101,6 +106,9 @@ NOTE
   - Alternative Python-like import syntax.
 - Can be used for non-Vite imports maps, i.e., for objects with the same shape.
 - Not a Rollo import engine member, but can play a supplementing role.
+- Risk of redundant (overlapping) registries. Therefore for instances exposed 
+  in production, use with import maps that have a unique (NOT checked) or 
+  small coverage.
 */
 export class Modules extends Base {
   #_ = {

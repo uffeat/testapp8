@@ -7,7 +7,7 @@ v.4.0
 /* Utility for post-processing import result.
 NOTE
 - Rollo import engine member. 
-- Can, but should typically not, be used stand-alone. */
+- Can, but should typically not, safely be used stand-alone. */
 export class Processor {
   #frozen = false;
   #owner;
