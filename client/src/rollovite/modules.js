@@ -1,10 +1,9 @@
 /*
 import { Base, Modules } from "@/rollovite/tools/modules.js";
-20250520
-v.4.0
+20250521
+v.4.1
 */
 
-import { Processor } from "@/rollovite/tools/_processor.js";
 import { syntax } from "@/rollovite/tools/_syntax.js";
 
 /* Base class for Vite import map controller.
@@ -18,17 +17,11 @@ NOTE
 export class Base {
   #_ = {};
 
-  __new__({ base, get, processor, query, type }) {
+  __new__({ base, get, query, type }) {
     this.#_.base = base;
     this.#_.get = get;
     this.#_.query = query;
     this.#_.type = type;
-
-    if (processor) {
-      const source = processor;
-      this.#_.processor = new Processor(this, source);
-    }
-
     /* Prevent __new__ from being called again */
     delete this.__new__;
   }
@@ -43,11 +36,6 @@ export class Base {
   - Convenient for aggregators. */
   get key() {
     return `${this.type || ""}${this.query}`;
-  }
-
-  /* Returns processor. */
-  get processor() {
-    return this.#_.processor;
   }
 
   /* Returns query. 
@@ -70,23 +58,10 @@ export class Base {
     if (this.query && path.endsWith(this.query)) {
       path = path.slice(0, -this.query.length);
     }
-    /* Add type */
-    if (this.type && !path.endsWith(`.${this.type}`)) {
-      path = `${path}.${this.type}`;
-    }
     /* Get load function from native path key */
     const load = this.#_.get(path);
     /* Import */
-    let result = await load();
-    /* Process */
-    if (this.processor) {
-      const processed = await this.processor.call(this, path, result);
-      /* Ignore undefined */
-      if (processed !== undefined) {
-        result = processed;
-      }
-    }
-    return result;
+    return await load();
   }
 }
 
@@ -94,7 +69,7 @@ export class Base {
 NOTE
 - Scoped to:
   - Single base dir
-  - single file type
+  - Single file type
   - Single query (optional)
   - Single processor (optional)
 - Supports:
@@ -106,16 +81,18 @@ NOTE
   - Alternative Python-like import syntax.
 - Can be used for non-Vite imports maps, i.e., for objects with the same shape.
 - Not a Rollo import engine member, but can play a supplementing role.
-- Risk of redundant (overlapping) registries. Therefore for instances exposed 
+- Risk of redundant (overlapping) registries. Therefore, for instances exposed 
   in production, use with import maps that have a unique (NOT checked) or 
-  small coverage.
-*/
+  small coverage. */
 export class Modules extends Base {
   #_ = {
     registry: new Map(),
   };
 
-  constructor(map, { base, filter, onbatch, onimport, processor, query, type } = {}) {
+  constructor(
+    map,
+    { base, filter, onbatch, onimport, processor, query, type } = {}
+  ) {
     super();
     /* Check base */
     if (!base) {
@@ -135,8 +112,9 @@ export class Modules extends Base {
       }
     });
 
-    this.#_.onbatch = onbatch;
-    this.#_.onimport = onimport;
+    this.onbatch = onbatch;
+    this.onimport = onimport;
+    this.processor = processor;
 
     /* NOTE
     -  Pass kwargs into 'super.__new__' (rather than 'super') to enable config 
@@ -152,7 +130,6 @@ export class Modules extends Base {
         }
         return load;
       },
-      processor,
       query,
       type,
     });
@@ -183,6 +160,35 @@ export class Modules extends Base {
     this.#_.onimport = onimport;
   }
 
+  /* Returns processor. */
+  get processor() {
+    return this.#_.processor;
+  }
+
+  /* Sets processor. */
+  set processor(processor) {
+    if (processor) {
+      const owner = this;
+      /* Create wrapper for processor function that provides path-based 
+      caching */
+      this.#_.processor = new (class {
+        #cache = new Map();
+        /* Returns processed result. */
+        async call(path, result) {
+          if (this.#cache.has(path)) return this.#cache.get(path);
+          const processed = await processor.call(null, result, {
+            owner,
+            path,
+          });
+          this.#cache.set(path, processed);
+          return processed;
+        }
+      })();
+    } else {
+      this.#_.processor = null;
+    }
+  }
+
   /* Batch-imports, optionally by filter. */
   async batch(filter) {
     const imports = {};
@@ -197,16 +203,27 @@ export class Modules extends Base {
 
   /* Checks, if valid path. */
   has(path) {
-    return this.#_.registry.has(path)
-   }
+    return this.#_.registry.has(path);
+  }
 
   /* Returns import. */
   async import(path) {
-    const result = await super.import(path)
+    /* Import */
+    let result = await super.import(path);
+    /* Process */
+    if (this.processor) {
+      const processed = await this.processor.call(path, result);
+      /* Ignore undefined */
+      if (processed !== undefined) {
+        result = processed;
+      }
+    }
+    /* Hook */
     if (this.onimport) {
       await this.onimport.call(this, result, { owner: this, path });
     }
-    return result
+
+    return result;
   }
 
   /* Returns paths. */

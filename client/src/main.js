@@ -1,3 +1,8 @@
+/*
+main.js
+20250520
+*/
+
 /* Globals */
 import "@/bootstrap.scss";
 import "@/main.css";

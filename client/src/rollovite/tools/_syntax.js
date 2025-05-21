@@ -18,6 +18,10 @@ export function syntax(base, owner, terminate) {
           if (terminate?.(part)) {
             return owner.import(`${path}.${part}`);
           }
+          /* Terminate based on '[:]'-cue.
+          NOTE
+          - Less elegant syntax, but works even if a 'terminate' function has 
+            not been provided. */
           if (part.includes(":")) {
             return owner.import(path + part.replaceAll(":", "."));
           }

@@ -1,4 +1,5 @@
 """
+server/md.py
 20250520
 """
 
@@ -9,14 +10,15 @@ from tools.connect import connect
 from tools.endpoint import endpoint
 from tools.write import write
 
-SUB = "rollomd"
-TARGET = f"public/{SUB}"
+PUBLIC = "public"
+DIR = "rollomd"
+
 
 
 def main():
     """Spins up a local Anvil server that serves 'md' endpoint."""
 
-    clear(TARGET)
+    clear(f"{PUBLIC}/{DIR}")
 
     keep_connection = connect()
 
@@ -24,11 +26,11 @@ def main():
     def md(data: dict, submission: int = None) -> dict:
         """Writes md-parsed files and manifest to disc."""
         for path, content in data.items():
-            write(f"{TARGET}/{path}", minify(content))
+            write(f"{PUBLIC}/{DIR}/{path}", minify(content))
         
         write(
-            f"{TARGET}/__manifest__.json",
-            json.dumps([f"/{SUB}/{path}" for path in data.keys()]),
+            f"{PUBLIC}/{DIR}/__manifest__.json",
+            json.dumps([f"/{DIR}/{path}" for path in data.keys()]),
         )
         return dict(ok=True)
 

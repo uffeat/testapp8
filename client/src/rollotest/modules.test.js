@@ -55,7 +55,7 @@ await (async () => {
       type: "html",
     }
   );
-  console.log("html:", await modules.import("foo/foo"));
+ 
   console.log("html:", await modules.import("foo/foo.html"));
 })();
 

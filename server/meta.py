@@ -1,4 +1,5 @@
 """
+server/meta.py
 20250520
 """
 
@@ -28,6 +29,7 @@ def main():
             set([file.suffix[1:] for file in SOURCE.rglob("*.*") if not file.is_dir()])
         )
         types.sort()
+        print("types: ", types)  ##
         write(
             f"src/rollometa/public/__types__.json",
             json.dumps(types),
@@ -36,33 +38,26 @@ def main():
         # Update "/rollotest/batch/__manifest__.json"
         paths = [
             f"/{file.relative_to(SOURCE).as_posix()}"
-            for file in (SOURCE / 'rollotest/batch').rglob("*.test.js")
-            
+            for file in (SOURCE / "rollotest/batch").rglob("*.test.js")
         ]
-        print('paths: ', paths) ##
+        print("paths: ", paths)  ##
         write(
-            (SOURCE /"rollotest/batch/__manifest__.json"),
+            (SOURCE / "rollotest/batch/__manifest__.json"),
             json.dumps(paths),
         )
 
         # Update "/rollotest/vercel/__manifest__.json"
         paths = [
             f"/{file.relative_to(SOURCE).as_posix()}"
-            for file in (SOURCE / 'rollotest/vercel').rglob("*.test.js")
-            
+            for file in (SOURCE / "rollotest/vercel").rglob("*.test.js")
         ]
-        print('paths: ', paths) ##
+        print("paths: ", paths)  ##
         write(
-            (SOURCE /"rollotest/vercel/__manifest__.json"),
+            (SOURCE / "rollotest/vercel/__manifest__.json"),
             json.dumps(paths),
         )
 
-
-
-
         return dict(ok=True)
-    
-
 
     keep_connection()
 
