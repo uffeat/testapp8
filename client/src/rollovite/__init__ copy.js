@@ -163,66 +163,8 @@ const app = new (class {
   };
 
   constructor() {
-    const owner = this;
-
-    this.#_.processors = new (class {
-      #registry = new Map();
-
-      add(spec, { cache = true } = {}) {
-        Object.entries(spec).forEach(([key, processor]) => {
-          /* Enforce no-duplication */
-          if (this.#registry.has(key)) {
-            throw new Error(`Duplicate key: ${key}`);
-          }
-
-          this.#registry.set(
-            key,
-            /* Wrap in class to provide caching */
-            new (class {
-              #cache = new Map();
-              /* Returns processed result (freshly created or from cache). */
-              async call(path, result) {
-                if (!cache)
-                  return await processor.call(null, result, {
-                    /* Give processor access to owner (enables dog-fooding) */
-                    owner,
-                    path,
-                  });
-                if (this.#cache.has(path)) return this.#cache.get(path);
-                /* Use 'call', so that processor can be an object with a 'call' 
-                method or a non-arrow that exploits its context. */
-                const processed = await processor.call(null, result, {
-                  /* Give processor access to owner (enables dog-fooding) */
-                  owner,
-                  path,
-                });
-                this.#cache.set(path, processed);
-                return processed;
-              }
-            })()
-          );
-        });
-
-        return this;
-      }
-
-      freeze() {
-        delete this.add
-      }
-
-      /* Returns class-wrapped processor. */
-      get(key) {
-        return this.#registry.get(key);
-      }
-
-      /* Checks, if processor registered. */
-      has(key) {
-        return this.#registry.has(key);
-      }
-    })();
-
     /* Enable Python-like import syntax for imports */
-    const _factory = (base) =>
+    const _factory = (owner, base) =>
       function factory(path) {
         return new Proxy(() => {}, {
           get: (_, part) =>
@@ -230,13 +172,8 @@ const app = new (class {
           apply: (_, __, args) => owner.import(`${path}.${args[0]}`),
         });
       };
-    this.#_.public = () => _factory("/")();
-    this.#_.src = () => _factory("@/")();
-  }
-
-  /* */
-  get processors() {
-    return this.#_.processors;
+    this.#_.public = () => _factory(this, "/")();
+    this.#_.src = () => _factory(this, "@/")();
   }
 
   /* Returns import from public (subject to any processing) with Python-like 
@@ -295,6 +232,60 @@ const app = new (class {
 
     /* Prevent method from being called again */
     delete this.modules;
+
+    return this;
+  }
+
+  /* Registers processors. Chainable. */
+  processors(spec) {
+    const owner = this;
+    /* Wrap in class to encapsulate registry and related I/O methods. */
+    this.#_.processors = new (class {
+      #registry = new Map();
+
+      /* Registers processors. */
+      constructor() {
+        Object.entries(spec).forEach(([key, processor]) => {
+          /* Enforce no-duplication */
+          if (this.#registry.has(key)) {
+            throw new Error(`Duplicate key: ${key}`);
+          }
+          this.#registry.set(
+            key,
+            /* Wrap in class to provide caching */
+            new (class {
+              #cache = new Map();
+              /* Returns processed result (freshly created or from cache). */
+              async call(path, result) {
+                if (this.#cache.has(path)) return this.#cache.get(path);
+                /* Use 'call', so that processor can be an object with a 'call' 
+                method or a non-arrow that exploits its context. */
+                const processed = await processor.call(null, result, {
+                  /* Give processor access to owner (enables dog-fooding) */
+                  owner,
+                  path,
+                });
+                this.#cache.set(path, processed);
+                return processed;
+              }
+            })()
+          );
+        });
+      }
+
+      /* Returns class-wrapped processor. */
+      get(key) {
+        return this.#registry.get(key);
+      }
+
+      /* Checks, if processor registered. */
+      has(key) {
+        return this.#registry.has(key);
+      }
+    })();
+
+    /* Prevent method from being called again */
+    delete this.processors;
 
     return this;
   }
@@ -484,16 +475,15 @@ const app = new (class {
       }
     )
   )
-  
-  
-  app.processors.add({
+  .processors({
     csv: async (result, { owner }) =>
-      (await owner.import("@/rollolibs/papa.js")).Papa.parse(result),
-  }, {cache: false})
-  .add({
+      /* Protect against mutation */
+      JSON.stringify(
+        (await owner.import("@/rollolibs/papa.js")).Papa.parse(result)
+      ),
     md: async (result, { owner }) =>
       (await owner.import("@/rollolibs/marked.js")).parse(result).trim(),
-  }).freeze();
+  });
 
 /* NOTE
 

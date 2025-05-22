@@ -19,8 +19,6 @@ await (async () => {
 
  
   console.log("foo:", (await modules.import("foo/foo.js")).foo);
-  console.log("foo:", (await modules.$.foo.foo.js).foo);
-  console.log("foo:", (await modules.$.foo.foo[":js"]).foo);
 })();
 
 /* raw js */
@@ -37,8 +35,6 @@ await (async () => {
     }
   );
   console.log("raw:", await modules.import("foo/foo.js"));
-  console.log("raw:", await modules.$.foo.foo.js);
-  console.log("raw:", await modules.$.foo.foo[":js"]);
 })();
 
 /* html */

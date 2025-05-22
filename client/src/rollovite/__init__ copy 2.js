@@ -203,11 +203,7 @@ const app = new (class {
           );
         });
 
-        return this;
-      }
-
-      freeze() {
-        delete this.add
+        return owner;
       }
 
       /* Returns class-wrapped processor. */
@@ -219,6 +215,8 @@ const app = new (class {
       has(key) {
         return this.#registry.has(key);
       }
+
+
     })();
 
     /* Enable Python-like import syntax for imports */
@@ -236,7 +234,7 @@ const app = new (class {
 
   /* */
   get processors() {
-    return this.#_.processors;
+    return this.#_.processors
   }
 
   /* Returns import from public (subject to any processing) with Python-like 
@@ -298,6 +296,8 @@ const app = new (class {
 
     return this;
   }
+
+  
 })()
   /* Configure */
   .modules(
@@ -484,16 +484,15 @@ const app = new (class {
       }
     )
   )
-  
-  
-  app.processors.add({
+  .processors.add({
     csv: async (result, { owner }) =>
-      (await owner.import("@/rollolibs/papa.js")).Papa.parse(result),
-  }, {cache: false})
-  .add({
+      /* Protect against mutation */
+      JSON.stringify(
+        (await owner.import("@/rollolibs/papa.js")).Papa.parse(result)
+      ),
     md: async (result, { owner }) =>
       (await owner.import("@/rollolibs/marked.js")).parse(result).trim(),
-  }).freeze();
+  })
 
 /* NOTE
 

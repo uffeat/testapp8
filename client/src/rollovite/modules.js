@@ -1,20 +1,19 @@
 /*
 import { Base, Modules } from "@/rollovite/tools/modules.js";
-20250521
-v.4.1
+20250522
+v.4.2
 */
 
-import { syntax } from "@/rollovite/tools/_syntax.js";
-
-/* Base class for Vite import map controller.
-NOTE
-- Rollo import engine member. 
-- When using Vite import maps:
-  - Code changes are NOT picked up by Vite's HMR, 
-    i.e., manual browser refresh is required.
-  - All (native) import statemenets in modules covered by an import map
-    must include file extension. */
+/* Base class for Vite import map controller. */
 export class Base {
+  /* NOTE
+  - Rollo import engine member. 
+  - When using Vite import maps:
+    - Code changes are NOT picked up by Vite's HMR, 
+      i.e., manual browser refresh is required.
+    - All (native) import statemenets in modules covered by an import map
+      must include file extension. */
+
   #_ = {};
 
   __new__({ base, get, query, type }) {
@@ -66,25 +65,23 @@ export class Base {
 }
 
 /* Vite import map controller (result of 'import.meta.glob').
-NOTE
-- Scoped to:
-  - Single base dir
-  - Single file type
-  - Single query (optional)
-  - Single processor (optional)
 - Supports:
-  - Import map filtering beyod the inclusion/exclusion syntax of 'import.meta.glob'.
+  - Single base dir and file type scope.
+  - Optional query.
+  - Optional processor.
+  - Import map filtering beyond the inclusion/exclusion syntax of 'import.meta.glob'.
   - Introspection.
   - Batch import.
   - Post-processing.
-  - Hooks.
-  - Alternative Python-like import syntax.
-- Can be used for non-Vite imports maps, i.e., for objects with the same shape.
-- Not a Rollo import engine member, but can play a supplementing role.
-- Risk of redundant (overlapping) registries. Therefore, for instances exposed 
-  in production, use with import maps that have a unique (NOT checked) or 
-  small coverage. */
+  - Hooks. */
 export class Modules extends Base {
+  /* NOTE
+  - Can be used for non-Vite imports maps, i.e., for objects with the same shape.
+  - Not a Rollo import engine member, but can play a supplementing role.
+  - Risk of redundant (overlapping) registries. Therefore, for instances exposed 
+    in production, use with import maps that have a unique (NOT checked) or 
+    small coverage. */
+
   #_ = {
     registry: new Map(),
   };
@@ -98,8 +95,6 @@ export class Modules extends Base {
     if (!base) {
       throw new Error(`'base' not provided`);
     }
-    /* Enable Python-like import syntax */
-    this.#_.$ = syntax("", this, (part) => part === this.type);
     /* Build registry from map */
     Object.entries(map).forEach(([path, load]) => {
       const key = path.slice("/src".length + base.length);
@@ -116,9 +111,8 @@ export class Modules extends Base {
     this.onimport = onimport;
     this.processor = processor;
 
-    /* NOTE
-    -  Pass kwargs into 'super.__new__' (rather than 'super') to enable config 
-       of parent with own 'this' members. */
+    /* Pass kwargs into 'super.__new__' (rather than 'super') to enable config 
+    of parent with own 'this' members */
     super.__new__({
       base,
       /* Returns load function. */
@@ -133,11 +127,6 @@ export class Modules extends Base {
       query,
       type,
     });
-  }
-
-  /* Returns import with Python-like-syntax. */
-  get $() {
-    return this.#_.$;
   }
 
   /* Returns onbatch hook. */
