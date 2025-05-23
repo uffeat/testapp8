@@ -1,3 +1,9 @@
+/*
+import "@/rollotest/__init__.js";
+20250522
+v.1.0
+*/
+
 import { Modules } from "@/rollovite/modules.js";
 
 const PUBLIC_BATCH_PATHS = Object.freeze(
@@ -5,12 +11,12 @@ const PUBLIC_BATCH_PATHS = Object.freeze(
 );
 const STORAGE_KEY = "unit_test";
 
-/* Utility for importing test modules.
-NOTE
-- Test modules should reside in public. However, for special cases, where test
-  modules uses build-related features, test modules should reside in rollotests.
-  'test' manages such tests. */
+/* Utility for importing test modules. */
 const test = new Modules(import.meta.glob(["/src/rollotest/**/*.test.js"]), {
+  /* NOTE
+  - Test modules should reside in public. However, for special cases, where test
+    modules uses build-related features, test modules should reside in rollotest.
+    'test' manages such tests. */
   base: "@/rollotest",
   type: "js",
 });

@@ -1,4 +1,5 @@
 """
+pip install minify-html
 server/md.py
 20250520
 """

@@ -1,4 +1,5 @@
 """
+pip install Jinja2
 server/ssg.py
 20250521
 """

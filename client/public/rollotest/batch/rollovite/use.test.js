@@ -2,17 +2,10 @@
 rollovite/batch/use
 */
 
-(async () => {
-  const mode = (test) => (test ? "info" : "error");
-  /* src */
-  console[
-    mode((await use("@/test/foo/foo.css?raw")).trim().startsWith(`.foo`))
-  ](`Tested src raw css`);
+const mode = (test) => (test ? "info" : "error");
 
-  console[mode((await use("@/test/foo/foo.html")).trim() === `<h1>FOO</h1>`)](
-    `Tested src html`
-  );
-
+/* 'use' for js files in src */
+await (async () => {
   console[mode((await use("@/test/foo/foo.js")).foo === "FOO")](
     `Tested src js`
   );
@@ -34,7 +27,24 @@ rollovite/batch/use
         `export const foo = "FOO";`
     )
   ](`Tested src raw js`);
+})();
 
+/* 'use' for css files in src */
+await (async () => {
+  console[
+    mode((await use("@/test/foo/foo.css?raw")).trim().startsWith(`.foo`))
+  ](`Tested src raw css`);
+})();
+
+/* 'use' for html files in src */
+await (async () => {
+  console[mode((await use("@/test/foo/foo.html")).trim() === `<h1>FOO</h1>`)](
+    `Tested src html`
+  );
+})();
+
+/* 'use' for json files in src */
+await (async () => {
   console[mode((await use("@/test/foo/foo.json")).foo === "FOO")](
     `Tested src json`
   );
@@ -42,8 +52,10 @@ rollovite/batch/use
   console[
     mode((await use("@/test/foo/foo.json?raw")).trim() === `{ "foo": "FOO" }`)
   ](`Tested src raw json`);
+})();
 
-  /* public */
+/* 'use' for public files */
+(async () => {
   console[mode((await use("/test/foo/foo.css?raw")).startsWith(`.foo`))](
     `Tested public raw css`
   );
@@ -67,17 +79,18 @@ rollovite/batch/use
   console[mode((await use("/test/foo/foo.json?raw")) === `{ "foo": "FOO" }`)](
     `Tested public raw json`
   );
+})();
 
-  // TODO
-  await (async () => {
-    console.log("foo:", await use("@/test/foo/foo.md"));
-  })();
+// TODO
+/* Access to 'use' maps */
+await (async () => {
+  const map = use.maps
+    .get("js")
+    .copy((path) => path.includes("/test/"), { format: "map" });
+  console.log("map:", map);
+})();
 
-  // TODO
-  await (async () => {
-    const test_map = use.maps
-      .get("js")
-      .copy((path) => path.includes("/test/"), { format: "map" });
-    console.log("test_map:", test_map);
-  })();
+// TODO
+await (async () => {
+  console.log("foo:", await use("@/test/foo/foo.md"));
 })();

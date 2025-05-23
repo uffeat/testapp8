@@ -10,6 +10,7 @@ if (import.meta.env.DEV) {
   console.info("Loading PapaParse...");
 }
 
+/* Create and add iframe with scripts injected */
 const iframe = await factory("rollolibs/papa/main.js");
 
 /* Harvest */

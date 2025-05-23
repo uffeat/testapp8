@@ -8,9 +8,7 @@ import "@/bootstrap.scss";
 import "@/main.css";
 import "@/rollovite/__init__.js";
 
-await (async () => {
-  console.log("Parsed csv:", await use("@/test/foo/foo.csv"));
-})();
+
 
 /* NOTE Do NOT await import! */
 if (import.meta.env.VERCEL_ENV === "production") {
