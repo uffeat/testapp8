@@ -1,25 +1,19 @@
 /*
 "@/rollolibs/papa.js"
-20250522
-v.1.0
+20250523
+v.1.1
 */
 
-import { component } from "@/rollo/component/component.js";
+import { factory } from "@/rollolibs/tools/factory.js";
 
 if (import.meta.env.DEV) {
   console.info("Loading PapaParse...");
 }
 
-const { promise, resolve } = Promise.withResolvers();
-const iframe = component.iframe({
-  parent: document.head,
-  onload: (event) => resolve(),
-  src: `${import.meta.env.BASE_URL}rollolibs/papa/main.html`,
-});
-await promise;
+const iframe = await factory("rollolibs/papa/main.js");
 
-
-
+/* Harvest */
 export const Papa = iframe.contentWindow.Papa;
 
-iframe.remove()
+/* Clean up */
+iframe.remove();

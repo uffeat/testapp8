@@ -68,9 +68,16 @@ rollovite/batch/use
     `Tested public raw json`
   );
 
+  // TODO
+  await (async () => {
+    console.log("foo:", await use("@/test/foo/foo.md"));
+  })();
 
   // TODO
   await (async () => {
-  console.log("foo:", await use("@/test/foo/foo.md"));
-})();
+    const test_map = use.maps
+      .get("js")
+      .copy((path) => path.includes("/test/"), { format: "map" });
+    console.log("test_map:", test_map);
+  })();
 })();

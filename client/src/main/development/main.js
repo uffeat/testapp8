@@ -1,5 +1,5 @@
 /*
-import("@/main/production/main.js");
+import("@/main/development/main.js");
 20250520
 */
 
@@ -10,11 +10,7 @@ import "@/main/development/rollossg/__init__.js";
 
 
 
-await (async () => {
 
-  console.log("Parsed csv:", await use("@/test/foo/foo.csv"));
-  
-  
-})();
+
 
 console.info("Vite environment:", import.meta.env.MODE);

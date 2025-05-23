@@ -1,8 +1,8 @@
 /*
 import "@/rollovite/__init__.js";
 import { use } from "@/rollovite/__init__.js";
-20250522
-v.4.4
+20250523
+v.4.5
 */
 
 /* TODO
@@ -18,7 +18,8 @@ v.4.4
 - Common of file types.
 - Raw imports.
 - Alternative Python-like-syntax.
-- Creation of ad-hoc "importers" that import from base dirs. */
+- Creation of ad-hoc "importers" that import from base dirs.
+- Safe access to registered import maps for reusability. */
 export const use = new Proxy(() => {}, {
   get: (_, key) => app[key],
   apply: (_, __, args) => app.import(...args),
@@ -139,65 +140,122 @@ const app = new (class {
       #registry = new Map();
 
       /* Adds import maps. Chainable with respect to owner. */
-      add(spec) {
-        Object.entries(spec).forEach(([key, map]) => {
-          /* Enforce no-duplication */
-          if (this.#registry.has(key)) {
-            throw new Error(`Duplicate key: ${key}`);
-          }
-          this.#registry.set(key, map);
+      add(...specs) {
+        specs.forEach((spec) => {
+          Object.entries(spec).forEach(([key, map]) => {
+            /* Enforce no-duplication */
+            if (this.#registry.has(key)) {
+              throw new Error(`Duplicate key: ${key}`);
+            }
+            this.#registry.set(
+              key,
+              /* Wrap in class to encapsulate and decentralize path 
+              conversion. */
+              new (class {
+                #map;
+
+                constructor(_map) {
+                  this.#map = _map;
+                }
+
+                /* Returns copy of import map with normalized paths, 
+                optionally filtered, optionally as Map instance.
+                For external use ONLY. */
+                copy(filter, { format = "object" } = {}) {
+                  const entries = (() => {
+                    const _entries = Object.entries(this.#map).map(
+                      ([path, load]) => [
+                        `@/${path.slice("/src/".length)}`,
+                        load,
+                      ]
+                    );
+                    return filter
+                      ? _entries.filter(([path, load]) => filter(path))
+                      : _entries;
+                  })();
+
+                  return format === "object"
+                    ? Object.fromEntries(entries)
+                    : new Map(entries);
+                }
+
+                /* Returns load function. */
+                get(specifier) {
+                  const path = (() => {
+                    const _path = `/src/${specifier.slice("@/".length)}`;
+                    return _path.endsWith("?raw")
+                      ? _path.slice(0, -"?raw".length)
+                      : _path;
+                  })();
+                  const load = this.#map[path];
+                  if (!load) {
+                    throw new Error(`Invalid path: ${specifier}`);
+                  }
+                  return load;
+                }
+              })(map)
+            );
+          });
         });
         return owner;
       }
 
-      /* Returns import map. */
+      /* Returns wrapped import map. */
       get(key) {
-        return this.#registry.get(key);
+        /* key is likely valid -> most efficient to use 'get' 
+        directly without a 'has' step. */
+        const wrapped = this.#registry.get(key);
+        if (!wrapped) {
+          throw new Error(`Invalid key: ${key}`);
+        }
+        return wrapped;
       }
     })();
 
     this.#_.processors = new (class {
       #registry = new Map();
 
-      /* Adds processors maps. Chainable with respect to owner. */
-      add(spec) {
-        Object.entries(spec).forEach(([key, processor]) => {
-          const cache = (() => {
-            if (key.endsWith("?cache")) {
-              key = key.slice(0, -"?cache".length);
-              return true;
+      /* Adds processors. Chainable with respect to owner. */
+      add(...specs) {
+        specs.forEach((spec) => {
+          Object.entries(spec).forEach(([key, processor]) => {
+            const cache = (() => {
+              if (key.endsWith("?cache")) {
+                key = key.slice(0, -"?cache".length);
+                return true;
+              }
+            })();
+            /* Enforce no-duplication */
+            if (this.#registry.has(key)) {
+              throw new Error(`Duplicate key: ${key}`);
             }
-          })();
-          /* Enforce no-duplication */
-          if (this.#registry.has(key)) {
-            throw new Error(`Duplicate key: ${key}`);
-          }
-          this.#registry.set(
-            key,
-            /* Wrap in class to provide caching */
-            new (class {
-              #cache = new Map();
-              /* Returns processed result (freshly created or from cache). */
-              async call(path, result) {
-                if (!cache)
-                  return await processor.call(null, result, {
+            this.#registry.set(
+              key,
+              /* Wrap in class to provide caching */
+              new (class {
+                #cache = new Map();
+                /* Returns processed result (freshly created or from cache). */
+                async call(path, result) {
+                  if (!cache)
+                    return await processor.call(null, result, {
+                      /* Give processor access to owner (enables dog-fooding) */
+                      owner,
+                      path,
+                    });
+                  if (this.#cache.has(path)) return this.#cache.get(path);
+                  /* Use 'call', so that processor can be an object with a 'call' 
+                  method or a non-arrow that exploits its context. */
+                  const processed = await processor.call(null, result, {
                     /* Give processor access to owner (enables dog-fooding) */
                     owner,
                     path,
                   });
-                if (this.#cache.has(path)) return this.#cache.get(path);
-                /* Use 'call', so that processor can be an object with a 'call' 
-                method or a non-arrow that exploits its context. */
-                const processed = await processor.call(null, result, {
-                  /* Give processor access to owner (enables dog-fooding) */
-                  owner,
-                  path,
-                });
-                this.#cache.set(path, processed);
-                return processed;
-              }
-            })()
-          );
+                  this.#cache.set(path, processed);
+                  return processed;
+                }
+              })()
+            );
+          });
         });
         return owner;
       }
@@ -207,7 +265,7 @@ const app = new (class {
         return this.#registry.get(key);
       }
 
-      /* Checks, if processor registered. */
+      /* Checks, if key registered. */
       has(key) {
         return this.#registry.has(key);
       }
@@ -248,48 +306,31 @@ const app = new (class {
     return this.#_.src();
   }
 
-  /* Prevents registration of maps and processors from API. Chainable. */
+  /* Prevents registration of maps and access to processors from API. 
+  Chainable. */
   freeze() {
-    delete this.maps;
+    /* NOTE Safe to expose controlled read access to import maps, but not to 
+    processors (risk of cache access). */
+    delete this.maps.add;
     delete this.processors;
     return this;
   }
 
   /* Returns import from src or public, subject to any processing. */
-  async import(path) {
-    let result;
-    const key = path.split(".").reverse()[0];
-    if (path.startsWith("@/")) {
-      /* Import from src */
-      const map = this.#_.maps.get(key);
-      if (!map) {
-        throw new Error(`Invalid key: ${key}`);
-      }
-      const load =
-        map[
-          (() => {
-            let _path = `/src/${path.slice("@/".length)}`;
-            return _path.endsWith("?raw")
-              ? _path.slice(0, -"?raw".length)
-              : _path;
-          })()
-        ];
-      /* Error, if invalid path */
-      if (!load) {
-        throw new Error(`Invalid path: ${path}`);
-      }
-      result = await load(path);
-    } else {
-      /* Import from public */
-      result = await pub.import(path);
-    }
+  async import(specifier) {
+    /* Get key for src import and processing */
+    const key = specifier.split(".").reverse()[0];
+    /* Import */
+    const result = specifier.startsWith("@/")
+      ? await this.maps.get(key).get(specifier)(specifier)
+      : await pub.import(specifier);
     /* Process */
+    /* NOTE No processing is more likely than processing -> use 'has' 
+    initially and not 'get' directly */
     if (this.#_.processors.has(key)) {
       const processor = this.#_.processors.get(key);
-      const processed = await processor.call(path, result);
-      if (processed !== undefined) {
-        return processed;
-      }
+      const processed = await processor.call(specifier, result);
+      if (processed !== undefined) return processed;
     }
     return result;
   }

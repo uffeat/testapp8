@@ -1,10 +1,8 @@
 /*
-import { Base, Modules } from "@/rollovite/tools/modules.js";
+import { Modules } from "@/rollovite/modules.js";
 20250522
 v.4.3
 */
-
-
 
 /* Vite import map controller ('import.meta.glob' result) that supports:
 - Single base dir and file type scope.
@@ -16,8 +14,6 @@ v.4.3
 - Post-processing.
 - Hooks. */
 export class Modules {
-
-
   #_ = {
     registry: new Map(),
   };
@@ -127,8 +123,6 @@ export class Modules {
     return imports;
   }
 
-
-
   /* Checks, if valid path. */
   has(path) {
     return this.#_.registry.has(path);
@@ -166,8 +160,7 @@ export class Modules {
   }
 }
 
-
-  /* NOTE
+/* NOTE
   - Can be used for non-Vite imports maps, i.e., for objects with the same shape.
   - Not a Rollo import engine member, but can play a supplementing role.
   - Risk of redundant (overlapping) registries. Therefore, for instances exposed 
