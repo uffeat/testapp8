@@ -6,18 +6,16 @@ v.4.4
 */
 
 /* TODO
-- Keep an eye on dir scopes for registered 'Modules' instances. 
+- Keep an eye on dir scopes for Vite import maps (globs). 
   Should effectively have global coverage, but leave out dirs and file 
   extensions not used by the actual app. Doing so is verbose, but worth it.
   Such narrowing does of course NOT affect imports from public!
 */
 
-import { Base } from "@/rollovite/modules.js";
-
 /* Global import utility that supports:
 - Truly dynamic imports.
 - Import from src ('@/'-prefix) and from public ('/'-prefix).
-- Common file types.
+- Common of file types.
 - Raw imports.
 - Alternative Python-like-syntax.
 - Creation of ad-hoc "importers" that import from base dirs. */
@@ -130,51 +128,50 @@ const pub = new (class {
   };
 })();
 
-/* Controller for Vite import maps. */
-class Modules extends Base {
-  #registry;
-
-  constructor(map, { query, type } = {}) {
-    super();
-    this.#registry = map;
-    /* Pass kwargs into 'super.__new__' (rather than 'super') to enable config 
-    of parent with own 'this' members. */
-    super.__new__({
-      /* Returns load function. */
-      get: (path) => {
-        const key = `/src/${path.slice("@/".length)}`;
-        const load = this.#registry[key];
-        /* Error, if invalid path */
-        if (!load) {
-          throw new Error(`Invalid path: ${path}`);
-        }
-        return load;
-      },
-      query,
-      type,
-    });
-  }
-}
-
 /* Global import utility. */
 const app = new (class {
-  #_ = {
-    registry: new Map(),
-  };
+  #_ = {};
 
   constructor() {
     const owner = this;
 
-    this.#_.processors = new (class {
+    this.#_.maps = new (class {
       #registry = new Map();
 
-      add(spec, { cache = true } = {}) {
-        Object.entries(spec).forEach(([key, processor]) => {
+      /* Adds import maps. Chainable with respect to owner. */
+      add(spec) {
+        Object.entries(spec).forEach(([key, map]) => {
           /* Enforce no-duplication */
           if (this.#registry.has(key)) {
             throw new Error(`Duplicate key: ${key}`);
           }
+          this.#registry.set(key, map);
+        });
+        return owner;
+      }
 
+      /* Returns import map. */
+      get(key) {
+        return this.#registry.get(key);
+      }
+    })();
+
+    this.#_.processors = new (class {
+      #registry = new Map();
+
+      /* Adds processors maps. Chainable with respect to owner. */
+      add(spec) {
+        Object.entries(spec).forEach(([key, processor]) => {
+          const cache = (() => {
+            if (key.endsWith("?cache")) {
+              key = key.slice(0, -"?cache".length);
+              return true;
+            }
+          })();
+          /* Enforce no-duplication */
+          if (this.#registry.has(key)) {
+            throw new Error(`Duplicate key: ${key}`);
+          }
           this.#registry.set(
             key,
             /* Wrap in class to provide caching */
@@ -202,12 +199,7 @@ const app = new (class {
             })()
           );
         });
-
-        return this;
-      }
-
-      freeze() {
-        delete this.add
+        return owner;
       }
 
       /* Returns class-wrapped processor. */
@@ -234,7 +226,12 @@ const app = new (class {
     this.#_.src = () => _factory("@/")();
   }
 
-  /* */
+  /* Returns maps controller (unavailable post-freeze). */
+  get maps() {
+    return this.#_.maps;
+  }
+
+  /* Returns processors controller (unavailable post-freeze). */
   get processors() {
     return this.#_.processors;
   }
@@ -251,17 +248,37 @@ const app = new (class {
     return this.#_.src();
   }
 
+  /* Prevents registration of maps and processors from API. Chainable. */
+  freeze() {
+    delete this.maps;
+    delete this.processors;
+    return this;
+  }
+
   /* Returns import from src or public, subject to any processing. */
   async import(path) {
     let result;
     const key = path.split(".").reverse()[0];
     if (path.startsWith("@/")) {
       /* Import from src */
-      const modules = this.#_.registry.get(key);
-      if (!modules) {
+      const map = this.#_.maps.get(key);
+      if (!map) {
         throw new Error(`Invalid key: ${key}`);
       }
-      result = await modules.import(path);
+      const load =
+        map[
+          (() => {
+            let _path = `/src/${path.slice("@/".length)}`;
+            return _path.endsWith("?raw")
+              ? _path.slice(0, -"?raw".length)
+              : _path;
+          })()
+        ];
+      /* Error, if invalid path */
+      if (!load) {
+        throw new Error(`Invalid path: ${path}`);
+      }
+      result = await load(path);
     } else {
       /* Import from public */
       result = await pub.import(path);
@@ -277,233 +294,165 @@ const app = new (class {
     return result;
   }
 
-  /* Returns function that imports from base (with string syntax). */
+  /* Returns ad-hoc function that imports from base (with string syntax). */
   importer(base) {
     return async (path) => await this.import(`${base}/${path}`);
   }
+})();
 
-  /* Registers modules. Chainable. */
-  modules(...spec) {
-    /* Build registry for 'Modules' instances */
-    spec.forEach((modules) => {
-      /* Enforce no-duplication */
-      if (this.#_.registry.has(modules.key)) {
-        throw new Error(`Duplicate key: ${modules.key}`);
-      }
-      this.#_.registry.set(modules.key, modules);
-    });
-
-    /* Prevent method from being called again */
-    delete this.modules;
-
-    return this;
-  }
-})()
-  /* Configure */
-  .modules(
-    new Modules(
-      import.meta.glob([
+/* Add support for most common file types */
+app.maps
+  .add({
+    css: import.meta.glob([
+      "/src/**/*.css",
+      "!/src/assets/**/*.*",
+      "!/src/main/**/*.*",
+      "!/src/rollotest/**/*.*",
+      "!/src/rollovite/**/*.*",
+    ]),
+    "css?raw": import.meta.glob(
+      [
         "/src/**/*.css",
         "!/src/assets/**/*.*",
         "!/src/main/**/*.*",
         "!/src/rollotest/**/*.*",
         "!/src/rollovite/**/*.*",
-      ]),
-      {
-        type: "css",
-      }
-    ),
-    new Modules(
-      import.meta.glob(
-        [
-          "/src/**/*.css",
-          "!/src/assets/**/*.*",
-          "!/src/main/**/*.*",
-          "!/src/rollotest/**/*.*",
-          "!/src/rollovite/**/*.*",
-        ],
-        {
-          query: "?raw",
-          import: "default",
-        }
-      ),
+      ],
       {
         query: "?raw",
-        type: "css",
+        import: "default",
       }
     ),
-    new Modules(
-      import.meta.glob(
-        [
-          "/src/**/*.html",
-          "!/src/assets/**/*.*",
-          "!/src/main/**/*.*",
-          "!/src/rollotest/**/*.*",
-          "!/src/rollovite/**/*.*",
-        ],
-        {
-          query: "?raw",
-          import: "default",
-        }
-      ),
+    html: import.meta.glob(
+      [
+        "/src/**/*.html",
+        "!/src/assets/**/*.*",
+        "!/src/main/**/*.*",
+        "!/src/rollotest/**/*.*",
+        "!/src/rollovite/**/*.*",
+      ],
       {
-        /* NOTE Do NOT register query! */
-        type: "html",
+        query: "?raw",
+        import: "default",
       }
     ),
-    new Modules(
-      import.meta.glob([
+    js: import.meta.glob([
+      "/src/**/*.js",
+      "!/src/main.js",
+      "!/src/assets/**/*.*",
+      "!/src/main/**/*.*",
+      "!/src/rollotest/**/*.*",
+      "!/src/rollovite/**/*.*",
+    ]),
+    "js?raw": import.meta.glob(
+      [
         "/src/**/*.js",
         "!/src/main.js",
         "!/src/assets/**/*.*",
         "!/src/main/**/*.*",
         "!/src/rollotest/**/*.*",
         "!/src/rollovite/**/*.*",
-      ]),
-      {
-        type: "js",
-      }
-    ),
-    new Modules(
-      import.meta.glob(
-        [
-          "/src/**/*.js",
-          "!/src/main.js",
-          "!/src/assets/**/*.*",
-          "!/src/main/**/*.*",
-          "!/src/rollotest/**/*.*",
-          "!/src/rollovite/**/*.*",
-        ],
-        {
-          query: "?raw",
-          import: "default",
-        }
-      ),
+      ],
       {
         query: "?raw",
-        type: "js",
+        import: "default",
       }
     ),
-    new Modules(
-      import.meta.glob(
-        [
-          "/src/**/*.json",
-          "!/src/assets/**/*.*",
-          "!/src/main/**/*.*",
-          "!/src/rollometa/**/*.*",
-          "!/src/rollotest/**/*.*",
-          "!/src/rollovite/**/*.*",
-        ],
-        {
-          import: "default",
-        }
-      ),
+    json: import.meta.glob(
+      [
+        "/src/**/*.json",
+        "!/src/assets/**/*.*",
+        "!/src/main/**/*.*",
+        "!/src/rollometa/**/*.*",
+        "!/src/rollotest/**/*.*",
+        "!/src/rollovite/**/*.*",
+      ],
       {
-        type: "json",
+        import: "default",
       }
     ),
-    new Modules(
-      import.meta.glob(
-        [
-          "/src/**/*.json",
-          "!/src/assets/**/*.*",
-          "!/src/main/**/*.*",
-          "!/src/rollometa/**/*.*",
-          "!/src/rollotest/**/*.*",
-          "!/src/rollovite/**/*.*",
-        ],
-        {
-          query: "?raw",
-          import: "default",
-        }
-      ),
+    "json?raw": import.meta.glob(
+      [
+        "/src/**/*.json",
+        "!/src/assets/**/*.*",
+        "!/src/main/**/*.*",
+        "!/src/rollometa/**/*.*",
+        "!/src/rollotest/**/*.*",
+        "!/src/rollovite/**/*.*",
+      ],
       {
         query: "?raw",
-        type: "json",
+        import: "default",
       }
     ),
-    new Modules(
-      import.meta.glob(
-        [
-          "/src/**/*.svg",
-          "!/src/assets/**/*.*",
-          "!/src/main/**/*.*",
-          "!/src/rollometa/**/*.*",
-          "!/src/rollotest/**/*.*",
-          "!/src/rollovite/**/*.*",
-        ],
-        {
-          query: "?raw",
-          import: "default",
-        }
-      ),
+    svg: import.meta.glob(
+      [
+        "/src/**/*.svg",
+        "!/src/assets/**/*.*",
+        "!/src/main/**/*.*",
+        "!/src/rollometa/**/*.*",
+        "!/src/rollotest/**/*.*",
+        "!/src/rollovite/**/*.*",
+      ],
       {
-        /* NOTE Do NOT register query! */
-        type: "svg",
+        query: "?raw",
+        import: "default",
       }
     ),
+  })
 
-    /* Non-common types from here... */
-
-    new Modules(
-      import.meta.glob(
-        [
-          "/src/**/*.csv",
-          "!/src/assets/**/*.*",
-          "!/src/main/**/*.*",
-          "!/src/rollotest/**/*.*",
-          "!/src/rollovite/**/*.*",
-        ],
-        {
-          query: "?raw",
-          import: "default",
-        }
-      ),
+  /* Add csv support */
+  .maps.add({
+    csv: import.meta.glob(
+      [
+        "/src/**/*.csv",
+        "!/src/assets/**/*.*",
+        "!/src/main/**/*.*",
+        "!/src/rollotest/**/*.*",
+        "!/src/rollovite/**/*.*",
+      ],
       {
-        /* NOTE Do NOT register query! */
-        type: "csv",
+        query: "?raw",
+        import: "default",
       }
     ),
-    new Modules(
-      import.meta.glob(
-        [
-          "/src/**/*.md",
-          "!/src/assets/**/*.*",
-          "!/src/main/**/*.*",
-          "!/src/rollotest/**/*.*",
-          "!/src/rollovite/**/*.*",
-        ],
-        {
-          query: "?raw",
-          import: "default",
-        }
-      ),
-      {
-        /* NOTE Do NOT register query! */
-        type: "md",
-      }
-    )
-  )
-  
-  
-  app.processors.add({
+  })
+  .processors.add({
     csv: async (result, { owner }) =>
       (await owner.import("@/rollolibs/papa.js")).Papa.parse(result),
-  }, {cache: false})
-  .add({
-    md: async (result, { owner }) =>
+  })
+
+  /* Add md support */
+  .maps.add({
+    md: import.meta.glob(
+      [
+        "/src/**/*.md",
+        "!/src/assets/**/*.*",
+        "!/src/main/**/*.*",
+        "!/src/rollotest/**/*.*",
+        "!/src/rollovite/**/*.*",
+      ],
+      {
+        query: "?raw",
+        import: "default",
+      }
+    ),
+  })
+  .processors.add({
+    "md?cache": async (result, { owner }) =>
       (await owner.import("@/rollolibs/marked.js")).parse(result).trim(),
-  }).freeze();
+  })
+
+  /* Prevent config tampering */
+  .freeze();
 
 /* NOTE
-
 Re 'app'
 - Central piece of the Rollo import engine. However, not exposed directly,
   but via 'use' (for a more succinct syntax).
 - Importers created with 'app.importer' support string syntax only; 
   The benefits of the Python-like syntax are limited, when imports strings 
   are short. 
-
 Re 'use':
 - The central piece of the Rollo import engine API.
 - Zero-config. Based on in-module defined import maps and processors. This 
@@ -529,20 +478,7 @@ Re 'use':
   function that wraps 'app.import' and then do `Object.defineProperty` to 
   patch-on selected members of 'app'. However, the proxy pattern is more 
   elegant and easier to maintain.
-
-Re 'Modules':
-- Scope:
-  - Global or a list of included/excluded top-level dirs.
-    Cannot be enforced, i.e., rely on usage discipline.
-  - Single file type; manual alignment between the import map and the 'type' 
-    kwarg required. Could be enforced, but that would hit performance 
-    (slightly) therefore rely on usage discipline.
-  - Raw OR non-raw. Cannot be enforced, i.e., rely on usage discipline.
-- Import maps are not copied, therefore performant construction.
-
-
 Re 'pub':
 - Based on the '/'-prefix syntax (Vite-aligned).
 - Supports js and all text-based file types.
-    
 */

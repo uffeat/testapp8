@@ -1,22 +1,86 @@
 /*
 import { Base, Modules } from "@/rollovite/tools/modules.js";
 20250522
-v.4.3
+v.4.2
 */
 
+/* Base class for Vite import map controller. */
+export class Base {
+  /* NOTE
+  - Rollo import engine member. 
+  - When using Vite import maps:
+    - Code changes are NOT picked up by Vite's HMR, 
+      i.e., manual browser refresh is required.
+    - All (native) import statemenets in modules covered by an import map
+      must include file extension. */
 
+  #_ = {};
 
-/* Vite import map controller ('import.meta.glob' result) that supports:
-- Single base dir and file type scope.
-- Optional query.
-- Optional processor.
-- Import map filtering beyond the inclusion/exclusion syntax of 'import.meta.glob'.
-- Introspection.
-- Batch import.
-- Post-processing.
-- Hooks. */
-export class Modules {
+  __new__({ base, get, query, type }) {
+    this.#_.base = base;
+    this.#_.get = get;
+    this.#_.query = query;
+    this.#_.type = type;
+    /* Prevent __new__ from being called again */
+    delete this.__new__;
+  }
 
+  /* Returns base. */
+  get base() {
+    return this.#_.base;
+  }
+
+  /* Returns key. 
+  NOTE
+  - Convenient for aggregators. */
+  get key() {
+    return `${this.type || ""}${this.query}`;
+  }
+
+  /* Returns query. 
+  NOTE
+  - Critial for aggregators that 'no query' is an empty string! */
+  get query() {
+    return this.#_.query || "";
+  }
+
+  /* Returns type. */
+  get type() {
+    return this.#_.type;
+  }
+
+  /* Returns import. */
+  async import(path) {
+    /* Remove query 
+    NOTE
+    - Critial for aggregators that 'import' can be called with query! */
+    if (this.query && path.endsWith(this.query)) {
+      path = path.slice(0, -this.query.length);
+    }
+    /* Get load function from native path key */
+    const load = this.#_.get(path);
+    /* Import */
+    return await load();
+  }
+}
+
+/* Vite import map controller (result of 'import.meta.glob').
+- Supports:
+  - Single base dir and file type scope.
+  - Optional query.
+  - Optional processor.
+  - Import map filtering beyond the inclusion/exclusion syntax of 'import.meta.glob'.
+  - Introspection.
+  - Batch import.
+  - Post-processing.
+  - Hooks. */
+export class Modules extends Base {
+  /* NOTE
+  - Can be used for non-Vite imports maps, i.e., for objects with the same shape.
+  - Not a Rollo import engine member, but can play a supplementing role.
+  - Risk of redundant (overlapping) registries. Therefore, for instances exposed 
+    in production, use with import maps that have a unique (NOT checked) or 
+    small coverage. */
 
   #_ = {
     registry: new Map(),
@@ -26,6 +90,7 @@ export class Modules {
     map,
     { base, filter, onbatch, onimport, processor, query, type } = {}
   ) {
+    super();
     /* Check base */
     if (!base) {
       throw new Error(`'base' not provided`);
@@ -46,14 +111,22 @@ export class Modules {
     this.onimport = onimport;
     this.processor = processor;
 
-    this.#_.base = base;
-    this.#_.query = query;
-    this.#_.type = type;
-  }
-
-  /* Returns base. */
-  get base() {
-    return this.#_.base;
+    /* Pass kwargs into 'super.__new__' (rather than 'super') to enable config 
+    of parent with own 'this' members */
+    super.__new__({
+      base,
+      /* Returns load function. */
+      get: (path) => {
+        const load = this.#_.registry.get(path);
+        /* Error, if invalid path */
+        if (!load) {
+          throw new Error(`Invalid path: ${path}`);
+        }
+        return load;
+      },
+      query,
+      type,
+    });
   }
 
   /* Returns onbatch hook. */
@@ -105,16 +178,6 @@ export class Modules {
     }
   }
 
-  /* Returns query. */
-  get query() {
-    return this.#_.query || "";
-  }
-
-  /* Returns type. */
-  get type() {
-    return this.#_.type;
-  }
-
   /* Batch-imports, optionally by filter. */
   async batch(filter) {
     const imports = {};
@@ -127,8 +190,6 @@ export class Modules {
     return imports;
   }
 
-
-
   /* Checks, if valid path. */
   has(path) {
     return this.#_.registry.has(path);
@@ -136,14 +197,8 @@ export class Modules {
 
   /* Returns import. */
   async import(path) {
-    /* Get load function */
-    const load = this.#_.registry.get(path);
-    /* Error, if invalid path */
-    if (!load) {
-      throw new Error(`Invalid path: ${path}`);
-    }
     /* Import */
-    let result = await load();
+    let result = await super.import(path);
     /* Process */
     if (this.processor) {
       const processed = await this.processor.call(path, result);
@@ -165,11 +220,3 @@ export class Modules {
     return this.#_.registry.keys();
   }
 }
-
-
-  /* NOTE
-  - Can be used for non-Vite imports maps, i.e., for objects with the same shape.
-  - Not a Rollo import engine member, but can play a supplementing role.
-  - Risk of redundant (overlapping) registries. Therefore, for instances exposed 
-    in production, use with import maps that have a unique (NOT checked) or 
-    small coverage. */
