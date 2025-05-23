@@ -29,18 +29,7 @@ def main():
 
         ##print("data: ", data)
 
-        format = {
-            "template": "<h1>Hello from SSG</h1>\r\n<h2>{{headline}}</h2>\r\n<div>{{html}}</div>",
-            "content": {
-                "/bar.template": {
-                    "html": "\n\n<h1>Bar</h1>",
-                    "meta": {
-                        "date": "2025-05-09",
-                        "headline": "I wonder how this pans out...",
-                    },
-                }
-            },
-        }
+       
 
         """TODO
         Sortable results
