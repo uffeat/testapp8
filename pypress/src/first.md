@@ -1,7 +1,7 @@
 ---
-title: "First Post"
-description: "A first demo"
-template: "template.jinja"
+title: First Post
+description: A first demo
+template: template.jinja
 ---
 
 # Hello from First
