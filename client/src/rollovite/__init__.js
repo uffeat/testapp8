@@ -6,6 +6,7 @@ v.4.5
 */
 
 /* TODO
+- Implement '?nocache' option.
 - Keep an eye on dir scopes for Vite import maps (globs). 
   Should effectively have global coverage, but leave out dirs and file 
   extensions not used by the actual app. Doing so is verbose, but worth it.

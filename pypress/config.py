@@ -1,1 +1,0 @@
-dst = "pypress/dst"
