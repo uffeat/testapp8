@@ -8,9 +8,11 @@ import "@/bootstrap.scss";
 import "@/main.css";
 import "@/rollovite/__init__.js";
 
+import { url } from "@/rollovite/url";
+
 
 const { component } = await use("@/rollo/component/component.js");
-const { url } = await use("@/rollovite/url.js");
+//const { url } = await use("@/rollovite/url.js");
 console.log('HERE')
 const src = await url("@/images/bevel.jpg")
 
