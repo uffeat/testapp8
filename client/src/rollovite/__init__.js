@@ -23,6 +23,30 @@ v.4.6
   Such narrowing does of course NOT affect imports from public!
 */
 
+/* */
+(() => {
+  const map = import.meta.glob(["/src/assets/**/*.*"], {
+    query: "?url",
+    import: "default",
+  });
+
+  /* Make 'url' global */
+  Object.defineProperty(window, "url", {
+    configurable: false,
+    enumerable: true,
+    writable: false,
+    value: (path) => {
+      path = `/src/assets/${path.slice("@/".length)}`;
+      const load = map[path];
+      if (!load) {
+        throw new Error(`Invalid path: ${path}`);
+      }
+      /* NOTE 'load' returns a promise; typically use with await or then */
+      return load();
+    },
+  });
+})();
+
 /* Global import utility that supports:
 - Truly dynamic imports.
 - Import from src ('@/'-prefix) and from public ('/'-prefix).
@@ -68,18 +92,16 @@ const pub = new (class {
     this.#_.import = new (class {
       #_ = {
         cache: new Map(),
-        import: Function('path', 'return import(path)')
-      }
+        import: Function("path", "return import(path)"),
+      };
 
       /* Returns js module. */
       async call(path) {
         if (this.#_.cache.has(path)) return this.#_.cache.get(path);
-        const module = await this.#_.import(path)
+        const module = await this.#_.import(path);
         this.#_.cache.set(path, module);
         return module;
       }
-
-      
     })();
   }
 
@@ -344,7 +366,6 @@ app.maps
       "!/src/assets/**/*.*",
       "!/src/main/**/*.*",
       "!/src/rollotest/**/*.*",
-      
     ]),
     "css?raw": import.meta.glob(
       [
@@ -352,7 +373,6 @@ app.maps
         "!/src/assets/**/*.*",
         "!/src/main/**/*.*",
         "!/src/rollotest/**/*.*",
-       
       ],
       {
         query: "?raw",
@@ -365,7 +385,6 @@ app.maps
         "!/src/assets/**/*.*",
         "!/src/main/**/*.*",
         "!/src/rollotest/**/*.*",
-       
       ],
       {
         query: "?raw",
@@ -378,7 +397,6 @@ app.maps
       "!/src/assets/**/*.*",
       "!/src/main/**/*.*",
       "!/src/rollotest/**/*.*",
-      
     ]),
     "js?raw": import.meta.glob(
       [
@@ -387,7 +405,6 @@ app.maps
         "!/src/assets/**/*.*",
         "!/src/main/**/*.*",
         "!/src/rollotest/**/*.*",
-        
       ],
       {
         query: "?raw",
@@ -401,7 +418,6 @@ app.maps
         "!/src/main/**/*.*",
         "!/src/rollometa/**/*.*",
         "!/src/rollotest/**/*.*",
-        
       ],
       {
         import: "default",
@@ -414,7 +430,6 @@ app.maps
         "!/src/main/**/*.*",
         "!/src/rollometa/**/*.*",
         "!/src/rollotest/**/*.*",
-        
       ],
       {
         query: "?raw",
@@ -428,7 +443,6 @@ app.maps
         "!/src/main/**/*.*",
         "!/src/rollometa/**/*.*",
         "!/src/rollotest/**/*.*",
-       
       ],
       {
         query: "?raw",
@@ -445,7 +459,6 @@ app.maps
         "!/src/assets/**/*.*",
         "!/src/main/**/*.*",
         "!/src/rollotest/**/*.*",
-       
       ],
       {
         query: "?raw",
@@ -466,7 +479,6 @@ app.maps
         "!/src/assets/**/*.*",
         "!/src/main/**/*.*",
         "!/src/rollotest/**/*.*",
-        
       ],
       {
         query: "?raw",
