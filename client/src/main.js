@@ -16,9 +16,8 @@ const { component } = await use("@/rollo/component/component.js");
 const { capitalize } = await use("@/rollo/tools/text/capitalize.js");
 
 
-//const { url } = await use("@/rollovite/url.js");
-console.log('HERE')
-const src = await url("@/images/bevel.jpg");
+
+
 
 
 
@@ -29,7 +28,7 @@ console.log('foo:', (await use('/test/foo/foo.js')).foo)
 console.log('template:', (await use('/test/foo/foo.template')))
 
 
-component.img({ src , parent: document.body });
+component.img({ src: ( await url("@/images/bevel.jpg")) , parent: document.body });
 component.img({ src: "/images/sprocket.jpg", parent: document.body });
 
 
