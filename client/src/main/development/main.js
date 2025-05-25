@@ -19,16 +19,10 @@ export class Path {
 
   constructor(specifier) {
     this.#_.specifier = specifier;
-
-    const file = specifier.split("/").reverse()[0];
-    const [stem, ...hot] = file.split(".");
-    this.#_.suffix = hot.join(".");
-    const [types, querystring] = this.#_.suffix.split("?");
-    this.#_.types = types;
-    this.#_.querystring = querystring;
   }
 
-  /* Returns key. */
+  /* Returns key. 
+  - type and first query key combo */
   get key() {
     if (this.#_.key === undefined) {
       this.#_.key = this.#_.querystring
@@ -41,13 +35,17 @@ export class Path {
   /* Returns native path. */
   get path() {
     if (this.#_.path === undefined) {
-      this.#_.path = 42; ////
+      this.#_.path = this.#_.specifier.split("?")[0];
+      if (this.#_.path.startsWith("@/")) {
+        this.#_.path = `/src/${this.#_.path.slice("@/".length)}`;
+      }
     }
     return this.#_.path;
   }
 
-  /* Returns . */
+  /* Returns query controller. */
   get query() {
+    this.#init();
     if (this.#_.query === undefined) {
       const querystring = this.#_.querystring;
       this.#_.query = new (class {
@@ -80,13 +78,16 @@ export class Path {
     return this.#_.specifier;
   }
 
-  /* Returns suffix. */
+  /* Returns suffix.
+  - Everything after first '.' in file name */
   get suffix() {
+    this.#init();
     return this.#_.suffix;
   }
 
   /* Returns types. */
   get types() {
+    this.#init();
     return this.#_.types;
   }
 
@@ -97,9 +98,21 @@ export class Path {
     }
     return this.#_.type;
   }
+
+  #init() {
+    if (this.#_.init) return;
+    const file = this.#_.specifier.split("/").reverse()[0];
+    const [stem, ...hot] = file.split(".");
+    this.#_.suffix = hot.join(".");
+    const [types, querystring] = this.#_.suffix.split("?");
+    this.#_.types = types;
+    this.#_.querystring = querystring;
+    this.#_.init = true;
+  }
 }
 
 (() => {
+  console.log('')
   const path = new Path("@/test/foo/foo.test.js?raw&nocache");
   console.log("suffix:", path.suffix);
   console.log("types:", path.types);
@@ -107,6 +120,19 @@ export class Path {
   console.log("raw:", path.query.has("raw"));
   console.log("nocache:", path.query.has("nocache"));
   console.log("key:", path.key);
+  console.log("path:", path.path);
+})();
+
+(() => {
+  console.log('')
+  const path = new Path("@/test/foo/foo.js");
+  console.log("suffix:", path.suffix);
+  console.log("types:", path.types);
+  console.log("type:", path.type);
+  console.log("raw:", path.query.has("raw"));
+  console.log("nocache:", path.query.has("nocache"));
+  console.log("key:", path.key);
+  console.log("path:", path.path);
 })();
 
 console.info("Vite environment:", import.meta.env.MODE);
