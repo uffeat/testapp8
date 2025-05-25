@@ -15,11 +15,7 @@ const constructed = Function('path', 'return import(path)')
 const import_ = async (path) => {
   // NOTE No caching
   
-  console.log(location.href)
- 
-  if (!import.meta.env.DEV) {
-    
-  }
+  
 
 
   //const module = await new Function(`return import("${path}")`)();
