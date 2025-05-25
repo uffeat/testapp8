@@ -28,7 +28,7 @@ console.log('foo:', (await use('/test/foo/foo.js')).foo)
 console.log('template:', (await use('/test/foo/foo.template')))
 
 
-component.img({ src: ( await url("@/images/bevel.jpg")) , parent: document.body });
+component.img({ src: ( await assets("images/bevel.jpg")) , parent: document.body });
 component.img({ src: "/images/sprocket.jpg", parent: document.body });
 
 

@@ -30,42 +30,31 @@ v.4.6
     import: "default",
   });
 
-  /* Make 'url' global */
-  Object.defineProperty(window, "url", {
+  /* Make 'assets' global */
+  Object.defineProperty(window, "assets", {
     configurable: false,
     enumerable: true,
     writable: false,
+    /* NOTEReturns a promise; use with await or then */
     value: (path) => {
-      path = `/src/assets/${path.slice("@/".length)}`;
-      const load = map[path];
+      const load = map[`/src/assets/${path}`];
       if (!load) {
         throw new Error(`Invalid path: ${path}`);
       }
-      /* NOTE 'load' returns a promise; typically use with await or then */
       return load();
     },
   });
 })();
-
-/* Global import utility that supports:
-- Truly dynamic imports.
-- Import from src ('@/'-prefix) and from public ('/'-prefix).
-- Common of file types.
-- Raw imports.
-- Alternative Python-like-syntax.
-- Creation of ad-hoc "importers" that import from base dirs.
-- Safe access to registered import maps for reusability. */
-export const use = new Proxy(() => {}, {
-  get: (_, key) => app[key],
-  apply: (_, __, args) => app.import(...args),
-});
 
 /* Make 'use' global */
 Object.defineProperty(window, "use", {
   configurable: false,
   enumerable: true,
   writable: false,
-  value: use,
+  value: new Proxy(() => {}, {
+    get: (_, key) => app[key],
+    apply: (_, __, args) => app.import(...args),
+  }),
 });
 
 /* Utility for importing public files. */
@@ -146,7 +135,14 @@ const pub = new (class {
   };
 })();
 
-/* Global import utility. */
+/* Global import utility that supports:
+- Truly dynamic imports.
+- Import from src ('@/'-prefix) and from public ('/'-prefix).
+- Common of file types.
+- Raw imports.
+- Alternative Python-like-syntax.
+- Creation of ad-hoc "importers" that import from base dirs.
+- Safe access to registered import maps for reusability. */
 const app = new (class {
   #_ = {};
 
