@@ -10,7 +10,7 @@ from github import Github, Auth
 
 
 def get_token():
-    """Return GitHun token. Raises exception, if token espired."""
+    """Return GitHun token. Raises exception, if token expired."""
     secrets: dict = json.loads(
         (Path.cwd() / "secrets.json").read_text(encoding="utf-8")
     )
