@@ -51,6 +51,8 @@ const pub = new (class {
   #_ = {};
 
   constructor() {
+    const owner = this;
+
     /* Create mechanism for importing, caching and returning pubilc files as 
     text */
     this.#_.fetch = new (class {
@@ -68,22 +70,31 @@ const pub = new (class {
     /* Create mechanism for importing, caching and returning pubilc js 
     modules */
     this.#_.import = new (class {
-      #_ = {
-        cache: new Map(),
-        import: Function('path', 'return import(path)')
-      }
+      #cache = new Map();
 
       /* Returns js module. */
       async call(path) {
-        if (this.#_.cache.has(path)) return this.#_.cache.get(path);
+        if (this.#cache.has(path)) return this.#cache.get(path);
         /* NOTE Use `owner.import` to avoid risk of redundancy, if the file 
         as previously been imported as text. */
-        const module = await this.#_.import(path)
-        this.#_.cache.set(path, module);
+        const module = await this.#construct(
+          `${await owner.import(`${path}?raw`)}\n//# sourceURL=${path}`
+        );
+        this.#cache.set(path, module);
         return module;
       }
 
-      
+      /* Returns js module constructed from text. */
+      #construct = async (text) => {
+        const url = URL.createObjectURL(
+          new Blob([text], { type: "text/javascript" })
+        );
+        /* Construct import function to prevent Vite from barking at truly 
+        dynamic imports in production. */
+        const module = await new Function(`return import("${url}")`)();
+        URL.revokeObjectURL(url);
+        return module;
+      };
     })();
   }
 
@@ -99,13 +110,9 @@ const pub = new (class {
     })();
     const type = path.split(".").reverse()[0];
     if (!raw && type === "js") return await this.#_.import.call(path);
-
-
     /* Normalize path AFTER handling of non-raw js to ensure that 'path' is 
     not normalized twice when this.#_.import calls 'import' */
-    //path = `${import.meta.env.BASE_URL}${path.slice("/".length)}`;
-
-
+    path = `${import.meta.env.BASE_URL}${path.slice("/".length)}`;
     /* Mimic Vite: css becomes global (albeit via link) */
     if (!raw && type === "css") return await this.#link(path);
     const result = await this.#_.fetch.call(path);

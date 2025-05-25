@@ -8,10 +8,23 @@ import "@/bootstrap.scss";
 import "@/main.css";
 import "@/rollovite/__init__.js";
 
+const constructed = Function('path', 'return import(path)')
+
+//VERCEL_URL
+//BASE_URL
+const import_ = async (path) => {
+  // NOTE No caching
+  
+  
 
 
-console.log('foo:', (await use('/test/foo/foo.js')).foo)
-console.log('template:', (await use('/test/foo/foo.template')))
+  //const module = await new Function(`return import("${path}")`)();
+  const module = await constructed(path);
+  return module
+}
+
+console.log('foo:', (await import_('/test/foo/foo.js')).foo)
+
 
 
 /* NOTE Do NOT await import! */
