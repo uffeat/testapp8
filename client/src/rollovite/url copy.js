@@ -28,6 +28,6 @@ export const url = (path) => {
     /* NOTE 'load' returns a promise; typically call with await */
     return load();
   } else {
-    return path;
+    return `${import.meta.env.BASE_URL}${path.slice("/".length)}`;
   }
 };

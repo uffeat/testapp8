@@ -99,9 +99,7 @@ const pub = new (class {
     if (!raw && type === "js") return await this.#_.import.call(path);
 
 
-    /* Normalize path AFTER handling of non-raw js to ensure that 'path' is 
-    not normalized twice when this.#_.import calls 'import' */
-    //path = `${import.meta.env.BASE_URL}${path.slice("/".length)}`;
+   
 
 
     /* Mimic Vite: css becomes global (albeit via link) */
@@ -353,7 +351,7 @@ app.maps
       "!/src/assets/**/*.*",
       "!/src/main/**/*.*",
       "!/src/rollotest/**/*.*",
-      "!/src/rollovite/**/*.*",
+      
     ]),
     "css?raw": import.meta.glob(
       [
@@ -361,7 +359,7 @@ app.maps
         "!/src/assets/**/*.*",
         "!/src/main/**/*.*",
         "!/src/rollotest/**/*.*",
-        "!/src/rollovite/**/*.*",
+       
       ],
       {
         query: "?raw",
@@ -374,7 +372,7 @@ app.maps
         "!/src/assets/**/*.*",
         "!/src/main/**/*.*",
         "!/src/rollotest/**/*.*",
-        "!/src/rollovite/**/*.*",
+       
       ],
       {
         query: "?raw",
@@ -387,7 +385,7 @@ app.maps
       "!/src/assets/**/*.*",
       "!/src/main/**/*.*",
       "!/src/rollotest/**/*.*",
-      "!/src/rollovite/**/*.*",
+      
     ]),
     "js?raw": import.meta.glob(
       [
@@ -396,7 +394,7 @@ app.maps
         "!/src/assets/**/*.*",
         "!/src/main/**/*.*",
         "!/src/rollotest/**/*.*",
-        "!/src/rollovite/**/*.*",
+        
       ],
       {
         query: "?raw",
@@ -410,7 +408,7 @@ app.maps
         "!/src/main/**/*.*",
         "!/src/rollometa/**/*.*",
         "!/src/rollotest/**/*.*",
-        "!/src/rollovite/**/*.*",
+        
       ],
       {
         import: "default",
@@ -423,7 +421,7 @@ app.maps
         "!/src/main/**/*.*",
         "!/src/rollometa/**/*.*",
         "!/src/rollotest/**/*.*",
-        "!/src/rollovite/**/*.*",
+        
       ],
       {
         query: "?raw",
@@ -437,7 +435,7 @@ app.maps
         "!/src/main/**/*.*",
         "!/src/rollometa/**/*.*",
         "!/src/rollotest/**/*.*",
-        "!/src/rollovite/**/*.*",
+       
       ],
       {
         query: "?raw",
@@ -454,7 +452,7 @@ app.maps
         "!/src/assets/**/*.*",
         "!/src/main/**/*.*",
         "!/src/rollotest/**/*.*",
-        "!/src/rollovite/**/*.*",
+       
       ],
       {
         query: "?raw",
@@ -475,7 +473,7 @@ app.maps
         "!/src/assets/**/*.*",
         "!/src/main/**/*.*",
         "!/src/rollotest/**/*.*",
-        "!/src/rollovite/**/*.*",
+        
       ],
       {
         query: "?raw",
