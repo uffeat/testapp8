@@ -1,13 +1,11 @@
 /*
 import "@/rollovite/__init__.js";
 import { use } from "@/rollovite/__init__.js";
-20250523
-v.4.5
+20250525
+v.4.6
 */
 
 /* TODO
-
-
 - Reimplement Path for more advanced query handling, incl.:
   - Path.create
   - path.query.has()
@@ -97,11 +95,6 @@ const pub = new (class {
     })();
     const type = path.split(".").reverse()[0];
     if (!raw && type === "js") return await this.#_.import.call(path);
-
-
-   
-
-
     /* Mimic Vite: css becomes global (albeit via link) */
     if (!raw && type === "css") return await this.#link(path);
     const result = await this.#_.fetch.call(path);
