@@ -1,0 +1,61 @@
+/*
+rollovite/assets
+*/
+
+import { assets } from "@/rollovite/tools//public/assets.js";
+import { component } from "@/rollo/component/component.js";
+
+await (async function css() {
+  console.log("css:", await assets.import("/test/foo/foo.css", { raw: true }));
+  console.log("css:", await assets.import("/test/foo/foo.css?raw"));
+  console.log("css:", await assets.path.test.foo.foo[":css"]({ raw: true }));
+  console.log("css:", await assets.path.test.foo.foo[":css"]({ raw: true }));
+})();
+
+await (async function link() {
+  await assets.import("/test/foo/foo.css");
+  component.h1("foo", { parent: document.body }, "FOO");
+})();
+
+await (async function js() {
+  console.log("foo:", (await assets.import("/test/foo/foo.js")).foo);
+  console.log("foo:", await assets.import("/test/foo/foo.js", { name: "foo" }));
+  console.log("foo:", await assets.path.test.foo.foo[":js"]({ name: "foo" }));
+  console.log("foo:", await assets.path.test.foo.foo[":js"]({ name: "foo" }));
+})();
+
+await (async function json() {
+  console.log("parsed:", await assets.import("/test/foo/foo.json"));
+  console.log("raw:", await assets.import("/test/foo/foo.json", { raw: true }));
+  console.log("raw:", await assets.path.test.foo.foo[":json"]({ raw: true }));
+  console.log("foo:", (await assets.import("/test/foo/foo.json")).foo);
+  console.log(
+    "foo:",
+    await assets.import("/test/foo/foo.json", { name: "foo" })
+  );
+  console.log("foo:", await assets.path.test.foo.foo[":json"]({ name: "foo" }));
+
+  console.log("parsed:", await assets.import("/test/bar/bar.json"));
+  console.log("3:", await assets.import("/test/bar/bar.json", { name: 2 }));
+})();
+
+await (async function template() {
+  console.log("foo:", await assets.import("/test/foo/foo.template"));
+  console.log("foo:", await assets.path.test.foo.foo[":template"]());
+  console.log("foo:", await assets.path.test.foo.foo[":template"]());
+})();
+
+await (async function batch() {
+  await assets.batch((path) => path.includes("/batch/"));
+})();
+
+await (async function importer() {
+  const test = assets.importer.create("/test");
+  console.log("foo:", await test.import("foo/foo.js", { name: "foo" }));
+  console.log("foo:", (await test.path.foo.foo[":js"]()).foo);
+})();
+
+await (async function invalid() {
+  console.log("invalid:", await assets.import("/blabla.template"));
+  console.log("invalid:", await assets.import("/blabla.js"));
+})();

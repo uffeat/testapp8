@@ -1,0 +1,24 @@
+/*
+main.js
+20250520
+*/
+
+/* Globals */
+import "@/bootstrap.scss";
+import "@/main.css";
+import "@/rollovite/__init__.js";
+
+
+
+console.log('foo:', (await use('/test/foo/foo.js')).foo)
+console.log('template:', (await use('/test/foo/foo.template')))
+
+
+/* NOTE Do NOT await import! */
+if (import.meta.env.VERCEL_ENV === "production") {
+  import("@/main/production/main.js");
+} else if (import.meta.env.VERCEL_ENV === "preview") {
+  import("@/main/preview/main.js");
+} else {
+  import("@/main/development/main.js");
+}

@@ -1,0 +1,27 @@
+"""
+pip install anvil-uplink
+20250515
+"""
+
+
+import json
+from pathlib import Path
+from anvil.server import (
+    connect as _connect,
+    
+    wait_forever,
+)
+
+
+def connect() -> callable:
+    """."""
+    secrets: dict = json.loads((Path.cwd() / "secrets.json").read_text(encoding="utf-8"))
+
+    _connect(
+        secrets.get(
+            "anvil.uplink.server"
+        )
+    )
+
+    return wait_forever
+

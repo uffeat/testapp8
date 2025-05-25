@@ -28,13 +28,13 @@ dist-ssr
 .vercel
 
 # Custom
+.venv/
 _notes/
-_devops_code
-_server_code/
-_scratch_code/
+_scratch/
 secrets.json
 
-
+# NOTE
+# - VS Code highlighting not always in sync with actual .gitignore
 
 
 
