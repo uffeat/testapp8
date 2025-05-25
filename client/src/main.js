@@ -14,11 +14,16 @@ const constructed = Function('path', 'return import(path)')
 //BASE_URL
 const import_ = async (path) => {
   // NOTE No caching
-  //path = `${import.meta.env.VERCEL_URL || ''}${path}`;
-  path = import.meta.env.DEV ? path : `.${path.slice('/assets'.length)}`
+  
+  console.log(location.href)
+ 
+  if (!import.meta.env.DEV) {
+    
+  }
 
 
-  const module = await new Function(`return import("${path}")`)();
+  //const module = await new Function(`return import("${path}")`)();
+  const module = await constructed(path);
   return module
 }
 
