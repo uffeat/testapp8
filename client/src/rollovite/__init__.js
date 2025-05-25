@@ -76,8 +76,6 @@ const pub = new (class {
       /* Returns js module. */
       async call(path) {
         if (this.#_.cache.has(path)) return this.#_.cache.get(path);
-        /* NOTE Use `owner.import` to avoid risk of redundancy, if the file 
-        as previously been imported as text. */
         const module = await this.#_.import(path)
         this.#_.cache.set(path, module);
         return module;
