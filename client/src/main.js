@@ -12,7 +12,10 @@ import "@/rollovite/__init__.js";
 //BASE_URL
 const import_ = async (path) => {
   // NOTE No caching
-  path = `${import.meta.env.VERCEL_URL || ''}${path}`;
+  //path = `${import.meta.env.VERCEL_URL || ''}${path}`;
+  path = import.meta.env.DEV ? path : `.${path}`
+
+
   const module = await new Function(`return import("${path}")`)();
   return module
 }
