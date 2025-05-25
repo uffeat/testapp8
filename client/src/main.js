@@ -12,9 +12,13 @@ import { url } from "@/rollovite/url";
 
 
 const { component } = await use("@/rollo/component/component.js");
+
+const { capitalize } = await use("@/rollo/tools/text/capitalize.js");
+
+
 //const { url } = await use("@/rollovite/url.js");
 console.log('HERE')
-const src = await url("@/images/bevel.jpg")
+const src = await url("@/images/bevel.jpg");
 
 
 
