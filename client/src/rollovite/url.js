@@ -1,7 +1,7 @@
 /*
 import { url } from  "@/rollovite/url.js";
-20250520
-v.4.0
+20250525
+v.4.1
 */
 
 /* TODO
@@ -25,7 +25,7 @@ export const url = (path) => {
     if (!load) {
       throw new Error(`Invalid path: ${path}`);
     }
-    /* NOTE 'load' returns a promise; typically call with await */
+    /* NOTE 'load' returns a promise; typically use with await or then */
     return load();
   } else {
     return path;

@@ -8,7 +8,8 @@ import "@/bootstrap.scss";
 import "@/main.css";
 import "@/rollovite/__init__.js";
 
-import { component } from "@/rollo/component/component.js";
+//import { component } from "@/rollo/component/component.js";
+const { component } = await use("@/rollo/component/component.js");
 
 
 component.h1("foo.bar", { parent: document.body }, "FOO");
