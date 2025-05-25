@@ -19,8 +19,14 @@ console.log('Capitalized:', capitalize('uffe'))
 
 component.h1("foo.bar", { parent: document.body }, "FOO");
 await use("/test/bar/bar.css");
+
+
+console.log('foo:', (await use('@/test/foo/foo.js')).foo)
+console.log('html:', (await use('@/test/foo/foo.html')))
 console.log('foo:', (await use('/test/foo/foo.js')).foo)
 console.log('template:', (await use('/test/foo/foo.template')))
+
+
 
 component.img({ src: ( await assets("images/bevel.jpg")) , parent: document.body });
 component.img({ src: "/images/sprocket.jpg", parent: document.body });

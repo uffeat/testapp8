@@ -1,5 +1,6 @@
 /*
 import "@/rollovite/__init__.js";
+import { use } from "@/rollovite/__init__.js";
 20250525
 v.4.6
 */
@@ -12,6 +13,14 @@ import { Processors } from "@/rollovite/_tools/processors.js";
 import { pub } from "@/rollovite/_tools/pub.js";
 
 /* TODO
+- Implement '?nocache' option that signals
+  - No caching of public assets
+  - return copy of src js
+  - No caching in processors
+
+- Aliases (exposed), that enables e.g.
+  - use.component
+- Perhaps sep out a src singleton
 - Keep an eye on dir scopes for Vite import maps (globs). 
   Should effectively have global coverage, but leave out dirs and file 
   extensions not used by the actual app. Doing so is verbose, but worth it.
@@ -52,6 +61,7 @@ const app = new (class {
     const owner = this;
 
     this.#_.maps = new Maps(this);
+
     this.#_.processors = new Processors(this);
 
     /* Enable Python-like import syntax for imports */
@@ -103,14 +113,9 @@ const app = new (class {
   async import(specifier) {
     const path = new Path(specifier);
     /* Import */
-    let result = path.public
+    const result = path.public
       ? await pub.import(path)
       : await this.maps.get(path.key).get(path)();
-
-    if (typeof result === "object" && path.query.has("nocache")) {
-      result = Object.freeze({ ...result });
-    }
-
     /* Process */
     /* NOTE No processing is more likely than processing -> use 'has' 
     initially and not 'get' directly */
