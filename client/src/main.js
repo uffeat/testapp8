@@ -15,7 +15,7 @@ const { component } = await use("@/rollo/component/component.js");
 
 const { capitalize } = await use("@/rollo/tools/text/capitalize.js");
 
-
+console.log('Capitalized:', capitalize('uffe'))
 
 
 
