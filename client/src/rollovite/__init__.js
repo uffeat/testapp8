@@ -6,8 +6,8 @@ v.4.5
 */
 
 /* TODO
-- Direct js import from public
-- Reuse constructed import func
+
+
 - Reimplement Path for more advanced query handling, incl.:
   - Path.create
   - path.query.has()
