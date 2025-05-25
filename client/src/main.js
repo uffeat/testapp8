@@ -11,6 +11,8 @@ import "@/rollovite/__init__.js";
 
 const { component } = await use("@/rollo/component/component.js");
 const { url } = await use("@/rollovite/url.js");
+console.log('HERE')
+const src = await url("@/images/bevel.jpg")
 
 
 
@@ -20,7 +22,7 @@ await use("/test/bar/bar.css");
 console.log('foo:', (await use('/test/foo/foo.js')).foo)
 console.log('template:', (await use('/test/foo/foo.template')))
 
-const src = await url("@/images/bevel.jpg")
+
 component.img({ src , parent: document.body });
 component.img({ src: "/images/sprocket.jpg", parent: document.body });
 
