@@ -28,7 +28,6 @@ dist-ssr
 .vercel
 
 # Custom
-.venv/
 _notes/
 _scratch/
 secrets.json
