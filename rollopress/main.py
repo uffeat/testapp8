@@ -1,4 +1,11 @@
 """
+pip install Jinja2
+pip install frontmatter
+pip install markdown-it-py
+pip install mdit-py-plugins
+pip install mdit-py-emoji
+pip install minify-html
+
 rollopress/main.py
 20250524
 """
@@ -51,12 +58,12 @@ class RolloPress:
         data = []
 
         for path in SRC.glob("*.md"):
-            """NOTE 
-                `glob("**/*.md")`  
-            combined with 
+            """NOTE
+                `glob("**/*.md")`
+            combined with
                 `path.relative_to(SRC).with_suffix(".template").as_posix()`
             could handle nested structures, but we intentionally go for flat!"""
-            # 
+            #
             meta, content = self.parse(path)
             data.append(dict(meta=meta, content=content, name=path.stem))
 
