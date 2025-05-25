@@ -9,6 +9,16 @@ import "@/main.css";
 import "@/rollovite/__init__.js";
 
 
+const import_ = async (path) => {
+  // NOTE No caching
+  path = `${import.meta.env.BASE_URL}${path.slice("/".length)}`;
+  const module = await new Function(`return import("${path}")`)();
+  return module
+}
+
+console.log('foo:', (await import_('/test/foo/foo.js')).foo)
+
+
 
 /* NOTE Do NOT await import! */
 if (import.meta.env.VERCEL_ENV === "production") {

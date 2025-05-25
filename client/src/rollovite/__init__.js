@@ -6,7 +6,19 @@ v.4.5
 */
 
 /* TODO
-- Implement '?nocache' option.
+- Direct js import from public
+- Reuse constructed import func
+- Reimplement Path for more advanced query handling, incl.:
+  - Path.create
+  - path.query.has()
+- Implement '?nocache' option that signals
+  - No caching of public assets
+  - return copy of src js
+  - No caching in processors
+
+- Aliases (exposed), that enables e.g.
+  - use.component
+- Perhaps sep out a src singleton
 - Keep an eye on dir scopes for Vite import maps (globs). 
   Should effectively have global coverage, but leave out dirs and file 
   extensions not used by the actual app. Doing so is verbose, but worth it.
