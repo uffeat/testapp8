@@ -1,4 +1,4 @@
-export const module = new (class Module {
+export const module = new (class {
   /* Returns a JS module constructed from text. 
   NOTE
   - Any caching should be handled in consuming code. */

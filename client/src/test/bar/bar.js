@@ -1,2 +1,1 @@
-export const bar = "BAR";
-
+export const bar = { bar: "BAR" };

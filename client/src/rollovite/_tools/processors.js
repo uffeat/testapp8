@@ -1,7 +1,7 @@
 /*
 import { Processors } from "@/rollovite/_tools/processors.js";
-20250525
-v.1.0
+20250526
+v.2.0
 */
 
 /* Do NOT import anything from outside 'rollovite' */
@@ -18,49 +18,19 @@ export class Processors {
 
   /* Adds processors. Chainable with respect to owner. */
   add(...specs) {
-    const owner = this.#_.owner
     specs.forEach((spec) => {
       Object.entries(spec).forEach(([key, processor]) => {
-        const cache = (() => {
-          if (key.endsWith("?cache")) {
-            key = key.slice(0, -"?cache".length);
-            return true;
-          }
-        })();
         /* Enforce no-duplication */
         if (this.#_.registry.has(key)) {
           throw new Error(`Duplicate key: ${key}`);
         }
-        this.#_.registry.set(
-          key,
-          /* Wrap in class to provide caching */
-          new (class {
-            #cache = new Map();
-            /* Returns processed result (freshly created or from cache). */
-            async call(path, result) {
-               /* Use 'call', so that processor can be an object with a 'call' 
-               method or a non-arrow that exploits its context. */
-              if (!cache || path.query.has('nocache'))
-                return await processor.call(null, result, {
-                  owner,
-                  path,
-                });
-              if (this.#cache.has(path.path)) return this.#cache.get(path.path);
-              const processed = await processor.call(null, result, {
-                owner,
-                path,
-              });
-              this.#cache.set(path, processed);
-              return processed;
-            }
-          })()
-        );
+        this.#_.registry.set(key, processor);
       });
     });
     return this.#_.owner;
   }
 
-  /* Returns class-wrapped processor. */
+  /* Returns processor. */
   get(key) {
     return this.#_.registry.get(key);
   }

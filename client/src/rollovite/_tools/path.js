@@ -1,7 +1,7 @@
 /*
 import { Path } from "@/rollovite/_tools/path.js";
-20250525
-v.1.0
+20250526
+v.2.0
 */
 
 /* Do NOT import anything from outside 'rollovite' */
@@ -21,63 +21,25 @@ export class Path {
     this.#_.specifier = specifier;
   }
 
-  /* Returns key. 
-  - type and first query key combo */
-  get key() {
-    if (this.#_.key === undefined) {
-      this.#_.key = this.#_.querystring
-        ? `${this.type}?${this.#_.querystring.split("&")[0]}`
-        : this.type;
-    }
-    return this.#_.key;
+  /* Returns file. */
+  get file() {
+    this.#init();
+    return this.#_.file;
   }
 
   /* Returns native path. */
   get path() {
     if (this.#_.path === undefined) {
-      this.#_.path = this.specifier.split("?")[0];
-      if (!this.public) {
-        this.#_.path = `/src/${this.#_.path.slice("@/".length)}`;
-      }
+      this.#_.path = this.public
+        ? this.specifier
+        : `/src/${this.specifier.slice("@/".length)}`;
     }
     return this.#_.path;
   }
 
   /* Returns public flag. */
   get public() {
-    return this.specifier.startsWith("/")
-  }
-
-
-
-  /* Returns query controller. */
-  get query() {
-    this.#init();
-    if (this.#_.query === undefined) {
-      const querystring = this.#_.querystring;
-      this.#_.query = new (class {
-        #_ = {};
-
-        get string() {
-          return querystring;
-        }
-
-        has(key) {
-          if (!this.string) {
-            return false;
-          }
-          if (!this.#_.querykeys) {
-            this.#_.querykeys = new Set();
-            for (const key of this.string.split("&")) {
-              this.#_.querykeys.add(key);
-            }
-          }
-          return this.#_.querykeys.has(key);
-        }
-      })();
-    }
-
-    return this.#_.query;
+    return this.specifier.startsWith("/");
   }
 
   /* Returns original specifier. */
@@ -85,11 +47,10 @@ export class Path {
     return this.#_.specifier;
   }
 
-  /* Returns suffix.
-  - Everything after first '.' in file name */
-  get suffix() {
+  /* Returns stem. */
+  get stem() {
     this.#init();
-    return this.#_.suffix;
+    return this.#_.stem;
   }
 
   /* Returns types. */
@@ -108,12 +69,10 @@ export class Path {
 
   #init() {
     if (this.#_.init) return;
-    const file = this.specifier.split("/").reverse()[0];
-    const [stem, ...hot] = file.split(".");
-    this.#_.suffix = hot.join(".");
-    const [types, querystring] = this.#_.suffix.split("?");
-    this.#_.types = types;
-    this.#_.querystring = querystring;
+    this.#_.file = this.specifier.split("/").reverse()[0];
+    const [stem, ...hot] = this.#_.file.split(".");
+    this.#_.stem = stem;
+    this.#_.types = hot.join(".");
     this.#_.init = true;
   }
 }
