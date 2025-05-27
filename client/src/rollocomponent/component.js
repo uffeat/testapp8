@@ -7,11 +7,20 @@ v.1.0
 import append from "@/rollocomponent/mixins/append.js";
 import attrs from "@/rollocomponent/mixins/attrs.js";
 import classes from "@/rollocomponent/mixins/classes.js";
+import clear from "@/rollocomponent/mixins/clear.js";
+import connect from "@/rollocomponent/mixins/connect.js";
+import find from "@/rollocomponent/mixins/find.js";
+import for_ from "@/rollocomponent/mixins/for_.js";
 import handlers from "@/rollocomponent/mixins/handlers.js";
 import hooks from "@/rollocomponent/mixins/hooks.js";
+import insert from "@/rollocomponent/mixins/insert.js";
+import novalidation from "@/rollocomponent/mixins/novalidation.js";
 import props from "@/rollocomponent/mixins/props.js";
+import send from "@/rollocomponent/mixins/send.js";
 import style from "@/rollocomponent/mixins/style.js";
+import tab from "@/rollocomponent/mixins/tab.js";
 import text from "@/rollocomponent/mixins/text.js";
+import vars from "@/rollocomponent/mixins/vars.js";
 
 const registry = new (class {
   #_ = {
@@ -28,10 +37,31 @@ const registry = new (class {
       throw new Error(`'${tag}' is not native.`);
     }
 
-    const mixins = [append, attrs, classes, handlers, hooks, props, style];
+    const mixins = [
+      append,
+      attrs,
+      classes,
+      clear,
+      connect,
+      find,
+      handlers,
+      hooks,
+      insert,
+      props,
+      send,
+      style,
+      tab,
+      vars,
+    ];
 
     if ("textContent" in ref) {
       mixins.push(text);
+    }
+    if (tag === "form") {
+      mixins.push(novalidation);
+    }
+    if (tag === "label") {
+      mixins.push(for_);
     }
 
     class cls extends mixin(base, {}, ...mixins) {

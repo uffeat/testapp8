@@ -4,6 +4,9 @@ import classes from "@/rollocomponent/mixins/classes.js";
 v.1.0
 */
 
+/* TODO
+- If ever needed: Relatively easy to make classes reactive, by event dispatch. */
+
 export default (parent, config) => {
   return class extends parent {
     #_ = {};
