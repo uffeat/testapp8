@@ -5,8 +5,8 @@ v.1.0
 */
 
 /* TODO
-- If ever needed: Relatively register handlers in custom registry. This would 
-  allow introspection and type-based clearing. */
+- If ever needed: Relatively easy to register handlers in custom registry. 
+  This would allow introspection and type-based clearing. */
 
 export default (parent, config) => {
   return class extends parent {
@@ -19,12 +19,13 @@ export default (parent, config) => {
           Object.entries(spec).forEach(([key, handler]) => {
             const [type, ...dirs] = key.split("$");
             if (dirs.includes("once")) {
-              const _handler = handler;
-              handler = (event) => {
-                _handler.call(owner, event);
-                owner.handlers.remove({ [type]: handler });
+              const original = handler;
+              handler = function wrapper(event) {
+                original.call(owner, event);
+                owner.removeEventListener(type, wrapper);
               };
             }
+            
             owner.addEventListener(type, handler);
 
             if (dirs.includes("run")) {
@@ -66,7 +67,6 @@ export default (parent, config) => {
     /* Adds event handlers from '@'-syntax. Chainable. */
     update(updates = {}) {
       super.update?.(updates);
-
       this.handlers.add(
         Object.fromEntries(
           Object.entries(updates)
@@ -74,7 +74,6 @@ export default (parent, config) => {
             .map(([k, v]) => [k.slice("@".length), v])
         )
       );
-
       return this;
     }
   };

@@ -6,7 +6,8 @@ v.1.0
 
 export default (parent, config) => {
   return class extends parent {
-    /* Unified alternative to 'querySelector' and 'querySelectorAll' a leaner syntax. */
+    /* Unified (optional) alternative to 'querySelector' and 'querySelectorAll' 
+    with a leaner syntax. */
     find(selector) {
       const result = this.querySelectorAll(selector)
       if (result.length === 0) {
@@ -17,7 +18,6 @@ export default (parent, config) => {
       }
       /* NOTE Return values() to enable direct use of iterator helpers. */
       return result.values()
-      
     }
   };
 };

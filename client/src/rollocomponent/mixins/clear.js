@@ -9,11 +9,9 @@ export default (parent, config) => {
     /* Clears content, optionally subject to selector. Chainable. */
     clear(selector) {
       if (selector) {
-        const result = this.find(selector);
-        if (Array.isArray(result)) {
-          result.forEach((e) => e.remove());
-        } else if (result instanceof HTMLElement) {
-          result.remove();
+        const elements = this.querySelectorAll(selector);
+        for (const element of elements) {
+          element.remove();
         }
       } else {
         /* Remove child elements in a memory-safe way. */

@@ -14,7 +14,7 @@ export default (parent, config) => {
       super();
       const owner = this;
       this.#_.classes = new (class {
-        /* Retuns classList (for advanced use). */
+        /* Returns classList (for advanced use). */
         get list() {
           return owner.classList;
         }
@@ -22,6 +22,14 @@ export default (parent, config) => {
         /* Adds classes. Chainable with respect to component. */
         add(classes) {
           classes && owner.classList.add(...classes.split("."));
+          return owner;
+        }
+
+        /* Removes all classes. Chainable with respect to component. */
+        clear() {
+          for (const c of Array.from(owner.classList)) {
+            owner.classList.remove(c);
+          }
           return owner;
         }
 

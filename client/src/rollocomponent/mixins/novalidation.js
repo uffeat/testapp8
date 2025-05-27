@@ -7,13 +7,13 @@ v.1.0
 export default (parent, config) => {
   return class extends parent {
     /* Returns 'novalidation' attribute. */
-    get noValidation() {
-      return this.getAttribute("for");
+    get novalidation() {
+      return this.getAttribute("novalidation");
     }
 
     /* Sets 'novalidation' attribute. */
-    set noValidation(noValidation) {
-      if (noValidation) {
+    set novalidation(novalidation) {
+      if (novalidation) {
         this.setAttribute("novalidation", "");
       } else {
         this.removeAttribute("novalidation");

@@ -67,7 +67,7 @@ export default (parent, config) => {
 
             /* By convention, false and null removes */
             if ([false, null].includes(value)) {
-              owner.removeAttribute(value);
+              owner.removeAttribute(name);
             } else if (
               value === true ||
               !["number", "string"].includes(typeof value)

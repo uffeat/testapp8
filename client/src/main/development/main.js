@@ -42,7 +42,7 @@ console.log(headline);
 const button = component.button(
   "btn.btn-primary",
   { 
-    //parent: document.body,
+    parent: document.body,
     '@click': (event) => console.log("Clicked!"),
     '[stuff': 'STUFF'
    },
