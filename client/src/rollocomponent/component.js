@@ -1,5 +1,7 @@
 import append from "@/rollocomponent/mixins/append.js";
 import classes from "@/rollocomponent/mixins/classes.js";
+import handlers from "@/rollocomponent/mixins/handlers.js";
+import hooks from "@/rollocomponent/mixins/hooks.js";
 import props from "@/rollocomponent/mixins/props.js";
 import text from "@/rollocomponent/mixins/text.js";
 
@@ -18,7 +20,7 @@ const registry = new (class {
       throw new Error(`'${tag}' is not native.`);
     }
 
-    const mixins = [append, classes, props];
+    const mixins = [append, classes, handlers, hooks, props];
 
     if ("textContent" in ref) {
       mixins.push(text);
@@ -75,7 +77,7 @@ export const component = new Proxy(
                 a instanceof Node ||
                 (i && ["number", "string"].includes(typeof a))
             )
-          );
+          ).hooks(...args.filter((a) => typeof a === 'function'))
       };
     },
   }
