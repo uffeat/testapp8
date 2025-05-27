@@ -8,9 +8,6 @@ import "@/bootstrap.scss";
 import "@/main.css";
 import "@/rollovite/__init__.js";
 
-
-
-
 /* NOTE Do NOT await import! */
 if (import.meta.env.VERCEL_ENV === "production") {
   import("@/main/production/main.js");
