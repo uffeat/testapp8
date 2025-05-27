@@ -43,7 +43,6 @@ export const classes = (parent, config, ...factories) => {
         if(condition, ...strings) {
           if (condition) {
             this.add(...strings);
-            this.add(...strings);
           } else {
             this.remove(...strings);
           }
