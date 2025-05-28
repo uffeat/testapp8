@@ -1,4 +1,8 @@
-
+/* 
+const { registry } = await use("@/rollobs/registry.js");
+v.0.1
+20200528
+*/
 
 const standard = await (async () => {
   const result = [];
@@ -21,64 +25,39 @@ const standard = await (async () => {
   ]) {
     result.unshift((await use(`@/rollocomponent/mixins/${name}.js`)).default);
   }
-  /* Ensure that super gets called */
+  /* Create shadow root and ensure that super gets called */
   result.unshift((parent, config) => {
     return class extends parent {
       constructor() {
         super();
+        if (!this.shadowRoot) {
+          this.attachShadow({ mode: "open" });
+          this.shadowRoot.innerHTML = `<slot></slot>`;
+        }
       }
     };
   });
   return result;
 })();
 
-/*
-const standard = [
-  (await use("@/rollocomponent/mixins/append.js")).default,
-  (await use("@/rollocomponent/mixins/attrs.js")).default,
-  (await use("@/rollocomponent/mixins/classes.js")).default,
-  (await use("@/rollocomponent/mixins/clear.js")).default,
-  (await use("@/rollocomponent/mixins/connect.js")).default,
-  (await use("@/rollocomponent/mixins/find.js")).default,
-  (await use("@/rollocomponent/mixins/handlers.js")).default,
-  (await use("@/rollocomponent/mixins/hooks.js")).default,
-  (await use("@/rollocomponent/mixins/insert.js")).default,
-  (await use("@/rollocomponent/mixins/props.js")).default,
-  (await use("@/rollocomponent/mixins/send.js")).default,
-  (await use("@/rollocomponent/mixins/style.js")).default,
-  (await use("@/rollocomponent/mixins/tab.js")).default,
-  (await use("@/rollocomponent/mixins/text.js")).default,
-  (await use("@/rollocomponent/mixins/vars.js")).default,
-  // Ensure that super gets called
-  (parent, config) => {
-    return class extends parent {
-      constructor() {
-        super();
-      }
-    };
-  },
-];
-*/
-
 export const registry = new (class {
-  #_ = {
-    registry: new Map(),
-  };
-
+  /* Registers autonomous web component from mixins and returns component 
+  factory that injects tree. Automatically adds standard mixins.
+  Intended for Bootstrap-based components. However, to accommodate special 
+  cases and for alternative uses, a shadow root is attached.  */
   add({ tag, tree, ...config }, ...mixins) {
+    if (typeof tag === "object" && "url" in tag) {
+      tag = tag.url.split("/").at(-2).replaceAll("_", "-");
+    }
     tag = `rbs-${tag}`;
 
-    standard.forEach((mixin) => mixins.unshift(mixin));
+    mixins.push(...standard);
 
     const cls = mixin(config, ...mixins);
-
     customElements.define(tag, cls);
-    this.#_.registry.set(tag, cls);
-
     if (import.meta.env.DEV) {
       console.info("Registered component with tag:", tag);
     }
-
     return factory(cls, tree);
   }
 })();
@@ -87,9 +66,9 @@ export const registry = new (class {
 function factory(cls, tree) {
   return (...args) => {
     const instance = new cls();
-
+    /* Instantiate */
     instance.__new__?.(tree && tree());
-
+    /* Harvest updates */
     const updates =
       args.find(
         (a, i) =>
@@ -99,11 +78,11 @@ function factory(cls, tree) {
           typeof a !== "function" &&
           !Array.isArray(a)
       ) || {};
-
+    /* Deal with special 'parent' item */
     if (updates.parent && instance.parentElement !== updates.parent) {
       updates.parent.append(instance);
     }
-
+    /* Config and return instance */
     return instance.classes
       .add(args.find((a, i) => !i && typeof a === "string"))
       .update(updates)
