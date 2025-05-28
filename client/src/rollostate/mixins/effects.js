@@ -54,10 +54,7 @@ export default (parent, config) => {
                 session: null,
               });
             }
-            
           }
-
-
 
           return effect;
         }
@@ -75,6 +72,15 @@ export default (parent, config) => {
               });
             }
           });
+        }
+
+        has(effect) {
+          return this.#_.registry.has(effect);
+        }
+
+        remove(effect) {
+          this.#_.registry.delete(effect);
+          return owner;
         }
       })();
     }
