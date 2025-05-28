@@ -7,13 +7,11 @@ v.1.0
 /* TODO
 - Implement 'update' method for batch updates; use the '__' prefix 
   ('update' in 'props' mixin already preparred for this).
-- Currently the getter uses to different approaches depending on connection.
-  I'm under the impression that the 'connected' approach is the best practice, but not sure?
-  If the 'connected' approach is superior, warn, if not connected.
-  If the 'disconnected' approach is just as good, use this as the single approach. 
 - If ever needed: Relatively easy to store CSS vars (current and previous) in 
-  custom registry. This could track changes and only make updates, if actual 
-  change. Could also be a step towards component serialization/deserialization.
+  custom registry. Such a registry could be used to reliably access to CSS 
+  vars from disconnected components and  could track changes and only make 
+  updates, if actual change. Could also be a step towards component 
+  serialization/deserialization.
 - If ever needed: Relatively easy to make CSS vars reactive, by event 
   dispatch. This could open up for very powerful pattern in combination with 
   dynamic sheets and a set of naming rules; e.g.:
@@ -49,7 +47,10 @@ export default (parent, config) => {
             if (priority) return `${value} !${priority}`;
             return value;
           }
-          /*  */
+          if (import.meta.env.DEV) {
+            console.warn(`Reading CSS var '${name}' from a disconnected component may be unreliable.`);
+
+          }
           const value = target.style.getPropertyValue(name);
           if (!value) return false;
           const priority = target.style.getPropertyPriority(name);

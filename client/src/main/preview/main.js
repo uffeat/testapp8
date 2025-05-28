@@ -5,12 +5,21 @@ import("@/main/preview/main.js");
 */
 
 import "@/rollotest/__init__.js";
-import { component } from "@/rollo/component/component.js";
-import { Check } from "@/rolloui/components/form/check.js";
+
 
 console.info("Vercel environment:", import.meta.env.VERCEL_ENV);
 
 document.querySelector("html").dataset.bsTheme = "dark";
 
-document.body.append(Check());
+
+const { component } = await use("@/rollocomponent/");
+const { MyComponent } = await use("@/rollobs/components/my_component/");
+
+
+
+const my_component = MyComponent({parent: document.body})
+
+
+
+
 

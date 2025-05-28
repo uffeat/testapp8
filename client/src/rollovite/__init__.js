@@ -185,6 +185,11 @@ app.maps
     new ImportMap(
       import.meta.glob([
         "/src/**/*.js",
+
+
+        //"/src/rollocomponent/**/*.js",//
+        "/src/rollobs/**/*.js", //
+
         "!/src/main.js",
         "!/src/assets/**/*.*",
         "!/src/main/**/*.*",
