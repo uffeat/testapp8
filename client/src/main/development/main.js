@@ -9,15 +9,6 @@ import "@/main/development/rollometa/__init__.js";
 const { component } = await use("@/rollocomponent/");
 const { MyComponent } = await use("@/rollobs/components/my_component/");
 
-
-
-const my_component = MyComponent({parent: document.body})
-
-
-
-
-
-
+const my_component = MyComponent({ parent: document.body });
 
 console.info("Vite environment:", import.meta.env.MODE);
-
