@@ -15,15 +15,64 @@ export default (parent, config) => {
           return this.#_.registry.size;
         }
 
-        add(effect, { condition } = {}) {
+        add(effect, ...args) {
+          let condition = args.find(
+            (a) => typeof a === "function" || (typeof a === "object" && a.call)
+          );
+          /* condition from short-hand (any array) */
+          if (!condition) {
+            for (const a of args) {
+              if (Array.isArray(a)) {
+                condition = (change) => {
+                  for (const k of change) {
+                    if (a.includes(k)) return true;
+                  }
+                  return false;
+                };
+                break;
+              }
+            }
+          }
+          const options =
+            args.find(
+              (a) =>
+                typeof a === "object" &&
+                !(typeof a === "function") &&
+                !Array.isArray(a)
+            ) || {};
+
           this.#_.registry.set(effect, condition);
+
+          if (options.run) {
+            if (!condition || condition(owner.change)) {
+              effect.call(null, owner.change, {
+                current: owner.current,
+                index: null,
+                owner,
+                previous: owner.previous,
+                effect,
+                session: null,
+              });
+            }
+            
+          }
+
+
+
           return effect;
         }
 
-        notify(change) {
-          this.#_.registry.entries().forEach(([effect, condition]) => {
+        __call__(change, { current, previous, session } = {}) {
+          this.#_.registry.entries().forEach(([effect, condition], index) => {
             if (!condition || condition(change)) {
-              effect(change, { owner, self: effect });
+              effect.call(null, change, {
+                current,
+                index,
+                owner,
+                previous,
+                effect,
+                session,
+              });
             }
           });
         }
