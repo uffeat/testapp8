@@ -3,10 +3,10 @@ export default (parent, config) => {
     #_ = {
       _current: {},
       _previous: {},
+      $: null,
       change: Object.freeze({}),
       current: Object.freeze({}),
       previous: Object.freeze({}),
-
       session: (() => {
         let s = 0;
         return () => s++;
@@ -15,6 +15,21 @@ export default (parent, config) => {
 
     constructor() {
       super();
+
+
+      this.#_.$ = new Proxy(this, {
+      get: (target, key) => {
+        return target.#_.current[key];
+      },
+      set: (target, key, value) => {
+        target.update({ [key]: value });
+        return true;
+      },
+    });
+    }
+
+    get $() {
+      return this.#_.$
     }
 
     /* Retuns changes from most recent update data */
