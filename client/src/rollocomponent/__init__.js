@@ -15,6 +15,7 @@ import for_ from "@/rollocomponent/mixins/for_.js";
 import handlers from "@/rollocomponent/mixins/handlers.js";
 import hooks from "@/rollocomponent/mixins/hooks.js";
 import insert from "@/rollocomponent/mixins/insert.js";
+import key from "@/rollocomponent/mixins/key.js";
 import novalidation from "@/rollocomponent/mixins/novalidation.js";
 import props from "@/rollocomponent/mixins/props.js";
 import send from "@/rollocomponent/mixins/send.js";
@@ -52,6 +53,7 @@ const registry = new (class {
       handlers,
       hooks,
       insert,
+      key,
       props,
       send,
       state,
@@ -118,13 +120,12 @@ export const component = new Proxy(
         /* Transfer state to child elements, if they have none declared */
         children.forEach((child) => {
           if (!child.state) {
-            child.state = updates.state
+            child.state = updates.state;
           }
-           
+        });
 
-        }
-         
-        );
+        /* TODO
+        - Handle host and key */
 
         /* Extract text as non-first numner or string arument */
         const text = args.find(

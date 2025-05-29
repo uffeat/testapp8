@@ -1,6 +1,6 @@
 /*
 import state from "@/rollocomponent/mixins/state.js";
-20250527
+20250530
 v.1.0
 */
 
@@ -17,13 +17,10 @@ export default (parent, config) => {
       /* Abort, if no change */
       if (state === this.#_.state) return
       /* Remove effect from previous state */
-      if (this.#_.state) {
-        this.#_.state.effects.remove(this.effect);
-      }
+      this.#_.state && this.#_.state.effects.remove(this.effect);
       /* Add effect to new state */
-      if (state) {
-        state.effects.add(this.effect)
-      }
+      state && state.effects.add(this.effect)
+      /* Set state */
       this.#_.state = state;
     }
   };

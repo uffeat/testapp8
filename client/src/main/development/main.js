@@ -9,7 +9,7 @@ import "@/main/development/rollometa/__init__.js";
 const { component, State } = await use("@/rollocomponent/");
 
 const my_component = component.div(
-  { state: State(), parent: document.body },
+  { state: State(), parent: document.body, host: true },
   component.h1({
     key: "headline",
     effect: function (change) {
