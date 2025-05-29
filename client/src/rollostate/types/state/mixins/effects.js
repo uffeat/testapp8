@@ -19,7 +19,7 @@ export default (parent, config) => {
           let condition = args.find(
             (a) => typeof a === "function" || (typeof a === "object" && a.call)
           );
-          /* condition from short-hand (any array) */
+          /* condition from array short-hand */
           if (!condition) {
             for (const a of args) {
               if (Array.isArray(a)) {

@@ -188,7 +188,7 @@ app.maps
 
 
         //"/src/rollocomponent/**/*.js",//
-        "/src/rollobs/**/*.js", //
+        //"/src/rollobs/**/*.js", //
 
         "!/src/main.js",
         "!/src/assets/**/*.*",

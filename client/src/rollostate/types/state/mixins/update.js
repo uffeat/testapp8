@@ -16,31 +16,33 @@ export default (parent, config) => {
     constructor() {
       super();
 
-
       this.#_.$ = new Proxy(this, {
-      get: (target, key) => {
-        return target.#_.current[key];
-      },
-      set: (target, key, value) => {
-        target.update({ [key]: value });
-        return true;
-      },
-    });
+        get: (target, key) => {
+          return target.#_.current[key];
+        },
+        set: (target, key, value) => {
+          target.update({ [key]: value });
+          return true;
+        },
+      });
     }
 
     get $() {
-      return this.#_.$
+      return this.#_.$;
     }
 
-    /* Retuns changes from most recent update data */
+    /* Retuns changes from most recent update. */
     get change() {
       return this.#_.change;
     }
 
+
+    /* Retuns current data. */
     get current() {
       return this.#_.current;
     }
 
+    /* Returns data as-was before most recent update. */
     get previous() {
       return this.#_.previous;
     }
@@ -74,7 +76,7 @@ export default (parent, config) => {
       this.#_.current = Object.freeze({ ...this.#_._current });
       this.#_.previous = Object.freeze({ ...this.#_._previous });
 
-      console.log("session", this.#_.session());
+      
 
       if (this.effects.size && change.length) {
         const session = this.#_.session();
