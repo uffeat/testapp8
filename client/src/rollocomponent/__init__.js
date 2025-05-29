@@ -120,14 +120,17 @@ export const component = new Proxy(
         const children = args.filter((a) => a instanceof Node);
 
         /* Transfer state to child elements, if they have none declared */
+
+        /* TODO
+        - Handle host and key */
+        
         children.forEach((child) => {
           if (!child.state) {
             child.state = updates.state;
           }
         });
 
-        /* TODO
-        - Handle host and key */
+        
 
         /* Extract text as non-first numner or string arument */
         const text = args.find(

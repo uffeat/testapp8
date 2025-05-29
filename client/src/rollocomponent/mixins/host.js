@@ -23,6 +23,12 @@ export default (parent, config) => {
         this.setAttribute("host", '');
       }
       this.#_.host = host
+
+
+      /* TODO Perhaps handle descendants */
+
+
+
     }
   };
 };
