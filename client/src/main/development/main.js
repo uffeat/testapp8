@@ -6,19 +6,23 @@
 import "@/rollotest/__init__.js";
 import "@/main/development/rollometa/__init__.js";
 
-const { component } = await use("@/rollocomponent/");
+const { component, State } = await use("@/rollocomponent/");
 
-const setup = (state) => {
-  return component.div(
-    { host: true },
+const my_component = component.div(
+  { state: State(), parent: document.body },
+  component.h1({
+    key: "headline",
+    effect: function (change) {
+      this.text = change.text;
+    },
+  })
+);
 
-    component.h1({
-      key: "headline",
-      state: state.effects.add(function () {
-        this.text = this.state.text;
-      }),
-    })
-  );
-};
+my_component.state.update({ text: "Hello" });
+
+const headline = my_component.find('h1')
+
+console.log("headline:", headline);
+console.log("headline.state:", headline.state);
 
 console.info("Vite environment:", import.meta.env.MODE);

@@ -6,7 +6,7 @@ class _State {
       previous: {},
     },
     /* Effects registry */
-    registry: new Set(),
+    registry: new Map(),
     /* Initial exposed stores */
     change: Object.freeze({}),
     current: Object.freeze({}),
@@ -27,26 +27,57 @@ class _State {
         return state.#_.registry.size;
       }
 
-      /* . */
-      add(effect) {
+      add(effect, ...keys) {
+        /* Infer any condition function */
+        const condition = keys.length
+          ? (change) => {
+              for (const key of Object.keys(change)) {
+                if (keys.includes(key)) return true;
+              }
+              return false;
+            }
+          : null;
         /* Register */
-        if (effect) {
-          state.#_.registry.add(effect);
+        state.#_.registry.set(effect, condition);
+        
+        /* Run 
+
+        if (
+          !condition ||
+          condition.call(this.owner, this.change, {
+            condition,
+            current: this.current,
+            index: null,
+            owner: this.owner,
+            previous: this.previous,
+            effect,
+            session: null,
+          })
+        ) {
+          effect.call(this.owner, this.change, {
+            condition,
+            current: this.current,
+            index: null,
+            owner: this.owner,
+            previous: this.previous,
+            effect,
+            session: null,
+          });
         }
+        */
+
         /* Make chainable with respect to owner */
         return state.owner;
       }
 
-      /* . */
       has(effect) {
-        return state.#_.registry.has(effect);
-      }
+          return state.#_.registry.has(effect);
+        }
 
-      /* . */
-      remove(effect) {
-        state.#_.registry.delete(effect);
-        return state.owner;
-      }
+        remove(effect) {
+          state.#_.registry.delete(effect);
+          return state.owner;
+        }
     })();
   }
 
@@ -108,21 +139,35 @@ class _State {
   #notify() {
     const session = this.#_.session();
 
-    this.#_.registry.values().forEach((effect, index) => {
-      effect(this.change, {
-        current: this.current,
-        index,
-        owner: this.owner,
-        previous: this.previous,
-        effect,
-        session,
-      });
+    this.#_.registry.entries().forEach(([effect, condition], index) => {
+      if (
+        !condition ||
+        condition.call(this.owner, this.change, {
+          condition,
+          current: this.current,
+          index,
+          owner: this.owner,
+          previous: this.previous,
+          effect,
+          session,
+        })
+      ) {
+        effect.call(this.owner, this.change, {
+          condition,
+          current: this.current,
+          index,
+          owner: this.owner,
+          previous: this.previous,
+          effect,
+          session,
+        });
+      }
     });
   }
 }
 
 export const State = (owner, initial) => {
   const instance = new _State(owner);
-  initial && instance.update(initial);
+  initial && instance.update(initial)
   return instance;
 };
