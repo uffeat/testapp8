@@ -12,7 +12,11 @@ export default (parent, config) => {
       return this.#_.state;
     }
 
-    /* Sets state. */
+    /* Sets state. 
+    NOTE
+    - 'effect' and 'state' interact. However, these props can be set 
+      independently of each other, hence the need for additional control flow
+      (for both props). */
     set state(state) {
       /* Abort, if no change */
       if (state === this.#_.state) return
