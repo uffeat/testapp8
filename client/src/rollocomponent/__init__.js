@@ -14,6 +14,7 @@ import find from "@/rollocomponent/mixins/find.js";
 import for_ from "@/rollocomponent/mixins/for_.js";
 import handlers from "@/rollocomponent/mixins/handlers.js";
 import hooks from "@/rollocomponent/mixins/hooks.js";
+import host from "@/rollocomponent/mixins/host.js";
 import insert from "@/rollocomponent/mixins/insert.js";
 import key from "@/rollocomponent/mixins/key.js";
 import novalidation from "@/rollocomponent/mixins/novalidation.js";
@@ -52,6 +53,7 @@ const registry = new (class {
       find,
       handlers,
       hooks,
+      host,
       insert,
       key,
       props,
