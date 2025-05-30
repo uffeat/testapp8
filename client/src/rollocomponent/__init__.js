@@ -17,14 +17,14 @@ import host from "@/rollocomponent/mixins/host.js";
 import insert from "@/rollocomponent/mixins/insert.js";
 import key from "@/rollocomponent/mixins/key.js";
 import novalidation from "@/rollocomponent/mixins/novalidation.js";
+import parent from "@/rollocomponent/mixins/parent.js";
 import props from "@/rollocomponent/mixins/props.js";
 import send from "@/rollocomponent/mixins/send.js";
+import setup from "@/rollocomponent/mixins/setup.js"; ////
 import style from "@/rollocomponent/mixins/style.js";
 import tab from "@/rollocomponent/mixins/tab.js";
 import text from "@/rollocomponent/mixins/text.js";
 import vars from "@/rollocomponent/mixins/vars.js";
-
-
 
 const registry = new (class {
   #_ = {
@@ -53,18 +53,13 @@ const registry = new (class {
       host,
       insert,
       key,
-
-      
-
-
-
+      parent,
       props,
       send,
+      setup,
       style,
       tab,
-
       vars,
-      
     ];
 
     if ("textContent" in ref) {
@@ -104,7 +99,14 @@ export const component = new Proxy(
   {
     get: (_, tag) => {
       const instance = new (registry.get(tag))();
-      return function (...args) {
+      return (...args) => {
+        /* Extract CSS classes */
+        const classes = args.find((a, i) => !i && typeof a === "string");
+
+        /* Add CSS classes */
+        instance.classes.add(classes);
+
+        /* Extract updates */
         const updates =
           args.find(
             (a, i) =>
@@ -115,21 +117,25 @@ export const component = new Proxy(
               !Array.isArray(a)
           ) || {};
 
-        if (updates.parent && instance.parentElement !== updates.parent) {
-          updates.parent.append(instance);
-        }
+        /* Use updates */
+        instance.update(updates);
 
-        return instance.classes
-          .add(args.find((a, i) => !i && typeof a === "string"))
-          .update(updates)
-          .append(
-            ...args.filter(
-              (a, i) =>
-                a instanceof Node ||
-                (i && ["number", "string"].includes(typeof a))
-            )
-          )
-          .hooks(...args.filter((a) => typeof a === "function"));
+        /* Extract children */
+        const children = args.filter(
+          (a, i) =>
+            a instanceof Node || (i && ["number", "string"].includes(typeof a))
+        );
+        /* Append children */
+        instance.append(...children);
+
+        /* Setup child elements */
+        children.forEach((child) => {
+          if (child instanceof Node) {
+            child.setup?.({ parent: instance });
+          }
+        });
+
+        return instance.hooks(...args.filter((a) => typeof a === "function"));
       };
     },
   }

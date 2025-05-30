@@ -7,18 +7,19 @@ v.1.0
 export default (parent, config) => {
   return class extends parent {
     
-    /* Returns closest host component or component itself, if host status. */
+    /* Returns closest 'host' component or the component itself, 
+    if it has 'host' status. */
     get host() {
       if (this.hasAttribute("host")) {
         return this;
       }
-      /* NOTE 
+      /* NOTE This would be less performant:
         return this.closest("[host]") || this
-      would be less performant  */
+      */
       return this.closest("[host]");
     }
 
-    /* Sets component's host status. */
+    /* Sets component's 'host' status. */
     set host(host) {
       if (host === true) {
         this.setAttribute("host", "");

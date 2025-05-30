@@ -15,8 +15,22 @@ console.info("Vite environment:", import.meta.env.MODE);
 const headline = component
   .h1(
     "foo.bar",
-    { parent: document.body, text: "FOO", host: true, ".stuff": true, '__color': 'hotpink' },
-    component.span({}, "...hi!"),
+    {
+      parent: document.body,
+      __height: "100%",
+      text: "FOO",
+      host: true,
+      ".stuff": true,
+      __color: "hotpink",
+    },
+    component.span(
+      {
+        setup: function ({parent}) {
+          console.log("setup got parent:", parent, "for component:", this);
+        },
+      },
+      "...hi!"
+    ),
     () => console.log("Hook says hi!")
   )
   .handlers.add({
