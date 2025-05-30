@@ -120,15 +120,16 @@ export const component = new Proxy(
         const children = args.filter((a) => a instanceof Node);
 
         /* Transfer state to child elements, if they have none declared */
-
-        /* TODO
-        - Handle host and key */
-        
         children.forEach((child) => {
           if (!child.state) {
             child.state = updates.state;
           }
         });
+
+
+
+         /* TODO
+        - Handle host and key */
 
         
 
@@ -142,6 +143,9 @@ export const component = new Proxy(
         if (text) {
           instance.append(text);
         }
+        instance.append(...children);////
+
+
 
         /* Handle parent */
         if (updates.parent && instance.parentElement !== updates.parent) {
@@ -153,7 +157,7 @@ export const component = new Proxy(
             /* Add CSS classes */
             .add(args.find((a, i) => !i && typeof a === "string"))
             /* Add child elements */
-            .append(...children)
+            ////.append(...children)
             /* Call hooks.
             NOTE Doen last to ensure that hooks have all info about the component */
             .hooks(...args.filter((a) => typeof a === "function"))
