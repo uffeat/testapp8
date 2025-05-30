@@ -88,5 +88,20 @@ export default (parent, config) => {
     get vars() {
       return this.#_.vars;
     }
+
+
+    /* Updates CSS vars from '__'-syntax. Chainable. */
+    update(updates = {}) {
+      super.update?.(updates);
+
+      Object.entries(updates)
+        .filter(([k, v]) => k.startsWith("__"))
+        .forEach(([k, v]) => {
+         
+          this.vars[k.slice("__".length)] = v
+        });
+
+      return this;
+    }
   };
 };

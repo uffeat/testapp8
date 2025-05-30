@@ -88,5 +88,23 @@ export default (parent, config) => {
     get classes() {
       return this.#_.classes;
     }
+
+    /* Updates CSS classes from '.'-syntax. Chainable. */
+    update(updates = {}) {
+      super.update?.(updates);
+
+      Object.entries(updates)
+        .filter(([k, v]) => k.startsWith("."))
+        .forEach(([k, v]) => {
+          const c = k.slice(".".length);
+          if (v === true) {
+            this.classes.add(c);
+          } else {
+            this.classes.remove(c);
+          }
+        });
+
+      return this;
+    }
   };
 };
