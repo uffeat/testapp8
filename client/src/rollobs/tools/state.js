@@ -1,3 +1,9 @@
+/*
+const { State } = await use("@/rollobs/tools/state.js");
+20250530
+v.1.0
+*/
+
 class _State {
   #_ = {
     _: {
@@ -107,7 +113,6 @@ class _State {
 
   #notify() {
     const session = this.#_.session();
-
     this.#_.registry.values().forEach((effect, index) => {
       effect(this.change, {
         current: this.current,
@@ -121,6 +126,7 @@ class _State {
   }
 }
 
+/* Returns instance of reactive state class for composite components. */
 export const State = (owner, initial) => {
   const instance = new _State(owner);
   initial && instance.update(initial);

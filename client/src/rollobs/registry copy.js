@@ -87,15 +87,6 @@ function factory(cls, tree, effects) {
   return (...args) => {
     const instance = new cls();
 
-    /* Set up reactivity */
-    if (effects) {
-      Object.entries(effects).forEach(([key, effect]) => {
-        const component = tree.get(key);
-
-        instance.state.effects.add(effect.bind(component));
-      });
-    }
-
     /* Parse args */
     args = new Args(args);
 
@@ -109,7 +100,7 @@ function factory(cls, tree, effects) {
     instance.append(...args.children);
 
     /* Inject tree in a way that makes the tree available to mixins. */
-    instance.__new__?.(tree);
+    instance.__new__?.(tree && tree());
 
     /* '__new__' is for factory use only, so remove */
     delete instance.__new__;
@@ -120,6 +111,17 @@ function factory(cls, tree, effects) {
         child.setup?.({ parent: instance });
       }
     });
+
+    /* Set up reactivity */
+    if (effects) {
+      Object.entries(effects).forEach(([key, effect]) => {
+        const component = instance.querySelector(`[key="${key}"]`);
+        if (!component) {
+          throw new Error(`Component with key '${key}' not found.`);
+        }
+        instance.state.effects.add(effect.bind(component));
+      });
+    }
 
     return instance.hooks(...args.hooks);
   };

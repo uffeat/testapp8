@@ -1,11 +1,10 @@
 /*
 import classes from "@/rollocomponent/mixins/classes.js";
-20250527
-v.1.0
+20250530
+v.1.1
 */
 
-/* TODO
-- If ever needed: Relatively easy to make classes reactive, by event dispatch. */
+
 
 export default (parent, config) => {
   return class extends parent {
@@ -108,3 +107,7 @@ export default (parent, config) => {
     }
   };
 };
+
+
+/* TODO
+- If ever needed: Relatively easy to make classes reactive, by event dispatch. */

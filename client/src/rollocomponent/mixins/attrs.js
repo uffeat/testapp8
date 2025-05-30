@@ -1,16 +1,8 @@
 /*
 import attrs from "@/rollocomponent/mixins/attrs.js";
-20250527
-v.1.0
+20250530
+v.1.1
 */
-
-/* TODO
-- If ever needed: Relatively easy to store attributes (current and previous) in 
-  custom registry. This could track changes and only make updates, if actual 
-  change. Could also be a step towards component serialization/deserialization.
-- If ever needed: Relatively easy to make attributes reactive, by event 
-  dispatch. This could be an elegant and more efficient alternative to 
-  observing attribute changes.  */
 
 export default (parent, config) => {
   return class extends parent {
@@ -64,18 +56,19 @@ export default (parent, config) => {
         set(spec = {}) {
           Object.entries(spec).forEach(([name, value]) => {
             name = kebab(name);
-
-            /* By convention, false and null removes */
-            if ([false, null].includes(value)) {
-              owner.removeAttribute(name);
-            } else if (
-              value === true ||
-              !["number", "string"].includes(typeof value)
-            ) {
-              /* By convention, non-primitive values sets value-less attribute */
-              owner.setAttribute(name, "");
-            } else {
-              owner.setAttribute(name, value);
+            if (value !== this.#interpret(owner.getAttribute(name))) {
+              /* By convention, false and null removes */
+              if ([false, null].includes(value)) {
+                owner.removeAttribute(name);
+              } else if (
+                value === true ||
+                !["number", "string"].includes(typeof value)
+              ) {
+                /* By convention, non-primitive values sets value-less attribute */
+                owner.setAttribute(name, "");
+              } else {
+                owner.setAttribute(name, value);
+              }
             }
           });
           return owner;
@@ -139,3 +132,11 @@ function kebab(camel) {
   /* NOTE Digits as lower-case, e.g., p10 -> p10. */
   return camel.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
 }
+
+/* TODO
+- If ever needed: Relatively easy to store attributes (current and previous) in 
+  custom registry. This could track changes and only make updates, if actual 
+  change. Could also be a step towards component serialization/deserialization.
+- If ever needed: Relatively easy to make attributes reactive, by event 
+  dispatch. This could be an elegant and more efficient alternative to 
+  observing attribute changes.  */

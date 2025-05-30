@@ -25,7 +25,7 @@ export default (parent, config) => {
                 owner.removeEventListener(type, wrapper);
               };
             }
-            
+
             owner.addEventListener(type, handler);
 
             if (dirs.includes("run")) {

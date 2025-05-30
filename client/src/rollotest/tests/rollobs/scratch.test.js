@@ -1,19 +1,10 @@
 /*
-"@/main/development/main.js"
-20250520
+ rollobs/scratch
 */
-
-import "@/rollotest/__init__.js";
-import "@/main/development/rollometa/__init__.js";
-
-console.info("Vite environment:", import.meta.env.MODE);
 
 const { MyComponent } = await use("@/rollobs/components/my_component/");
 
 const my_component = MyComponent({ parent: document.body });
 
 my_component.state.update({text: "It works!"})
-
-
-
 

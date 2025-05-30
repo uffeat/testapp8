@@ -4,6 +4,8 @@ import { component } from "@/rollocomponent/component.js";
 v.1.0
 */
 
+import { Args } from "./tools/args.js";
+
 import append from "@/rollocomponent/mixins/append.js";
 import attrs from "@/rollocomponent/mixins/attrs.js";
 import classes from "@/rollocomponent/mixins/classes.js";
@@ -40,7 +42,6 @@ const registry = new (class {
     if (base === HTMLUnknownElement) {
       throw new Error(`'${tag}' is not native.`);
     }
-
     const mixins = [
       append,
       attrs,
@@ -71,24 +72,19 @@ const registry = new (class {
     if (tag === "label") {
       mixins.push(for_);
     }
-
-    class cls extends mixin(base, {}, ...mixins) {
+    class cls extends mix(base, {}, ...mixins) {
       constructor() {
         super();
         this.setAttribute("web-component", "");
       }
     }
-
     this.#_.registry.set(tag, cls);
-
     customElements.define(`x-${tag}`, cls, {
       extends: tag,
     });
-
     if (import.meta.env.DEV) {
       console.info("Registered component with tag:", tag);
     }
-
     return cls;
   }
 })();
@@ -100,48 +96,27 @@ export const component = new Proxy(
     get: (_, tag) => {
       const instance = new (registry.get(tag))();
       return (...args) => {
-        /* Extract CSS classes */
-        const classes = args.find((a, i) => !i && typeof a === "string");
-
+        /* Parse args */
+        args = new Args(args);
         /* Add CSS classes */
-        instance.classes.add(classes);
-
-        /* Extract updates */
-        const updates =
-          args.find(
-            (a, i) =>
-              i < 2 &&
-              typeof a === "object" &&
-              !(a instanceof Node) &&
-              typeof a !== "function" &&
-              !Array.isArray(a)
-          ) || {};
-
+        instance.classes.add(args.classes);
         /* Use updates */
-        instance.update(updates);
-
-        /* Extract children */
-        const children = args.filter(
-          (a, i) =>
-            a instanceof Node || (i && ["number", "string"].includes(typeof a))
-        );
+        instance.update(args.updates);
         /* Append children */
-        instance.append(...children);
-
-        /* Setup child elements */
-        children.forEach((child) => {
+        instance.append(...args.children);
+        /* Set up child elements */
+        args.children.forEach((child) => {
           if (child instanceof Node) {
             child.setup?.({ parent: instance });
           }
         });
-
-        return instance.hooks(...args.filter((a) => typeof a === "function"));
+        return instance.hooks(...args.hooks);
       };
     },
   }
 );
 
-function mixin(cls, config, ...mixins) {
+function mix(cls, config, ...mixins) {
   for (const mixin of mixins) {
     cls = mixin(cls, config);
   }
