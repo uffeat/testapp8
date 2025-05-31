@@ -3,7 +3,7 @@ const { MyComponent } = await use("@/rollobs/components/my_component/");
 */
 
 const { registry } = await use("@/rollobs/registry.js");
-const { Tree } = await use("@/rollobs/tools/tree.js");
+
 const { component } = await use("@/rollocomponent/");
 
 await use("/rollobs/components/my_component/assets/main.css");
@@ -12,30 +12,27 @@ export const MyComponent = registry.add(
   {
     tag: import.meta,
     /* Define tree function */
-    tree: new Tree(
-        component.h1(
-          {},
-          "Hi! ",
-          component.span({
-            /* Provide key for access, when defining reactivity */
-            key: "foo",
-          })
-        )
+    tree: () =>
+      component.h1(
+        {},
+        "Hi! ",
+        component.span({
+          /* Define reactivity */
+          effect: function (change) {
+            this.text = change.text;
+          },
+          /* Provide key for access, when defining reactivity */
+          key: "foo",
+        })
       ),
 
-    /* Define reactivity */
-    effects: {
-      foo: function (change) {
-        this.text = change.text;
-      },
-    },
+    
   },
   /* Mixins go here; directly of from import */
   (parent, config) => {
     return class extends parent {
       __new__(tree) {
-        /* Add tree */
-        this.append(...tree.children);
+        
         /* Share tree with mixins */
         super.__new__?.(tree);
       }

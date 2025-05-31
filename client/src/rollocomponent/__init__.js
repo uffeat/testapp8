@@ -11,6 +11,7 @@ import attrs from "@/rollocomponent/mixins/attrs.js";
 import classes from "@/rollocomponent/mixins/classes.js";
 import clear from "@/rollocomponent/mixins/clear.js";
 import connect from "@/rollocomponent/mixins/connect.js";
+import effect from "@/rollocomponent/mixins/effect.js";
 import find from "@/rollocomponent/mixins/find.js";
 import for_ from "@/rollocomponent/mixins/for_.js";
 import handlers from "@/rollocomponent/mixins/handlers.js";
@@ -48,6 +49,7 @@ const registry = new (class {
       classes,
       clear,
       connect,
+      effect,
       find,
       handlers,
       hooks,

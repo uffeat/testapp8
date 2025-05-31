@@ -4,41 +4,34 @@ const { Tree } = await use("@/rollobs/tools/tree.js");
 v.1.0
 */
 
-const { component } = await use("@/rollocomponent/");
 
-export class Tree {
+
+export class Tree extends HTMLElement {
   #_ = {
-    cache: new Map(),
     registry: new Map(),
-    conainer: component.div(),
   };
 
-  constructor(...children) {
-    this.append(...children)
-
+  constructor() {
+    super();
   }
 
-  get children() {
-    return this.#_.conainer.children;
+  append(...components) {
+    super.append(...components)
+    // TODO Add to registry
+    return this
   }
 
-  append(...children) {
-    this.#_.conainer.append(...children);
-    children.forEach((child) => {
-      if (child.key) {
-        this.#_.registry.set(child.key, child);
-      }
-    });
+  components() {
+    return this.#_.registry.values()
   }
 
   get(key) {
-    if (this.#_.cache.has(key)) return this.#_.cache.get(key)
-    const component = this.#_.conainer.querySelector(`[key="${key}"]`);
-    if (!component) {
-          throw new Error(`Component with key '${key}' not found.`);
-        }
-    this.#_.cache.set(key, component)
-    return component
+    return this.#_.registry.get(key);
   }
-};
+}
 
+const tag = 'rollo-tree'
+ customElements.define(tag, Tree);
+    if (import.meta.env.DEV) {
+      console.info("Registered component with tag:", tag);
+    }

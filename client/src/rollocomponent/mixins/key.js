@@ -30,11 +30,3 @@ export default (parent, config) => {
   - likely, in combination with 'setup' and 'host' - can facilitate intra-tree 
   communication within instance factory functions. */
 
-/* TODO
-- Consider, if 'find' should be made 'key'-aware, e.g., to enable something like:
-    const bar = foo.find({key: 'bar'})
-  OR
-    const bar = foo.find('bar')
-  OR
-    const bar = foo.find.bar 
-  If doing stuff like that, do NOT implement with caching (too inflexible) */

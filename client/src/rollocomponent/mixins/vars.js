@@ -76,10 +76,10 @@ export default (parent, config) => {
     update(updates = {}) {
       super.update?.(updates);
 
-      /* TODO filter out k.endsWith("__") */
+     
 
       Object.entries(updates)
-        .filter(([k, v]) => k.startsWith("__"))
+        .filter(([k, v]) => k.startsWith("__") && !k.endsWith("__"))
         .forEach(([k, v]) => {
           this.vars[k.slice("__".length)] = v;
         });

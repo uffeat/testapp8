@@ -5,10 +5,12 @@ v.1.0
 */
 
 
-/* Tree mixin */
+/* TODO
+- Let Tree live here */
 
 const { Args } = await use("@/rollocomponent/tools/args.js");
 const { State } = await use("@/rollobs/tools/state.js");
+const { Tree } = await use("@/rollobs/tools/tree.js");
 
 const standard = await (async () => {
   const result = [];
@@ -18,6 +20,7 @@ const standard = await (async () => {
     "classes",
     "clear",
     "connect",
+    "effect",
     "find",
     "handlers",
     "hooks",
@@ -53,6 +56,21 @@ const standard = await (async () => {
       get state() {
         return this.#_.state;
       }
+
+      /* Returns tree. */
+      get tree() {
+        return this.#_.tree;
+      }
+
+      /* Sets tree. */
+      set tree(tree) {
+        if (tree) {
+          this.removeAttribute("tree");
+        } else {
+          this.setAttribute("tree", "");
+        }
+        this.#_.tree = tree;
+      }
     };
   });
   return result;
@@ -66,7 +84,7 @@ export const registry = new (class {
   - Sets up reactivity.
   - Intended for ligt-DOM-first components. However, to accommodate special 
     cases and for alternative uses, a shadow root is attached. */
-  add({ config = {}, effects, tag, tree }, ...mixins) {
+  add({ config = {}, tag, tree }, ...mixins) {
     if (typeof tag === "object" && "url" in tag) {
       tag = tag.url.split("/").at(-2).replaceAll("_", "-");
     }
@@ -81,23 +99,41 @@ export const registry = new (class {
       console.info("Registered component with tag:", tag);
     }
 
-    return factory(cls, tree, effects);
+    return factory(cls, tree);
   }
 })();
 
 /* Returns component factory function. */
-function factory(cls, tree, effects) {
+function factory(cls, tree) {
   return (...args) => {
     const instance = new cls();
 
-    /* Set up reactivity */
-    if (effects) {
-      Object.entries(effects).forEach(([key, effect]) => {
-        const component = tree.get(key);
+    /* TODO Move all tree work to a mixin triggered by __new__ call */
+    if (tree) {
+      /* Set tree prop */
+      instance.tree = new Tree(); //
+      instance.tree.append(tree())
 
-        instance.state.effects.add(effect.bind(component));
-      });
+      /* Append tree */
+      instance.append(instance.tree); //
+
+     
+
+      /* Set up reactivity */
+      instance.tree.querySelectorAll(`[effect]`).values().forEach((component) =>
+          instance.state.effects.add(component.effect.bind(component))
+        );
+
+
+     
+        
     }
+
+    instance.__new__?.();
+    /* '__new__' is for factory use only, so remove */
+    delete instance.__new__;
+
+   
 
     /* Parse args */
     args = new Args(args);
@@ -111,11 +147,7 @@ function factory(cls, tree, effects) {
     /* Append children */
     instance.append(...args.children);
 
-    /* Inject tree in a way that makes the tree available to mixins. */
-    instance.__new__?.(tree);
-
-    /* '__new__' is for factory use only, so remove */
-    delete instance.__new__;
+    
 
     /* Set up child elements */
     args.children.forEach((child) => {
