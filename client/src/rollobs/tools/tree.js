@@ -1,37 +1,54 @@
 /*
 const { Tree } = await use("@/rollobs/tools/tree.js");
-20250530
-v.1.0
+20250531
+v.1.1
 */
 
+const { mix } = await use("@/rollocomponent/tools/mix.js");
+const { define } = await use("@/rollobs/tools/define.js");
 
+export const Tree = define(
+  "Tree",
+  mix(HTMLElement, {}, (parent, config) => {
+    return class extends parent {
+      #_ = {};
+      constructor(owner) {
+        super();
+        this.#_.owner = owner;
+      }
 
-export class Tree extends HTMLElement {
-  #_ = {
-    registry: new Map(),
-  };
+      /* Appends components and adds key-components as accessor props. Chainable. */
+      setup(...components) {
+        this.append(...components);
+        /* Register key-components as accessor props */
+        this.querySelectorAll("[key]")
+          .values()
+          .forEach((component) =>
+            Object.defineProperty(this, component.key, {
+              configurable: true,
+              enumerable: true,
+              writable: true,
+              value: component,
+            })
+          );
 
-  constructor() {
-    super();
-  }
+        /* Set up reactivity */
+        this.querySelectorAll(`[effect]`)
+          .values()
+          .forEach((component) =>
+            this.#_.owner.state.effects.add(component.effect.bind(component))
+          );
 
-  append(...components) {
-    super.append(...components)
-    // TODO Add to registry
-    return this
-  }
+        this.#_.owner.append(this);
 
-  components() {
-    return this.#_.registry.values()
-  }
+        return this;
+      }
+    };
+  })
+);
 
-  get(key) {
-    return this.#_.registry.get(key);
-  }
-}
-
-const tag = 'rollo-tree'
- customElements.define(tag, Tree);
-    if (import.meta.env.DEV) {
-      console.info("Registered component with tag:", tag);
-    }
+/* NOTE 
+- The component is composed. This is, strictly speaking not necessary, since 
+  only a single mixin is used. However, the mix pattern makes it easy to add 
+  additional mixin with only minimal changes.
+ */

@@ -1,10 +1,11 @@
 /*
 const { State } = await use("@/rollobs/tools/state.js");
-20250530
-v.1.0
+20250531
+v.1.1
 */
 
-class _State {
+/* Reactive state utility for composite components. */
+export class State {
   #_ = {
     _: {
       /* Deep stores */
@@ -24,10 +25,12 @@ class _State {
     })(),
   };
 
-  constructor(owner) {
+  constructor(owner, initial) {
     this.#_.owner = owner;
+    
 
     const state = this;
+
     this.#_.effects = new (class {
       get size() {
         return state.#_.registry.size;
@@ -54,6 +57,8 @@ class _State {
         return state.owner;
       }
     })();
+
+    initial && this.update(initial);
   }
 
   /* Retuns changes from most recent update. */
@@ -126,9 +131,5 @@ class _State {
   }
 }
 
-/* Returns instance of reactive state class for composite components. */
-export const State = (owner, initial) => {
-  const instance = new _State(owner);
-  initial && instance.update(initial);
-  return instance;
-};
+
+

@@ -3,10 +3,16 @@ const tree = await use("@/rollobs/mixins/tree.js");
 20250531
 v.1.0
 */
+const { Tree } = await use("@/rollobs/tools/tree.js");
 
-export default (parent, config) => {
+export const tree = (parent, config) => {
   return class extends parent {
-    #_ = {};
+   #_ = {};
+    constructor() {
+      super();
+      /* Add state */
+      this.#_.tree = new Tree(this);
+    }
     /* Returns tree. */
     get tree() {
       return this.#_.tree;
@@ -14,11 +20,6 @@ export default (parent, config) => {
 
     /* Sets tree. */
     set tree(tree) {
-      if (tree) {
-        this.removeAttribute("tree");
-      } else {
-        this.setAttribute("tree", "");
-      }
       this.#_.tree = tree;
     }
   };

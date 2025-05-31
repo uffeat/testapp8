@@ -1,39 +1,27 @@
 /*
 import { component } from "@/rollocomponent/component.js";
-20250527
-v.1.0
+20250531
+v.1.1
 */
 
-import { Args } from "./tools/args.js";
-
-import append from "@/rollocomponent/mixins/append.js";
-import attrs from "@/rollocomponent/mixins/attrs.js";
-import classes from "@/rollocomponent/mixins/classes.js";
-import clear from "@/rollocomponent/mixins/clear.js";
-import connect from "@/rollocomponent/mixins/connect.js";
-import effect from "@/rollocomponent/mixins/effect.js";
-import find from "@/rollocomponent/mixins/find.js";
+import { Args } from "@/rollocomponent/tools/args.js";
+import { mix } from "@/rollocomponent/tools/mix.js";
+import { mixins } from "@/rollocomponent/mixins/__init__.js";
 import for_ from "@/rollocomponent/mixins/for_.js";
-import handlers from "@/rollocomponent/mixins/handlers.js";
-import hooks from "@/rollocomponent/mixins/hooks.js";
-import host from "@/rollocomponent/mixins/host.js";
-import insert from "@/rollocomponent/mixins/insert.js";
-import key from "@/rollocomponent/mixins/key.js";
 import novalidation from "@/rollocomponent/mixins/novalidation.js";
-import parent from "@/rollocomponent/mixins/parent.js";
-import props from "@/rollocomponent/mixins/props.js";
-import send from "@/rollocomponent/mixins/send.js";
-import setup from "@/rollocomponent/mixins/setup.js"; ////
-import style from "@/rollocomponent/mixins/style.js";
-import tab from "@/rollocomponent/mixins/tab.js";
 import text from "@/rollocomponent/mixins/text.js";
-import vars from "@/rollocomponent/mixins/vars.js";
 
+/* Utility for composing and registering non-autonomous web components. */
 const registry = new (class {
   #_ = {
     registry: new Map(),
   };
 
+  constructor(...mixins) {
+    this.#_.mixins = mixins;
+  }
+
+  /* Returns composed and registered non-autonomous web component class. */
   get(tag) {
     if (this.#_.registry.has(tag)) {
       return this.#_.registry.get(tag);
@@ -43,43 +31,24 @@ const registry = new (class {
     if (base === HTMLUnknownElement) {
       throw new Error(`'${tag}' is not native.`);
     }
-    const mixins = [
-      append,
-      attrs,
-      classes,
-      clear,
-      connect,
-      effect,
-      find,
-      handlers,
-      hooks,
-      host,
-      insert,
-      key,
-      parent,
-      props,
-      send,
-      setup,
-      style,
-      tab,
-      vars,
-    ];
 
     if ("textContent" in ref) {
-      mixins.push(text);
+      this.#_.mixins.push(text);
     }
     if (tag === "form") {
-      mixins.push(novalidation);
+      this.#_.mixins.push(novalidation);
     }
     if (tag === "label") {
-      mixins.push(for_);
+      this.#_.mixins.push(for_);
     }
-    class cls extends mix(base, {}, ...mixins) {
+    /* Compose */
+    class cls extends mix(base, {}, ...this.#_.mixins) {
       constructor() {
         super();
         this.setAttribute("web-component", "");
       }
     }
+    /* Register */
     this.#_.registry.set(tag, cls);
     customElements.define(`x-${tag}`, cls, {
       extends: tag,
@@ -89,7 +58,7 @@ const registry = new (class {
     }
     return cls;
   }
-})();
+})(...mixins);
 
 /* Returns instance of native web component. */
 export const component = new Proxy(
@@ -117,10 +86,3 @@ export const component = new Proxy(
     },
   }
 );
-
-function mix(cls, config, ...mixins) {
-  for (const mixin of mixins) {
-    cls = mixin(cls, config);
-  }
-  return cls;
-}
