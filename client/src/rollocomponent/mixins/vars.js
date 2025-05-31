@@ -76,6 +76,8 @@ export default (parent, config) => {
     update(updates = {}) {
       super.update?.(updates);
 
+      /* TODO filter out k.endsWith("__") */
+
       Object.entries(updates)
         .filter(([k, v]) => k.startsWith("__"))
         .forEach(([k, v]) => {
