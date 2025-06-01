@@ -23,5 +23,16 @@ export default (parent, config) => {
         this.removeAttribute("state");
       }
     }
+
+    __new__() {
+      super.__new__?.();
+      if (this.state) {
+        this.querySelectorAll(`[effect]`)
+          .values()
+          .forEach((c) => {
+            this.state.effects.add(c.effect.bind(c));
+          });
+      }
+    }
   };
 };

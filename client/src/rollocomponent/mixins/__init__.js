@@ -1,11 +1,13 @@
+/*
+import { mixins } from "@/rollocomponent/mixins/__init__.js";
+const { mixins } = await use("@/rollocomponent/mixins/");
+*/
+
 import append from "@/rollocomponent/mixins/append.js";
 import attrs from "@/rollocomponent/mixins/attrs.js";
 import classes from "@/rollocomponent/mixins/classes.js";
 import clear from "@/rollocomponent/mixins/clear.js";
-
 import components from "@/rollocomponent/mixins/components.js";
-
-
 import connect from "@/rollocomponent/mixins/connect.js";
 import effect from "@/rollocomponent/mixins/effect.js";
 import find from "@/rollocomponent/mixins/find.js";

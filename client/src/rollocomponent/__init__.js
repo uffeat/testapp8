@@ -1,5 +1,6 @@
 /*
-import { component } from "@/rollocomponent/component.js";
+import { component } from "@/rollocomponent/__init__.js";
+const { component } = await use("@/rollocomponent/");
 20250531
 v.1.1
 */
@@ -60,52 +61,28 @@ const registry = new (class {
   }
 })(...mixins);
 
-const create = (tag) => {
-  const instance = new (registry.get(tag))();
-  return (...args) => {
-    /* Parse args */
-    args = new Args(args);
-    /* Add CSS classes */
-    instance.classes.add(args.classes);
-    /* Use updates */
-    instance.update(args.updates);
-    /* Append children */
-    instance.append(...args.children);
-
-    /* Call setup on descendants */
-    if (args.updates.host === true) {
-      instance
-        .querySelectorAll(`*`)
-        .values()
-        .forEach((c) => {
-          c.host = instance;
-
-          c.setup?.call(c, c);
-        });
-    }
-
-    /* register descendant effects */
-    if (args.updates.state === true) {
-      instance
-        .querySelectorAll(`[effect]`)
-        .values()
-        .forEach((c) => {
-         instance.state.effects.add(c.effect.bind(c))
-
-         
-        });
-    }
-
-    return instance.hooks(...args.hooks);
-  };
-};
-
 /* Returns instance of native web component. */
-export const component = new Proxy(() => {}, {
-  get: (target, tag) => {
-    return create(tag);
-  },
-  apply: (target, thisArg, args) => {
-    return create;
-  },
-});
+export const component = new Proxy(
+  {},
+  {
+    get: (target, tag) => {
+      const self = new (registry.get(tag))();
+      return (...args) => {
+        /* Parse args */
+        args = new Args(args);
+        /* Add CSS classes */
+        self.classes.add(args.classes);
+        /* Use updates */
+        self.update(args.updates);
+        /* Append children */
+        self.append(...args.children);
+        /* Call '__new__' to do stuff not allowed in constructors. */
+        self.__new__?.();
+        /* '__new__' is for factory use only, so remove */
+        delete self.__new__;
+        /* Call hooks and return instance */
+        return self.hooks(...args.hooks);
+      };
+    },
+  }
+);

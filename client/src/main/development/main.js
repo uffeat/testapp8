@@ -8,62 +8,79 @@ import "@/main/development/rollometa/__init__.js";
 
 console.info("Vite environment:", import.meta.env.MODE);
 
-const { component } = await use("@/rollocomponent/");
+import { Args } from "@/rollocomponent/tools/args.js";
+import { mixins } from "@/rollocomponent/mixins/__init__.js";
+import { mix } from "@/rollocomponent/tools/mix.js";
+import { define } from "@/rollocomponent/tools/define.js";
+import shadow from "@/rollocomponent/mixins/shadow.js";
+import { component } from "@/rollocomponent/__init__.js";
 
-const container = component.div(
-  {
-    parent: document.body,
-    host: true,
-    key: 'container',
-    state: true,
-  },
-  component.h1(
-    { key: "bar" },
-    "Bar ",
-    component.span(
-      {
-        key: "foo",
-        setup: function () {
-          console.log(`'setup' for key '${this.key}' running...`);
-          console.log("host:", this.host);
-          console.log("bar:", this.host.components.bar);
-          console.log(" ");
-        },
-      },
-      "FOO"
-    ),
-    function () {
-    console.log("bar hook running...");
-    console.log(" ");
-  }
-  ),
-  component.h2(
-    {
-      key: "ding",
-      effect: function (change) {this.text = change.text},
-      setup: (self) => {
-        console.log(`'setup' for key '${self.key}' running...`);
-        console.log("host:", self.host);
-        console.log("bar:", self.host.components.bar);
-        console.log(" ");
-      },
-    },
-    "Ding"
-  ),
-  component.button('btn.btn-primary',{ '@click': function(event) {
-    console.log('Clicked on:', this)
-    
+const Tree = () => component.h1({}, 'Yo World!')
+
+const tree = (parent, config) => {
+  return class extends parent {
+    #_ = {};
 
 
-    this.host.state.update({text: 'Dong'})
-  }}, 'Go Dong'),
-  function () {
-    console.log("host hook running...");
-    console.log(" ");
-  }
-);
+    /* FIX 'tree' should NOt be an instance prob, bit instead
+    passed into reg machine directly OR via static prop */
 
-console.log("foo:", container.components.foo);
 
-const factory = component();
-//console.log("factory:", factory);//
+
+    /* Returns tree function. */
+    get tree() {
+      return this.#_.tree;
+    }
+
+    /* Sets tree function. */
+    set tree(tree) {
+      this.#_.tree = tree;
+    }
+
+    __new__() {
+      super.__new__?.();
+      if (this.tree) {
+        const tree = this.tree();
+        if (Array.isArray(tree)) {
+          this.append(...tree);
+        } else {
+          this.append(tree);
+        }
+      }
+    }
+  };
+};
+
+const mycomponent = (parent, config) => {
+  return class extends parent {};
+};
+
+/* TODO Aggregate mix, define, tree, and factory into abstraction */
+const cls = mix(HTMLElement, {}, mycomponent, tree, shadow, ...mixins);
+define("MyComponent", cls);
+
+/* TODO Use this exact same factory for basic components also */
+const factory = (cls) => {
+  self = new cls();
+  return (...args) => {
+    /* Parse args */
+    args = new Args(args);
+    /* Add CSS classes */
+    self.classes.add(args.classes);
+    /* Use updates */
+    self.update(args.updates);
+    /* Append children */
+    self.append(...args.children);
+    /* Call '__new__' to do stuff not allowed in constructors. */
+    self.__new__?.();
+    /* '__new__' is for factory use only, so remove */
+    delete self.__new__;
+    /* Call hooks and return instance */
+    return self.hooks(...args.hooks);
+  };
+};
+
+const MyComponent = factory(cls)
+
+const my_component = MyComponent({parent: document.body});
+
