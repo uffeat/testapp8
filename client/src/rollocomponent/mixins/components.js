@@ -1,0 +1,23 @@
+/*
+import find from "@/rollocomponent/mixins/find.js";
+20250530
+v.1.1
+*/
+
+export default (parent, config) => {
+  return class extends parent {
+    #_ = {};
+    constructor() {
+      super();
+
+      this.#_.components = new Proxy(this, {
+        get: (target, key) => target.querySelector(`[key="${key}"]`),
+      });
+    }
+
+    /*  'key'. */
+    get components() {
+      return this.#_.components;
+    }
+  };
+};

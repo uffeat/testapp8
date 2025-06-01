@@ -6,31 +6,46 @@ v.1.0
 
 export default (parent, config) => {
   return class extends parent {
-    
-    /* Returns closest 'host' component or the component itself, 
-    if it has 'host' status. */
+    #_ = {};
+    constructor() {
+      super();
+    }
+
+    /* Returns 'host'. */
     get host() {
-      if (this.hasAttribute("host")) {
-        return this;
+      if (this.#_.host) {
+        return this.#_.host;
       }
-      /* NOTE This would be less performant:
-        return this.closest("[host]") || this
-      */
+
       return this.closest("[host]");
     }
 
     /* Sets component's 'host' status. */
     set host(host) {
+      /* Own host */
       if (host === true) {
         this.setAttribute("host", "");
+        this.#_.host = this;
         return;
       }
-      if ([false, null].includes(host)) {
+
+      /* No explicit host */
+      if (!host) {
         this.removeAttribute("host");
-        return;
+        this.#_.host = null;
       }
-      console.warn('Invalid type:', host)
-      throw new Error(`Invalid value.`)
+
+      /* Explicit host */
+      this.#_.host = host;
+      if (host.key) {
+        this.setAttribute("host", host.key);
+      } else {
+        this.removeAttribute("host");
+      }
+      
+
+
+
     }
   };
 };

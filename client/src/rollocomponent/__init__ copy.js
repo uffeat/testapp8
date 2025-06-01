@@ -60,52 +60,29 @@ const registry = new (class {
   }
 })(...mixins);
 
-const create = (tag) => {
-  const instance = new (registry.get(tag))();
-  return (...args) => {
-    /* Parse args */
-    args = new Args(args);
-    /* Add CSS classes */
-    instance.classes.add(args.classes);
-    /* Use updates */
-    instance.update(args.updates);
-    /* Append children */
-    instance.append(...args.children);
-
-    /* Call setup on descendants */
-    if (args.updates.host === true) {
-      instance
-        .querySelectorAll(`*`)
-        .values()
-        .forEach((c) => {
-          c.host = instance;
-
-          c.setup?.call(c, c);
-        });
-    }
-
-    /* register descendant effects */
-    if (args.updates.state === true) {
-      instance
-        .querySelectorAll(`[effect]`)
-        .values()
-        .forEach((c) => {
-         instance.state.effects.add(c.effect.bind(c))
-
-         
-        });
-    }
-
-    return instance.hooks(...args.hooks);
-  };
-};
-
 /* Returns instance of native web component. */
-export const component = new Proxy(() => {}, {
-  get: (target, tag) => {
-    return create(tag);
-  },
-  apply: (target, thisArg, args) => {
-    return create;
-  },
-});
+export const component = new Proxy(
+  {},
+  {
+    get: (_, tag) => {
+      const instance = new (registry.get(tag))();
+      return (...args) => {
+        /* Parse args */
+        args = new Args(args);
+        /* Add CSS classes */
+        instance.classes.add(args.classes);
+        /* Use updates */
+        instance.update(args.updates);
+        /* Append children */
+        instance.append(...args.children);
+        /* Set up child elements */
+        args.children.forEach((child) => {
+          if (child instanceof Node) {
+            child.setup?.({ parent: instance });
+          }
+        });
+        return instance.hooks(...args.hooks);
+      };
+    },
+  }
+);

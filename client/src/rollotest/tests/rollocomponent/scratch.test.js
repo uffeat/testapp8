@@ -2,7 +2,7 @@
 
 const { component } = await use("@/rollocomponent/");
 
-console.info("Vite environment:", import.meta.env.MODE);
+
 
 const headline = component
   .h1(

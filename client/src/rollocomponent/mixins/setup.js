@@ -17,6 +17,10 @@ export default (parent, config) => {
     set setup(setup) {
       if (setup) {
         this.#_.setup = setup.bind(this);
+        this.setAttribute('setup', '')
+      } else {
+        this.removeAttribute('setup')
+        this.#_.setup = null
       }
     }
   };

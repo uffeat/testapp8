@@ -1,7 +1,7 @@
 /*
 import hooks from "@/rollocomponent/mixins/hooks.js";
-20250527
-v.1.0
+20250601
+v.1.1
 */
 
 export default (parent, config) => {
@@ -9,12 +9,18 @@ export default (parent, config) => {
     /* Executes hooks bound to component and with component passed in. 
     Chainable. 
     NOTE
-    - Useful, e.g., during instantiation. */
+    - Useful in instance factories. */
     hooks(...hooks) {
+      const deferred = []
       hooks.forEach((hook) => {
-        hook.call(this, this);
+        const result = hook.call(this, this);
+        if (typeof result === 'function') {
+          deferred.push(result)
+        }
       });
-
+      setTimeout(() => {
+        deferred.forEach((hook) => hook.call(this, this))
+      }, 0)
       return this;
     }
   };
