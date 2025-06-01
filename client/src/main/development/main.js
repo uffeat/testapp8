@@ -15,32 +15,15 @@ import { define } from "@/rollocomponent/tools/define.js";
 import shadow from "@/rollocomponent/mixins/shadow.js";
 import { component } from "@/rollocomponent/__init__.js";
 
-const Tree = () => component.h1({}, 'Yo World!')
-
 const tree = (parent, config) => {
   return class extends parent {
     #_ = {};
 
-
-    /* FIX 'tree' should NOt be an instance prob, bit instead
-    passed into reg machine directly OR via static prop */
-
-
-
-    /* Returns tree function. */
-    get tree() {
-      return this.#_.tree;
-    }
-
-    /* Sets tree function. */
-    set tree(tree) {
-      this.#_.tree = tree;
-    }
-
     __new__() {
       super.__new__?.();
-      if (this.tree) {
-        const tree = this.tree();
+
+      if (this.constructor.tree) {
+        const tree = this.constructor.tree();
         if (Array.isArray(tree)) {
           this.append(...tree);
         } else {
@@ -51,12 +34,13 @@ const tree = (parent, config) => {
   };
 };
 
-const mycomponent = (parent, config) => {
-  return class extends parent {};
-};
+const composition = mix(HTMLElement, {}, tree, shadow, ...mixins);
 
 /* TODO Aggregate mix, define, tree, and factory into abstraction */
-const cls = mix(HTMLElement, {}, mycomponent, tree, shadow, ...mixins);
+const cls = class extends composition {
+  static tree = () => component.h1({}, "Yo World!");
+};
+
 define("MyComponent", cls);
 
 /* TODO Use this exact same factory for basic components also */
@@ -80,7 +64,6 @@ const factory = (cls) => {
   };
 };
 
-const MyComponent = factory(cls)
+const MyComponent = factory(cls);
 
-const my_component = MyComponent({parent: document.body});
-
+const my_component = MyComponent({ parent: document.body });
