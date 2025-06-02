@@ -13,10 +13,8 @@ export const MyComponent = author(
       const state = new State();
 
       /* 'Component' is an autonomous web component with same features as 
-      basic Rollo components; suitable as top-level wrapper although, 
-      e.g., component.div could also be used. 
-      Tree functions are also alloed to return an array of components. */
-      return () => Component(
+      basic Rollo components.  */
+      const main = Component(
         /* NOTE Typically, state should not be added to a tree component, 
         but doing so enables external state-based updates, which may be desirable. */
         {state},
@@ -32,6 +30,7 @@ export const MyComponent = author(
             /* Intially, no 'foo' CSS class */
             return false;
           },
+
           "[foo": function () {
             /* Make 'foo' attribute depend on state.$.foo */
             state.effects.add(
@@ -42,11 +41,8 @@ export const MyComponent = author(
             /* Intially, no 'foo' attribute */
             return null;
           },
-          /* Make text content depend on state.$.text */
           text: function () {
-            /* Effect is only triggered, when change contains a 'text' key. */
             state.effects.add((change) => (this.text = change.text), "text");
-            /* Set initial text */
             return "Ding";
           },
         }),
@@ -69,6 +65,8 @@ export const MyComponent = author(
           "Go Foo"
         )
       );
+
+      return () => main;
     })();
   }
 );

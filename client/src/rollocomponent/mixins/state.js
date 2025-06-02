@@ -15,11 +15,12 @@ export default (parent, config) => {
 
     /* Sets state. */
     set state(state) {
+      this.#_.state = state === true ? new State(this) : state;
       if (state) {
-        this.#_.state = new State(this);
+        
         this.setAttribute("state", "");
       } else {
-        this.#_.state = null;
+       
         this.removeAttribute("state");
       }
     }

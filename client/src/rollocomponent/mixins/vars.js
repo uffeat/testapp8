@@ -76,12 +76,17 @@ export default (parent, config) => {
     update(updates = {}) {
       super.update?.(updates);
 
-     
-
       Object.entries(updates)
-        .filter(([k, v]) => k.startsWith("__") && !k.endsWith("__"))
+
+        .filter(
+          ([k, v]) =>
+            k.startsWith("__") &&
+            /* NOTE dunder keys are reserved for special purposes */
+            !k.endsWith("__")
+        )
         .forEach(([k, v]) => {
-          this.vars[k.slice("__".length)] = v;
+          this.vars[k.slice("__".length)] =
+            typeof v === "function" ? v.call(this, this) : v;
         });
 
       return this;
@@ -92,11 +97,10 @@ export default (parent, config) => {
 /* TODO
 - If ever needed: Relatively easy to store CSS vars (current and previous) in 
   custom registry. Such a registry could be used to reliably access to CSS 
-  vars from disconnected components and  could track changes and only make 
-  updates, if actual change. Could also be a step towards component 
+  vars from disconnected components. Could also be a step towards component 
   serialization/deserialization.
 - If ever needed: Relatively easy to make CSS vars reactive, by event 
-  dispatch. This could open up for very powerful pattern in combination with 
+  dispatch. This could open up for very powerful patterns in combination with 
   dynamic sheets and a set of naming rules; e.g.:
   - A CSS var is set, e.g., 'color'
   - A reaction triggers the creation of a rule in a dynamic sheet, if such a 
