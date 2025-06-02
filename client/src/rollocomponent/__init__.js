@@ -2,7 +2,16 @@
 import { component } from "@/rollocomponent/__init__.js";
 const { component } = await use("@/rollocomponent/");
 20250602
-v.1.2
+v.2.0
+
+This module is the main entry point for the 'rollocomponent' suite.
+The suite provides utilities for using and authoring web components
+with a declarative JSX-like syntax.
+
+The 'component' utility constitutes the basic Rollo components. 
+In addition to these, the 'rollocomponent' suite provides tools
+for authoring autonomous web components that can be used in 
+combination with and offers the same API as the basic Rollo components.
 */
 
 import { author } from "@/rollocomponent/tools/author.js";
@@ -10,6 +19,9 @@ import { compose } from "@/rollocomponent/tools/compose.js";
 import { factory } from "@/rollocomponent/tools/factory.js";
 import { mix } from "@/rollocomponent/tools/mix.js";
 import { MIXINS } from "@/rollocomponent/tools/mixins.js";
+
+export { State } from "@/rollocomponent/tools/state.js";
+export { Component, author, component, compose };
 
 /* Utility for composing and registering non-autonomous web components. */
 const registry = new (class {
@@ -58,8 +70,8 @@ const registry = new (class {
   }
 })();
 
-/* Returns instance of native web component. */
-export const component = new Proxy(
+/* Returns instance of basic non-autonomous web component. */
+const component = new Proxy(
   {},
   {
     get: (target, tag) => {
@@ -70,4 +82,5 @@ export const component = new Proxy(
   }
 );
 
-export const Component = author("Component", compose());
+/* Returns instance of basic autonomous web component. */
+const Component = author("Component", compose());
