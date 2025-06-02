@@ -5,22 +5,16 @@ const { component } = await use("@/rollocomponent/");
 v.1.1
 */
 
-import { Args } from "@/rollocomponent/tools/args.js";
 import { mix } from "@/rollocomponent/tools/mix.js";
-import { mixins } from "@/rollocomponent/mixins/__init__.js";
-import for_ from "@/rollocomponent/mixins/for_.js";
-import novalidation from "@/rollocomponent/mixins/novalidation.js";
-import text from "@/rollocomponent/mixins/text.js";
+import { factory } from "@/rollocomponent/tools/factory.js";
+
+import { index } from "@/rollocomponent/mixins/__index__.js";
 
 /* Utility for composing and registering non-autonomous web components. */
 const registry = new (class {
   #_ = {
     registry: new Map(),
   };
-
-  constructor(...mixins) {
-    this.#_.mixins = mixins;
-  }
 
   /* Returns composed and registered non-autonomous web component class. */
   get(tag) {
@@ -33,17 +27,19 @@ const registry = new (class {
       throw new Error(`'${tag}' is not native.`);
     }
 
+    const mixins = index.create();
+
     if ("textContent" in ref) {
-      this.#_.mixins.push(text);
+      mixins.push(index.text);
     }
     if (tag === "form") {
-      this.#_.mixins.push(novalidation);
+      mixins.push(index.novalidation);
     }
     if (tag === "label") {
-      this.#_.mixins.push(for_);
+      mixins.push(index.for_);
     }
     /* Compose */
-    class cls extends mix(base, {}, ...this.#_.mixins) {
+    class cls extends mix(base, {}, ...mixins) {
       constructor() {
         super();
         this.setAttribute("web-component", "");
@@ -59,30 +55,14 @@ const registry = new (class {
     }
     return cls;
   }
-})(...mixins);
+})();
 
 /* Returns instance of native web component. */
 export const component = new Proxy(
   {},
   {
     get: (target, tag) => {
-      const self = new (registry.get(tag))();
-      return (...args) => {
-        /* Parse args */
-        args = new Args(args);
-        /* Add CSS classes */
-        self.classes.add(args.classes);
-        /* Use updates */
-        self.update(args.updates);
-        /* Append children */
-        self.append(...args.children);
-        /* Call '__new__' to do stuff not allowed in constructors. */
-        self.__new__?.();
-        /* '__new__' is for factory use only, so remove */
-        delete self.__new__;
-        /* Call hooks and return instance */
-        return self.hooks(...args.hooks);
-      };
+      return factory(registry.get(tag));
     },
   }
 );
