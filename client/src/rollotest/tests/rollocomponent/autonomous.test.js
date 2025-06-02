@@ -1,4 +1,4 @@
-/* Would normally reside in actual module */
+/* Would normally reside in actual component-specific module, e.g., inside src/components */
 const MyComponent = await (async function vmodule() {
   const { WebComponent, State, author, component, compose } = await use(
     "@/rollocomponent/"
@@ -81,6 +81,7 @@ const MyComponent = await (async function vmodule() {
   return MyComponent;
 })();
 
+/* Here's the consuming code that would normally reside elsewhere in the app - perhaps inside another component module. */
 const my_component = MyComponent({ parent: document.body });
 
 my_component.components.main.state.$.text = "Hijacked!";

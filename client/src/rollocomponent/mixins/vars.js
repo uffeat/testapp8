@@ -96,7 +96,7 @@ export default (parent, config) => {
 
 /* TODO
 - If ever needed: Relatively easy to store CSS vars (current and previous) in 
-  custom registry. Such a registry could be used to reliably access to CSS 
+  custom registry. Such a registry could be used to reliably access CSS 
   vars from disconnected components. Could also be a step towards component 
   serialization/deserialization.
 - If ever needed: Relatively easy to make CSS vars reactive, by event 

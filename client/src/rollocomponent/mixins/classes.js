@@ -4,8 +4,6 @@ import classes from "@/rollocomponent/mixins/classes.js";
 v.1.1
 */
 
-
-
 export default (parent, config) => {
   return class extends parent {
     #_ = {};
@@ -97,12 +95,9 @@ export default (parent, config) => {
         .forEach(([k, v]) => {
           const c = k.slice(".".length);
 
-          if (typeof v === 'function') {
-            v = v.call(this, this)
+          if (typeof v === "function") {
+            v = v.call(this, this);
           }
-
-
-
 
           if (v === true) {
             this.classes.add(c);
@@ -115,7 +110,6 @@ export default (parent, config) => {
     }
   };
 };
-
 
 /* TODO
 - If ever needed: Relatively easy to make classes reactive, by event dispatch. */

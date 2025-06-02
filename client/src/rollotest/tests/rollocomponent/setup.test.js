@@ -15,6 +15,7 @@ const container = component.div(
         /* This is just to show that, although not typical to contol 
         another component from the setup function, it can be done. */
         __setup__: function (host) {
+          /* Optional, but fater to use the passed in 'host' */
           host.state.effects.add((change) => {
             if (change.text) {
               host.components.ding.style.color = "pink";
