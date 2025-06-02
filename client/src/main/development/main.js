@@ -8,6 +8,7 @@ import "@/main/development/rollometa/__init__.js";
 
 console.info("Vite environment:", import.meta.env.MODE);
 
+
 import { MyComponent } from "@/components/my_component.js";
 
 const my_component = MyComponent({ parent: document.body });

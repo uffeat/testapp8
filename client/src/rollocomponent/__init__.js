@@ -1,15 +1,15 @@
 /*
 import { component } from "@/rollocomponent/__init__.js";
 const { component } = await use("@/rollocomponent/");
-20250531
-v.1.1
+20250602
+v.1.2
 */
 
-import { mix } from "@/rollocomponent/tools/mix.js";
+import { author } from "@/rollocomponent/tools/author.js";
+import { compose } from "@/rollocomponent/tools/compose.js";
 import { factory } from "@/rollocomponent/tools/factory.js";
+import { mix } from "@/rollocomponent/tools/mix.js";
 import { MIXINS } from "@/rollocomponent/tools/mixins.js";
-
-
 
 /* Utility for composing and registering non-autonomous web components. */
 const registry = new (class {
@@ -63,7 +63,11 @@ export const component = new Proxy(
   {},
   {
     get: (target, tag) => {
-      return factory(registry.get(tag));
+      const cls = registry.get(tag);
+
+      return factory(cls);
     },
   }
 );
+
+export const Component = author("Component", compose());
