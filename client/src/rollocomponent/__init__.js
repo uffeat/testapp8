@@ -7,8 +7,9 @@ v.1.1
 
 import { mix } from "@/rollocomponent/tools/mix.js";
 import { factory } from "@/rollocomponent/tools/factory.js";
+import { MIXINS } from "@/rollocomponent/tools/mixins.js";
 
-import { index } from "@/rollocomponent/mixins/__index__.js";
+
 
 /* Utility for composing and registering non-autonomous web components. */
 const registry = new (class {
@@ -27,16 +28,16 @@ const registry = new (class {
       throw new Error(`'${tag}' is not native.`);
     }
 
-    const mixins = index.create();
+    const mixins = MIXINS.create();
 
     if ("textContent" in ref) {
-      mixins.push(index.text);
+      mixins.push(MIXINS.text);
     }
     if (tag === "form") {
-      mixins.push(index.novalidation);
+      mixins.push(MIXINS.novalidation);
     }
     if (tag === "label") {
-      mixins.push(index.for_);
+      mixins.push(MIXINS.for_);
     }
     /* Compose */
     class cls extends mix(base, {}, ...mixins) {

@@ -78,7 +78,7 @@ const standard = [
   vars,
 ];
 
-export const index = new (class {
+export const MIXINS = new (class {
   create(...names) {
     const result = [...standard];
     names.forEach((name) => result.push(registry[name]));
@@ -103,10 +103,10 @@ export const index = new (class {
 
 /* Add mixins as accessor props */
 Object.entries(registry).forEach(([name, mixin]) => {
-  if (index[name]) {
+  if (MIXINS[name]) {
     throw new Error(`Invalid name: ${name}`);
   }
-  Object.defineProperty(index, name, {
+  Object.defineProperty(MIXINS, name, {
     configurable: false,
     enumerable: true,
     writable: false,
