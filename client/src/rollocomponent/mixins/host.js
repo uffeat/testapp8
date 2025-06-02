@@ -31,14 +31,13 @@ export default (parent, config) => {
       super.__new__?.();
 
       /* Call setup on descendants */
-        if (this.hasAttribute('host')) {
-          this
-            .querySelectorAll(`[setup]`)
-            .values()
-            .forEach((c) => {
-              c.setup.call(c, c);
-            });
-        }
+      if (this.hasAttribute("host")) {
+        this.querySelectorAll(`[setup]`)
+          .values()
+          .forEach((c) => {
+            c.__setup__.call(c, this);
+          });
+      }
     }
   };
 };

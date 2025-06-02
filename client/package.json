@@ -13,16 +13,31 @@
   "author": "",
   "license": "ISC",
   "description": "",
-  "devDependencies": {
-    "hint": "^2.0.0",
-    "sass": "^1.81.0",
-    "vercel": "^41.6.2",
-    "vite": "^6.3.2"
-  },
   "dependencies": {
+    "@headlessui/react": "^2.2.4",
+    "@heroicons/react": "^2.2.0",
     "@popperjs/core": "^2.11.8",
+    "@tailwindcss/vite": "^4.1.8",
+    "@vitejs/plugin-vue": "^5.2.3",
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.11.3",
-    "marked": "^15.0.11"
+    "clsx": "^2.1.1",
+    "framer-motion": "^12.15.0",
+    "marked": "^15.0.11",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "vue": "^3.5.16"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.4.1",
+    "autoprefixer": "^10.4.21",
+    "hint": "^2.0.0",
+    "postcss": "^8.5.4",
+    "sass": "^1.81.0",
+    "tailwindcss": "^4.1.8",
+    "vercel": "^41.6.2",
+    "vite": "^6.3.2",
+    "@vitejs/plugin-vue": "^5.2.3",
+    "vite-plugin-vue-devtools": "^7.7.2"
   }
 }

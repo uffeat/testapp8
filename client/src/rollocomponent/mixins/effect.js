@@ -8,18 +8,26 @@ export default (parent, config) => {
   return class extends parent {
     #_ = {};
     /* Returns effect. */
-    get effect() {
+    get __effect__() {
       return this.#_.effect;
     }
 
     /* Sets effect. */
-    set effect(effect) {
+    set __effect__(effect) {
       this.#_.effect = effect;
       if (effect) {
         this.setAttribute("effect", "");
       } else {
         this.removeAttribute("effect");
       }
+    }
+
+    update(updates = {}) {
+      super.update?.(updates);
+      if (updates.__effect__) {
+        this.__effect__ = updates.__effect__;
+      }
+      return this;
     }
   };
 };

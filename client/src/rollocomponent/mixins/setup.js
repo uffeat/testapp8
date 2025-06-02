@@ -9,12 +9,12 @@ export default (parent, config) => {
     #_ = {};
 
     /* Returns setup method. */
-    get setup() {
+    get __setup__() {
       return this.#_.setup;
     }
 
     /* Sets setup method. */
-    set setup(setup) {
+    set __setup__(setup) {
       if (setup) {
         this.#_.setup = setup.bind(this);
         this.setAttribute('setup', '')
@@ -22,6 +22,14 @@ export default (parent, config) => {
         this.removeAttribute('setup')
         this.#_.setup = null
       }
+    }
+
+    update(updates = {}) {
+      super.update?.(updates);
+      if (updates.__setup__) {
+        this.__setup__ = updates.__setup__;
+      }
+      return this;
     }
   };
 };

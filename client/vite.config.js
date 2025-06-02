@@ -1,6 +1,10 @@
 import { defineConfig } from "vite";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
+import tailwindcss from "@tailwindcss/vite";
+import vue from "@vitejs/plugin-vue";
+import vueDevTools from "vite-plugin-vue-devtools";
+import react from "@vitejs/plugin-react";
 
 /* Create __dirname to help aliases work reliably */
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -28,7 +32,7 @@ export default defineConfig(({ mode }) => {
       /* Enable features such as top-level await and async imports */
       target: "es2022",
     },
-    plugins: [],
+    plugins: [tailwindcss(), vue(), vueDevTools(), react()],
     resolve: {
       alias: {
         "@": resolve(__dirname, "src"),

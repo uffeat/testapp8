@@ -15,12 +15,10 @@ export default (parent, config) => {
 
     /* Sets state. */
     set state(state) {
-      this.#_.state = state === true ? new State(this) : state;
+      this.#_.state = state === true ? new State() : state;
       if (state) {
-        
         this.setAttribute("state", "");
       } else {
-       
         this.removeAttribute("state");
       }
     }
@@ -31,7 +29,7 @@ export default (parent, config) => {
         this.querySelectorAll(`[effect]`)
           .values()
           .forEach((c) => {
-            this.state.effects.add(c.effect.bind(c));
+            this.state.effects.add(c.__effect__.bind(c));
           });
       }
     }

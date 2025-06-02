@@ -1,5 +1,4 @@
-const { component } = await use("@/rollocomponent/");
-
+import { component } from "@/rollocomponent/component.js";
 
 /* Using host + keys + setup to wire up state-driven reactivity */
 const container = component.div(
@@ -15,10 +14,10 @@ const container = component.div(
       {
         /* This is just to show that, although not typical to contol 
         another component from the setup function, it can be done. */
-        setup: function () {
-          this.host.state.effects.add((change) => {
+        __setup__: function (host) {
+          host.state.effects.add((change) => {
             if (change.text) {
-              this.host.components.ding.style.color = "pink";
+              host.components.ding.style.color = "pink";
             }
           });
         },
@@ -29,7 +28,7 @@ const container = component.div(
   component.h2(
     {
       key: "ding",
-      setup: function () {
+      __setup__: function () {
         this.host.state.effects.add((change) => (this.text = change.text));
       },
     },
@@ -45,3 +44,5 @@ const container = component.div(
     "Go Dong"
   )
 );
+
+

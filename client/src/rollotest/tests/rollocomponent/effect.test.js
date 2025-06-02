@@ -1,4 +1,4 @@
-const { component } = await use("@/rollocomponent/");
+import { component } from "@/rollocomponent/component.js";
 
 /* Using host + effect to wire up state-driven reactivity */
 const container = component.div(
@@ -12,7 +12,7 @@ const container = component.div(
     "Bar ",
     component.span(
       {
-        effect: function (change) {
+        __effect__: function (change) {
           this.text = change.text;
         },
       },
@@ -24,7 +24,7 @@ const container = component.div(
     "btn.btn-primary",
     {
       "@click": function (event) {
-        this.host.state.update({ text: "Dong" });
+        this.host.state.$.text = "Dong";
       },
     },
     "Go Dong"

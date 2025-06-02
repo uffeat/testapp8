@@ -1,8 +1,5 @@
 
-
-const { component } = await use("@/rollocomponent/");
-
-
+import { component } from "@/rollocomponent/component.js";
 
 const headline = component
   .h1(
@@ -65,3 +62,8 @@ button.vars.foo = "pink !important";
 console.log(button.vars.foo);
 
 console.log(button.vars.bar);
+
+
+
+
+

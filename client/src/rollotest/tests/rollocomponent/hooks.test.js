@@ -1,4 +1,4 @@
-const { component } = await use("@/rollocomponent/");
+import { component } from "@/rollocomponent/component.js";
 
 /* Using host + keys + hooks to wire up state-driven reactivity */
 const container = component.div(
