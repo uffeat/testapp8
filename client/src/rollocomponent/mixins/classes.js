@@ -96,6 +96,14 @@ export default (parent, config) => {
         .filter(([k, v]) => k.startsWith("."))
         .forEach(([k, v]) => {
           const c = k.slice(".".length);
+
+          if (typeof v === 'function') {
+            v = v.call(this, this)
+          }
+
+
+
+
           if (v === true) {
             this.classes.add(c);
           } else {

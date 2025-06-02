@@ -119,7 +119,7 @@ export default (parent, config) => {
         Object.fromEntries(
           Object.entries(updates)
             .filter(([k, v]) => k.startsWith("["))
-            .map(([k, v]) => [k.slice("[".length), v])
+            .map(([k, v]) => [k.slice("[".length), typeof v === 'function' ? v.call(this, this) : v])
         )
       );
       return this;

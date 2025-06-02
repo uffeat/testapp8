@@ -14,7 +14,7 @@ export class State {
       previous: {},
     },
     /* Effects registry */
-    registry: new Set(),
+    registry: new Map(),
     /* Initial exposed stores */
     change: Object.freeze({}),
     current: Object.freeze({}),
@@ -28,7 +28,6 @@ export class State {
 
   constructor(owner, initial) {
     this.#_.owner = owner;
-    
 
     const state = this;
 
@@ -38,10 +37,10 @@ export class State {
       }
 
       /* . */
-      add(effect) {
+      add(effect, ...keys) {
         /* Register */
         if (effect) {
-          state.#_.registry.add(effect);
+          state.#_.registry.set(effect, keys.length ? new Set(keys) : null);
         }
         /* Make chainable with respect to owner */
         return state.owner;
@@ -59,8 +58,23 @@ export class State {
       }
     })();
 
+    this.#_.$ = new Proxy(this, {
+        get: (target, key) => {
+          /* NOTE Safe to use deep store */
+          return target.#_._.current[key];
+        },
+        set: (target, key, value) => {
+          target.update({ [key]: value });
+          return true;
+        },
+      });
+
     initial && this.update(initial);
   }
+
+  get $() {
+      return this.#_.$;
+    }
 
   /* Retuns changes from most recent update. */
   get change() {
@@ -119,18 +133,17 @@ export class State {
 
   #notify() {
     const session = this.#_.session();
-    this.#_.registry.values().forEach((effect, index) => {
-      effect(this.change, {
-        current: this.current,
-        index,
-        owner: this.owner,
-        previous: this.previous,
-        effect,
-        session,
-      });
+    this.#_.registry.entries().forEach(([effect, keys], index) => {
+      if (!keys || keys.intersection(new Set(Object.keys(this.change))).size) {
+        effect(this.change, {
+          current: this.current,
+          index,
+          owner: this.owner,
+          previous: this.previous,
+          effect,
+          session,
+        });
+      }
     });
   }
 }
-
-
-

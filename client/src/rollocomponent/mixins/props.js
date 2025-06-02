@@ -12,9 +12,13 @@ export default (parent, config) => {
       Object.entries(updates)
         .filter(
           ([k, v]) =>
-            ((k in this || (k.startsWith("_") && !k.startsWith("__"))) && this[k] !== v)
+            (k in this || (k.startsWith("_") && !k.startsWith("__"))) &&
+            this[k] !== v
         )
-        .forEach(([k, v]) => (this[k] = v));
+        .forEach(
+          ([k, v]) =>
+            (this[k] = typeof v === "function" ? v.call(this, this) : v)
+        );
       return this;
     }
   };

@@ -13,7 +13,7 @@ export default (parent, config) => {
       super.update?.(updates);
       Object.entries(updates)
         .filter(([k, v]) => k in this.style && this.style[k] !== v)
-        .forEach(([k, v]) => (this.style[k] = v));
+        .forEach(([k, v]) => (this.style[k] = typeof v === "function" ? v.call(this, this) : v));
       return this;
     }
   };
