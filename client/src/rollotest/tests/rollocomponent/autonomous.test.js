@@ -1,3 +1,7 @@
+/*
+ rollocomponent/autonomous
+*/
+
 /* Would normally reside in actual component-specific module, e.g., inside src/components */
 const MyComponent = await (async function vmodule() {
   const { WebComponent, State, author, component, compose } = await use(
@@ -45,11 +49,12 @@ const MyComponent = await (async function vmodule() {
                 return null;
               },
               /* Make text content depend on state.$.text */
-              text: function () {
-                /* Effect is only triggered, when change contains a 'text' key. */
+              text: function (key) {
+                /* Effect is only triggered, when change contains a 'text' key.
+                Because there is state-component key parity, we can use the passed in key */
                 state.effects.add(
                   (change) => (this.text = change.text),
-                  "text"
+                  key
                 );
                 /* Set initial text */
                 return "Ding";

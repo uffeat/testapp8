@@ -1,3 +1,7 @@
+/*
+ rollocomponent/hooks
+*/
+
 import { component } from "@/rollocomponent/component.js";
 
 /* Using host + keys + hooks to wire up state-driven reactivity */

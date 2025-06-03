@@ -1,3 +1,7 @@
+/*
+ rollocomponent/attrs
+*/
+
 
 import { component } from "@/rollocomponent/component.js";
 
@@ -29,7 +33,7 @@ const headline = component
   .attributes.set({ fooBar: true, dingDong: 42, thing: "THING" });
 
 console.log("span:", headline.find('span'));
-console.log("span:", headline.find.span);
+
 
 console.log("fooBar:", headline.attributes.get("fooBar"));
 console.log("fooBar:", headline.attribute.fooBar);

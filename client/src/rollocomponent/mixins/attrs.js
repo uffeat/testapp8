@@ -1,7 +1,7 @@
 /*
 import attrs from "@/rollocomponent/mixins/attrs.js";
-20250530
-v.1.1
+20250602
+v.1.2
 */
 
 export default (parent, config) => {
@@ -53,23 +53,45 @@ export default (parent, config) => {
         }
 
         /* Sets one or more attribute values. Chainable with respect to component. */
-        set(spec = {}) {
-          Object.entries(spec).forEach(([name, value]) => {
-            name = kebab(name);
-            if (value !== this.#interpret(owner.getAttribute(name))) {
-              /* By convention, false and null removes */
-              if ([false, null].includes(value)) {
-                owner.removeAttribute(name);
-              } else if (
-                value === true ||
-                !["number", "string"].includes(typeof value)
-              ) {
-                /* By convention, non-primitive values sets value-less attribute */
-                owner.setAttribute(name, "");
-              } else {
-                owner.setAttribute(name, value);
-              }
+        set(name, value) {
+          /* Abort, if undefined value to, e.g., for efficient use of iife's */
+          if (value === undefined) {
+            return owner;
+          }
+          /* Normalize name */
+          name = kebab(name);
+          /* Handle function values */
+          if (typeof value === "function") {
+            const result = value.call(owner, name);
+            if (result !== undefined) {
+              value = result;
             }
+          }
+          /* Abort, if no change */
+          const current = this.#interpret(owner.getAttribute(name));
+          if (value === current) {
+            return owner;
+          }
+          /* Update */
+          if ([false, null].includes(value)) {
+            /* By convention, false and null removes */
+            owner.removeAttribute(name);
+          } else if (
+            value === true ||
+            !["number", "string"].includes(typeof value)
+          ) {
+            /* By convention, non-primitive values sets value-less attribute */
+            owner.setAttribute(name, "");
+          } else {
+            owner.setAttribute(name, value);
+          }
+          return owner;
+        }
+
+        /* Updates one or more attribute values. Chainable with respect to component. */
+        update(updates = {}) {
+          Object.entries(updates).forEach(([name, value]) => {
+            this.set(name, value);
           });
           return owner;
         }
@@ -96,7 +118,7 @@ export default (parent, config) => {
           return target.attributes.get(name);
         },
         set(target, name, value) {
-          target.attributes.set({ [name]: value });
+          target.attributes.set(name, value);
           return true;
         },
       });
@@ -112,14 +134,14 @@ export default (parent, config) => {
       return this.#_.attributes;
     }
 
-    /* Sets attributes from '['-syntax. Chainable. */
+    /* Updates attributes from '['-syntax. Chainable. */
     update(updates = {}) {
       super.update?.(updates);
-      this.attributes.set(
+      this.attributes.update(
         Object.fromEntries(
           Object.entries(updates)
             .filter(([k, v]) => k.startsWith("["))
-            .map(([k, v]) => [k.slice("[".length), typeof v === 'function' ? v.call(this, this) : v])
+            .map(([k, v]) => [k.slice("[".length), v])
         )
       );
       return this;

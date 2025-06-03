@@ -1,7 +1,7 @@
 /*
 import classes from "@/rollocomponent/mixins/classes.js";
-20250530
-v.1.1
+20250602
+v.1.2
 */
 
 export default (parent, config) => {
@@ -90,22 +90,27 @@ export default (parent, config) => {
     update(updates = {}) {
       super.update?.(updates);
 
-      Object.entries(updates)
-        .filter(([k, v]) => k.startsWith("."))
-        .forEach(([k, v]) => {
-          const c = k.slice(".".length);
-
-          if (typeof v === "function") {
-            v = v.call(this, this);
+      for (let [key, value] of Object.entries(updates)) {
+        /* Ignore undefined value to, e.g., for efficient use of iife's */
+        if (value === undefined) {
+          continue;
+        }
+        /* Ignore, if not special syntax */
+        if (!key.startsWith(".")) {
+          continue;
+        }
+        /* Adjust for special syntax */
+        key = key.slice(".".length);
+        /* Handle function values */
+        if (typeof value === "function") {
+          const result = value.call(this, key);
+          if (result !== undefined) {
+            value = result;
           }
-
-          if (v === true) {
-            this.classes.add(c);
-          } else {
-            this.classes.remove(c);
-          }
-        });
-
+        }
+        /* Update */
+        this.classes[value ? "add" : "remove"](key);
+      }
       return this;
     }
   };

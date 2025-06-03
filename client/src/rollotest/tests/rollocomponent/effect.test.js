@@ -1,3 +1,7 @@
+/*
+ rollocomponent/effect
+*/
+
 import { component } from "@/rollocomponent/component.js";
 
 /* Using host + effect to wire up state-driven reactivity */

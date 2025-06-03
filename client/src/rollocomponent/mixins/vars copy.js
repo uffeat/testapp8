@@ -35,48 +35,31 @@ export default (parent, config) => {
           if (!value) return false;
           const priority = target.style.getPropertyPriority(name);
           if (priority) return `${value} !${priority}`;
+
           return value;
         },
         set(target, name, value) {
-          /* Abort, if undefined value to, e.g., for efficient use of iife's */
-          if (value === undefined) {
-            return true;
-          }
           /* Normalize name */
           if (!name.startsWith("--")) {
             name = `--${name}`;
           }
-          /* Handle function values */
-          if (typeof value === "function") {
-            const result = value.call(target, name);
-            if (result !== undefined) {
-              value = result;
-            }
-          }
-          /* By convention, null is interpreted as 'none' */
-          if (value === null) {
-            value = "none";
-          }
-          /* Abort, if no change */
-          const current = target.vars[name];
-          if (value === current) {
-            return true;
-          }
-          /* Update */
-          if (value === false) {
+          /* Guard against no-change. */
+          if (value !== target.vars[name]) {
             /* By convention, false removes */
-            target.style.removeProperty(name);
-          } else {
-            /* Handle priority */
-            value = value.trim();
-            if (value.endsWith("!important")) {
-              target.style.setProperty(
-                name,
-                value.slice(0, -"!important".length),
-                "important"
-              );
+            if (value === false) {
+              target.style.removeProperty(name);
             } else {
-              target.style.setProperty(name, value);
+              /* Handle priority */
+              value = value.trim();
+              if (value.endsWith("!important")) {
+                target.style.setProperty(
+                  name,
+                  value.slice(0, -"!important".length),
+                  "important"
+                );
+              } else {
+                target.style.setProperty(name, value);
+              }
             }
           }
           return true;
@@ -93,20 +76,18 @@ export default (parent, config) => {
     update(updates = {}) {
       super.update?.(updates);
 
-      for (let [key, value] of Object.entries(updates)) {
-        /* Ignore dunder keys */
-        if (key.endsWith("__")) {
-          continue;
-        }
-        /* Ignore, if not special syntax */
-        if (!key.startsWith("__")) {
-          continue;
-        }
-        /* Adjust for special syntax */
-        key = key.slice("__".length);
-        /* Update */
-        this.vars[key] = value;
-      }
+      Object.entries(updates)
+
+        .filter(
+          ([k, v]) =>
+            k.startsWith("__") &&
+            /* NOTE dunder keys are reserved for special purposes */
+            !k.endsWith("__")
+        )
+        .forEach(([k, v]) => {
+          this.vars[k.slice("__".length)] =
+            typeof v === "function" ? v.call(this, this) : v;
+        });
 
       return this;
     }
