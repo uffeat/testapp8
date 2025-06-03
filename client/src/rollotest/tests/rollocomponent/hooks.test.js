@@ -1,5 +1,5 @@
 /*
- rollocomponent/hooks
+rollocomponent/hooks
 */
 
 import { component } from "@/rollocomponent/component.js";
