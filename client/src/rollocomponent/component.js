@@ -6,7 +6,7 @@ v.2.0
 
 import { factory } from "@/rollocomponent/tools/factory.js";
 import { mix } from "@/rollocomponent/tools/mix.js";
-import { MIXINS } from "@/rollocomponent/tools/mixins.js";
+import { mixins } from "@/rollocomponent/tools/mixins.js";
 
 /* Utility for composing and registering non-autonomous web components. */
 const registry = new (class {
@@ -25,19 +25,19 @@ const registry = new (class {
       throw new Error(`'${tag}' is not native.`);
     }
 
-    const mixins = MIXINS.create();
+    const _mixins = [...mixins.standard];
 
     if ("textContent" in ref) {
-      mixins.push(MIXINS.text);
+      _mixins.push(mixins.get('text'));
     }
     if (tag === "form") {
-      mixins.push(MIXINS.novalidation);
+      _mixins.push(mixins.get('novalidation'));
     }
     if (tag === "label") {
-      mixins.push(MIXINS.for_);
+      _mixins.push(mixins.get('for_'));
     }
     /* Compose */
-    class cls extends mix(base, {}, ...mixins) {
+    class cls extends mix(base, {}, ..._mixins) {
       constructor() {
         super();
         this.setAttribute("web-component", "");

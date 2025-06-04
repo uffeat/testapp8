@@ -1,3 +1,9 @@
+/*
+import { mixins } from "@/rollocomponent/tools/mixins.js";
+20250605
+v.1.0
+*/
+
 import append from "@/rollocomponent/mixins/append.js";
 import attrs from "@/rollocomponent/mixins/attrs.js";
 import classes from "@/rollocomponent/mixins/classes.js";
@@ -25,7 +31,7 @@ import text from "@/rollocomponent/mixins/text.js";
 import tree from "@/rollocomponent/mixins/tree.js";
 import vars from "@/rollocomponent/mixins/vars.js";
 
-const registry = {
+const registry = Object.freeze({
   append,
   attrs,
   classes,
@@ -52,9 +58,9 @@ const registry = {
   text,
   tree,
   vars,
-};
+});
 
-const standard = [
+const standard = Object.freeze([
   append,
   attrs,
   classes,
@@ -76,40 +82,49 @@ const standard = [
   style,
   tab,
   vars,
-];
+]);
 
-export const MIXINS = new (class {
-  create(...names) {
-    const result = [...standard];
-    names.forEach((name) => result.push(registry[name]));
-    return result;
+
+/* */
+export const mixins = new (class {
+  get standard() {
+    return standard
   }
 
-  get(arg) {
-    if (typeof arg === "string") {
-      const key = arg;
-      return registry[key];
+  get(name) {
+    if (!(name in registry)) {
+    throw new Error(`Invalid name: ${name}`);
+  }
+    return registry[name]
+  }
+
+
+  /* Returns array of mixins based on standard.
+  'mixin_name' includes from registry
+  '!mixin_name' excludes from standard */
+  select(...args) {
+    if (!args.length) {
+      return [...standard];
     }
 
-    if (typeof arg === "function") {
-      const filter = arg;
-      return Object.entries(registry)
-        .filter(([k, v]) => filter(k))
-        .map(([k, v]) => v);
+    const result = [];
+
+    const add = args.filter((arg) => !arg.startsWith("!"));
+    const remove = args.filter((arg) => arg.startsWith("!"));
+
+    /* Add from standard, if not in remove */
+    for (const name of standard) {
+      if (!remove.includes(name)) {
+        result.push(name);
+      }
     }
-    return Object.values(registry);
+    /* Add from registry, if in add */
+    for (const name of add) {
+      result.push(registry[name]);
+    }
+
+    return result;
   }
 })();
 
-/* Add mixins as accessor props */
-Object.entries(registry).forEach(([name, mixin]) => {
-  if (MIXINS[name]) {
-    throw new Error(`Invalid name: ${name}`);
-  }
-  Object.defineProperty(MIXINS, name, {
-    configurable: false,
-    enumerable: true,
-    writable: false,
-    value: mixin,
-  });
-});
+

@@ -1,10 +1,10 @@
 /*
 import { Args } from "@/rollocomponent/tools/args.js";
-const { Args } = await use("@/rollocomponent/tools/args.js");
 20250530
 v.1.0
 */
 
+/* Utility for parsing args in component factory functions. */
 export class Args {
   #_ = {};
   constructor(args) {

@@ -4,6 +4,8 @@ import handlers from "@/rollocomponent/mixins/handlers.js";
 v.1.0
 */
 
+import { Handlers } from "@/rollocomponent/tools/handlers.js";
+
 /* TODO
 - If ever needed: Relatively easy to register handlers in custom registry. 
   This would allow introspection and type-based clearing. */
@@ -11,57 +13,21 @@ v.1.0
 export default (parent, config) => {
   return class extends parent {
     #_ = {};
+
     constructor() {
       super();
-      const owner = this;
-      this.#_.handlers = new (class {
-        add(spec = {}) {
-          Object.entries(spec).forEach(([key, handler]) => {
-            const [type, ...dirs] = key.split("$");
-            if (dirs.includes("once")) {
-              const original = handler;
-              handler = function wrapper(event) {
-                original.call(owner, event);
-                owner.removeEventListener(type, wrapper);
-              };
-            }
 
-            owner.addEventListener(type, handler);
-
-            if (dirs.includes("run")) {
-              handler({ owner });
-            }
-          });
-          return owner;
-        }
-
-        remove(spec = {}) {
-          Object.entries(spec).forEach(([type, handler]) => {
-            owner.removeEventListener(type, handler);
-          });
-          return owner;
-        }
-      })();
-
-      this.#_.on = new Proxy(this, {
-        get(target, type) {
-          throw new Error(`'on' is write-only.`);
-        },
-        set(target, key, handler) {
-          target.handlers.add({ [key]: handler });
-          return true;
-        },
-      });
+      this.#_.handlers = new Handlers(this);
     }
 
-    /* Returns controller for managing event handler from objects. */
+    /* Returns controller for managing event handlers. */
     get handlers() {
       return this.#_.handlers;
     }
 
     /* Adds event handler with `on.type = handler`-syntax. */
     get on() {
-      return this.#_.on;
+      return this.#_.handlers.on;
     }
 
     /* Adds event handlers from '@'-syntax. Chainable. */

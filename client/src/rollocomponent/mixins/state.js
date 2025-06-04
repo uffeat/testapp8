@@ -23,8 +23,9 @@ export default (parent, config) => {
       }
     }
 
-    __new__() {
-      super.__new__?.();
+    /* Calls '__effect__' on descendants, if component has state. */
+    __init__() {
+      super.__init__?.();
       if (this.state) {
         this.querySelectorAll(`[effect]`)
           .values()

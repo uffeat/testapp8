@@ -1,17 +1,14 @@
 /*
 import key from "@/rollocomponent/mixins/key.js";
-20250530
-v.1.0
+20250604
+v.1.1
 */
 
 export default (parent, config) => {
   return class extends parent {
     /* Returns key. */
     get key() {
-      if (!this.hasAttribute("key")) {
-        return null
-      }
-      return this.getAttribute("key");
+      return this.hasAttribute("key") ? this.getAttribute("key") : null;
     }
 
     /* Sets key. */
@@ -25,8 +22,5 @@ export default (parent, config) => {
   };
 };
 
-/* NOTE
-- 'key' is intended as a means provide "soft identification", which in turn
-  - likely, in combination with 'setup' and 'host' - can facilitate intra-tree 
-  communication within instance factory functions. */
-
+/* NOTE 'key' is intended as a means to provide "soft identification", 
+which in turn can facilitate intra-tree communication. */

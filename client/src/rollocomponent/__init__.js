@@ -1,5 +1,5 @@
 /*
-const {  WebComponent, State, author, component, compose } = await use("@/rollocomponent/");
+const {  State, Tree, WebComponent, author, component, compose } = await use("@/rollocomponent/");
 20250602
 v.2.0
 
@@ -13,11 +13,14 @@ for authoring autonomous web components that can be used in
 combination with and offers the same API as the basic Rollo components.
 */
 
+export { Slot } from "@/rollocomponent/slot.js";
 export { State } from "@/rollocomponent/tools/state.js";
+export { Tree } from "@/rollocomponent/tree.js";
 export { WebComponent } from "@/rollocomponent/web_component.js";
 export { author } from "@/rollocomponent/tools/author.js";
-export { compose } from "@/rollocomponent/tools/compose.js";
 export { component } from "@/rollocomponent/component.js";
+export { compose } from "@/rollocomponent/tools/compose.js";
+
 
 
 

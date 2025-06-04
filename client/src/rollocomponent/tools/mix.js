@@ -7,7 +7,7 @@ v.1.0
 
 export const mix = (cls, config, ...mixins) => {
   for (const mixin of mixins) {
-    cls = mixin(cls, config);
+    cls = mixin(cls, config, ...mixins);
   }
   return cls;
 };

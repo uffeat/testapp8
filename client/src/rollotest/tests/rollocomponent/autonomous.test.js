@@ -1,10 +1,7 @@
-/*
- rollocomponent/autonomous
-*/
 
 /* Would normally reside in actual component-specific module, e.g., inside src/components */
 const MyComponent = await (async function vmodule() {
-  const { WebComponent, State, author, component, compose } = await use(
+  const { Slot, State, Tree, author, component, compose } = await use(
     "@/rollocomponent/"
   );
 
@@ -17,49 +14,47 @@ const MyComponent = await (async function vmodule() {
       static tree = (() => {
         const state = new State();
 
-        /* 'WebComponent' is an autonomous web component with same features as 
-        basic Rollo components; suitable as top-level wrapper although, 
-        e.g., component.div could also be used. 
-        Tree functions are also alloed to return an array of components. */
         return () =>
-          WebComponent(
-            /* NOTE Typically, state should not be added to a tree component, 
+          Tree(
+            /* NOTE Typically, state should not be added to the tree component, 
             but doing so enables external state-based updates, which may be desirable. */
-            { state, key: "main" },
-            component.h1({}, "Yo World!"),
-            component.span({
-              ".foo": function () {
-                /* Make 'foo' CSS class depend on Boolean interpretation of state.$.foo */
-                state.effects.add(
-                  /* Effect is only triggered, when change contains a 'foo' key. */
-                  (change) => this.classes.if(change.foo, "foo"),
-                  "foo"
-                );
-                /* Intially, no 'foo' CSS class */
-                return false;
-              },
-              "[foo": function () {
-                /* Make 'foo' attribute depend on state.$.foo */
-                state.effects.add(
-                  /* Effect is only triggered, when change contains a 'foo' key. */
-                  (change) => (this.attribute.foo = change.foo),
-                  "foo"
-                );
-                /* Intially, no 'foo' attribute */
-                return null;
-              },
-              /* Make text content depend on state.$.text */
-              text: function (key) {
-                /* Effect is only triggered, when change contains a 'text' key.
-                Because there is state-component key parity, we can use the passed in key */
-                state.effects.add(
-                  (change) => (this.text = change.text),
-                  key
-                );
-                /* Set initial text */
-                return "Ding";
-              },
-            }),
+            { state },
+            component.h1(
+              {},
+              "Yo World!",
+              component.span("text-sm.text-orange-500", {
+                ".foo": function () {
+                  /* Make 'foo' CSS class depend on Boolean interpretation of state.$.foo */
+                  state.effects.add(
+                    /* Effect is only triggered, when change contains a 'foo' key. */
+                    (change) => this.classes.if(change.foo, "foo"),
+                    "foo"
+                  );
+                  /* Intially, no 'foo' CSS class */
+                  return false;
+                },
+                "[foo": function () {
+                  /* Make 'foo' attribute depend on state.$.foo */
+                  state.effects.add(
+                    /* Effect is only triggered, when change contains a 'foo' key. */
+                    (change) => (this.attribute.foo = change.foo),
+                    "foo"
+                  );
+                  /* Intially, no 'foo' attribute */
+                  return null;
+                },
+                /* Make text content depend on state.$.text */
+                text: function (key) {
+                  /* Effect is only triggered, when change contains a 'text' key.
+                  Because there is state-component key parity, we can use the passed in key */
+                  state.effects.add((change) => (this.text = change.text), key);
+                  /* Set initial text */
+                  return "Ding";
+                },
+              })
+            ),
+            component.input("form-control"),
+            Slot({ name: "main" }),
             component.button(
               "btn.btn-primary",
               {
@@ -80,13 +75,26 @@ const MyComponent = await (async function vmodule() {
             )
           );
       })();
+
+      get value() {
+        return this.tree.find("input").value
+      }
+
+      set value(value) {
+        this.tree.find("input").value = value;
+      }
     }
   );
 
   return MyComponent;
 })();
 
-/* Here's the consuming code that would normally reside elsewhere in the app - perhaps inside another component module. */
-const my_component = MyComponent({ parent: document.body });
+/* Here's the consuming code that would normally reside elsewhere in the app - 
+perhaps inside another component module. */
+import { component } from "@/rollocomponent/component.js";
+const my_component = MyComponent(
+  { parent: document.body, value: 42 },
+  component.h3({ slot: "main" }, "Injected")
+);
+my_component.tree.state.$.text = "Hijacked!";
 
-my_component.components.main.state.$.text = "Hijacked!";

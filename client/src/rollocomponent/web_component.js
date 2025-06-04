@@ -1,17 +1,13 @@
 /*
 import { WebComponent } from "@/rollocomponent/web_component.js";
-20250602
-v.1.0
+20250605
+v.1.1
 */
 
+import { author } from "@/rollocomponent/tools/author.js";
 import { compose } from "@/rollocomponent/tools/compose.js";
-import { factory } from "@/rollocomponent/tools/factory.js";
 
 const cls = compose();
-const tag = "web-component";
-customElements.define(tag, cls);
-if (import.meta.env.DEV) {
-  console.info("Registered component with tag:", tag);
-}
+
 /* Returns instance of basic autonomous web component. */
-export const WebComponent = factory(cls);
+export const WebComponent = author(cls, "web-component");

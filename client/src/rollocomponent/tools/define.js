@@ -5,8 +5,12 @@ const { define } = await use("@/rollocomponent/tools/define.js");
 v.1.0
 */
 
+/* Registers autonomous web component. */
 export const define = (tag, cls) => {
-  tag = `rollo-${tag.toLowerCase()}`;
+  if (!tag.includes('-')) {
+    tag = `rollo-${tag.toLowerCase()}`;
+  }
+  
   customElements.define(tag, cls);
   if (import.meta.env.DEV) {
     console.info("Registered component with tag:", tag);

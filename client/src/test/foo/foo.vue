@@ -6,6 +6,15 @@ const count = ref(0)
 function increment() {
   count.value++
 }
+
+count.value = 10
+
+defineExpose({
+  increment,
+ 
+})
+
+
 </script>
 
 <template>

@@ -16,7 +16,10 @@ export default (parent, config) => {
 
     append(...children) {
       for (const child of children) {
-        
+        if (!(child instanceof Node)) {
+          super.append(child);
+          continue;
+        }
 
         if (child.slot) {
           const slot = this.querySelector(`rollo-slot[name="${child.slot}"]`);
@@ -24,20 +27,12 @@ export default (parent, config) => {
             throw new Error(`Invalid slot: ${child.slot}`);
           }
           slot.append(child);
-          
-        } else {
-          const slot = this.querySelector(`rollo-slot:not([name])`);
-          if (!slot) {
-            throw new Error(`Invalid slot: ${child.slot}`);
-          }
-          slot.append(child);
+          continue;
         }
-       
+        super.append(child);
       }
 
       return this;
     }
-
-    
   };
 };

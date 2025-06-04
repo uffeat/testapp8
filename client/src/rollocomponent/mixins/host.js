@@ -7,9 +7,6 @@ v.1.1
 export default (parent, config) => {
   return class extends parent {
     #_ = {};
-    constructor() {
-      super();
-    }
 
     /* Returns 'host'. */
     get host() {
@@ -19,7 +16,6 @@ export default (parent, config) => {
     /* Sets component's 'host' status. */
     set host(host) {
       this.#_.host = host;
-
       if (host) {
         this.setAttribute("host", "");
       } else {
@@ -27,10 +23,9 @@ export default (parent, config) => {
       }
     }
 
-    __new__() {
-      super.__new__?.();
-
-      /* Call setup on descendants */
+    /* Calls '__setup__' on descendants, if component is host. */
+    __init__() {
+      super.__init__?.();
       if (this.hasAttribute("host")) {
         this.querySelectorAll(`[setup]`)
           .values()

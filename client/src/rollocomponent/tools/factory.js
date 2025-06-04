@@ -1,23 +1,36 @@
+/*
+import { factory } from "@/rollocomponent/tools/factory.js";
+20250605
+v.1.0
+*/
+
 import { Args } from "@/rollocomponent/tools/args.js";
 
-/* Returns instance factory function for cls. */
+/* Returns instance factory function.
+NOTE
+- cls can be a component class (or other constructor function) or a component 
+instance. */
 export const factory = (cls) => {
-  const instance = new cls();
-  
   return (...args) => {
+    const instance = typeof cls === "function" ? new cls() : cls;
     /* Parse args */
     args = new Args(args);
-    /* Add CSS classes */
-    instance.classes.add(args.classes);
-    /* Use updates */
-    instance.update(args.updates);
-    /* Append children */
-    instance.append(...args.children);
-    /* Call '__new__' to do stuff not allowed in constructors. */
+    /* Call '__new__' to invoke pre-config actions */
     instance.__new__?.();
-    /* '__new__' is for factory use only, so remove */
     delete instance.__new__;
-    /* Call hooks and return instance */
-    return instance.hooks(...args.hooks);
+    /* Add CSS classes */
+    if (instance.classes) {
+      instance.classes.add(args.classes);
+    }
+    /* Use updates */
+    instance.update?.(args.updates);
+    /* Append children */
+    instance?.append(...args.children);
+    /* Call '__init__' to invoke post-config actions */
+    instance.__init__?.();
+    delete instance.__init__;
+    /* Call hooks */
+    instance?.hooks(...args.hooks);
+    return instance;
   };
 };
