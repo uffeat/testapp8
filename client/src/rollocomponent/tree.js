@@ -14,5 +14,6 @@ const cls = class extends compose() {
   }
 };
 
-/* Returns instance of tree component. */
+/* Returns instance of tree component.
+Use with the 'tree' pattern. */
 export const Tree = author(cls);

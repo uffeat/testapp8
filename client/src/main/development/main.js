@@ -10,65 +10,68 @@ console.info("Vite environment:", import.meta.env.MODE);
 
 /* Would normally reside in actual component-specific module, e.g., inside src/components */
 const MyComponent = await (async function vmodule() {
-  const { Slot, State, Tree, author, component, compose, WebComponent } = await use(
+  const { Slot, State, Tree, author, component, compose } = await use(
     "@/rollocomponent/"
   );
 
   await use("/sheets/my_component.css");
 
   const MyComponent = author(
-    class extends compose("tree") {
+    class extends compose("tree", "!append", "!insert") {
       static tag = "MyComponent";
       /* iife to encapsulate state */
       static tree = (() => {
         const state = new State();
 
+        /* NOTE If in-lining is inadequate, do 
+          const tree = Tre(... 
+          // Work on tree
+        here, and then 
+          return () => tree  */
+
         return () =>
           Tree(
             /* Add state to tree component only if state should be exposed. */
             { state },
-
-           
-            
-
-
-
             component.h1(
               {},
               "Yo World!",
               component.span("text-sm.text-orange-500", {
-                ".foo": function () {
-                  /* Make 'foo' CSS class reactive */
-                  state.effects.add(
-                    (change) => this.classes.if(change.foo, "foo"),
-                    "foo"
-                  );
-                  /* Intially, no 'foo' CSS class */
-                  return false;
-                },
-                "[foo": function () {
-                  /* Make 'foo' attribute reactive */
-                  state.effects.add(
-                    (change) => (this.attribute.foo = change.foo),
-                    "foo"
-                  );
-                  /* Intially, no 'foo' attribute */
-                  return null;
-                },
-                /* Make text content depend on state.$.text */
-                text: function (key) {
-                  /* Effect is only triggered, when change contains a 'text' key.
-                  Because there is state-component key parity, we can use the passed in key */
+                ".foo":
+                  /* Make 'foo' CSS class reactive and set inital value */
+                  function () {
+                    state.effects.add(
+                      (change) => this.classes.if(change.foo, "foo"),
+                      "foo"
+                    );
+                    return false;
+                  },
+                "[foo":
+                  /* Make 'foo' attribute reactive and set inital value */
+                  function () {
+                    state.effects.add(
+                      (change) => (this.attribute.foo = change.foo),
+                      "foo"
+                    );
+                    return null;
+                  },
+                text: 
+                /* Make text prop reactive and set inital value */
+                function (key) {
+                  /* state-component key parity -> we can use the passed in key
+                  as effect condition */
                   state.effects.add((change) => (this.text = change.text), key);
-                  /* Set initial text */
                   return "Ding";
                 },
               })
             ),
-          
             Slot({ name: "top" }),
             component.input("form-control"),
-            Slot(),
+            Slot({
+              "@slotchange": function (event) {
+                console.log("Slot change!");
+              },
+            }),
             component.button(
               "btn.btn-primary",
               {
@@ -112,5 +115,3 @@ const my_component = MyComponent(
   component.h3({}, "Injected into default")
 );
 my_component.tree.state.$.text = "Hijacked!";
-
-my_component.on.click = (event) => console.log("clicked");
