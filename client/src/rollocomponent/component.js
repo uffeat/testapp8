@@ -6,11 +6,35 @@ v.2.0
 
 import { factory } from "@/rollocomponent/tools/factory.js";
 import { mix } from "@/rollocomponent/tools/mix.js";
-import { mixins } from "@/rollocomponent/tools/mixins.js";
+import { mixins } from "@/rollocomponent/mixins/__init__.js";
 
 /* Utility for composing and registering non-autonomous web components. */
 const registry = new (class {
   #_ = {
+    mixins: Object.freeze([
+      mixins.append,
+      mixins.attrs,
+      mixins.classes,
+      mixins.clear,
+      mixins.components,
+      mixins.connect,
+      mixins.effect,
+      mixins.find,
+      mixins.handlers,
+      mixins.hooks,
+      mixins.host,
+      mixins.insert,
+      mixins.key,
+      mixins.parent,
+      mixins.props,
+      mixins.send,
+      mixins.setup,
+      mixins.state,
+      mixins.style,
+      mixins.tab,
+      mixins.text,
+      mixins.vars,
+    ]),
     registry: new Map(),
   };
 
@@ -25,16 +49,16 @@ const registry = new (class {
       throw new Error(`'${tag}' is not native.`);
     }
 
-    const _mixins = [...mixins.standard];
+    const _mixins = [...this.#_.mixins];
 
     if ("textContent" in ref) {
-      _mixins.push(mixins.get('text'));
+      _mixins.push(mixins.text);
     }
     if (tag === "form") {
-      _mixins.push(mixins.get('novalidation'));
+      _mixins.push(mixins.novalidation);
     }
     if (tag === "label") {
-      _mixins.push(mixins.get('for_'));
+      _mixins.push(mixins.for_);
     }
     /* Compose */
     class cls extends mix(base, {}, ..._mixins) {

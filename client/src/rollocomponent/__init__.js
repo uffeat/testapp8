@@ -1,5 +1,5 @@
 /*
-const {  State, Tree, WebComponent, author, component, compose } = await use("@/rollocomponent/");
+const {  State, Tree, author, component } = await use("@/rollocomponent/");
 20250602
 v.2.0
 
@@ -14,12 +14,11 @@ combination with and offers the same API as the basic Rollo components.
 */
 
 export { Slot } from "@/rollocomponent/slot.js";
-export { State } from "@/rollocomponent/tools/state.js";
-export { Tree } from "@/rollocomponent/tree.js";
-export { WebComponent } from "@/rollocomponent/web_component.js";
+export { TreeBase } from "@/rollocomponent/tree_base.js";
 export { author } from "@/rollocomponent/tools/author.js";
 export { component } from "@/rollocomponent/component.js";
-export { compose } from "@/rollocomponent/tools/compose.js";
+export { mix } from "@/rollocomponent/tools/mix.js";
+export { mixins } from "@/rollocomponent/mixins/__init__.js";
 
 
 

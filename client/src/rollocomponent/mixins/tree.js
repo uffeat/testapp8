@@ -11,8 +11,14 @@ export default (parent, config) => {
     __new__() {
       super.__new__?.();
       if (this.constructor.tree) {
-        this.#_.tree = this.constructor.tree();
-        super.append(this.#_.tree);
+        this.state = true
+        this.#_.tree = this.constructor.tree(this.state);
+        if (Array.isArray(this.#_.tree)) {
+          super.append(...this.#_.tree);
+        } else {
+          super.append(this.#_.tree);
+        }
+        
       }
     }
 

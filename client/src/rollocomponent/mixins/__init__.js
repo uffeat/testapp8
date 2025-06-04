@@ -1,5 +1,6 @@
 /*
-import { mixins } from "@/rollocomponent/tools/mixins.js";
+import { mixins } from "@/rollocomponent/mixins/__init__.js";
+const { mixins } = await use("@/rollocomponent/mixins/");
 20250605
 v.1.0
 */
@@ -31,7 +32,7 @@ import text from "@/rollocomponent/mixins/text.js";
 import tree from "@/rollocomponent/mixins/tree.js";
 import vars from "@/rollocomponent/mixins/vars.js";
 
-const registry = Object.freeze({
+export const mixins = Object.freeze({
   append,
   attrs,
   classes,
@@ -59,72 +60,3 @@ const registry = Object.freeze({
   tree,
   vars,
 });
-
-const standard = Object.freeze([
-  append,
-  attrs,
-  classes,
-  clear,
-  components,
-  connect,
-  effect,
-  find,
-  handlers,
-  hooks,
-  host,
-  insert,
-  key,
-  parent,
-  props,
-  send,
-  setup,
-  state,
-  style,
-  tab,
-  vars,
-]);
-
-
-/* */
-export const mixins = new (class {
-  get standard() {
-    return standard
-  }
-
-  get(name) {
-    if (!(name in registry)) {
-    throw new Error(`Invalid name: ${name}`);
-  }
-    return registry[name]
-  }
-
-
-  /* Returns array of mixins based on standard.
-  'mixin_name' includes from registry
-  '!mixin_name' excludes from standard */
-  select(...args) {
-    if (!args.length) {
-      return [...standard];
-    }
-
-    const result = [];
-
-    const add = args.filter((arg) => !arg.startsWith("!"));
-    const remove = args.filter((arg) => arg.startsWith("!"));
-
-    /* Add from standard, if not in remove */
-    for (const name of standard) {
-      if (!remove.includes(name)) {
-        result.push(name);
-      }
-    }
-    /* Add from registry, if in add */
-    for (const name of add) {
-      result.push(registry[name]);
-    }
-
-    return result;
-  }
-})();
-
-

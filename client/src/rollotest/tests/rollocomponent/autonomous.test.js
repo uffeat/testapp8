@@ -2,31 +2,20 @@
 rollocomponent/autonomous
 */
 
-/* Would normally reside in actual component-specific module, e.g., inside src/components */
-const MyComponent = await (async function vmodule() {
-  const { Slot, State, Tree, author, component, compose } = await use(
-    "@/rollocomponent/"
-  );
+import { component } from "@/rollocomponent/component.js";
 
-  await use("/sheets/my_component.css");
+const MyComponent =
+  await /* Simulate component-specific module, e.g., inside src/components */
+  (async function vmodule() {
+    const { Slot, TreeBase, author, component } = await use(
+      "@/rollocomponent/"
+    );
 
-  const MyComponent = author(
-    class extends compose("tree", "!append", "!insert") {
-      static tag = "MyComponent";
-      /* iife to encapsulate state */
-      static tree = (() => {
-        const state = new State();
-
-        /* NOTE If in-lining is inadequate, do 
-          const tree = Tre(... 
-          // Work on tree
-        here, and then 
-          return () => tree  */
-
-        return () =>
-          Tree(
-            /* Add state to tree component only if state should be exposed. */
-            { state },
+    return author(
+      class extends TreeBase {
+        static tag = "my-component";
+        static tree = (state) => {
+          return [
             component.h1(
               {},
               "Yo World!",
@@ -49,14 +38,17 @@ const MyComponent = await (async function vmodule() {
                     );
                     return null;
                   },
-                text: 
-                /* Make text prop reactive and set inital value */
-                function (key) {
-                  /* state-component key parity -> we can use the passed in key
-                  as effect condition */
-                  state.effects.add((change) => (this.text = change.text), key);
-                  return "Ding";
-                },
+                text:
+                  /* Make text prop reactive and set inital value */
+                  function (key) {
+                    /* state-component key parity -> we can use the passed in key
+              as effect condition */
+                    state.effects.add(
+                      (change) => (this.text = change.text),
+                      key
+                    );
+                    return "Ding";
+                  },
               })
             ),
             Slot({ name: "top" }),
@@ -83,29 +75,26 @@ const MyComponent = await (async function vmodule() {
                 },
               },
               "Go Foo"
-            )
-          );
-      })();
+            ),
+          ];
+        };
 
-      get value() {
-        return this.tree.find("input").value;
+        get value() {
+          return this.find("input").value;
+        }
+
+        set value(value) {
+          this.find("input").value = value;
+        }
       }
+    );
+  })();
 
-      set value(value) {
-        this.tree.find("input").value = value;
-      }
-    }
-  );
-
-  return MyComponent;
-})();
-
-/* Here's the consuming code that would normally reside elsewhere in the app - 
-perhaps inside another component module. */
-import { component } from "@/rollocomponent/component.js";
+/* Consuming code. */
 const my_component = MyComponent(
   { parent: document.body, value: 42 },
   component.h3({ slot: "top" }, "Injected into top"),
   component.h3({}, "Injected into default")
 );
-my_component.tree.state.$.text = "Hijacked!";
+
+my_component.state.$.text = "Hijacked!";
