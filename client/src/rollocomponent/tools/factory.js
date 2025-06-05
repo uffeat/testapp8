@@ -1,7 +1,7 @@
 /*
 import { factory } from "@/rollocomponent/tools/factory.js";
 20250605
-v.1.0
+v.1.1
 */
 
 import { Args } from "@/rollocomponent/tools/args.js";

@@ -7,6 +7,7 @@ import { State } from "@/rollocomponent/tools/state.js";
 
 export default (parent, config) => {
   return class extends parent {
+    static __name__ = "state";
     #_ = {};
     /* Returns state. */
     get state() {

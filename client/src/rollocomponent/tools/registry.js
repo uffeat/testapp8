@@ -11,8 +11,6 @@ export const registry = new (class {
 
   /* Registers web component. */
   add(cls, key, ext) {
-    
-
     if (ext) {
       customElements.define(key, cls, {
         extends: ext,
@@ -27,15 +25,21 @@ export const registry = new (class {
       }
     }
 
+    /* Retrieval of non-autonomous components from CustomElementRegistry is not
+    supported by Safari (20250601). Therefore, use additional registry.
+    It could be argued that registering autonomous components in this 
+    additional registry is redundant. However, doing so is relatively cheap,
+    and may support future features. */
     this.#_.registry.set(key, cls);
-
     return cls;
   }
 
+  /* Returns registered web component. */
   get(key) {
     return this.#_.registry.get(key);
   }
 
+  /* Checks, if web component with key has been registered. */
   has(key) {
     return this.#_.registry.has(key);
   }

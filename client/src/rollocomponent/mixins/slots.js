@@ -1,10 +1,7 @@
-
-
 export default (parent, config) => {
   return class extends parent {
+    static __name__ = "slots";
     #_ = {};
-
-   
 
     append(...children) {
       for (const child of children) {
@@ -15,17 +12,8 @@ export default (parent, config) => {
           }
           slot.append(child);
         } else {
-          //super.append(child)
-          //this.super_.append(child)
-          Element.prototype.append.call(this, child)
-
-          /*
-          const slot = this.querySelector(`rollo-slot:not([name])`);
-          if (!slot) {
-            throw new Error(`Invalid slot: ${child.slot}`);
-          }
-          slot.append(child);
-          */
+          /* Could use 'super', but this is the safer way */
+          Element.prototype.append.call(this, child);
         }
       }
 

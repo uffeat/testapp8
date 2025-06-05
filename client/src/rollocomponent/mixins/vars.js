@@ -6,6 +6,7 @@ v.1.2
 
 export default (parent, config) => {
   return class extends parent {
+    static __name__ = "vars";
     #_ = {};
     constructor() {
       super();

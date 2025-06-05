@@ -6,6 +6,7 @@ v.1.2
 
 export default (parent, config) => {
   return class extends parent {
+    static __name__ = "find";
     /* Unified (optional) alternative to 'querySelector' and 'querySelectorAll' 
     with a leaner syntax. */
     find(selector) {

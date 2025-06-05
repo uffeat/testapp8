@@ -6,6 +6,7 @@ v.1.0
 
 export default (parent, config) => {
   return class extends parent {
+    static __name__ = "for_";
     /* Returns 'for' attribute. */
     get for_() {
       return this.getAttribute("for");

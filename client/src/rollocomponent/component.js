@@ -30,7 +30,6 @@ const standard = Object.freeze([
   mixins.state,
   mixins.style,
   mixins.tab,
-  mixins.text,
   mixins.vars,
 ]);
 

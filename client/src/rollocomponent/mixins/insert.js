@@ -8,6 +8,7 @@ import { Insert } from "@/rollocomponent/tools/insert.js";
 
 export default (parent, config, ...mixins) => {
   return class extends parent {
+    static __name__ = "insert";
     #_ = {};
     
     __new__() {

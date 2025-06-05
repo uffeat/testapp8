@@ -6,6 +6,7 @@ v.1.0
 
 export default (parent, config) => {
   return class extends parent {
+    static __name__ = "clear";
     /* Clears content, optionally subject to selector. Chainable. */
     clear(selector) {
       if (selector) {

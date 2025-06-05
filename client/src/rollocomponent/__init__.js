@@ -8,9 +8,8 @@ The suite provides utilities for using and authoring web components
 with a declarative JSX-like syntax.
 
 The 'component' utility constitutes the basic Rollo components. 
-In addition to these, the 'rollocomponent' suite provides tools
-for authoring autonomous web components that can be used in 
-combination with and offers the same API as the basic Rollo components.
+In addition to these, the suite provides tools for authoring 
+components the same API as the basic Rollo components.
 */
 
 export { Slot } from "@/rollocomponent/slot.js";

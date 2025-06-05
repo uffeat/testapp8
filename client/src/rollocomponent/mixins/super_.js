@@ -1,6 +1,6 @@
 export default (parent, config, ...mixins) => {
   return class extends parent {
-    static name = "super_";
+    static __name__ = "super_";
 
     #super_;
 

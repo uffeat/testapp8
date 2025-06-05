@@ -6,6 +6,7 @@ v.1.0
 
 export default (parent, config) => {
   return class extends parent {
+    static __name__ = "tab";
     /* Returns tabindex. */
     get tab() {
       return this.getAttribute("tabindex");

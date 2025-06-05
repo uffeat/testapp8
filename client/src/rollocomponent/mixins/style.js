@@ -6,6 +6,7 @@ v.1.1
 
 export default (parent, config) => {
   return class extends parent {
+    static __name__ = "style";
     /* Updates style props. Chainable. */
     update(updates = {}) {
       super.update?.(updates);

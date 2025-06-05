@@ -12,6 +12,7 @@ import { Handlers } from "@/rollocomponent/tools/handlers.js";
 
 export default (parent, config) => {
   return class extends parent {
+    static __name__ = "handlers";
     #_ = {};
 
     constructor() {

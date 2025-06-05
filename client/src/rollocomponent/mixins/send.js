@@ -6,6 +6,7 @@ v.1.0
 
 export default (parent, config) => {
   return class extends parent {
+    static __name__ = "send";
     /* Dispatches event with additional options and a leaner syntax. */
     send(type, { detail, trickle, ...options } = {}) {
       if (!this.handlers.size(type)) return;
