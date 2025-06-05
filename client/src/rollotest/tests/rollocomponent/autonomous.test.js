@@ -7,15 +7,18 @@ import { component } from "@/rollocomponent/component.js";
 const MyComponent =
   await /* Simulate component-specific module, e.g., inside src/components */
   (async function vmodule() {
-    const { Slot, TreeBase, author, component } = await use(
-      "@/rollocomponent/"
-    );
+    const { Slot, Tree, author, component } = await use("@/rollocomponent/");
 
     return author(
-      class extends TreeBase {
-        static tag = "my-component";
-        static tree = (state) => {
-          return [
+      class extends Tree {
+        static __tag__ = "my-component";
+
+        static __new__ = function () {
+          this.state = true;
+          const host = this;
+          const state = this.state;
+
+          const tree = [
             component.h1(
               {},
               "Yo World!",
@@ -23,7 +26,7 @@ const MyComponent =
                 ".foo":
                   /* Make 'foo' CSS class reactive and set inital value */
                   function () {
-                    state.effects.add(
+                    host.state.effects.add(
                       (change) => this.classes.if(change.foo, "foo"),
                       "foo"
                     );
@@ -32,7 +35,7 @@ const MyComponent =
                 "[foo":
                   /* Make 'foo' attribute reactive and set inital value */
                   function () {
-                    state.effects.add(
+                    host.state.effects.add(
                       (change) => (this.attribute.foo = change.foo),
                       "foo"
                     );
@@ -43,7 +46,7 @@ const MyComponent =
                   function (key) {
                     /* state-component key parity -> we can use the passed in key
               as effect condition */
-                    state.effects.add(
+                    host.state.effects.add(
                       (change) => (this.text = change.text),
                       key
                     );
@@ -54,6 +57,7 @@ const MyComponent =
             Slot({ name: "top" }),
             component.input("form-control"),
             Slot({
+              name: "main",
               "@slotchange": function (event) {
                 console.log("Slot change!");
               },
@@ -77,6 +81,8 @@ const MyComponent =
               "Go Foo"
             ),
           ];
+
+          this.append(...tree);
         };
 
         get value() {
@@ -94,7 +100,16 @@ const MyComponent =
 const my_component = MyComponent(
   { parent: document.body, value: 42 },
   component.h3({ slot: "top" }, "Injected into top"),
-  component.h3({}, "Injected into default")
+  component.h3({ slot: "main" }, "Injected into main")
 );
 
 my_component.state.$.text = "Hijacked!";
+
+
+console.log('meta:', my_component.constructor.__meta__)
+console.log('base:', my_component.constructor.__meta__.base)
+console.log('classes:', Array.from(my_component.constructor.__meta__.classes()))
+
+
+console.log(HTMLElement.name)
+console.log(Object.hasOwn(HTMLElement, 'name'))
