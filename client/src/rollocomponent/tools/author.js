@@ -13,7 +13,7 @@ NOTE
 - If tag is not explicitly provided, a static tag prop on cls is used. */
 export const author = (cls, key) => {
   if (!key) {
-    key = cls.tag
+    key = cls.__tag__
   }
   return factory(registry.add(cls, key));
 };

@@ -8,7 +8,7 @@ v.1.0
 import { mix } from "@/rollocomponent/tools/mix.js";
 import { mixins } from "@/rollocomponent/mixins/__init__.js";
 
-export class TreeBase extends mix(
+export class Tree extends mix(
   HTMLElement,
   {},
   mixins.attrs,
@@ -24,11 +24,11 @@ export class TreeBase extends mix(
   mixins.parent,
   mixins.props,
   mixins.send,
+  mixins.slots,
   mixins.state,
   mixins.style,
   mixins.tab,
   mixins.text,
-  mixins.tree,
   mixins.vars
 ) {
   constructor() {

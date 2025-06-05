@@ -33,7 +33,7 @@ const cls = class extends mix(
   mixins.text,
   mixins.vars
 ) {
-  static tag = "rollo-slot";
+  static __tag__ = "rollo-slot";
 
   #_ = {};
 

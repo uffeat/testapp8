@@ -1,26 +1,10 @@
-/* Mixin for use with the 'tree' pattern.  */
+
 
 export default (parent, config) => {
   return class extends parent {
     #_ = {};
 
-    get tree() {
-      return this.#_.tree;
-    }
-
-    __new__() {
-      super.__new__?.();
-      if (this.constructor.tree) {
-        this.state = true
-        this.#_.tree = this.constructor.tree(this.state);
-        if (Array.isArray(this.#_.tree)) {
-          super.append(...this.#_.tree);
-        } else {
-          super.append(this.#_.tree);
-        }
-        
-      }
-    }
+   
 
     append(...children) {
       for (const child of children) {
@@ -31,11 +15,17 @@ export default (parent, config) => {
           }
           slot.append(child);
         } else {
+          //super.append(child)
+          //this.super_.append(child)
+          Element.prototype.append.call(this, child)
+
+          /*
           const slot = this.querySelector(`rollo-slot:not([name])`);
           if (!slot) {
             throw new Error(`Invalid slot: ${child.slot}`);
           }
           slot.append(child);
+          */
         }
       }
 

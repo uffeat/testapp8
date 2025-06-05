@@ -14,7 +14,7 @@ combination with and offers the same API as the basic Rollo components.
 */
 
 export { Slot } from "@/rollocomponent/slot.js";
-export { TreeBase } from "@/rollocomponent/tree_base.js";
+export { Tree } from "@/rollocomponent/tree.js";
 export { author } from "@/rollocomponent/tools/author.js";
 export { component } from "@/rollocomponent/component.js";
 export { mix } from "@/rollocomponent/tools/mix.js";

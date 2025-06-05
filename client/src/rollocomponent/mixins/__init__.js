@@ -25,12 +25,16 @@ import props from "@/rollocomponent/mixins/props.js";
 import send from "@/rollocomponent/mixins/send.js";
 import setup from "@/rollocomponent/mixins/setup.js";
 import shadow from "@/rollocomponent/mixins/shadow.js";
+import slots from "@/rollocomponent/mixins/slots.js";
 import state from "@/rollocomponent/mixins/state.js";
 import style from "@/rollocomponent/mixins/style.js";
+import super_ from "@/rollocomponent/mixins/super_.js";
 import tab from "@/rollocomponent/mixins/tab.js";
 import text from "@/rollocomponent/mixins/text.js";
-import tree from "@/rollocomponent/mixins/tree.js";
 import vars from "@/rollocomponent/mixins/vars.js";
+
+
+
 
 export const mixins = Object.freeze({
   append,
@@ -53,10 +57,17 @@ export const mixins = Object.freeze({
   send,
   setup,
   shadow,
+  slots,
   state,
   style,
+  super_,
   tab,
   text,
-  tree,
+
+
+
+
   vars,
+
+  
 });

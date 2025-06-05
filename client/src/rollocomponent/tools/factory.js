@@ -16,8 +16,8 @@ export const factory = (cls) => {
     /* Parse args */
     args = new Args(args);
     /* Call '__new__' to invoke pre-config actions */
+    instance.constructor.__new__?.call(instance);
     instance.__new__?.();
-    delete instance.__new__;
     /* Add CSS classes */
     if (instance.classes) {
       instance.classes.add(args.classes);
@@ -28,7 +28,7 @@ export const factory = (cls) => {
     instance?.append(...args.children);
     /* Call '__init__' to invoke post-config actions */
     instance.__init__?.();
-    delete instance.__init__;
+    instance.constructor.__init__?.call(instance);
     /* Call hooks */
     instance?.hooks(...args.hooks);
     return instance;
