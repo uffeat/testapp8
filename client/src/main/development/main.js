@@ -20,6 +20,8 @@ const MyComponent =
     return author(
       class extends TreeBase {
         static tag = "my-component";
+
+        
         static tree = (state) => {
           return [
             component.h1(
