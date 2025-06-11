@@ -1,0 +1,46 @@
+<style global name="hot">
+  h1 {
+    color: hotpink;
+  }
+</style>
+
+<style shadow name="green">
+  h1 {
+    color: green;
+  }
+</style>
+
+<template>
+  <h1></h1>
+</template>
+
+<script setup>
+
+  const { Tree, component, mix, mixins } = await use("@/rollocomponent/");
+  const { Shadow } = await use("@/rollocomponent/shadow.js");
+
+  
+
+  export default class extends Tree {
+     static __tag__ = "my-component";
+
+    static __new__ = function () {
+
+      this.attachShadow({ mode: "open" })
+      component.slot()
+      this.shadowRoot.append(component.slot())
+    
+
+
+
+
+      this.append(component.h1({}, 'Hi!'))
+    }
+    constructor() {
+      super()
+      //new Shadow(this)
+    }
+
+
+  }
+</script>

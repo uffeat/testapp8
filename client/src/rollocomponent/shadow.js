@@ -1,17 +1,16 @@
 /*
-import { TreeBase } from "@/rollocomponent/tree.js";
+import { Shadow } from "@/rollocomponent/shadow.js";
 20250605
 v.1.1
 */
 
-
 import { mix } from "@/rollocomponent/tools/mix.js";
 import { mixins } from "@/rollocomponent/mixins/__init__.js";
 
-export class Tree extends mix(
+export class Shadow extends mix(
   HTMLElement,
   {},
-  mixins.append,//
+  mixins.append, //
   mixins.attrs,
   mixins.classes,
   mixins.clear,
@@ -32,7 +31,19 @@ export class Tree extends mix(
   mixins.text,
   mixins.vars
 ) {
-  constructor() {
+  #_ = {};
+
+  constructor(owner) {
     super();
+    //this.#_.owner = owner;
+    //owner.attachShadow({ mode: "open" }).append(this);
+
+    /*
+    Object.defineProperty(owner, "shadow", {
+      configurable: true,
+      enumerable: false,
+      get: () => this,
+    });
+    */
   }
 }

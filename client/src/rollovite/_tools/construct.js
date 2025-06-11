@@ -8,7 +8,7 @@ v.1.0
 
 const import_ = Function("path", "return import(path)");
 
-/* Return uncached js module constructed from text. */
+/* Returns js module constructed from text. */
 export const construct = async (text) => {
   const url = URL.createObjectURL(
     new Blob([text], {
@@ -19,3 +19,5 @@ export const construct = async (text) => {
   URL.revokeObjectURL(url);
   return module;
 };
+
+

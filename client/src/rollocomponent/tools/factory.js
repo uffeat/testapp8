@@ -25,12 +25,12 @@ export const factory = (cls) => {
     /* Use updates */
     instance.update?.(args.updates);
     /* Append children */
-    instance?.append(...args.children);
+    instance.append?.(...args.children);
     /* Call '__init__' to invoke post-config actions */
     instance.__init__?.();
     instance.constructor.__init__?.call(instance);
     /* Call hooks */
-    instance?.hooks(...args.hooks);
+    instance.hooks?.(...args.hooks);
     return instance;
   };
 };

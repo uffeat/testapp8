@@ -1,5 +1,5 @@
 /*
-const {  State, Tree, author, component } = await use("@/rollocomponent/");
+const {  State, Tree, author, component, mix, mixins } = await use("@/rollocomponent/");
 20250602
 v.2.0
 

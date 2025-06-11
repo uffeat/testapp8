@@ -1,0 +1,20 @@
+<style global>
+  h1 {
+    color: hotpink;
+  }
+</style>
+
+<script>
+  const { Tree, component, mix, mixins } = await use("@/rollocomponent/");
+
+
+
+
+
+
+  export default {
+    tag:  "my-component",
+    mixins: ['parent', 'props'],
+    tree: () => component.h1({}, 'Hi!'),
+  }
+</script>
