@@ -6,8 +6,9 @@ v.1.1
 
 import { mix } from "@/rollocomponent/tools/mix.js";
 import { mixins } from "@/rollocomponent/mixins/__init__.js";
+import { author } from "@/rollocomponent/tools/author.js";
 
-export class Shadow extends mix(
+const cls = class extends mix(
   HTMLElement,
   {},
   mixins.append, //
@@ -31,6 +32,8 @@ export class Shadow extends mix(
   mixins.text,
   mixins.vars
 ) {
+  static __tag__ = "rollo-shadow";
+
   #_ = {};
 
   constructor(owner) {
@@ -46,4 +49,23 @@ export class Shadow extends mix(
     });
     */
   }
-}
+
+  get owner() {
+    return this.#_.owner;
+  }
+
+  set owner(owner) {
+    this.#_.owner = owner;
+    owner.attachShadow({ mode: "open" }).append(this);
+
+
+
+    Object.defineProperty(owner, "shadow", {
+      configurable: true,
+      enumerable: false,
+      get: () => this,
+    });
+  }
+};
+
+export const Shadow = author(cls);
