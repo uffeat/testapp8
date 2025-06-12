@@ -12,6 +12,8 @@ import { author } from "@/rollocomponent/tools/author.js";
 import { construct } from "@/rollovite/_tools/construct.js";
 import { component } from "@/rollocomponent/component.js";
 
+import { module as _module } from "@/rollo/tools/module";
+
 class Sheet extends CSSStyleSheet {
   #_ = {
     targets: new Set(),
@@ -65,11 +67,9 @@ const components = new (class {
     /* Get html */
 
 
-    //
-    //
+    
     const path = `/src/components/${key}`;
-    //
-    //
+    
 
     const load = map[path];
     const html = await load();
@@ -84,7 +84,11 @@ const components = new (class {
     const script = wrapper.find("script");
     const js = script.textContent;
     console.log('js:', js)////
-    const module = await construct(js);
+
+
+    //const module = await construct(js);
+    const module = await _module.construct(js);
+
 
 
      console.log('HERE')
