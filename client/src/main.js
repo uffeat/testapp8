@@ -74,7 +74,7 @@ const components = new (class {
     const load = map[path];
     const html = await load();
 
-    console.log('HERE')
+   
 
     //console.log('html:', html)////
 
@@ -85,6 +85,12 @@ const components = new (class {
     const js = script.textContent;
     //console.log('js:', js)////
     const module = await construct(js);
+
+
+     console.log('HERE')
+
+
+
     //console.log('module:', module)////
     const cls = module.default;
     //console.log('cls:', cls)////
