@@ -47,6 +47,8 @@ const map = import.meta.glob(["/src/components/**/*.html"], {
   import: "default",
 });
 
+console.log('paths:', Object.keys(map))
+
 const components = new (class {
   #_ = {
     cache: new Map(),
@@ -61,7 +63,14 @@ const components = new (class {
       return this.#_.cache.get(key);
     }
     /* Get html */
+
+
+    //
+    //
     const path = `/src/components/${key}`;
+    //
+    //
+
     const load = map[path];
     const html = await load();
 
