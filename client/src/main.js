@@ -83,7 +83,7 @@ const components = new (class {
     /* Get cls */
     const script = wrapper.find("script");
     const js = script.textContent;
-    //console.log('js:', js)////
+    console.log('js:', js)////
     const module = await construct(js);
 
 
