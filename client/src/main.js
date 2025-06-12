@@ -74,6 +74,8 @@ const components = new (class {
     const load = map[path];
     const html = await load();
 
+    console.log('HERE')
+
     //console.log('html:', html)////
 
     const wrapper = component.div({ innerHTML: html });
