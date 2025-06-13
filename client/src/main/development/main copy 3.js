@@ -8,9 +8,13 @@ import "@/main/development/rollometa/__init__.js";
 
 console.info("Vite environment:", import.meta.env.MODE);
 
+
+
 import { author } from "@/rollocomponent/tools/author.js";
 import { construct } from "@/rollovite/_tools/construct.js";
 import { component } from "@/rollocomponent/component.js";
+
+
 
 class Sheet extends CSSStyleSheet {
   #_ = {
@@ -38,7 +42,7 @@ class Sheet extends CSSStyleSheet {
   }
 
   toString() {
-    return this.text;
+    return this.text
   }
 }
 
@@ -47,7 +51,7 @@ const map = import.meta.glob(["/src/components/**/*.html"], {
   import: "default",
 });
 
-console.log("paths:", Object.keys(map));
+console.log('paths:', Object.keys(map))
 
 const components = new (class {
   #_ = {
@@ -64,14 +68,43 @@ const components = new (class {
     }
     /* Get html */
 
+
+    
     const path = `/src/components/${key}`;
+    
 
     const load = map[path];
     const html = await load();
 
+   
+
     //console.log('html:', html)////
 
     const wrapper = component.div({ innerHTML: html });
+
+    /* Get cls */
+    const script = wrapper.find("script");
+    const js = script.textContent;
+    console.log('js:', js)////
+
+
+    const module = await construct(js);
+ 
+
+
+
+     console.log('HERE')
+
+
+
+    //console.log('module:', module)////
+    const cls = module.default;
+    //console.log('cls:', cls)////
+
+    // TODO Handle scoped and shadow sheets and templates
+
+    const result = author(cls);
+    this.#_.cache.set(key, result);
 
     /* Handle global style */
     const global_style = wrapper.find("style[global]");
@@ -84,31 +117,23 @@ const components = new (class {
     }
 
     /* Handle assets */
-    const assets = {};
-    for (const element of wrapper.querySelectorAll("style[name]")) {
+    cls.__assets__ = {};
+    for (const element of wrapper.querySelectorAll('style[name]')) {
       //console.log('element:', element)//
-      console.log("text:", element.textContent);
-      console.log("name:", element.getAttribute("name"));
-      assets[element.getAttribute("name")] = new Sheet(element.textContent); //
+      console.log('text:', element.textContent)
+      console.log('name:', element.getAttribute('name'))
+     
+     cls.__assets__[element.getAttribute('name')] = new Sheet(element.textContent)//
+      
     }
 
-    for (const element of wrapper.querySelectorAll("template[name]")) {
-      assets[element.getAttribute("name")] = element.innerHTML;
+   
+
+
+    for (const element of wrapper.querySelectorAll('template[name]')) {
+     cls.__assets__[element.getAttribute('name')] = element.innerHTML
+      
     }
-
-    /* Get cls */
-    const script = wrapper.find("script");
-    const js = script.textContent;
-    //console.log("js:", js); ////
-    const module = await construct(js);
-    //console.log('module:', module)////
-    const cls = module.default(assets)
-    //console.log('cls:', cls)////
-
-    
-
-    const result = author(cls);
-    this.#_.cache.set(key, result);
 
     return result;
   }
@@ -117,3 +142,4 @@ const components = new (class {
 const MyComponent = await components.import("my_component.html");
 
 const my_component = MyComponent({ parent: document.body });
+

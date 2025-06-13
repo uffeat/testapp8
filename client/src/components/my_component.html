@@ -15,38 +15,29 @@
   <slot></slot>
 </template>
 
-<script>
-
+<script type="module">
   const { Tree, component, mix, mixins } = await use("@/rollocomponent/");
   const { Shadow } = await use("@/rollocomponent/shadow.js");
 
+  // Rename Tree to Base and add shadow features
 
-  // Rename Trre to Base and add shadow features
+  export default (assets) => {
+    const cls = class extends Tree {
+      static __tag__ = "my-component";
+      static __new__ = function () {
+        console.log("assets:", assets);
 
-  export default class extends Tree {
-    
-    static __tag__ = "my-component";
+        Shadow({ owner: this });
+        this.shadowRoot.innerHTML = assets.my_template;
 
-    static __new__ = function () {
+        this.append(component.h1({}, "Hi!"));
+      };
 
-      console.log('assets:', this.constructor.__assets__)
+      constructor() {
+        super();
+      }
+    };
 
-
-      Shadow({owner: this})
-      //this.shadow.append(component.slot())
-
-      this.shadowRoot.innerHTML = this.constructor.__assets__.my_template
-
-
-
-      this.append(component.h1({}, 'Hi!'))
-    }
-
-    constructor() {
-      super()
-
-    }
-
-
-  }
+    return cls;
+  };
 </script>
