@@ -42,6 +42,8 @@ class Sheet extends CSSStyleSheet {
   }
 }
 
+/* TODO Version that supports js and autoimport/injection of files in sub dirs. Start with the __ini__.js idea  */
+
 const map = import.meta.glob(["/src/components/**/*.html"], {
   query: "?raw",
   import: "default",
