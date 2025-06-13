@@ -11,6 +11,9 @@ export const registry = new (class {
 
   /* Registers web component. */
   add(cls, key, ext) {
+    if (!key) {
+    key = cls.__tag__
+  }
     if (ext) {
       customElements.define(key, cls, {
         extends: ext,

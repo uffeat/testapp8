@@ -7,6 +7,8 @@ v.1.1
 import { mix } from "@/rollocomponent/tools/mix.js";
 import { mixins } from "@/rollocomponent/mixins/__init__.js";
 import { author } from "@/rollocomponent/tools/author.js";
+import { registry } from "@/rollocomponent/tools/registry.js";
+import { remove } from "@/rollo/tools/array/remove.js";
 
 const cls = class extends mix(
   HTMLElement,
@@ -38,34 +40,39 @@ const cls = class extends mix(
 
   constructor(owner) {
     super();
-    //this.#_.owner = owner;
-    //owner.attachShadow({ mode: "open" }).append(this);
+    this.#_.owner = owner;
+    owner.attachShadow({ mode: "open" }).append(this);
 
-    /*
     Object.defineProperty(owner, "shadow", {
       configurable: true,
       enumerable: false,
       get: () => this,
     });
-    */
+
+    this.#_.sheets = new (class {
+      #_ = {
+        registry: new Set()
+      };
+
+      add(...sheets) {
+
+      }
+
+      remove(sheet) {
+
+      }
+    })();
   }
 
   get owner() {
     return this.#_.owner;
   }
 
-  set owner(owner) {
-    this.#_.owner = owner;
-    owner.attachShadow({ mode: "open" }).append(this);
-
-
-
-    Object.defineProperty(owner, "shadow", {
-      configurable: true,
-      enumerable: false,
-      get: () => this,
-    });
+  get root() {
+    return this.#_.owner.shadowRoot;
   }
 };
 
-export const Shadow = author(cls);
+registry.add(cls, "rollo-shadow");
+
+export const Shadow = (owner) => new cls(owner);

@@ -28,7 +28,7 @@
       static __new__ = function () {
         console.log("assets:", assets);
 
-        Shadow({ owner: this });
+        Shadow(this);
         this.shadowRoot.innerHTML = assets.my_template;
 
         this.append(component.h1({}, "Hi!"));

@@ -42,7 +42,9 @@ class Sheet extends CSSStyleSheet {
   }
 }
 
-/* TODO Version that supports js and autoimport/injection of files in sub dirs. Start with the __ini__.js idea  */
+/* TODO Version that supports js and autoimport/injection of files in sub dirs. 
+Same idea re a default func tht receives assets + a way to handle global sheets
+  */
 
 const map = import.meta.glob(["/src/components/**/*.html"], {
   query: "?raw",
@@ -76,14 +78,15 @@ const components = new (class {
     const wrapper = component.div({ innerHTML: html });
 
     /* Handle global style */
-    const global_style = wrapper.find("style[global]");
-    if (global_style) {
-      const css = global_style.textContent;
-      ////console.log('css:', css)////
-      const sheet = new CSSStyleSheet();
-      sheet.replaceSync(css);
-      document.adoptedStyleSheets.push(sheet);
-    }
+    (() => {
+      const style = wrapper.find("style[global]");
+      if (style) {
+        const text = style.textContent;
+        const sheet = new CSSStyleSheet();
+        sheet.replaceSync(text);
+        document.adoptedStyleSheets.push(sheet);
+      }
+    })();
 
     /* Handle assets */
     const assets = {};
@@ -104,10 +107,8 @@ const components = new (class {
     //console.log("js:", js); ////
     const module = await construct(js);
     //console.log('module:', module)////
-    const cls = module.default(assets)
+    const cls = module.default(assets);
     //console.log('cls:', cls)////
-
-    
 
     const result = author(cls);
     this.#_.cache.set(key, result);
