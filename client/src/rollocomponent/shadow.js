@@ -6,14 +6,16 @@ v.1.1
 
 import { mix } from "@/rollocomponent/tools/mix.js";
 import { mixins } from "@/rollocomponent/mixins/__init__.js";
-import { author } from "@/rollocomponent/tools/author.js";
 import { registry } from "@/rollocomponent/tools/registry.js";
-import { remove } from "@/rollo/tools/array/remove.js";
+import { Sheets } from "@/rollosheet/tools/sheets.js";
+
+/* NOTE The native shadow root has limited DOM manipulation features,
+therefore use the special Shadow component. */
 
 const cls = class extends mix(
   HTMLElement,
   {},
-  mixins.append, //
+  mixins.append,
   mixins.attrs,
   mixins.classes,
   mixins.clear,
@@ -27,7 +29,6 @@ const cls = class extends mix(
   mixins.parent,
   mixins.props,
   mixins.send,
-  //mixins.slots,
   mixins.state,
   mixins.style,
   mixins.tab,
@@ -42,26 +43,25 @@ const cls = class extends mix(
     super();
     this.#_.owner = owner;
     owner.attachShadow({ mode: "open" }).append(this);
+    this.#_.slots = new (class {
+      #_ = {};
 
-    Object.defineProperty(owner, "shadow", {
-      configurable: true,
-      enumerable: false,
-      get: () => this,
-    });
-
-    this.#_.sheets = new (class {
-      #_ = {
-        registry: new Set()
-      };
-
-      add(...sheets) {
-
+      constructor(owner) {
+        this.#_.owner = owner;
       }
 
-      remove(sheet) {
-
+      get owner() {
+        return this.#_.owner;
       }
-    })();
+
+      has(name) {
+        if (name) {
+          return !!this.#_.owner.querySelector(`slot[name="${name}"]`)
+        }
+        return !!this.#_.owner.querySelector(`slot:not([name])`)
+      }
+    })(this);
+    this.#_.sheets = new Sheets(owner.shadowRoot);
   }
 
   get owner() {
@@ -70,6 +70,14 @@ const cls = class extends mix(
 
   get root() {
     return this.#_.owner.shadowRoot;
+  }
+
+  get sheets() {
+    return this.#_.sheets;
+  }
+
+  get slots() {
+    return this.#_.slots;
   }
 };
 

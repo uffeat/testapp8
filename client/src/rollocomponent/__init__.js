@@ -1,5 +1,5 @@
 /*
-const {  State, Tree, author, component, mix, mixins } = await use("@/rollocomponent/");
+const { Base, author, component, mix, mixins } = await use("@/rollocomponent/");
 20250602
 v.2.0
 
@@ -12,8 +12,7 @@ In addition to these, the suite provides tools for authoring
 components the same API as the basic Rollo components.
 */
 
-export { Slot } from "@/rollocomponent/slot.js";
-export { Tree } from "@/rollocomponent/tree.js";
+export { Base } from "@/rollocomponent/base.js";
 export { author } from "@/rollocomponent/tools/author.js";
 export { component } from "@/rollocomponent/component.js";
 export { mix } from "@/rollocomponent/tools/mix.js";
