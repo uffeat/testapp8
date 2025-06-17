@@ -1,8 +1,12 @@
-const { Base, State, component } = await use("@/rollocomponent/");
-const { reboot } = await use("@/rollolibs/bootstrap/reboot.js");
-const { bootstrap } = await use("@/rollolibs/bootstrap/bootstrap.js");
+/*
+const Stuff = await components.import("stuff/");
+*/
+
+const { Base, component } = await use("@/rollocomponent/");
 
 export default async (assets) => {
+
+  /* Make parcel sheet global */
   assets["sheet.css"].adopt(document);
 
   return class extends Base {
@@ -10,19 +14,17 @@ export default async (assets) => {
 
     constructor() {
       super();
-      this.shadow.sheets.add(reboot);
-
-      //this.shadow.insert.beforeend(assets["template.html"]);
     }
 
     __new__() {
       this.append(
         component.form(
           "row.g-3.p-3",
-
           component.div(
             "form-floating.col-md-6",
-            { state: true },
+            {
+              state: true,
+            },
             component.input("form-control", {
               type: "email",
               id: "email",
@@ -31,21 +33,21 @@ export default async (assets) => {
               title: " ",
               required: true,
             }),
-            component.label({ for_: "email", text: "Email" }),
+            component.label({
+              for_: "email",
+              text: "Email",
+              __marginLeft: '0.25rem',
+            }),
             component.p(),
 
             function () {
-              const input = this.find(`input`);
-              const message = this.find(`p`);
+              const [input, message] = [this.find(`input`), this.find(`p`)];
 
               const validate = () => {
                 if (input.value) {
-                  console.log("validity:", input.validity);
-                  if (input.validity.typeMismatch) {
-                    this.state.$.message = "Invalid format";
-                  } else {
-                    this.state.$.message = null;
-                  }
+                  this.state.$.message = input.validity.typeMismatch
+                    ? "Invalid format"
+                    : null;
                 } else {
                   this.state.$.message = "Required";
                 }
@@ -55,8 +57,7 @@ export default async (assets) => {
 
               input.on.blur = (event) => {
                 validate();
-                this.state.$.visited = true;
-                input.attribute.visited = true;
+                this.state.$.visited = input.attribute.visited = true;
               };
 
               this.state.effects.add((change) => {
@@ -76,7 +77,9 @@ export default async (assets) => {
 
           component.div(
             "form-floating.col-md-6",
-            { state: true },
+            {
+              state: true,
+            },
             component.input("form-control", {
               type: "password",
               id: "password",
@@ -85,27 +88,25 @@ export default async (assets) => {
               title: " ",
               required: true,
             }),
-            component.label({ for_: "password", text: "Password" }),
+            component.label({
+              for_: "password",
+              text: "Password",
+              __marginLeft: '0.25rem',
+            }),
             component.p(),
 
             function () {
-              const input = this.find(`input`);
-              const message = this.find(`p`);
+              const [input, message] = [this.find(`input`), this.find(`p`)];
 
               const validate = () => {
-                if (input.value) {
-                  this.state.$.message = null;
-                } else {
-                  this.state.$.message = "Required";
-                }
+                this.state.$.message = input.value ? null : "Required";
               };
 
               input.on.input = validate;
 
               input.on.blur = (event) => {
                 validate();
-                this.state.$.visited = true;
-                input.attribute.visited = true;
+                this.state.$.visited = input.attribute.visited = true;
               };
 
               this.state.effects.add((change) => {
@@ -123,30 +124,29 @@ export default async (assets) => {
             }
           ),
           component.menu(
-            component.button(
-              "btn.btn-primary.disabled",
-              {
-                key: "submit",
-                type: "button",
-                "@click": (event) => {
-                  console.log("Clicked");
-                },
-              },
-              "Submit"
-            )
+            component.button("btn.btn-primary.disabled", {}, "Submit")
           )
         )
       );
 
       const form = this.find(`form`);
       const submit = this.find(`button`);
-      //const email = this.components.email;
-      //const password = this.find(`input[name="password"]`);
-      //console.log('password:', password)
+      const email = this.find(`input[name="email"]`);
+      const password = this.find(`input[name="password"]`);
 
       this.on.input = (event) => {
         const valid = form.checkValidity();
         submit.classes.if(!valid, "disabled");
+      };
+
+      form.on.submit = (event) => {
+        event.preventDefault();
+
+        const data = {
+          [email.name]: email.value,
+          [password.name]: password.value,
+        };
+        /* TODO Call endpoint and show any errors */
       };
     }
   };

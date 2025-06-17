@@ -9,7 +9,7 @@ v.1.1
   (or perhaps component) that can make post-processing easier, and/or create
   a parser that converts template elements to basic Rollo components.
 - Consider deep integration into 'use' rather than using a local import maps.
-  */
+*/
 
 import { author } from "@/rollocomponent/tools/author.js";
 import { construct } from "@/rollovite/_tools/construct.js";

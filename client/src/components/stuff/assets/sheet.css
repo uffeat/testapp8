@@ -1,3 +1,7 @@
+/*
+components/stuff/assets/sheet.css
+*/
+
 rollo-stuff p {
   color: var(--bs-light);
 }
@@ -8,15 +12,19 @@ rollo-stuff p::after {
   padding-top: 0.25rem;
 }
 
+/* Prevent vertical shifts, when no message. */
 rollo-stuff p::after {
-  content: "__Hidden__";
+  content: "X";
   visibility: hidden;
 }
 
+/* Correct Bootstrap standard, where label brushes against border in the upper 
+position. */
 rollo-stuff label {
-  margin-left: 0.25rem;
+  margin-left: var(--marginLeft, 0.25rem);
 }
 
+/* Hard error-styling of message, if visited. */
 rollo-stuff .form-floating:has(input[visited]) p {
   color: var(--bs-form-invalid-color);
 }
