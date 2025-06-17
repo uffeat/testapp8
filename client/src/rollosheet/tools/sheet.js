@@ -12,10 +12,10 @@ export class Sheet extends CSSStyleSheet {
     targets: new Set(),
   };
 
-  constructor(text, {name} = {}) {
+  constructor(text, { name } = {}) {
     super();
     this.replaceSync(text);
-      this.#_.text = text;
+    this.#_.text = text;
 
     if (name) {
       this.#_.name = name;
@@ -40,14 +40,6 @@ export class Sheet extends CSSStyleSheet {
       target.adoptedStyleSheets.push(this);
     }
     return this;
-  }
-
-  update(key, updates) {
-    /* TODO
-    - The idea is that CSS is declared as text, but can subsequently be changes, 
-      i.e. no support for 'add' and 'remove'
-    - Also update text!... At least in dev */
-    return this
   }
 
   unadopt(target) {

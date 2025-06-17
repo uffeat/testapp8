@@ -1,5 +1,5 @@
 <style global name="hot">
-  h1 {
+  rollo-foo h1 {
     color: hotpink;
   }
 </style>
@@ -10,22 +10,19 @@
   }
 </style>
 
-<!--NOTE It's tempting to implement a 'shadow' attr, that lets 'components' 
-set the template as shadow's innerHTML... But DO NOT! It would be too much 
-magic and would require that cls supports shadow. -->
 <template name="my_template">
   <h1>Hello from my_template</h1>
   <slot></slot>
   <slot name="main"></slot>
 </template>
 
-<script type="module">
- 
+<script>
+
   const { Base, component } = await use("@/rollocomponent/");
   const { reboot } = await use("@/rollolibs/bootstrap/reboot.js");
 
   export default async (assets, { components }) => {
-    
+
     /* This is just to demo that assets can be imported forom other SFCs*/
     const bar_assets = await components.assets.import("bar.html");
 
@@ -36,9 +33,9 @@ magic and would require that cls supports shadow. -->
         super();
         this.shadow.sheets.add(reboot, assets.green, bar_assets.linen);
 
-        /* NOTE Here, we populate shadow with an SFC asset. 
+        /* NOTE Here, we populate shadow with an SFC asset.
         However, we could just as well have built a tree with 'component'.
-        The ability to use an SFC asset template can be handy, when a classic 
+        The ability to use an SFC asset template can be handy, when a classic
         HTML tree provides a better overview, but can sometimes require more
         post-processing. */
 
@@ -46,8 +43,7 @@ magic and would require that cls supports shadow. -->
       }
 
       __new__() {
-        /* NOTE Typically, children cannot be added in the constructor, hence __new__.
-        However - and to my surpise - the work done here could also be done in the constructor! */
+       
         this.append(
           component.h1({}, "Hi!"),
           component.h2({ slot: "main" }, "Also hi from me!")

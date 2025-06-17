@@ -4,6 +4,7 @@ import { Base } from "@/rollocomponent/base.js";
 v.1.0
 */
 
+import { component } from "@/rollocomponent/component.js";
 import { mix } from "@/rollocomponent/tools/mix.js";
 import { mixins } from "@/rollocomponent/mixins/__init__.js";
 import { Shadow } from "@/rollocomponent/shadow.js";
@@ -35,6 +36,8 @@ export class Base extends mix(
   constructor() {
     super();
     this.#_.shadow = Shadow(this);
+    /* */
+    this.#_.shadow.append(component.slot());
   }
 
   get shadow() {
@@ -42,13 +45,13 @@ export class Base extends mix(
   }
 
   append(...children) {
-    this.#check(...children)
+    this.#check(...children);
     super.append(...children);
     return this;
   }
 
   prepend(...children) {
-    this.#check(...children)
+    this.#check(...children);
     super.prepend(...children);
     return this;
   }

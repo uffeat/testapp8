@@ -14,3 +14,12 @@ import { components } from "@/rollocomponent/tools/components.js";
 const Foo = await components.import("foo.html");
 
 const foo = Foo({ parent: document.body });
+
+const Bar = await components.import("bar.html");
+
+const bar = Bar({ parent: document.body });
+
+
+const Stuff = await components.import("stuff/");
+
+const stuff = Stuff({ parent: document.body });
