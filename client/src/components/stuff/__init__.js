@@ -16,93 +16,110 @@ export default async (assets) => {
     }
 
     __new__() {
-      //this.host = true;
-      //this.state = true
-
       this.append(
         component.form(
           "row.g-3.p-3",
-          {
-            key: "form",
-            novalidation: true,
-          },
+
           component.div(
             "form-floating.col-md-6",
-            {},
+            { state: true },
             component.input("form-control", {
-              key: "email",
               type: "email",
               id: "email",
               name: "email",
               placeholder: "Email",
               title: " ",
-              "@blur": function (event) {
-                this.attribute.visited = true;
-              },
+              required: true,
             }),
             component.label({ for_: "email", text: "Email" }),
-            component.p()
-          ),
-          component.div(
-            "form-floating.col-md-6",
-            { host: true, state: true },
-            component.input("form-control", {
-              key: "input",
-              type: "password",
-              id: "password",
-              name: "password",
-              placeholder: "Password",
-              title: " ",
-            }),
-            component.label({ for_: "password", text: "Password" }),
-            component.p({ key: "message" }),
+            component.p(),
 
             function () {
-              const input = this.components.input;
+              const input = this.find(`input`);
+              const message = this.find(`p`);
 
-              input.on.input = (event) => {
+              const validate = () => {
                 if (input.value) {
-                  this.state.$.message = null;
-                  //input.attribute.message = null
+                  console.log("validity:", input.validity);
+                  if (input.validity.typeMismatch) {
+                    this.state.$.message = "Invalid format";
+                  } else {
+                    this.state.$.message = null;
+                  }
                 } else {
                   this.state.$.message = "Required";
-                  //input.attribute.message = true
-                  if (input.attribute.visited) {
-                    //input.classes.add("is-invalid");
-                  } else {
-                    //input.classes.remove("is-invalid");
-                  }
                 }
               };
 
-              //input.classes.add("is-invalid");//
+              input.on.input = validate;
 
               input.on.blur = (event) => {
+                validate();
                 this.state.$.visited = true;
                 input.attribute.visited = true;
               };
 
               this.state.effects.add((change) => {
-                console.log('HERE')////
-                console.log('visited:', this.state.$.visited)////
-                console.log('message:', this.state.$.message)////
+                input.classes.if(
+                  this.state.$.visited && this.state.$.message,
+                  "is-invalid"
+                );
+              });
 
-                if (this.state.$.visited && this.state.$.message) {
-                  input.classes.add("is-invalid");
+              this.state.effects.add((change) => {
+                message.text = change.message;
+              }, "message");
+
+              validate();
+            }
+          ),
+
+          component.div(
+            "form-floating.col-md-6",
+            { state: true },
+            component.input("form-control", {
+              type: "password",
+              id: "password",
+              name: "password",
+              placeholder: "Password",
+              title: " ",
+              required: true,
+            }),
+            component.label({ for_: "password", text: "Password" }),
+            component.p(),
+
+            function () {
+              const input = this.find(`input`);
+              const message = this.find(`p`);
+
+              const validate = () => {
+                if (input.value) {
+                  this.state.$.message = null;
                 } else {
-                  input.classes.remove("is-invalid");
+                  this.state.$.message = "Required";
                 }
+              };
+
+              input.on.input = validate;
+
+              input.on.blur = (event) => {
+                validate();
+                this.state.$.visited = true;
+                input.attribute.visited = true;
+              };
+
+              this.state.effects.add((change) => {
+                input.classes.if(
+                  this.state.$.visited && this.state.$.message,
+                  "is-invalid"
+                );
               });
 
-              const message = this.components.message;
-              message.update({
-                text: () => {
-                  this.state.effects.add((change) => {
-                    message.text = change.message;
-                  }, "message");
-                  return "Required";
-                },
-              });
+              this.state.effects.add((change) => {
+                message.text = change.message;
+              }, "message");
+
+              validate();
             }
           ),
           component.menu(
@@ -121,18 +138,15 @@ export default async (assets) => {
         )
       );
 
-      //const form = this.components.form;
+      const form = this.find(`form`);
+      const submit = this.find(`button`);
       //const email = this.components.email;
-      //const password = this.components.password;
+      //const password = this.find(`input[name="password"]`);
+      //console.log('password:', password)
 
       this.on.input = (event) => {
-        return;
-        if (event.target.value) {
-          event.target.attribute.empty = null;
-        } else {
-          event.target.attribute.empty = true;
-        }
-        //console.log('value:', event.target.value)
+        const valid = form.checkValidity();
+        submit.classes.if(!valid, "disabled");
       };
     }
   };

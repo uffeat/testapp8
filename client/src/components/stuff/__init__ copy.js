@@ -23,8 +23,8 @@ export default async (assets) => {
         component.form(
           "row.g-3.p-3",
           {
-            key: "form",
-            novalidation: true,
+            //key: "form",
+            //novalidation: true,
           },
           component.div(
             "form-floating.col-md-6",
@@ -53,35 +53,55 @@ export default async (assets) => {
               name: "password",
               placeholder: "Password",
               title: " ",
-              "[empty": true,
-              "[invalid": true,
-              "[message": "Required",
-              "@blur": function (event) {
-                this.attribute.visited = true;
-              },
-              "@input": function (event) {
-                if (this.value) {
-                  this.attribute.empty = null;
-                  if (this.value.length < 8) {
-                    this.attribute.message = "Too short";
-                  } else {
-                    this.attribute.message = null;
-                  }
-                } else {
-                  this.attribute.empty = true;
-                  this.attribute.message = "Required";
-                }
-              },
             }),
-            component.label({  for_: "password", text: "Password" }),
-            component.p({key: 'message',}),
+            component.label({ for_: "password", text: "Password" }),
+            component.p({ key: "message" }),
 
             function () {
               const input = this.components.input;
-              
               const message = this.components.message;
-              message.text = 'Required'
-              
+
+              const validate = () => {
+                if (input.value) {
+                  this.state.$.message = null;
+                  input.setCustomValidity("");
+                } else {
+                  this.state.$.message = "Required";
+                  input.setCustomValidity(" ");
+                }
+                //console.log('validity:', input.validity)
+              };
+
+              input.on.input = (event) => {
+                validate()
+                
+              };
+
+              input.on.blur = (event) => {
+                validate()
+                this.state.$.visited = true;
+                input.attribute.visited = true;
+              };
+
+              this.state.effects.add((change) => {
+                console.log("visited:", this.state.$.visited); ////
+                console.log("message:", this.state.$.message); ////
+
+                if (this.state.$.visited && this.state.$.message) {
+                  input.classes.add("is-invalid");
+                } else {
+                  input.classes.remove("is-invalid");
+                }
+              });
+
+              message.update({
+                text: () => {
+                  this.state.effects.add((change) => {
+                    message.text = change.message;
+                  }, "message");
+                  return "Required";
+                },
+              });
             }
           ),
           component.menu(

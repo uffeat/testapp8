@@ -1,11 +1,15 @@
 rollo-stuff p {
-  font-size: 0.9rem;
   color: var(--bs-light);
+}
+
+rollo-stuff p,
+rollo-stuff p::after {
+  font-size: 0.9rem;
+  padding-top: 0.25rem;
 }
 
 rollo-stuff p::after {
   content: "__Hidden__";
-  font-size: 0.9rem;
   visibility: hidden;
 }
 
@@ -13,11 +17,8 @@ rollo-stuff label {
   margin-left: 0.25rem;
 }
 
-
 rollo-stuff .form-floating:has(input[visited]) p {
   color: var(--bs-form-invalid-color);
 }
 
-rollo-stuff input[visited][message] {
-  /*border: 2px solid var(--bs-form-invalid-border-color);*/
-}
+
