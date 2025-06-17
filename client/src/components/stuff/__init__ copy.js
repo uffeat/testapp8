@@ -53,56 +53,35 @@ export default async (assets) => {
               name: "password",
               placeholder: "Password",
               title: " ",
+              "[empty": true,
+              "[invalid": true,
+              "[message": "Required",
+              "@blur": function (event) {
+                this.attribute.visited = true;
+              },
+              "@input": function (event) {
+                if (this.value) {
+                  this.attribute.empty = null;
+                  if (this.value.length < 8) {
+                    this.attribute.message = "Too short";
+                  } else {
+                    this.attribute.message = null;
+                  }
+                } else {
+                  this.attribute.empty = true;
+                  this.attribute.message = "Required";
+                }
+              },
             }),
-            component.label({ for_: "password", text: "Password" }),
-            component.p({ key: "message" }),
+            component.label({  for_: "password", text: "Password" }),
+            component.p({key: 'message',}),
 
             function () {
               const input = this.components.input;
-
-              input.on.input = (event) => {
-                if (input.value) {
-                  this.state.$.message = null;
-                  //input.attribute.message = null
-                } else {
-                  this.state.$.message = "Required";
-                  //input.attribute.message = true
-                  if (input.attribute.visited) {
-                    //input.classes.add("is-invalid");
-                  } else {
-                    //input.classes.remove("is-invalid");
-                  }
-                }
-              };
-
-              //input.classes.add("is-invalid");//
-
-              input.on.blur = (event) => {
-                this.state.$.visited = true;
-                input.attribute.visited = true;
-              };
-
-              this.state.effects.add((change) => {
-                console.log('HERE')////
-                console.log('visited:', this.state.$.visited)////
-                console.log('message:', this.state.$.message)////
-
-                if (this.state.$.visited && this.state.$.message) {
-                  input.classes.add("is-invalid");
-                } else {
-                  input.classes.remove("is-invalid");
-                }
-              });
-
+              
               const message = this.components.message;
-              message.update({
-                text: () => {
-                  this.state.effects.add((change) => {
-                    message.text = change.message;
-                  }, "message");
-                  return "Required";
-                },
-              });
+              message.text = 'Required'
+              
             }
           ),
           component.menu(

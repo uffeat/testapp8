@@ -4,25 +4,21 @@
   }
 </style>
 
-<style name="green">
+<style export name="green">
   h1 {
     color: green;
   }
-  rollo-shadow {
-    display: flex;
-    border: 1px solid red;
-  }
 </style>
 
-<template name="shadow">
-  <h1>Hello from foo shadow</h1>
+<template name="my_template">
+  <h1>Hello from my_template</h1>
   <slot></slot>
   <slot name="main"></slot>
   
 </template>
 
 <template name="tree">
-  <p key="color"></p>
+ 
   <menu>
     <button>Go</button>
   </menu>
@@ -54,7 +50,7 @@
         HTML tree provides a better overview, but can sometimes require more
         post-processing. */
 
-        this.shadow.innerHTML = assets.shadow;
+        //this.shadow.innerHTML = assets.my_template;
       }
 
       __init__() {

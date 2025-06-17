@@ -21,6 +21,7 @@ export class Base extends mix(
   mixins.handlers,
   mixins.hooks,
   mixins.host,
+  mixins.insert,
   mixins.key,
   mixins.parent,
   mixins.props,
@@ -36,8 +37,7 @@ export class Base extends mix(
   constructor() {
     super();
     this.#_.shadow = Shadow(this);
-    /* */
-    this.#_.shadow.append(component.slot());
+    
   }
 
   get shadow() {

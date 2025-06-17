@@ -1,19 +1,14 @@
-<style export name="linen">
+<style name="linen">
   h1 {
     background-color: linen;
   }
 </style>
-
 
 <style global name="main">
   rollo-bar h1 {
     color: blue;
   }
 </style>
-
-
-
-
 
 <script>
 
@@ -22,30 +17,29 @@
 
   export default async (assets, { components }) => {
 
-   
 
-  
-    const cls = class extends Base {
+
+
+    return class extends Base {
       static __tag__ = "rollo-bar";
 
       constructor() {
         super();
         this.shadow.sheets.add(reboot);
 
-       
 
-        
+
+
       }
 
       __new__() {
-       
+
         this.append(
           component.h1({}, "BAR"),
-        
+
         );
       }
     };
 
-    return cls;
   };
 </script>

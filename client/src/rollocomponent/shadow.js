@@ -4,6 +4,8 @@ import { Shadow } from "@/rollocomponent/shadow.js";
 v.1.1
 */
 
+import { component } from "@/rollocomponent/component.js";
+import { factory } from "@/rollocomponent/tools/factory.js";
 import { mix } from "@/rollocomponent/tools/mix.js";
 import { mixins } from "@/rollocomponent/mixins/__init__.js";
 import { registry } from "@/rollocomponent/tools/registry.js";
@@ -25,6 +27,7 @@ const cls = class extends mix(
   mixins.handlers,
   mixins.hooks,
   mixins.host,
+  mixins.insert,
   mixins.key,
   mixins.parent,
   mixins.props,
@@ -42,7 +45,9 @@ const cls = class extends mix(
   constructor(owner) {
     super();
     this.#_.owner = owner;
+
     owner.attachShadow({ mode: "open" }).append(this);
+
     this.#_.slots = new (class {
       #_ = {};
 
@@ -56,12 +61,18 @@ const cls = class extends mix(
 
       has(name) {
         if (name) {
-          return !!this.#_.owner.querySelector(`slot[name="${name}"]`)
+          return !!this.#_.owner.querySelector(`slot[name="${name}"]`);
         }
-        return !!this.#_.owner.querySelector(`slot:not([name])`)
+        return !!this.#_.owner.querySelector(`slot:not([name])`);
       }
     })(this);
+
     this.#_.sheets = new Sheets(owner.shadowRoot);
+  }
+
+  __new__() {
+    super.__new__?.();
+    this.append(component.slot())
   }
 
   get owner() {
@@ -81,6 +92,12 @@ const cls = class extends mix(
   }
 };
 
+/* NOTE 'author' is not used, since a custom factory with a single-arg 
+signature is needed. */
+
 registry.add(cls, "rollo-shadow");
 
-export const Shadow = (owner) => new cls(owner);
+export const Shadow = (owner) => {
+  /* Ensure that __new__ and __init__ methods are called */
+  return factory(new cls(owner))();
+};

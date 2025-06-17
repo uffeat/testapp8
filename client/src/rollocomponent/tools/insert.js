@@ -1,7 +1,7 @@
 /*
 import { Insert } from "@/rollocomponent/tools/insert.js";
-20250604
-v.1.0
+20250617
+v.1.1
 */
 
 /* */
@@ -12,34 +12,45 @@ export class Insert {
     this.#_.owner = owner;
   }
 
-  /* Inserts elements 'afterbegin'. Chainable with respect to component. */
+  /* Inserts elements/html fragments 'afterbegin'. Chainable with respect to component. */
   afterbegin(...elements) {
-    elements
-      .reverse()
-      .forEach(
-        (e) => e && this.#_.owner.insertAdjacentElement("afterbegin", e)
-      );
+    elements.reverse().forEach((e) => {
+      e &&
+        this.#_.owner[
+          typeof e === "string" ? "insertAdjacentHTML" : "insertAdjacentElement"
+        ]("afterbegin", e);
+    });
     return this.#_.owner;
   }
-  /* Inserts elements 'afterend'. Chainable with respect to component. */
+  /* Inserts elements/html fragments 'afterend'. Chainable with respect to component. */
   afterend(...elements) {
-    elements
-      .reverse()
-      .forEach((e) => e && this.#_.owner.insertAdjacentElement("afterend", e));
+    elements.reverse().forEach((e) => {
+      e &&
+        this.#_.owner[
+          typeof e === "string" ? "insertAdjacentHTML" : "insertAdjacentElement"
+        ]("afterend", e);
+    });
+
     return this.#_.owner;
   }
-  /* Inserts elements 'beforebegin'. Chainable with respect to component. */
+  /* Inserts elements/html fragments 'beforebegin'. Chainable with respect to component. */
   beforebegin(...elements) {
-    elements.forEach(
-      (e) => e && this.#_.owner.insertAdjacentElement("beforebegin", e)
-    );
+    elements.forEach((e) => {
+      e &&
+        this.#_.owner[
+          typeof e === "string" ? "insertAdjacentHTML" : "insertAdjacentElement"
+        ]("beforebegin", e);
+    });
     return this.#_.owner;
   }
-  /* Inserts elements 'beforeend'. Chainable with respect to component. */
+  /* Inserts  elements/html fragments 'beforeend'. Chainable with respect to component. */
   beforeend(...elements) {
-    elements.forEach(
-      (e) => e && this.#_.owner.insertAdjacentElement("beforeend", e)
-    );
+    elements.forEach((e) => {
+      e &&
+        this.#_.owner[
+          typeof e === "string" ? "insertAdjacentHTML" : "insertAdjacentElement"
+        ]("beforeend", e);
+    });
     return this.#_.owner;
   }
 }

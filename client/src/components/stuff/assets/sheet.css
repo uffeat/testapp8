@@ -1,3 +1,23 @@
-rollo-stuff h1 {
-  background-color: lightblue;
+rollo-stuff p {
+  font-size: 0.9rem;
+  color: var(--bs-light);
+}
+
+rollo-stuff p::after {
+  content: "__Hidden__";
+  font-size: 0.9rem;
+  visibility: hidden;
+}
+
+rollo-stuff label {
+  margin-left: 0.25rem;
+}
+
+
+rollo-stuff .form-floating:has(input[visited]) p {
+  color: var(--bs-form-invalid-color);
+}
+
+rollo-stuff input[visited][message] {
+  /*border: 2px solid var(--bs-form-invalid-border-color);*/
 }
