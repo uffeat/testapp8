@@ -14,7 +14,8 @@ v.1.1
 import { author } from "@/rollocomponent/tools/author.js";
 import { construct } from "@/rollovite/_tools/construct.js";
 import { component } from "@/rollocomponent/component.js";
-const { Sheet } = await use("@/rollosheet/");
+//const { Sheet } = await use("@/rollosheet/");
+import { Sheet } from "@/rollosheet/tools/sheet.js";
 
 /* Returns instance factory for web component. */
 export const components = new (class {

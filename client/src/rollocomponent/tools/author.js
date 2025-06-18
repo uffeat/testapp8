@@ -11,7 +11,7 @@ import { registry } from "@/rollocomponent/tools/registry.js";
 /* Defines autonomous web component and returns instance factory function.
 NOTE
 - If tag is not explicitly provided, a static __tag__ prop on cls is used. */
-export const author = (cls, key) => {
+export const author = (cls, key, ext) => {
   
-  return factory(registry.add(cls, key));
+  return factory(registry.add(cls, key, ext));
 };

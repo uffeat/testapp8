@@ -8,6 +8,7 @@
   h1 {
     color: green;
   }
+
   rollo-shadow {
     display: flex;
     border: 1px solid red;
@@ -18,7 +19,6 @@
   <h1>Hello from foo shadow</h1>
   <slot></slot>
   <slot name="main"></slot>
-  
 </template>
 
 <template name="tree">
@@ -30,18 +30,18 @@
 
 <script>
 
-  const { Base, component } = await use("@/rollocomponent/");
+  const { base, component } = await use("@/rollocomponent/");
   const { reboot } = await use("@/rollolibs/bootstrap/reboot.js");
 
   export default async (assets, { components }) => {
 
     /* This is just to demo that assets can be imported from other SFCs */
     const Bar = await components.import("bar");
-   
 
-   
 
-    return class extends Base {
+
+
+    return class extends base() {
       static __tag__ = "rollo-foo";
 
       constructor() {
@@ -58,7 +58,7 @@
       }
 
       __init__() {
-       
+
         this.append(
           component.h1({}, "Hi!"),
           //component.h2({ slot: "main" }, "Also hi from me!")

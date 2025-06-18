@@ -4,7 +4,10 @@ import "@/rollovite/__init__.js";
 v.5.0
 */
 
-/* Do NOT import anything from outside 'rollovite' */
+import { author } from "@/rollocomponent/tools/author.js";
+import { component } from "@/rollocomponent/component.js";
+import { Sheet } from "@/rollosheet/tools/sheet.js";
+
 import { assets } from "@/rollovite/_tools/assets.js";
 import { construct } from "@/rollovite/_tools/construct.js";
 import { ImportMap } from "@/rollovite/_tools/import_map.js";
@@ -186,7 +189,6 @@ app.maps
       import.meta.glob([
         "/src/**/*.js",
 
-
         //"/src/rollocomponent/**/*.js",//
         //"/src/rollobs/**/*.js", //
 
@@ -329,6 +331,80 @@ app.maps
       async (result, { owner, path }) =>
         (await owner.import("@/rollolibs/yaml.js")).parse(result),
       { cache: false }
+    ),
+  })
+
+  /* Add SFC support */
+  .maps.add(
+    new ImportMap(
+      import.meta.glob(
+        [
+          "/src/**/*.rollo",
+          "!/src/assets/**/*.*",
+          "!/src/main/**/*.*",
+          "!/src/rollotest/**/*.*",
+        ],
+        {
+          query: "?raw",
+          import: "default",
+        }
+      ),
+      { type: "rollo" }
+    )
+  )
+  .processors.add({
+    rollo: new Processor(
+      async (result, { owner, path }) => {
+        const wrapper = component.div({ innerHTML: result });
+
+        /* Build sheet assets */
+        const assets = {};
+        for (const element of wrapper.querySelectorAll("style[name]")) {
+          /* NOTE Only handle named styles, so that unnamed styles inside 
+          templates are not handled. */
+          const name = element.getAttribute("name");
+
+          const sheet = new Sheet(element.textContent, {
+            name: `${path.path}/${name}`,
+          });
+          assets[name] = sheet;
+          /* Handle global styles */
+          if (element.hasAttribute("global")) {
+            sheet.adopt(document);
+          }
+        }
+        /* Build template assets */
+        for (const element of wrapper.querySelectorAll("template")) {
+          if (!element.hasAttribute("name")) {
+            throw new Error(`Unnamed template.`);
+          }
+          const name = element.getAttribute("name");
+          const html = element.innerHTML;
+          assets[name] = html;
+        }
+        Object.freeze(assets);
+        /* Create module */
+        const script = wrapper.querySelector("script");
+        const js = script.textContent;
+        const module = await construct(js);
+        /* Get cls */
+        const cls = await module.default(assets);
+
+        const factory = author(cls);
+
+        /* Expose component assets */
+        Object.defineProperty(factory, "__assets__", {
+          configurable: false,
+          enumerable: true,
+          writable: false,
+          value: assets,
+        });
+
+        return factory;
+      },
+      {
+        cache: true,
+      }
     ),
   })
 

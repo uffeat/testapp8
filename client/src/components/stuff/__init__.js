@@ -2,14 +2,14 @@
 const Stuff = await components.import("stuff/");
 */
 
-const { Base, component } = await use("@/rollocomponent/");
+const { base, component } = await use("@/rollocomponent/");
 
 export default async (assets) => {
 
   /* Make parcel sheet global */
   assets["sheet.css"].adopt(document);
 
-  return class extends Base {
+  return class extends base() {
     static __tag__ = "rollo-stuff";
 
     constructor() {
