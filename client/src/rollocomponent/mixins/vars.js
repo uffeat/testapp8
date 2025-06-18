@@ -39,24 +39,21 @@ export default (parent, config) => {
           return value;
         },
         set(target, name, value) {
-          /* Abort, if undefined value to, e.g., for efficient use of iife's */
-          if (value === undefined) {
-            return true;
-          }
           /* Normalize name */
           if (!name.startsWith("--")) {
             name = `--${name}`;
           }
           /* Handle function values */
           if (typeof value === "function") {
-            const result = value.call(target, name);
-            if (result !== undefined) {
-              value = result;
-            }
+            value = value.call(target, name);
           }
           /* By convention, null is interpreted as 'none' */
           if (value === null) {
             value = "none";
+          }
+          /* Abort, if undefined value to, e.g., for efficient use of iife's */
+          if (value === undefined) {
+            return true;
           }
           /* Abort, if no change */
           const current = target.vars[name];

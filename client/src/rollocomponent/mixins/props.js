@@ -11,10 +11,7 @@ export default (parent, config) => {
     update(updates = {}) {
       super.update?.(updates);
       for (let [key, value] of Object.entries(updates)) {
-        /* Ignore undefined value to, e.g., for efficient use of iife's */
-        if (value === undefined) {
-          continue;
-        }
+        
         /* Ignore __ key */
         if (key.startsWith("__")) {
           continue;
@@ -25,13 +22,20 @@ export default (parent, config) => {
         }
         /* Handle function values */
         if (typeof value === "function" && !key.startsWith("on")) {
-          const result = value.call(this, key);
-          if (result !== undefined) {
-            value = result;
-          }
+
+         
+
+          value = value.call(this, key);
+          
         }
+
+
         /* Ignore no change */
         if (this[key] === value) {
+          continue;
+        }
+        /* Ignore undefined value to, e.g., for efficient use of iife's */
+        if (value === undefined) {
           continue;
         }
         /* Update */

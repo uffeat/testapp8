@@ -55,18 +55,18 @@ export default (parent, config) => {
 
         /* Sets one or more attribute values. Chainable with respect to component. */
         set(name, value) {
-          /* Abort, if undefined value to, e.g., for efficient use of iife's */
-          if (value === undefined) {
-            return owner;
-          }
+          
+          
           /* Normalize name */
           name = kebab(name);
           /* Handle function values */
           if (typeof value === "function") {
-            const result = value.call(owner, name);
-            if (result !== undefined) {
-              value = result;
-            }
+            value = value.call(owner, name);
+            
+          }
+          /* Abort, if undefined value to, e.g., for efficient use of iife's */
+          if (value === undefined) {
+            return owner;
           }
           /* Abort, if no change */
           const current = this.#interpret(owner.getAttribute(name));

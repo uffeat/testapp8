@@ -1,3 +1,9 @@
+<!--
+const Input = await use("@/components/form/input.x.html");
+20250618
+v.1.0
+-->
+
 <style global name="main">
   rollo-input p,
   rollo-input p::after {
@@ -67,14 +73,14 @@
 
         this.classes.add("form-floating");
 
-        /* onblur -> visited state amd attribute */
+        /* onblur -> visited state and attribute */
         this.#_.components.input.on.blur = (event) =>
           (this.state.$.visited = this.attribute.visited = true);
 
-        /* oninput -> value state */
-        this.#_.components.input.on.input = (event) => {
-          this.state.$.value = this.value;
-        };
+        /* value state -> input component */
+        this.state.effects.add((change) => {
+          this.#_.components.input.value = change.value;
+        }, "value");
 
         /* Pass on 'invalid' events to component */
         this.#_.components.input.on.invalid = (event) => this.send("invalid");
@@ -96,24 +102,24 @@
         this.#_.components.label.text = label;
       }
 
-      /* Returns max length constraint. */
+      /* Returns max constraint. */
       get max() {
-        return this.#_.components.input.maxLength;
+        return this.#_.max;
       }
 
-      /* Sets max length constraint. */
+      /* Sets max constraint. */
       set max(max) {
-        this.#_.components.input.maxLength = max;
+        this.#_.max = max;
       }
 
-      /* Returns min length constraint. */
+      /* Returns min constraint. */
       get min() {
-        return this.#_.components.input.minLength;
+        return this.#_.min;
       }
 
-      /* Sets min length constraint. */
+      /* Sets min constraint. */
       set min(min) {
-        this.#_.components.input.minLength = min;
+        this.#_.min = min;
       }
 
       /* Returns form control name. */
@@ -148,19 +154,27 @@
 
       /* Returns form control type. */
       get type() {
-        return this.#_.type || 'text';
+        return this.#_.type || "text";
       }
 
       /* Sets form control type. */
       set type(type) {
         if (
-          !["email", "numeric", "password", "search", "tel", "text", "url"].includes(type)
+          ![
+            "email",
+            "numeric",
+            "password",
+            "search",
+            "tel",
+            "text",
+            "url",
+          ].includes(type)
         ) {
           throw new Error(`Unsupported type: ${type}`);
         }
-        this.#_.type = type
-        if (type === 'numeric') {
-          type = 'text'
+        this.#_.type = type;
+        if (type === "numeric") {
+          type = "text";
         }
         this.#_.components.input.type = type;
       }
@@ -185,26 +199,68 @@
 
       /* Returns form control value. */
       get value() {
-        return this.#_.components.input.value || null;
+        return this.state.$.value;
       }
 
       /* Sets form control value. */
       set value(value) {
-        this.#_.components.input.value = value;
+        this.state.$.value = value;
       }
 
       __init__() {
         super.__init__?.();
 
-        /* Update message state, update empty state and attribute, and update 
-        valid state and attribute  */
+        /* oninput -> value state */
+        this.#_.components.input.on.input = (event) => {
+          if (this.type === "numeric") {
+            if (!is_numeric(this.#_.components.input.value)) {
+              this.#_.components.input.value =
+                this.#_.components.input.value.slice(0, -1);
+            }
+            if (["", "-", ".", ","].includes(this.#_.components.input.value)) {
+              this.state.$.value = null;
+            } else {
+              this.state.$.value = Number(
+                this.#_.components.input.value.replace(",", ".")
+              );
+            }
+          } else {
+            this.state.$.value = this.#_.components.input.value;
+          }
+        };
+
+        /* value state -> message state, empty state and attribute, valid state and attribute  */
         this.state.effects.add((change) => {
+          if (this.type !== "numeric") {
+            if (this.min !== undefined) {
+              this.#_.components.input.minLength = this.min;
+            }
+            if (this.max !== undefined) {
+              this.#_.components.input.maxLength = this.max;
+            }
+          }
+
           this.state.$.message = get_message(this.#_.components.input);
-          this.state.$.empty = this.attribute.empty = !this.value;
+          this.state.$.empty = this.attribute.empty =
+            this.#_.components.input.value === "" ? true : false;
+
+          if (!this.state.$.message && this.type === "numeric") {
+            if (this.min !== undefined) {
+              if (change.value < this.min) {
+                this.state.$.message = "Too low";
+              }
+            }
+            if (this.max !== undefined) {
+              if (change.value > this.max) {
+                this.state.$.message = "Too high";
+              }
+            }
+          }
+
           if (!this.state.$.message && this.validators) {
             let message;
             for (const validator of this.validators) {
-              message = validator(this.value);
+              message = validator(change.value);
               if (message) {
                 this.state.$.message = message;
                 this.#_.components.input.setCustomValidity(message);
@@ -221,12 +277,12 @@
             this.#_.components.input.checkValidity();
         }, "value");
 
-        /* Update message component */
+        /* message state -> message component */
         this.state.effects.add((change) => {
           this.#_.components.message.text = change.message;
         }, "message");
 
-        /* Update input component */
+        /* state -> input component style */
         this.state.effects.add(
           (change) => {
             this.#_.components.input.classes.if(
@@ -238,10 +294,8 @@
           "visited"
         );
 
-        this.state.$.value = this.value;
+        this.state.$.value = this.#_.components.input.value;
       }
     };
   };
-
- 
 </script>
