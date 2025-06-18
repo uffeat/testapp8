@@ -134,6 +134,8 @@ export const components = new (class {
       components: this,
     });
 
+    
+
     const factory = author(cls);
 
     /* Expose component assets.

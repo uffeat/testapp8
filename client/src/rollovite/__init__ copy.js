@@ -125,8 +125,8 @@ const app = new (class {
     /* Process */
     /* NOTE No-processing is more likely than processing -> use 'has' 
     initially and not 'get' directly */
-    if (this.#_.processors.has(path.types)) {
-      const processor = this.#_.processors.get(path.types);
+    if (this.#_.processors.has(path.type)) {
+      const processor = this.#_.processors.get(path.type);
       const processed = await processor.call(path.path, result, {
         owner: this,
         path,
@@ -334,14 +334,28 @@ app.maps
     ),
   })
 
-  /* Add support for x.html */
-  
+  /* Add SFC support */
+  .maps.add(
+    new ImportMap(
+      import.meta.glob(
+        [
+          "/src/**/*.rollo",
+          "!/src/assets/**/*.*",
+          "!/src/main/**/*.*",
+          "!/src/rollotest/**/*.*",
+        ],
+        {
+          query: "?raw",
+          import: "default",
+        }
+      ),
+      { type: "rollo" }
+    )
+  )
   .processors.add({
-    'x.html': new Processor(
+    rollo: new Processor(
       async (result, { owner, path }) => {
         const wrapper = component.div({ innerHTML: result });
-
-        console.log('stem:', path.stem)//
 
         /* Build assets */
         const assets = {};
@@ -385,8 +399,7 @@ app.maps
           /* Get cls */
           const cls = await module.default(assets);
           /* Create instance factory */
-          const key = cls.__tag__ ? cls.__tag__ : `x-${path.stem.replaceAll('_', '-')}`
-          const factory = author(cls, key);
+          const factory = author(cls);
           /* Expose component assets */
           Object.defineProperty(factory, "__assets__", {
             configurable: false,

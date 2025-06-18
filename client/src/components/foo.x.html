@@ -5,8 +5,8 @@
 </style>
 
 <style global name="main">
-  rollo-bar h1 {
-    color: blue;
+  rollo-foo h1 {
+    background-color: lightblue;
   }
 </style>
 
@@ -14,9 +14,11 @@
   const { base, component } = await use("@/rollocomponent/");
   const { reboot } = await use("@/rollolibs/bootstrap/reboot.js");
 
+  console.log('Building rollo-foo')
+
   export default async (assets) => {
     return class extends base() {
-      static __tag__ = "rollo-foo";
+      
 
       constructor() {
         super();

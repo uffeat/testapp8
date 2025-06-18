@@ -5,14 +5,18 @@
 </style>
 
 <style global name="main">
-  rollo-bar h1 {
-    color: blue;
+  rollo-foo-p h1 {
+    background-color: lightblue;
   }
 </style>
+
+<style src="/sheets/foo.css"></style>
 
 <script>
   const { base, component } = await use("@/rollocomponent/");
   const { reboot } = await use("@/rollolibs/bootstrap/reboot.js");
+
+  console.log('Building rollo-foo-p')
 
   export default async (assets) => {
     return class extends base() {

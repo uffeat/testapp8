@@ -12,8 +12,9 @@ console.info("Vercel environment:", import.meta.env.VERCEL_ENV);
 document.querySelector("html").dataset.bsTheme = "dark";
 
 
-const Foo = await use("@/components/foo.rollo");
+const Foo = await use("@/components/foo.x.html");
 const foo = Foo({ parent: document.body });
 
-const FooP = await use("/components/foo.rollo");
+const FooP = await use("/components/foo.x.html");
 const foop = FooP({ parent: document.body });
+

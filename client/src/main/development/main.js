@@ -13,10 +13,10 @@ document.querySelector("html").dataset.bsTheme = "dark";
 
 import { components } from "@/rollocomponent/tools/components.js";
 
-const Foo = await use("@/components/foo.rollo");
+const Foo = await use("@/components/foo.x.html");
 const foo = Foo({ parent: document.body });
 
-const FooP = await use("/components/foo.rollo");
+const FooP = await use("/components/foo.x.html");
 const foop = FooP({ parent: document.body });
 
 
@@ -27,3 +27,4 @@ const foop = FooP({ parent: document.body });
 
 //const Stuff = await components.import("stuff/");
 //const stuff = Stuff({ parent: document.body });
+
