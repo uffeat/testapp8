@@ -5,12 +5,12 @@
 </style>
 
 <style global name="main">
-  rollo-foo h1 {
+  x-foo h1 {
     background-color: lightblue;
   }
 </style>
 
-<script>
+<script setup>
   const { base, component } = await use("@/rollocomponent/");
   const { reboot } = await use("@/rollolibs/bootstrap/reboot.js");
 

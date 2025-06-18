@@ -10,21 +10,47 @@ console.info("Vite environment:", import.meta.env.MODE);
 
 document.querySelector("html").dataset.bsTheme = "dark";
 
+import { component } from "@/rollocomponent/component.js";
 
-import { components } from "@/rollocomponent/tools/components.js";
+const Input = await use("@/components/form/input.x.html");
+const email = Input({
+  parent: document.body,
+  name: "email",
+  label: "Email",
+  required: true,
+  type: "email",
+  min: 8,
+});
 
-const Foo = await use("@/components/foo.x.html");
-const foo = Foo({ parent: document.body });
+const uffe = Input({
+  parent: document.body,
+  name: "uffe",
+  label: "Uffe",
+  required: true,
+  validators: [
+    (value) => {
+      if (value !== "uffe") {
+        return "Not uffe";
+      }
+    },
+  ],
+});
 
-const FooP = await use("/components/foo.x.html");
-const foop = FooP({ parent: document.body });
+//uffe.on.invalid = (event) => console.log(event)
 
+const numeric = Input({
+  parent: document.body,
+  name: "numeric",
+  label: "Numeric",
+  required: true,
+  type: "numeric",
+  min: 3,
+  max: 10,
+});
 
+component.button({ parent: document.body }, "stuff");
 
-//const Bar = await components.import("bar");
-//const bar = Bar({ parent: document.body });
-
-
-//const Stuff = await components.import("stuff/");
-//const stuff = Stuff({ parent: document.body });
-
+/*
+const Login = await use("@/components/login.x.html");
+const login = Login({ parent: document.body });
+*/

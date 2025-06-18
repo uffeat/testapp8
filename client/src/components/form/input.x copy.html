@@ -1,0 +1,247 @@
+<style global name="main">
+  rollo-input p,
+  rollo-input p::after {
+    font-size: 0.9rem;
+    padding-top: 0.25rem;
+    visibility: hidden;
+  }
+
+  /* Prevent vertical shifts, when no message. */
+  rollo-input p::after {
+    content: "X";
+  }
+
+  /* Correct Bootstrap standard, where label brushes against border in the 
+  upper position. */
+  rollo-input label {
+    margin-left: var(--marginLeft, 0.25rem);
+  }
+
+  /* Soft error-styling of message, if required, empty and non-visited. */
+  rollo-input[empty]:not([visited]):has(input:required) p {
+    visibility: visible;
+    color: var(--bs-light);
+  }
+
+  /* Hard error-styling of message, if visited. */
+  rollo-input[visited] p {
+    visibility: visible;
+    color: var(--bs-form-invalid-color);
+  }
+</style>
+
+<script setup type="module">
+  const { is_number } = await use("@/rollotools/is/is_number.js");
+  const { is_numeric } = await use("@/rollotools/is/is_numeric.js");
+
+  const { base, component } = await use("@/rollocomponent/");
+  const { create_id } = await use("@/components/form/tools/id.js");
+  const { get_message } = await use("@/components/form/tools/message.js");
+
+  export default async (assets) => {
+    return class extends base() {
+      static __tag__ = "rollo-input";
+
+      #_ = {
+        components: {},
+      };
+
+      constructor() {
+        super();
+      }
+
+      __new__() {
+        super.__new__?.();
+
+        this.state = true;
+
+        this.#_.components.input = component.input("form-control", {
+          placeholder: " ",
+          title: " ",
+          id: create_id(),
+        });
+        this.#_.components.label = component.label({
+          for_: this.#_.components.input.id,
+        });
+        this.#_.components.message = component.p();
+
+        this.classes.add("form-floating");
+
+        /* onblur -> visited state amd attribute */
+        this.#_.components.input.on.blur = (event) =>
+          (this.state.$.visited = this.attribute.visited = true);
+
+        /* oninput -> value state */
+        this.#_.components.input.on.input = (event) => {
+          this.state.$.value = this.value;
+        };
+
+        /* Pass on 'invalid' events to component */
+        this.#_.components.input.on.invalid = (event) => this.send("invalid");
+
+        this.append(
+          this.#_.components.input,
+          this.#_.components.label,
+          this.#_.components.message
+        );
+      }
+
+      /* Returns label text. */
+      get label() {
+        return this.#_.components.label.text || null;
+      }
+
+      /* Sets label text. */
+      set label(label) {
+        this.#_.components.label.text = label;
+      }
+
+      /* Returns max length constraint. */
+      get max() {
+        return this.#_.components.input.maxLength;
+      }
+
+      /* Sets max length constraint. */
+      set max(max) {
+        this.#_.components.input.maxLength = max;
+      }
+
+      /* Returns min length constraint. */
+      get min() {
+        return this.#_.components.input.minLength;
+      }
+
+      /* Sets min length constraint. */
+      set min(min) {
+        this.#_.components.input.minLength = min;
+      }
+
+      /* Returns form control name. */
+      get name() {
+        return this.#_.components.input.name;
+      }
+
+      /* Sets form control name. */
+      set name(name) {
+        this.#_.components.input.name = name;
+      }
+
+      /* Returns pattern constraint. */
+      get pattern() {
+        return this.#_.components.input.pattern;
+      }
+
+      /* Sets pattern constraint. */
+      set pattern(pattern) {
+        this.#_.components.input.pattern = pattern;
+      }
+
+      /* Returns required constraint. */
+      get required() {
+        return this.#_.components.input.required;
+      }
+
+      /* Sets required constraint. */
+      set required(required) {
+        this.#_.components.input.required = required;
+      }
+
+      /* Returns form control type. */
+      get type() {
+        return this.#_.type || 'text';
+      }
+
+      /* Sets form control type. */
+      set type(type) {
+        if (
+          !["email", "numeric", "password", "search", "tel", "text", "url"].includes(type)
+        ) {
+          throw new Error(`Unsupported type: ${type}`);
+        }
+        this.#_.type = type
+        if (type === 'numeric') {
+          type = 'text'
+        }
+        this.#_.components.input.type = type;
+      }
+
+      /* Returns valid state. */
+      get valid() {
+        return this.state.$.valid;
+      }
+
+      /* Returns custom validators. */
+      get validators() {
+        return this.#_.validators;
+      }
+
+      /* Sets custom validators. */
+      set validators(validators) {
+        if (validators) {
+          validators = Object.freeze([...validators]);
+        }
+        this.#_.validators = validators;
+      }
+
+      /* Returns form control value. */
+      get value() {
+        return this.#_.components.input.value || null;
+      }
+
+      /* Sets form control value. */
+      set value(value) {
+        this.#_.components.input.value = value;
+      }
+
+      __init__() {
+        super.__init__?.();
+
+        /* Update message state, update empty state and attribute, and update 
+        valid state and attribute  */
+        this.state.effects.add((change) => {
+          this.state.$.message = get_message(this.#_.components.input);
+          this.state.$.empty = this.attribute.empty = !this.value;
+          if (!this.state.$.message && this.validators) {
+            let message;
+            for (const validator of this.validators) {
+              message = validator(this.value);
+              if (message) {
+                this.state.$.message = message;
+                this.#_.components.input.setCustomValidity(message);
+                break;
+              }
+            }
+            if (!message) {
+              this.#_.components.input.setCustomValidity("");
+            }
+          } else {
+            this.#_.components.input.setCustomValidity("");
+          }
+          this.state.$.valid = this.attribute.valid =
+            this.#_.components.input.checkValidity();
+        }, "value");
+
+        /* Update message component */
+        this.state.effects.add((change) => {
+          this.#_.components.message.text = change.message;
+        }, "message");
+
+        /* Update input component */
+        this.state.effects.add(
+          (change) => {
+            this.#_.components.input.classes.if(
+              this.state.$.visited && !this.state.$.valid,
+              "is-invalid"
+            );
+          },
+          "valid",
+          "visited"
+        );
+
+        this.state.$.value = this.value;
+      }
+    };
+  };
+
+ 
+</script>

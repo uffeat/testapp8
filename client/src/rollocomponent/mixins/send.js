@@ -9,7 +9,7 @@ export default (parent, config) => {
     static __name__ = "send";
     /* Dispatches event with additional options and a leaner syntax. */
     send(type, { detail, trickle, ...options } = {}) {
-      if (!this.handlers.size(type)) return;
+      
       const event =
         detail === undefined
           ? new Event(type, options)

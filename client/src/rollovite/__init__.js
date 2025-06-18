@@ -335,14 +335,10 @@ app.maps
   })
 
   /* Add support for x.html */
-  
   .processors.add({
-    'x.html': new Processor(
+    "x.html": new Processor(
       async (result, { owner, path }) => {
         const wrapper = component.div({ innerHTML: result });
-
-        console.log('stem:', path.stem)//
-
         /* Build assets */
         const assets = {};
         /* Named sheets */
@@ -376,7 +372,10 @@ app.maps
           assets[name] = html;
         }
         Object.freeze(assets);
-        const script = wrapper.querySelector("script");
+        /* NOTE Use `setup` attr to accommodate future uses of other scripts. 
+        Also, (to some degree) guards against collision with deployment 
+        vendors' injection of scripts. */
+        const script = wrapper.querySelector("script[setup]");
         if (script) {
           /* Create module */
           const module = await construct(
@@ -385,7 +384,9 @@ app.maps
           /* Get cls */
           const cls = await module.default(assets);
           /* Create instance factory */
-          const key = cls.__tag__ ? cls.__tag__ : `x-${path.stem.replaceAll('_', '-')}`
+          const key = cls.__tag__
+            ? cls.__tag__
+            : `x-${path.stem.replaceAll("_", "-")}`;
           const factory = author(cls, key);
           /* Expose component assets */
           Object.defineProperty(factory, "__assets__", {
@@ -397,7 +398,7 @@ app.maps
           return factory;
         } else {
           /* If no script, 'assets' becomes the result. This means that the 
-          .rollo format can also be used to only declare sheet and template assets. */
+          .x.html format can also be used to only declare sheet and template assets. */
           return assets;
         }
       },
