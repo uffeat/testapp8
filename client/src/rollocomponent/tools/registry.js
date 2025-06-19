@@ -10,23 +10,20 @@ export const registry = new (class {
   };
 
   /* Registers web component. */
-  add(cls, key, ext) {
-    if (!key && cls.__tag__) {
-      key = cls.__tag__;
+  add(cls, key, native) {
+    if (!key) {
+      key = cls.__key__;
     }
-    if (!ext && cls.__extends__) {
-      ext = cls.__extends__
+    if (!native) {
+      native = cls.__native__;
     }
 
-
-
-
-    if (ext) {
+    if (native) {
       customElements.define(key, cls, {
-        extends: ext,
+        extends: native,
       });
       if (import.meta.env.DEV) {
-        console.info(`Defined '${key}' component extended from '${ext}'.`);
+        console.info(`Defined '${key}' component extended from '${native}'.`);
       }
     } else {
       customElements.define(key, cls);

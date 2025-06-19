@@ -19,7 +19,11 @@ export class State {
     change: Object.freeze({}),
     current: Object.freeze({}),
     previous: Object.freeze({}),
-    session: null,
+    /* Returns unique session id */
+    session: (() => {
+      let s = 0;
+      return () => s++;
+    })(),
   };
 
   constructor(owner, initial) {
@@ -33,54 +37,14 @@ export class State {
       }
 
       /* . */
-      add(effect, ...args) {
-        const options = args.find(
-          (a) =>
-            typeof a === "object" &&
-            typeof a !== "function" &&
-            !Array.isArray(a)
-        ) || { run: true };
-
-        const condition =
-          (() => {
-            const keys = args.find((a) => Array.isArray(a));
-            if (keys) {
-              const _keys = new Set(keys);
-              return (change) =>
-                !!_keys.intersection(new Set(Object.keys(change))).size;
-            }
-            return args.find((a) => typeof a === "function");
-          })() || null;
-
+      add(effect, ...keys) {
         /* Register */
-        state.#_.registry.set(effect, { condition });
-
-        if (options.run) {
-          if (
-            !condition ||
-            condition(state.change, {
-              current: state.current,
-              index: null,
-              owner: state.owner,
-              previous: state.previous,
-              session: state.session,
-            })
-          ) {
-            effect(state.change, {
-              current: state.current,
-              index: null,
-              owner: state.owner,
-              previous: state.previous,
-              effect,
-              session: state.session,
-            });
-          }
+        if (effect) {
+          state.#_.registry.set(effect, keys.length ? new Set(keys) : null);
         }
-
-        return this;
+        /* Make chainable with respect to owner */
+        return state.owner;
       }
-
-      get() {}
 
       /* . */
       has(effect) {
@@ -95,22 +59,22 @@ export class State {
     })();
 
     this.#_.$ = new Proxy(this, {
-      get: (target, key) => {
-        /* NOTE Safe to use deep store */
-        return target.#_._.current[key];
-      },
-      set: (target, key, value) => {
-        target.update({ [key]: value });
-        return true;
-      },
-    });
+        get: (target, key) => {
+          /* NOTE Safe to use deep store */
+          return target.#_._.current[key];
+        },
+        set: (target, key, value) => {
+          target.update({ [key]: value });
+          return true;
+        },
+      });
 
     initial && this.update(initial);
   }
 
   get $() {
-    return this.#_.$;
-  }
+      return this.#_.$;
+    }
 
   /* Retuns changes from most recent update. */
   get change() {
@@ -137,13 +101,8 @@ export class State {
     return this.#_.previous;
   }
 
-  /* Returns session id. */
-  get session() {
-    return this.#_.session;
-  }
-
   /* Updates data and notifies effects, if changes. Chainable with respect to owner. */
-  update(updates = {}, { silent = false } = {}) {
+  update(updates = {}) {
     /* Infer change entries */
     const change = Object.entries(updates).filter(
       ([k, v]) => v !== this.#_._.current[k]
@@ -165,34 +124,24 @@ export class State {
     this.#_.change = Object.freeze(Object.fromEntries(change));
     this.#_.current = Object.freeze({ ...this.#_._.current });
     this.#_.previous = Object.freeze({ ...this.#_._.previous });
-    /* Call any effects, if change and not silent */
-    if (!silent && this.effects.size && change.length) {
+    /* Call any effects, if change */
+    if (this.effects.size && change.length) {
       this.#notify();
     }
     return this.owner;
   }
 
   #notify() {
-    this.#_.session = this.session === null ? 0 : this.session;
-
-    this.#_.registry.entries().forEach(([effect, { condition }], index) => {
-      if (
-        !condition ||
-        condition(this.change, {
-          current: this.current,
-          index,
-          owner: this.owner,
-          previous: this.previous,
-          session: this.session,
-        })
-      ) {
+    const session = this.#_.session();
+    this.#_.registry.entries().forEach(([effect, keys], index) => {
+      if (!keys || keys.intersection(new Set(Object.keys(this.change))).size) {
         effect(this.change, {
           current: this.current,
           index,
           owner: this.owner,
           previous: this.previous,
           effect,
-          session: this.session,
+          session,
         });
       }
     });

@@ -65,7 +65,7 @@ const cls = class extends mix(
   text,
   vars
 ) {
-  static __tag__ = "rollo-shadow";
+  static __key__ = "rollo-shadow";
 
   #_ = {};
 
@@ -122,7 +122,7 @@ const cls = class extends mix(
 /* NOTE 'author' is not used, since a custom factory with a single-arg 
 signature is needed. */
 
-registry.add(cls, "rollo-shadow");
+registry.add(cls);
 
 export const Shadow = (owner) => {
   /* Ensure that __new__ and __init__ methods are called */

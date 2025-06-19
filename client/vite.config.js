@@ -32,7 +32,12 @@ export default defineConfig(({ mode }) => {
       /* Enable features such as top-level await and async imports */
       target: "es2022",
     },
-    plugins: [tailwindcss(), vue(), vueDevTools(), react()],
+    plugins: [
+      tailwindcss(),
+      //vue(),
+      //vueDevTools(),
+      //react()
+    ],
     resolve: {
       alias: {
         "@": resolve(__dirname, "src"),

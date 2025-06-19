@@ -9,30 +9,6 @@ import { mix } from "@/rollocomponent/tools/mix.js";
 import { mixins } from "@/rollocomponent/mixins/__init__.js";
 import { registry } from "@/rollocomponent/tools/registry.js";
 
-const standard = Object.freeze([
-  mixins.append,
-  mixins.attrs,
-  mixins.classes,
-  mixins.clear,
-  mixins.components,
-  mixins.connect,
-  mixins.effect,
-  mixins.find,
-  mixins.handlers,
-  mixins.hooks,
-  mixins.host,
-  mixins.insert,
-  mixins.key,
-  mixins.parent,
-  mixins.props,
-  mixins.send,
-  mixins.setup,
-  mixins.state,
-  mixins.style,
-  mixins.tab,
-  mixins.vars,
-]);
-
 const get = (tag) => {
   const key = `x-${tag}`;
 
@@ -46,7 +22,30 @@ const get = (tag) => {
     throw new Error(`'${tag}' is not native.`);
   }
 
-  const _mixins = [...standard];
+  const _mixins = [
+    mixins.append,
+    mixins.attrs,
+    mixins.classes,
+    mixins.clear,
+    mixins.components,
+    mixins.connect,
+    mixins.effect,
+    mixins.find,
+    mixins.handlers,
+    mixins.hooks,
+    mixins.host,
+    mixins.insert,
+    mixins.key,
+    mixins.parent,
+    mixins.props,
+    mixins.send,
+    mixins.setup,
+    mixins.state,
+    mixins.style,
+    mixins.super_,
+    mixins.tab,
+    mixins.vars,
+  ];
 
   if ("textContent" in ref) {
     _mixins.push(mixins.text);
@@ -57,17 +56,18 @@ const get = (tag) => {
   if (tag === "label") {
     _mixins.push(mixins.for_);
   }
-  /* Compose */
-  class cls extends mix(base, {}, ..._mixins) {
-    constructor() {
-      super();
-      this.setAttribute("web-component", "");
-    }
-  }
-  /* Register */
-  registry.add(cls, key, tag);
 
-  return cls;
+  return registry.add(
+    class extends mix(base, {}, ..._mixins) {
+      static __key__ = key;
+      static __native__ = tag;
+
+      constructor() {
+        super();
+        this.setAttribute("web-component", "");
+      }
+    }
+  );
 };
 
 /* Returns instance of basic non-autonomous web component. */

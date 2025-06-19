@@ -1,36 +1,36 @@
 <!--
 const Input = await use("@/components/form/input.x.html");
 20250618
-v.1.0
+v.1.1
 -->
 
 <style global name="main">
-  rollo-input p,
-  rollo-input p::after {
+  rollo-input-control p,
+  rollo-input-control p::after {
     font-size: 0.9rem;
     padding-top: 0.25rem;
     visibility: hidden;
   }
 
   /* Prevent vertical shifts, when no message. */
-  rollo-input p::after {
+  rollo-input-control p::after {
     content: "X";
   }
 
   /* Correct Bootstrap standard, where label brushes against border in the 
   upper position. */
-  rollo-input label {
+  rollo-input-control label {
     margin-left: var(--marginLeft, 0.25rem);
   }
 
   /* Soft error-styling of message, if required, empty and non-visited. */
-  rollo-input[empty]:not([visited]):has(input:required) p {
+  rollo-input-control[empty]:not([visited]):has(input:required) p {
     visibility: visible;
     color: var(--bs-light);
   }
 
   /* Hard error-styling of message, if visited. */
-  rollo-input[visited] p {
+  rollo-input-control[visited] p {
     visibility: visible;
     color: var(--bs-form-invalid-color);
   }
@@ -39,51 +39,72 @@ v.1.0
 <script setup type="module">
   const { is_number } = await use("@/rollotools/is/is_number.js");
   const { is_numeric } = await use("@/rollotools/is/is_numeric.js");
-
-  const { base, component } = await use("@/rollocomponent/");
+  const { State, base, component } = await use("@/rollocomponent/");
   const { create_id } = await use("@/components/form/tools/id.js");
   const { get_message } = await use("@/components/form/tools/message.js");
 
   export default async (assets) => {
     return class extends base() {
-      static __tag__ = "rollo-input";
+      static __key__ = "rollo-input-control";
 
       #_ = {
         components: {},
+        numchars: ["", "-", ".", ","],
+        types: ["email", "numeric", "password", "search", "tel", "text", "url"],
       };
 
       constructor() {
         super();
+        this.classes.add("form-floating");
+        this.state = true;
       }
 
       __new__() {
         super.__new__?.();
+        const host = this;
 
-        this.state = true;
-
+        /* Build tree */
         this.#_.components.input = component.input("form-control", {
           placeholder: " ",
           title: " ",
           id: create_id(),
+          /* state value -> input value */
+          value: function () {
+            host.state.effects.add((change) => {
+              this.value = change.value;
+            }, "value");
+          },
+          "@blur": function (event) {
+            host.state.$.visited = true;
+          },
+          /* Pass on 'invalid' events to component */
+          "@invalid": (event) => host.send("invalid"),
+          /* state -> input style */
+          ".is-invalid": function () {
+            host.state.effects.add(
+              (change) =>
+                this.classes.if(
+                  host.state.$.visited && !host.state.$.valid,
+                  "is-invalid"
+                ),
+              "valid",
+              "visited"
+            );
+            return false;
+          },
         });
         this.#_.components.label = component.label({
           for_: this.#_.components.input.id,
         });
-        this.#_.components.message = component.p();
-
-        this.classes.add("form-floating");
-
-        /* onblur -> visited state and attribute */
-        this.#_.components.input.on.blur = (event) =>
-          (this.state.$.visited = this.attribute.visited = true);
-
-        /* value state -> input component */
-        this.state.effects.add((change) => {
-          this.#_.components.input.value = change.value;
-        }, "value");
-
-        /* Pass on 'invalid' events to component */
-        this.#_.components.input.on.invalid = (event) => this.send("invalid");
+        this.#_.components.message = component.p({
+          /* message state -> message component */
+          text: function () {
+            host.state.effects.add(
+              (change) => (this.text = change.message),
+              "message"
+            );
+          },
+        });
 
         this.append(
           this.#_.components.input,
@@ -159,17 +180,7 @@ v.1.0
 
       /* Sets form control type. */
       set type(type) {
-        if (
-          ![
-            "email",
-            "numeric",
-            "password",
-            "search",
-            "tel",
-            "text",
-            "url",
-          ].includes(type)
-        ) {
+        if (!this.#_.types.includes(type)) {
           throw new Error(`Unsupported type: ${type}`);
         }
         this.#_.type = type;
@@ -209,28 +220,34 @@ v.1.0
 
       __init__() {
         super.__init__?.();
+        const host = this;
 
-        /* oninput -> value state */
-        this.#_.components.input.on.input = (event) => {
-          if (this.type === "numeric") {
-            if (!is_numeric(this.#_.components.input.value)) {
-              this.#_.components.input.value =
-                this.#_.components.input.value.slice(0, -1);
+        /* NOTE Handling of numeric values is hacky, but just gnarly to 
+        make text-type behave like number-type - necessary for live validation. */
+
+        /* input value -> self-correct */
+        this.#_.components.input.on.input = function (event) {
+          if (host.type === "numeric") {
+            if (!is_numeric(this.value)) {
+              this.value = this.value.slice(0, -1);
             }
-            if (["", "-", ".", ","].includes(this.#_.components.input.value)) {
-              this.state.$.value = null;
-            } else {
-              this.state.$.value = Number(
-                this.#_.components.input.value.replace(",", ".")
-              );
-            }
-          } else {
-            this.state.$.value = this.#_.components.input.value;
           }
         };
 
-        /* value state -> message state, empty state and attribute, valid state and attribute  */
+        /* input value -> state value */
+        this.#_.components.input.on.input = function (event) {
+          if (host.type === "numeric") {
+            host.state.$.value = host.#_.numchars.includes(this.value)
+              ? null
+              : Number(this.value.replace(",", "."));
+          } else {
+            host.state.$.value = this.value === "" ? null : this.value;
+          }
+        };
+
+        /* state value -> empty, message and valid state  */
         this.state.effects.add((change) => {
+          /* Interpret min/max for non-numeric */
           if (this.type !== "numeric") {
             if (this.min !== undefined) {
               this.#_.components.input.minLength = this.min;
@@ -239,57 +256,50 @@ v.1.0
               this.#_.components.input.maxLength = this.max;
             }
           }
-
-          this.state.$.message = get_message(this.#_.components.input);
-          this.state.$.empty = this.attribute.empty =
-            this.#_.components.input.value === "" ? true : false;
-
-          if (!this.state.$.message && this.type === "numeric") {
+          /* Get message from native validation */
+          let message = get_message(this.#_.components.input);
+          /* Interpret min/max for numeric */
+          if (!message && this.type === "numeric") {
             if (this.min !== undefined) {
               if (change.value < this.min) {
-                this.state.$.message = "Too low";
+                message = "Too low";
               }
             }
             if (this.max !== undefined) {
               if (change.value > this.max) {
-                this.state.$.message = "Too high";
+                message = "Too high";
               }
             }
           }
-
-          if (!this.state.$.message && this.validators) {
-            let message;
+          /* If no message (valid), proceed with custom validators */
+          if (!message && this.validators) {
+            this.#_.components.input.setCustomValidity("");
             for (const validator of this.validators) {
-              message = validator(change.value);
+              message = validator(change.value) || null;
               if (message) {
-                this.state.$.message = message;
                 this.#_.components.input.setCustomValidity(message);
                 break;
               }
             }
-            if (!message) {
-              this.#_.components.input.setCustomValidity("");
-            }
           } else {
             this.#_.components.input.setCustomValidity("");
           }
-          this.state.$.valid = this.attribute.valid =
-            this.#_.components.input.checkValidity();
+          /* Update state */
+          this.state.update({
+            empty: this.#_.components.input.value === "" ? true : false,
+            message,
+            valid: this.#_.components.input.checkValidity(),
+          });
         }, "value");
 
-        /* message state -> message component */
-        this.state.effects.add((change) => {
-          this.#_.components.message.text = change.message;
-        }, "message");
-
-        /* state -> input component style */
+        /* state -> attr */
         this.state.effects.add(
           (change) => {
-            this.#_.components.input.classes.if(
-              this.state.$.visited && !this.state.$.valid,
-              "is-invalid"
-            );
+            this.attribute.empty = this.state.$.empty || null;
+            this.attribute.valid = this.state.$.valid || null;
+            this.attribute.visited = this.state.$.visited || null;
           },
+          "empty",
           "valid",
           "visited"
         );
@@ -298,4 +308,47 @@ v.1.0
       }
     };
   };
+</script>
+
+<script example type="module">
+  
+
+  const InputControl = await use("@/components/form/input_control.x.html");
+
+  const email = InputControl({
+    parent: document.body,
+    name: "email",
+    label: "Email",
+    required: true,
+    type: "email",
+    min: 8,
+  });
+
+  const uffe = InputControl({
+    parent: document.body,
+    name: "uffe",
+    label: "Uffe",
+    required: true,
+    validators: [
+      (value) => {
+        if (value !== "uffe") {
+          return "Not uffe";
+        }
+      },
+    ],
+  });
+
+  //uffe.on.invalid = (event) => console.log(event)
+
+  const numeric = InputControl({
+    parent: document.body,
+    name: "numeric",
+    label: "Numeric",
+    required: true,
+    type: "numeric",
+    min: 3,
+    max: 10,
+  });
+
+  component.button({ parent: document.body }, "stuff");
 </script>

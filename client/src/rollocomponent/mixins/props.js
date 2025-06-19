@@ -11,7 +11,6 @@ export default (parent, config) => {
     update(updates = {}) {
       super.update?.(updates);
       for (let [key, value] of Object.entries(updates)) {
-        
         /* Ignore __ key */
         if (key.startsWith("__")) {
           continue;
@@ -22,14 +21,8 @@ export default (parent, config) => {
         }
         /* Handle function values */
         if (typeof value === "function" && !key.startsWith("on")) {
-
-         
-
           value = value.call(this, key);
-          
         }
-
-
         /* Ignore no change */
         if (this[key] === value) {
           continue;

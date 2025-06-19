@@ -8,7 +8,9 @@ import { State } from "@/rollocomponent/tools/state.js";
 export default (parent, config) => {
   return class extends parent {
     static __name__ = "state";
+
     #_ = {};
+
     /* Returns state. */
     get state() {
       return this.#_.state;
@@ -16,10 +18,14 @@ export default (parent, config) => {
 
     /* Sets state. */
     set state(state) {
-      this.#_.state = state === true ? new State() : state;
       if (state) {
+        this.#_.state = new State(this);
+        if (typeof state === "object") {
+          this.#_.state.update(state);
+        }
         this.setAttribute("state", "");
       } else {
+        this.#_.state = null;
         this.removeAttribute("state");
       }
     }
