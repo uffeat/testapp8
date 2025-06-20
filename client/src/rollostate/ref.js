@@ -1,6 +1,6 @@
 /*
-import { Ref } from "@/rollostate/ref.js";
-const { Ref } = await use("@/rollostate/ref.js");
+import { Ref } from "@/rollorstate/ref.js";
+const { Ref } = await use("@/rollorstate/ref.js");
 20250620
 v.1.0
 */
@@ -20,12 +20,12 @@ export class Ref {
     this.#_.name = name;
     this.#_.owner = owner;
 
-    const state = this;
+    const ref = this;
 
     this.#_.effects = new (class {
       /* Returns number of effects. */
       get size() {
-        return state.#_.registry.size;
+        return ref.#_.registry.size;
       }
 
       /* Adds effect. */
@@ -39,81 +39,69 @@ export class Ref {
           ) || {};
 
         const condition = (() => {
-          const values_condition = (() => {
+          const values = (() => {
             const values = args.find((a) => Array.isArray(a));
-            if (values) {
-              return (current) => values.includes(current);
-            }
+            if (values) return (current) => values.includes(current);
           })();
 
-          const custom_condition = args.find((a) => typeof a === "function");
+          const custom = args.find((a) => typeof a === "function");
 
-          if (values_condition && !custom_condition) {
-            return values_condition;
-          }
+          if (values && !custom) return values;
 
-          if (!values_condition && custom_condition) {
-            return custom_condition;
-          }
+          if (!values && custom) return custom;
 
-          if (values_condition && custom_condition) {
-            return (...args) => {
-              if (!values_condition(...args)) {
-                return false;
-              }
-              return custom_condition(...args);
-            };
-          }
+          if (values && custom)
+            return (...args) => values(...args) && custom(...args);
         })();
 
         const detail = { condition, once: options.once };
 
-        state.#_.registry.set(effect, detail);
+        ref.#_.registry.set(effect, detail);
         /* NOTE By storing 'detail' as a mutatable object, advanced (likely rare) 
         dynamic effect control is possible. Example:
         - An effect is added with a condition function.
         - The effect function does nothing, but the actual work is done in the 
           condition function.
-        - The condition function receives 'effect' and 'state' and can 
+        - The condition function receives 'effect' and 'ref' and can 
           therefore access and mutate the stored detail object and hence 
           replace itself, like:
-            const detail = state.effects.get(effect)
+            const detail = ref.effects.get(effect)
             detail.condition = (change) => { ... }
         */
 
         if (options.run) {
           if (
             !condition ||
-            condition(state.current, {
+            condition(ref.current, {
               index: null,
               effect,
-              state,
+              ref,
             })
           ) {
-            effect(state.current, {
+            effect(ref.current, {
               effect,
               index: null,
-              state,
+              ref,
             });
           }
         }
 
-        return state;
+        return ref;
       }
 
       /* Returns effect detail. */
       get(effect) {
-        return state.#_.registry.get(effect);
+        return ref.#_.registry.get(effect);
       }
 
       /* Checks, if effect registered. */
       has(effect) {
-        return state.#_.registry.has(effect);
+        return ref.#_.registry.has(effect);
       }
 
       /* Removes effect. */
       remove(effect) {
-        state.#_.registry.delete(effect);
+        ref.#_.registry.delete(effect);
       }
     })();
 
@@ -195,13 +183,13 @@ export class Ref {
               condition(this.current, {
                 effect,
                 index,
-                state: this,
+                ref: this,
               })
             ) {
               effect(this.current, {
                 effect,
                 index,
-                state: this,
+                ref: this,
               });
 
               if (once) {
@@ -215,5 +203,3 @@ export class Ref {
     return this;
   }
 }
-
-

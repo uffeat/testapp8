@@ -371,35 +371,40 @@ app.maps
           const html = element.innerHTML;
           assets[name] = html;
         }
-        Object.freeze(assets);
+
         /* NOTE Use `setup` attr to accommodate future uses of other scripts. 
         Also, (to some degree) guards against collision with deployment 
         vendors' injection of scripts. */
-        const script = wrapper.querySelector("script[setup]");
+        const script = wrapper.find("script[setup]");
         if (script) {
           /* Create module */
           const module = await construct(
             `${script.textContent}\n//# sourceURL=${path.path}`
           );
-          /* Get cls */
-          const cls = await module.default(assets);
-          /* Create instance factory */
-          const key = cls.__tag__
-            ? cls.__tag__
-            : `x-${path.stem.replaceAll("_", "-")}`;
-          const factory = author(cls, key);
-          /* Expose component assets */
-          Object.defineProperty(factory, "__assets__", {
-            configurable: false,
-            enumerable: true,
-            writable: false,
-            value: assets,
-          });
-          return factory;
+
+          if (wrapper.find("meta[component]")) {
+            /* Get cls */
+            const cls = await module.default(assets);
+            /* Create instance factory */
+            const key = cls.__tag__
+              ? cls.__tag__
+              : `x-${path.stem.replaceAll("_", "-")}`;
+            const factory = author(cls, key);
+            /* Expose component assets */
+            Object.defineProperty(factory, "__assets__", {
+              configurable: false,
+              enumerable: true,
+              writable: false,
+              value: Object.freeze(assets),
+            });
+            return factory;
+          } else {
+            return Object.freeze({ ...assets, ...module });
+          }
         } else {
           /* If no script, 'assets' becomes the result. This means that the 
           .x.html format can also be used to only declare sheet and template assets. */
-          return assets;
+          return Object.freeze(assets);
         }
       },
       {
@@ -410,40 +415,3 @@ app.maps
 
   /* Prevent config tampering */
   .freeze();
-
-/* NOTE
-Re 'app'
-- Central piece of the Rollo import engine. However, not exposed directly,
-  but via 'use' (for a more succinct syntax).
-- Importers created with 'app.importer' support string syntax only; 
-  The benefits of the Python-like syntax are limited, when imports strings 
-  are short. 
-Re 'use':
-- The central piece of the Rollo import engine API.
-- Zero-config. Based on in-module defined import maps and processors. This 
-  config is not exposed as it is fundamental and should not be 
-  tampered with.
-- Fast and memory-efficient (imports maps are not copied).
-- Import from src or public? Import from src is faster, but also increases 
-  bundle size. Moreover, in certain cases, only src import is possible, e.g.,
-  when using node modules or Vite-specific features.
-  Therefore:
-  - Actual app: Import from src, unless dealing with very large file volumes,
-    e.g., large number statically generated html files and/or small sizes,
-    e.g., icon collections.
-  - Testing: Prefer public. Although src .test.js files can be treeshaken out 
-    and/or configured as external, it's cleaner to place in public.
-  - SSG and other pre-building tasks: Prefer public, but likely that src is
-    the only option due to the public import limitations mentioned.
-  When serving the app from Vercel the difference between src and public imports 
-  is surprisingly small!
-- Really no need to export, since added to global namespace, but explicit 
-  import can silence barking linters. 
-- A slightly better performance could be achieved by refactoring 'use' to be a 
-  function that wraps 'app.import' and then do `Object.defineProperty` to 
-  patch-on selected members of 'app'. However, the proxy pattern is more 
-  elegant and easier to maintain.
-Re 'pub':
-- Based on the '/'-prefix syntax (Vite-aligned).
-- Supports js and all text-based file types.
-*/

@@ -4,6 +4,8 @@ const Input = await use("@/components/form/input.x.html");
 v.1.1
 -->
 
+<meta component />
+
 <script setup type="module">
   const { Ref, State } = await use("@/rollostate/");
   const { is_number } = await use("@/rollotools/is/is_number.js");
@@ -42,8 +44,6 @@ v.1.1
           .effects.add(
             /* Set visited attribute */
             (change, { state }) => {
-              //console.log(`Setting visited attribute for ${this.name}`); //
-
               this.attribute.visited = change.visited;
             },
             ["visited"]
@@ -58,27 +58,21 @@ v.1.1
               /* required */
               if (this.required) {
                 pipe.push((value) => {
-                  if (value === null) {
-                    return "Required";
-                  }
+                  if (value === null) return "Required";
                 });
               }
 
               /* email and url */
               if (["email", "url"].includes(this.type)) {
                 pipe.push(() => {
-                  if (this.validity.typeMismatch) {
-                    return "Invalid format";
-                  }
+                  if (this.validity.typeMismatch) return "Invalid format";
                 });
               }
 
               /* pattern */
               if (this.pattern) {
                 pipe.push(() => {
-                  if (this.validity.patternMismatch) {
-                    return "Invalid format";
-                  }
+                  if (this.validity.patternMismatch) return "Invalid format";
                 });
               }
 
@@ -133,39 +127,37 @@ v.1.1
                 });
               }
 
-              //console.log(`Setting message for ${this.name}`); //
-
               state.$.message =
                 (() => {
                   for (const validator of pipe) {
                     const message = validator(change.value);
-                    if (message) {
-                      return message;
-                    }
+                    if (message) return message;
                   }
                 })() || null;
 
               this.checkValidity();
             },
             ["value"]
+          )
+
+          .effects.add(
+            /* Set style */
+            (change, { state }) => {
+              this.classes.if(state.$.visited && state.$.message, "is-invalid");
+            },
+            ["message", "visited"]
           );
 
-        this.id = create_id();
-        /* Prevent browser default validation message */
-        this.title = " ";
-        this.classes.add("form-control");
-        /* Set visisted on blur */
-        this.on.blur = (event) => (this.#_.states.main.$.visited = true);
+        this.update({
+          id: create_id(),
+          /* Prevent browser default validation message */
+          title: " ",
+          ".form-control": true,
+          /* Set visisted on blur */
+          "@blur": (event) => (this.#_.states.main.$.visited = true),
+        });
       }
 
-      __new__() {
-        super.__new__?.();
-      }
-
-      /* Returns message effects controller. 
-      NOTE Allows external addition of message 
-      effects without exposing data and already-added 
-      effects. */
       get state() {
         return this.#_.states.main;
       }
@@ -237,7 +229,8 @@ v.1.1
           }
         };
 
-        const handler = (event) => {
+        /* Set value state from input value */
+        this.on.input$run = (event) => {
           if (this.type === "numeric") {
             this.#_.states.main.$.value = this.#_.numchars.includes(super.value)
               ? null
@@ -247,21 +240,60 @@ v.1.1
             this.#_.states.main.$.value = value === "" ? null : value;
           }
         };
-
-        /* Set value state from input value */
-        this.on.input$run = handler;
-
-        //this.on.change = handler;
-        //this.on.blur = handler;
-
-        /*
-        this.classes.if(
-            this.attribute.visited && this.#_.states.message.$,
-            "is-invalid"
-          );
-
-        */
       }
     };
   };
+</script>
+
+<script example type="module">
+  const Input = await use("@/components/form/input.x.html");
+
+  const uffe = Input({
+    parent: document.body,
+    name: "uffe",
+
+    required: true,
+    validators: [
+      (value) => {
+        if (value !== "uffe") {
+          return "Not uffe";
+        }
+      },
+    ],
+  });
+
+  uffe.message.add(
+    (current) => {
+      console.log("message for uffe:", current);
+    },
+    { run: true }
+  );
+
+  const number = Input({
+    parent: document.body,
+    name: "number",
+    type: "numeric",
+    required: true,
+  });
+
+  number.message.add(
+    (current) => {
+      console.log("message for number:", current);
+    },
+    { run: true }
+  );
+
+  const email = Input({
+    parent: document.body,
+    name: "email",
+    type: "email",
+    required: true,
+  });
+
+  email.message.add(
+    (current) => {
+      console.log("message for email:", current);
+    },
+    { run: true }
+  );
 </script>

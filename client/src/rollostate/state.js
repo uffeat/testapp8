@@ -1,8 +1,8 @@
 /*
 import { State } from "@/rollostate/state.js";
 const { State } = await use("@/rollostate/state.js");
-20250618
-v.1.1
+20250620
+v.1.2
 */
 
 /* Reactive state utility for flat object data with primitive values. */
@@ -13,9 +13,10 @@ export class State {
       current: {},
       previous: {},
     },
-    /* Effects registry */
-    registry: new Map(),
-    /* Init exposed stores */
+    registries: {
+      effects: new Map(),
+    },
+    /* Initial exposed stores */
     change: Object.freeze({}),
     current: Object.freeze({}),
     detail: {},
@@ -32,7 +33,7 @@ export class State {
     this.#_.effects = new (class {
       /* Returns number of effects. */
       get size() {
-        return state.#_.registry.size;
+        return state.#_.registries.effects.size;
       }
 
       /* Adds effect. */
@@ -46,7 +47,7 @@ export class State {
           ) || {};
 
         const condition = (() => {
-          const keys_condition = (() => {
+          const keys = (() => {
             const keys = args.find((a) => Array.isArray(a));
             if (keys) {
               const _keys = new Set(keys);
@@ -55,29 +56,19 @@ export class State {
             }
           })();
 
-          const custom_condition = args.find((a) => typeof a === "function");
+          const custom = args.find((a) => typeof a === "function");
 
-          if (keys_condition && !custom_condition) {
-            return keys_condition;
-          }
+          if (keys && !custom) return keys;
 
-          if (!keys_condition && custom_condition) {
-            return custom_condition;
-          }
+          if (!keys && custom) return custom;
 
-          if (keys_condition && custom_condition) {
-            return (...args) => {
-              if (!keys_condition(...args)) {
-                return false;
-              }
-              return custom_condition(...args);
-            };
-          }
+          if (keys && custom)
+            return (...args) => keys(...args) && custom(...args);
         })();
 
         const detail = { condition, once: options.once };
 
-        state.#_.registry.set(effect, detail);
+        state.#_.registries.effects.set(effect, detail);
         /* NOTE By storing 'detail' as a mutatable object, advanced (likely rare) 
         dynamic effect control is possible. Example:
         - An effect is added with a condition function.
@@ -112,17 +103,17 @@ export class State {
 
       /* Returns effect detail. */
       get(effect) {
-        return state.#_.registry.get(effect);
+        return state.#_.registries.effects.get(effect);
       }
 
       /* Checks, if effect registered. */
       has(effect) {
-        return state.#_.registry.has(effect);
+        return state.#_.registries.effects.has(effect);
       }
 
       /* Removes effect. */
       remove(effect) {
-        state.#_.registry.delete(effect);
+        state.#_.registries.effects.delete(effect);
       }
     })();
 
@@ -140,7 +131,7 @@ export class State {
     initial && this.update(initial);
   }
 
-  /* Returns object, from with sigle current data items can be retrieved/set. */
+  /* Returns object, from with single current data items can be retrieved/set. */
   get $() {
     return this.#_.$;
   }
@@ -175,7 +166,7 @@ export class State {
     return this.#_.owner;
   }
 
-  /* Returns data as-was before most recent update. */
+  /* Returns data as-was before most recent change to individual items. */
   get previous() {
     return this.#_.previous;
   }
@@ -187,52 +178,52 @@ export class State {
 
   /* Updates data and notifies effects,. Chainable. */
   update(updates = {}, { silent = false } = {}) {
-    /* Infer change entries */
-    const change = Object.entries(updates).filter(
-      ([k, v]) => v !== this.#_._.current[k]
-    );
-    /* Update deep stores from change entries */
-    change.forEach(([k, v]) => {
+    const change = {};
+    for (const [k, v] of Object.entries(updates)) {
       if (v === undefined) {
-        this.#_._.previous[k] = v;
-        /* NOTE Important convention: undefined deletes;
-        provides a way to remove entries and ensures that current 
-        values are never undefined */
-        delete this.#_._.current[k];
-      } else {
         this.#_._.previous[k] = this.#_._.current[k];
+        change[k] = v;
+        /* NOTE By convention, undefined deletes */
+        delete this.#_._.current[k];
+      } else if (v !== this.#_._.current[k]) {
+        this.#_._.previous[k] = this.#_._.current[k];
+        change[k] = v;
         this.#_._.current[k] = v;
       }
-    });
+    }
+
     /* Create exposed stores */
-    this.#_.change = Object.freeze(Object.fromEntries(change));
+    this.#_.change = Object.freeze(change);
     this.#_.current = Object.freeze({ ...this.#_._.current });
     this.#_.previous = Object.freeze({ ...this.#_._.previous });
     /* Call any effects, if change and not silent */
-    if (!silent && this.effects.size && change.length) {
-      this.#_.session = this.session === null ? 0 : this.session + 1;
-      this.#_.registry
-        .entries()
-        .forEach(([effect, { condition, once }], index) => {
-          if (
-            !condition ||
-            condition(this.change, {
-              effect,
-              index,
-              state: this,
-            })
-          ) {
-            effect(this.change, {
-              effect,
-              index,
-              state: this,
-            });
+    if (!silent && this.effects.size && Object.keys(change)) {
+      this.#_.session = this.session === null ? 0 : ++this.#_.session;
+      let index = 0;
+      for (const [
+        effect,
+        { condition, once },
+      ] of this.#_.registries.effects.entries()) {
+        if (
+          !condition ||
+          condition(this.change, {
+            effect,
+            index,
+            state: this,
+          })
+        ) {
+          effect(this.change, {
+            effect,
+            index,
+            state: this,
+          });
 
-            if (once) {
-              this.effects.remove(effect);
-            }
+          if (once) {
+            this.effects.remove(effect);
           }
-        });
+        }
+        ++index;
+      }
     }
     return this;
   }
