@@ -25,33 +25,30 @@ v.1.1
       constructor() {
         super();
 
-        this.#_.states.main = new State({
-          name: "main",
+        /* Init message state */
+        this.#_.states.message = new Ref({
+          name: "message",
+          owner: this,
+        }).effects.add(
+          /* Set message attribute */
+          (current) => {
+            this.attribute.message = current;
+          }
+        ).effects.add((current) => {
+            this.classes.if(
+              this.attribute.visited && current,
+              "is-invalid"
+            );
+          })
+
+        /* Init value state */
+        this.#_.states.value = new Ref({
+          name: "value",
           owner: this,
         }).effects
           .add(
-            /* Set message attribute */
-            (change, { state }) => {
-              //console.log(`Setting message attribute for ${this.name}`); //
-
-              this.attribute.message = change.message;
-            },
-            ["message"]
-          )
-
-          .effects.add(
-            /* Set visited attribute */
-            (change, { state }) => {
-              //console.log(`Setting visited attribute for ${this.name}`); //
-
-              this.attribute.visited = change.visited;
-            },
-            ["visited"]
-          )
-
-          .effects.add(
             /* Validate and set message state */
-            (change, { state }) => {
+            (current) => {
               this.setCustomValidity("");
               const pipe = [];
 
@@ -133,29 +130,25 @@ v.1.1
                 });
               }
 
-              //console.log(`Setting message for ${this.name}`); //
-
-              state.$.message =
-                (() => {
-                  for (const validator of pipe) {
-                    const message = validator(change.value);
-                    if (message) {
-                      return message;
-                    }
-                  }
-                })() || null;
+              for (const validator of pipe) {
+                const message = validator(current);
+                if (message) {
+                  this.#_.states.message.$ = message;
+                  break;
+                }
+              }
 
               this.checkValidity();
-            },
-            ["value"]
-          );
+            }
+          )
+          
 
         this.id = create_id();
         /* Prevent browser default validation message */
         this.title = " ";
         this.classes.add("form-control");
-        /* Set visisted on blur */
-        this.on.blur = (event) => (this.#_.states.main.$.visited = true);
+        /* Set visisted attribute on blur */
+        this.on.blur = (event) => (this.attribute.visited = true);
       }
 
       __new__() {
@@ -166,8 +159,8 @@ v.1.1
       NOTE Allows external addition of message 
       effects without exposing data and already-added 
       effects. */
-      get state() {
-        return this.#_.states.main;
+      get message() {
+        return this.#_.states.message.effects;
       }
 
       /* Returns max constraint. */
@@ -237,30 +230,17 @@ v.1.1
           }
         };
 
-        const handler = (event) => {
+        /* Set value state from input value */
+        this.on.input$run = (event) => {
           if (this.type === "numeric") {
-            this.#_.states.main.$.value = this.#_.numchars.includes(super.value)
+            this.#_.states.value.$ = this.#_.numchars.includes(super.value)
               ? null
               : Number(super.value.replace(",", "."));
           } else {
             const value = super.value.trim();
-            this.#_.states.main.$.value = value === "" ? null : value;
+            this.#_.states.value.$ = value === "" ? null : value;
           }
         };
-
-        /* Set value state from input value */
-        this.on.input$run = handler;
-
-        //this.on.change = handler;
-        //this.on.blur = handler;
-
-        /*
-        this.classes.if(
-            this.attribute.visited && this.#_.states.message.$,
-            "is-invalid"
-          );
-
-        */
       }
     };
   };

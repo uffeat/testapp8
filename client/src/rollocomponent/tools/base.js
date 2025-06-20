@@ -18,18 +18,17 @@ export const base = (native, ...__mixins) => {
     mixins.find,
     mixins.handlers,
     mixins.hooks,
-    mixins.host,
+    //mixins.host,//
     mixins.insert,
-    mixins.key,
+    //mixins.key,//
     mixins.parent,
     mixins.props,
     mixins.send,
-    mixins.setup,
-    mixins.state,
+    //mixins.setup,//
+    //mixins.state,//
     mixins.style,
     mixins.super_,
     mixins.tab,
-
     mixins.vars,
     ...__mixins,
   ];

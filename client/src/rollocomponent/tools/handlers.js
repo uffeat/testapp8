@@ -40,7 +40,7 @@ export class Handlers {
       this.#_.owner.addEventListener(type, handler);
 
       if (dirs.includes("run")) {
-        handler({ owner: this.#_.owner });
+        handler({ target: this.#_.owner });
       }
     });
     return this.#_.owner;

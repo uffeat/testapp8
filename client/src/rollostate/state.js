@@ -45,12 +45,6 @@ export class State {
               !Array.isArray(a)
           ) || {};
 
-        /* Patch up missing option items with defaults */
-        if (options.run === undefined && !options.once) {
-          /* NOTE It does typically not make sense to let a 'once' effect run at registration.  */
-          options.run = true;
-        }
-
         const condition = (() => {
           const keys_condition = (() => {
             const keys = args.find((a) => Array.isArray(a));
@@ -73,7 +67,7 @@ export class State {
 
           if (keys_condition && custom_condition) {
             return (...args) => {
-              if (!keys_condition) {
+              if (!keys_condition(...args)) {
                 return false;
               }
               return custom_condition(...args);
@@ -84,7 +78,7 @@ export class State {
         const detail = { condition, once: options.once };
 
         state.#_.registry.set(effect, detail);
-        /* NOTE By storering 'detail' as a mutatable object, advanced (likely rare) 
+        /* NOTE By storing 'detail' as a mutatable object, advanced (likely rare) 
         dynamic effect control is possible. Example:
         - An effect is added with a condition function.
         - The effect function does nothing, but the actual work is done in the 
@@ -216,7 +210,7 @@ export class State {
     this.#_.previous = Object.freeze({ ...this.#_._.previous });
     /* Call any effects, if change and not silent */
     if (!silent && this.effects.size && change.length) {
-      this.#_.session = this.session === null ? 0 : this.session;
+      this.#_.session = this.session === null ? 0 : this.session + 1;
       this.#_.registry
         .entries()
         .forEach(([effect, { condition, once }], index) => {
