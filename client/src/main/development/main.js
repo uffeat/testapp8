@@ -31,6 +31,6 @@ const uffe = Input({
   
 });
 
-//uffe.on.invalid = (event) => console.log(event)
+uffe.on.message = (event) => console.log(event.detail)
 
 

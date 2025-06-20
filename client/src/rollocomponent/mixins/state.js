@@ -3,7 +3,7 @@ import state from "@/rollocomponent/mixins/state.js";
 20250601
 v.1.0
 */
-import { State } from "@/rollocomponent/tools/state.js";
+import { State } from "@/rollostate/state.js";
 
 export default (parent, config) => {
   return class extends parent {
@@ -19,7 +19,7 @@ export default (parent, config) => {
     /* Sets state. */
     set state(state) {
       if (state) {
-        this.#_.state = new State(this);
+        this.#_.state = new State({owner: this});
         if (typeof state === "object") {
           this.#_.state.update(state);
         }
@@ -30,10 +30,10 @@ export default (parent, config) => {
       }
     }
 
-    /* Calls '__effect__' on descendants, if component has state. */
+    /* Calls '__effect__' on descendants, if component has state and is host. */
     __init__() {
       super.__init__?.();
-      if (this.state) {
+      if (this.state && this.hasAttribute("host")) {
         this.querySelectorAll(`[effect]`)
           .values()
           .forEach((c) => {

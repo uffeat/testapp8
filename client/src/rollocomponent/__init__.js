@@ -12,7 +12,7 @@ In addition to these, the suite provides tools for authoring
 components the same API as the basic Rollo components.
 */
 
-export { State } from "@/rollocomponent/tools/state.js";
+export { State } from "@/rollostate/state.js";
 export { base } from "@/rollocomponent/tools/base.js";
 export { author } from "@/rollocomponent/tools/author.js";
 export { component } from "@/rollocomponent/component.js";

@@ -5,10 +5,9 @@ v.1.1
 -->
 
 <script setup type="module">
-  const { State } = await use("@/rollostate/state.js");
   const { is_number } = await use("@/rollotools/is/is_number.js");
   const { is_numeric } = await use("@/rollotools/is/is_numeric.js");
-  const { base, component } = await use("@/rollocomponent/");
+  const { State, base, component } = await use("@/rollocomponent/");
   const { create_id } = await use("@/components/form/tools/id.js");
   const { get_message } = await use("@/components/form/tools/message.js");
 
@@ -24,33 +23,22 @@ v.1.1
 
       constructor() {
         super();
+        /* Init state */
+        this.state = { message: null };
 
-        /* Init message state */
-        this.#_.states.message = new State({
-          initial: { message: null },
-          name: "message",
-          owner: this,
-        }).effects
-          .add(
-            (change) => {
-              this.attribute.message = change.message;
-            },
-            ["message"]
-          )
-          .effects.add(
-            (change) => {
-              this.send("message", { bubbles: true, detail: change.message });
-            },
-            ["message"],
-            { run: false }
-          );
 
-        /* Init value state */
-        this.#_.states.value = new State({
-          initial: { value: null },
-          name: "value",
-          owner: this,
-        });
+       
+
+
+
+
+        /* message state -> message attribute  */
+        this.state.effects.add(
+          (change) => {
+            this.attribute.message = change.message;
+          },
+          ["message"]
+        );
 
         this.id = create_id();
         /* Prevent browser default validation message */
@@ -60,20 +48,22 @@ v.1.1
         this.on.blur = (event) => (this.attribute.visisted = true);
 
         /* Set message state from value state */
-        this.#_.states.value.effects.add(
+        this.state.effects.add(
           (change) => {
             if (this.required && change.value === null) {
-              this.#_.states.message.$.message = "Required";
-            }
-            //console.log('validators:', this.validators)
+            this.state.$.message = "Required";
+          }
+          //console.log('validators:', this.validators)
+            
           },
           ["value"]
         );
 
+        
         /* Set value state from user input */
         this.on.input = (event) => {
-          const value = super.value.trim();
-          this.#_.states.value.$.value = value === "" ? null : value;
+          const value = super.value.trim()
+          this.state.$.value = value === "" ? null : value
         };
       }
 
