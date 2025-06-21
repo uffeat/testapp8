@@ -133,10 +133,12 @@ v.1.0
 </script>
 
 <script example type="module">
-  const FormControl = await use("@/components/form/form_control.x.html");
+
+const FormControl = await use("@/components/form/form_control.x.html");
 
   const uffe = FormControl({
     parent: document.body,
+    label: 'Uffe',
     name: "uffe",
     //value: 'uff',
     required: true,
@@ -149,20 +151,5 @@ v.1.0
     ],
   });
 
-  //uffe.value = 'uff'
-
-  uffe.states.main.effects.add(
-    (change) => {
-      console.log("message:", change.message);
-    },
-    ["message"],
-    { run: true }
-  );
-
-  uffe.states.value.effects.add(
-    (current) => {
-      console.log("value:", current);
-    },
-    { run: true }
-  );
+ 
 </script>

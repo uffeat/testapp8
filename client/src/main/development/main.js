@@ -10,21 +10,25 @@ console.info("Vite environment:", import.meta.env.MODE);
 
 document.querySelector("html").dataset.bsTheme = "dark";
 
-const FormControl = await use("@/components/form/form_control.x.html");
+const Input = await use("@/components/form/input.x.html");
 
-  const uffe = FormControl({
-    parent: document.body,
-    label: 'Uffe',
-    name: "uffe",
-    //value: 'uff',
-    required: true,
-    validators: [
-      (value) => {
-        if (value !== "uffe") {
-          return "Not uffe";
-        }
-      },
-    ],
-  });
+const uffe = Input({
+  parent: document.body,
+  name: "uffe",
+  //value: 'uff',
+  required: true,
+  validators: [
+    (value) => {
+      if (value !== "uffe") {
+        return "Not uffe";
+      }
+    },
+  ],
+});
 
- 
+const number = Input({
+  parent: document.body,
+  name: "number",
+  type: "numeric",
+  required: true,
+});
