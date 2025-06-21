@@ -12,12 +12,14 @@ NOTE
 instance. */
 export const factory = (cls) => {
   return (...args) => {
-    const instance = typeof cls === "function" ? new cls() : cls;
     /* Parse args */
     args = new Args(args);
+
+    const instance = typeof cls === "function" ? new cls(args) : cls;
+    
     /* Call '__new__' to invoke pre-config actions */
-    instance.constructor.__new__?.call(instance);
-    instance.__new__?.();
+    instance.constructor.__new__?.call(instance, args);
+    instance.__new__?.(args);
     /* Add CSS classes */
     if (instance.classes) {
       instance.classes.add(args.classes);
@@ -27,8 +29,8 @@ export const factory = (cls) => {
     /* Append children */
     instance.append?.(...args.children);
     /* Call '__init__' to invoke post-config actions */
-    instance.__init__?.();
-    instance.constructor.__init__?.call(instance);
+    instance.__init__?.(args);
+    instance.constructor.__init__?.call(instance, args);
     /* Call hooks */
     instance.hooks?.(...args.hooks);
     return instance;

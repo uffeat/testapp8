@@ -10,34 +10,32 @@ console.info("Vite environment:", import.meta.env.MODE);
 
 document.querySelector("html").dataset.bsTheme = "dark";
 
-const Input = await use("@/components/form/input.x.html");
+const FormControl = await use("@/components/form/form_control.x.html");
 
-const uffe = Input({
-  parent: document.body,
-  name: "uffe",
-  //value: 'uff',
-  required: true,
-  validators: [
-    (value) => {
-      if (value !== "uffe") {
-        return "Not uffe";
-      }
-    },
-  ],
-});
-
-const number = Input({
-  parent: document.body,
-  name: "number",
-  type: "numeric",
-  required: true,
-});
-
-const Textarea = await use("@/components/form/textarea.x.html");
-
-  const notes = Textarea({
+  const uffe = FormControl({
     parent: document.body,
-    name: "notes",
+    label: "Uffe",
+    name: "uffe",
+    //value: 'uff',
     required: true,
-    resize: 'both'
+    validators: [
+      (value) => {
+        if (value !== "uffe") {
+          return "Not uffe";
+        }
+      },
+    ],
   });
+
+
+  const notes = FormControl({
+    parent: document.body,
+    type: 'textarea',
+    label: "Notes",
+    name: "notes",
+   
+    required: true,
+    
+  });
+
+

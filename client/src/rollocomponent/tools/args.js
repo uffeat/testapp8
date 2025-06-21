@@ -14,11 +14,9 @@ export class Args {
   /* Returns children. */
   get children() {
     if (this.#_.children === undefined) {
-      this.#_.children = Object.freeze(
-        this.#_.args.filter(
-          (a, i) =>
-            a instanceof Node || (i && ["number", "string"].includes(typeof a))
-        )
+      this.#_.children = this.#_.args.filter(
+        (a, i) =>
+          a instanceof Node || (i && ["number", "string"].includes(typeof a))
       );
     }
     return this.#_.children;
@@ -45,7 +43,7 @@ export class Args {
   /* Returns updates. */
   get updates() {
     if (this.#_.updates === undefined) {
-      this.#_.updates = Object.freeze(
+      this.#_.updates =
         this.#_.args.find(
           (a, i) =>
             i < 2 &&
@@ -53,8 +51,7 @@ export class Args {
             !(a instanceof Node) &&
             typeof a !== "function" &&
             !Array.isArray(a)
-        ) || {}
-      );
+        ) || {};
     }
     return this.#_.updates;
   }
