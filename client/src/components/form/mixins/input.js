@@ -82,6 +82,7 @@ export default (parent, config) => {
 
       this.update({
         id: create_id(),
+        '[rollo': true,
         /* Prevent browser default validation message */
         title: " ",
         ".form-control": true,

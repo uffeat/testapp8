@@ -32,3 +32,12 @@ const number = Input({
   type: "numeric",
   required: true,
 });
+
+const Textarea = await use("@/components/form/textarea.x.html");
+
+  const notes = Textarea({
+    parent: document.body,
+    name: "notes",
+    required: true,
+    resize: 'both'
+  });

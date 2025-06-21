@@ -11,7 +11,7 @@ export default (parent, config) => {
     constructor() {
       super();
 
-      this.#_.vars = new Proxy(this, {
+      this.#_.__ = new Proxy(this, {
         get(target, name) {
           /* Normalize name */
           if (!name.startsWith("--")) {
@@ -25,6 +25,7 @@ export default (parent, config) => {
             if (!value) return false;
             const priority = target.style.getPropertyPriority(name);
             if (priority) return `${value} !${priority}`;
+            if (value === 'none') return null
             return value;
           }
           if (import.meta.env.DEV) {
@@ -36,6 +37,7 @@ export default (parent, config) => {
           if (!value) return false;
           const priority = target.style.getPropertyPriority(name);
           if (priority) return `${value} !${priority}`;
+          if (value === 'none') return null
           return value;
         },
         set(target, name, value) {
@@ -56,7 +58,7 @@ export default (parent, config) => {
             return true;
           }
           /* Abort, if no change */
-          const current = target.vars[name];
+          const current = target.__[name];
           if (value === current) {
             return true;
           }
@@ -83,8 +85,8 @@ export default (parent, config) => {
     }
 
     /* Provides access to single CSS var without use of strings. */
-    get vars() {
-      return this.#_.vars;
+    get __() {
+      return this.#_.__;
     }
 
     /* Updates CSS vars from '__'-syntax. Chainable. */
@@ -100,10 +102,9 @@ export default (parent, config) => {
         if (!key.startsWith("__")) {
           continue;
         }
-        /* Adjust for special syntax */
-        key = key.slice("__".length);
+       
         /* Update */
-        this.vars[key] = value;
+        this.__[key.slice("__".length)] = value;
       }
 
       return this;

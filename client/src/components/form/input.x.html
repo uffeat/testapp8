@@ -10,7 +10,7 @@ v.1.2
     const input = (await use("@/components/form/mixins/input.js")).default;
 
     return class extends mix(base("input"), {}, input) {
-      static __key__ = "rollo-input";
+      
 
       #_ = {
         types: ["email", "numeric", "password", "search", "tel", "text", "url"],
