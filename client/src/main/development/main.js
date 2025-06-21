@@ -30,34 +30,33 @@ const uffe = Input({
 
 uffe.states.main.effects.add(
   (change) => {
-    //console.log("message:", change.message);
+    console.log("message:", change.message);
   },
   ["message"],
   { run: true }
 );
 
 uffe.states.value.effects.add((current) => {
-  //console.log("value:", current);
-});
+  console.log("value:", current);
+},{ run: true });
 
 const number = Input({
   parent: document.body,
   name: "number",
   type: "numeric",
   required: true,
-  value: 42
 });
 
 number.states.main.effects.add(
   (change) => {
-    //console.log("message:", change.message);
+    console.log("message:", change.message);
   },
   ["message"],
   { run: true }
 );
 
 number.states.value.effects.add((current) => {
-  //console.log("value:", current);
+  console.log("value:", current);
 },
  { run: true }
 );
