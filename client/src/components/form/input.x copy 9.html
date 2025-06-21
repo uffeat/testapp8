@@ -1,17 +1,19 @@
 <!--
 const Input = await use("@/components/form/input.x.html");
-20250621
-v.1.2
+20250618
+v.1.1
 -->
 
-<script component type="module">
-  export default async (assets) => {
-    const { Ref, State } = await use("@/rollostate/");
-    const { is_number } = await use("@/rollotools/is/is_number.js");
-    const { is_numeric } = await use("@/rollotools/is/is_numeric.js");
-    const { base } = await use("@/rollocomponent/");
-    const { create_id } = await use("@/components/form/tools/id.js");
 
+<script component type="module">
+  const { Ref, State } = await use("@/rollostate/");
+  const { is_number } = await use("@/rollotools/is/is_number.js");
+  const { is_numeric } = await use("@/rollotools/is/is_numeric.js");
+  const { base, component } = await use("@/rollocomponent/");
+  const { create_id } = await use("@/components/form/tools/id.js");
+  const { get_message } = await use("@/components/form/tools/message.js");
+
+  export default async (assets) => {
     return class extends base("input") {
       static __key__ = "rollo-input";
 
@@ -23,8 +25,7 @@ v.1.2
 
       constructor() {
         super();
-        /* State slice to manage "message" and "visited"
-        NOTE Using 'State', since combined-value effect is required. */
+
         this.#_.states.main = new State({
           name: "main",
           owner: this,
@@ -32,10 +33,12 @@ v.1.2
           .add(
             /* Set message attribute */
             (change, { state }) => {
+              //console.log(`Setting message attribute for ${this.name}`); //
               this.attribute.message = change.message;
             },
             ["message"]
           )
+
           .effects.add(
             /* Set visited attribute */
             (change, { state }) => {
@@ -43,41 +46,10 @@ v.1.2
             },
             ["visited"]
           )
-          .effects.add(
-            /* Set style */
-            (change, { state }) => {
-              this.classes.if(state.$.visited && state.$.message, "is-invalid");
-            },
-            ["message", "visited"]
-          );
 
-        /* State slice to manage "value".
-        NOTE Separate slice, since updates "message" */
-        this.#_.states.value = new Ref({
-          name: "value",
-          owner: this,
-        }).effects
-          .add((current, { ref }) => {
-            /* Value check and correct */
-            if (this.type === "numeric") {
-              if (current !== null && !is_number(current)) {
-                console.error("value:", current);
-                throw new Error(`Not a number.`);
-              }
-            } else {
-              if (typeof current === "string") {
-                current = current.trim();
-              }
-              ref.update(current === "" ? null : current, { silent: true });
-            }
-          })
-          .effects.add((current, { ref }) => {
-            /* Update UI */
-            super.value = current;
-          })
           .effects.add(
-            /* Validate and update message */
-            (current, { ref }) => {
+            /* Validate and set message state */
+            (change, { state }) => {
               this.setCustomValidity("");
               const pipe = [];
               /* required */
@@ -147,51 +119,39 @@ v.1.2
                 });
               }
 
-              this.states.main.$.message =
+              state.$.message =
                 (() => {
                   for (const validator of pipe) {
-                    const message = validator(current);
+                    const message = validator(change._value);
                     if (message) return message;
                   }
                 })() || null;
 
               this.checkValidity();
-            }
+            },
+            ["_value"]
+          )
+
+          .effects.add(
+            /* Set style */
+            (change, { state }) => {
+              this.classes.if(state.$.visited && state.$.message, "is-invalid");
+            },
+            ["message", "visited"]
           );
-        Object.freeze(this.#_.states);
 
         this.update({
           id: create_id(),
           /* Prevent browser default validation message */
           title: " ",
           ".form-control": true,
-          "@input": (event) => {
-            if (this.type === "numeric") {
-              if (!is_numeric(super.value)) {
-                /* Self-correct numeric input */
-                super.value = super.value.slice(0, -1);
-              }
-              /* Update state */
-              this.states.value.$ = this.#_.numchars.includes(super.value)
-                ? null
-                : Number(super.value.replace(",", "."));
-            } else {
-              /* Update state */
-              const value = super.value.trim();
-              this.states.value.$ = value === "" ? null : value;
-            }
-          },
           /* Set visisted on blur */
-          "@blur": (event) => (this.states.main.$.visited = true),
+          "@blur": (event) => (this.#_.states.main.$.visited = true),
         });
       }
 
-      /* Return state controllers.
-      NOTE Fully exposed; useful for wireing up complex components.
-      Exposure could have been limited, but hard encapsulation is already 
-      not achievable due to the option for direct DOM manipulation etc. */
-      get states() {
-        return this.#_.states;
+      get state() {
+        return this.#_.states.main;
       }
 
       /* Returns max constraint. */
@@ -233,7 +193,7 @@ v.1.2
 
       /* Returns valid state. */
       get valid() {
-        return !!this.attribute.message;
+        return this.state.$.valid;
       }
 
       /* Returns custom validators. */
@@ -249,30 +209,35 @@ v.1.2
         this.#_.validators = validators;
       }
 
-      /* Returns value state. */
-      get value() {
-        return this.states.value.$;
-      }
-
-      /* Sets value state. */
-      set value(value) {
-        this.states.value.$ = value;
-      }
-
       __init__() {
         super.__init__?.();
 
-        if (this.value === undefined) {
-          this.value = null;
-        }
+        /* Self-correct numeric input */
+        this.on.input = (event) => {
+          if (this.type === "numeric") {
+            if (!is_numeric(super.value)) {
+              super.value = super.value.slice(0, -1);
+            }
+          }
+        };
+
+        /* Set value state from input value */
+        this.on.input$run = (event) => {
+          if (this.type === "numeric") {
+            this.#_.states.main.$.value = this.#_.numchars.includes(super.value)
+              ? null
+              : Number(super.value.replace(",", "."));
+          } else {
+            const value = super.value.trim();
+            this.#_.states.main.$.value = value === "" ? null : value;
+          }
+        };
       }
     };
   };
 </script>
 
 <script example type="module">
- 
-
   const Input = await use("@/components/form/input.x.html");
 
   const uffe = Input({

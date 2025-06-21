@@ -15,7 +15,7 @@ const Input = await use("@/components/form/input.x.html");
 const uffe = Input({
   parent: document.body,
   name: "uffe",
-
+  //value: 'uff',
   required: true,
   validators: [
     (value) => {
@@ -26,9 +26,60 @@ const uffe = Input({
   ],
 });
 
-uffe.state.effects.add(
+//uffe.value = 'uff'
+
+uffe.states.main.effects.add(
+  (change) => {
+    //console.log("message:", change.message);
+  },
+  ["message"],
+  { run: true }
+);
+
+uffe.states.value.effects.add((current) => {
+  //console.log("value:", current);
+});
+
+const number = Input({
+  parent: document.body,
+  name: "number",
+  type: "numeric",
+  required: true,
+  value: 42
+});
+
+number.states.main.effects.add(
+  (change) => {
+    //console.log("message:", change.message);
+  },
+  ["message"],
+  { run: true }
+);
+
+number.states.value.effects.add((current) => {
+  //console.log("value:", current);
+},
+ { run: true }
+);
+
+const email = Input({
+    parent: document.body,
+    name: "email",
+    type: "email",
+    required: true,
+  });
+
+
+email.states.main.effects.add(
   (change) => {
     console.log("message:", change.message);
   },
-  ["message"], {run: true}
+  ["message"],
+  { run: true }
+);
+
+email.states.value.effects.add((current) => {
+  console.log("value:", current);
+},
+ { run: true }
 );

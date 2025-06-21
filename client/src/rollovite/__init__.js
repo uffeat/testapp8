@@ -335,6 +335,9 @@ app.maps
   })
 
   /* Add support for x.html */
+
+  /* TODO
+  Add support for additional "sub-types" dictated by script attr, e.g. sheet */
   .processors.add({
     "x.html": new Processor(
       async (result, { owner, path }) => {
@@ -372,18 +375,17 @@ app.maps
           assets[name] = html;
         }
 
-        /* NOTE Use `setup` attr to accommodate future uses of other scripts. 
+        /* NOTE Use `component` attr to accommodate future uses of other scripts. 
         Also, (to some degree) guards against collision with deployment 
         vendors' injection of scripts. */
-        const script = wrapper.find("script[setup]");
+        const script = wrapper.find("script[component]");
         if (script) {
           /* Create module */
           const module = await construct(
             `${script.textContent}\n//# sourceURL=${path.path}`
           );
 
-          if (wrapper.find("meta[component]")) {
-            /* Get cls */
+          /* Get cls */
             const cls = await module.default(assets);
             /* Create instance factory */
             const key = cls.__tag__
@@ -391,16 +393,16 @@ app.maps
               : `x-${path.stem.replaceAll("_", "-")}`;
             const factory = author(cls, key);
             /* Expose component assets */
-            Object.defineProperty(factory, "__assets__", {
-              configurable: false,
-              enumerable: true,
-              writable: false,
-              value: Object.freeze(assets),
-            });
+            if (Object.keys(assets)) {
+              Object.defineProperty(factory, "__assets__", {
+                configurable: false,
+                enumerable: true,
+                writable: false,
+                value: Object.freeze(assets),
+              });
+            }
+
             return factory;
-          } else {
-            return Object.freeze({ ...assets, ...module });
-          }
         } else {
           /* If no script, 'assets' becomes the result. This means that the 
           .x.html format can also be used to only declare sheet and template assets. */

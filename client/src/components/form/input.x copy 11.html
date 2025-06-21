@@ -1,17 +1,17 @@
 <!--
 const Input = await use("@/components/form/input.x.html");
-20250621
-v.1.2
+20250618
+v.1.1
 -->
 
 <script component type="module">
-  export default async (assets) => {
-    const { Ref, State } = await use("@/rollostate/");
-    const { is_number } = await use("@/rollotools/is/is_number.js");
-    const { is_numeric } = await use("@/rollotools/is/is_numeric.js");
-    const { base } = await use("@/rollocomponent/");
-    const { create_id } = await use("@/components/form/tools/id.js");
+  const { Ref, State } = await use("@/rollostate/");
+  const { is_number } = await use("@/rollotools/is/is_number.js");
+  const { is_numeric } = await use("@/rollotools/is/is_numeric.js");
+  const { base } = await use("@/rollocomponent/");
+  const { create_id } = await use("@/components/form/tools/id.js");
 
+  export default async (assets) => {
     return class extends base("input") {
       static __key__ = "rollo-input";
 
@@ -59,17 +59,20 @@ v.1.2
         }).effects
           .add((current, { ref }) => {
             /* Value check and correct */
-            if (this.type === "numeric") {
-              if (current !== null && !is_number(current)) {
-                console.error("value:", current);
-                throw new Error(`Not a number.`);
-              }
-            } else {
-              if (typeof current === "string") {
-                current = current.trim();
-              }
-              ref.update(current === "" ? null : current, { silent: true });
+            if (typeof current === "string") {
+              current = current.trim();
             }
+            if (this.type === "numeric") {
+              if (typeof current === "string") {
+                if (this.#_.numchars.includes(current)) {
+                  current = null;
+                } else {
+                  current = Number(current.replace(",", "."));
+                }
+              }
+            }
+
+            ref.update(current === "" ? null : current, { silent: true });
           })
           .effects.add((current, { ref }) => {
             /* Update UI */
@@ -166,20 +169,14 @@ v.1.2
           title: " ",
           ".form-control": true,
           "@input": (event) => {
+            /* Self-correct numeric input */
             if (this.type === "numeric") {
               if (!is_numeric(super.value)) {
-                /* Self-correct numeric input */
                 super.value = super.value.slice(0, -1);
               }
-              /* Update state */
-              this.states.value.$ = this.#_.numchars.includes(super.value)
-                ? null
-                : Number(super.value.replace(",", "."));
-            } else {
-              /* Update state */
-              const value = super.value.trim();
-              this.states.value.$ = value === "" ? null : value;
             }
+            /* Update state */
+            this.states.value.$ = super.value;
           },
           /* Set visisted on blur */
           "@blur": (event) => (this.states.main.$.visited = true),
@@ -271,8 +268,6 @@ v.1.2
 </script>
 
 <script example type="module">
- 
-
   const Input = await use("@/components/form/input.x.html");
 
   const uffe = Input({

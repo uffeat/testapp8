@@ -118,12 +118,12 @@ export class State {
     })();
 
     this.#_.$ = new Proxy(this, {
-      get: (target, key) => {
+      get: (target, k) => {
         /* NOTE Safe to use deep store */
-        return target.#_._.current[key];
+        return target.#_._.current[k];
       },
-      set: (target, key, value) => {
-        target.update({ [key]: value });
+      set: (target, k, v) => {
+        target.update({ [k]: v });
         return true;
       },
     });
