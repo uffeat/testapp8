@@ -1,8 +1,8 @@
 /*
 import { Ref } from "@/rollorstate/ref.js";
 const { Ref } = await use("@/rollorstate/ref.js");
-20250620
-v.1.0
+20250621
+v.1.1
 */
 
 /* Reactive state utility for primitive values. */
@@ -16,9 +16,13 @@ export class Ref {
     session: null,
   };
 
-  constructor({ initial, name, owner } = {}) {
+  constructor({ initial, name, owner, subscription, transform } = {}) {
     this.#_.name = name;
     this.#_.owner = owner;
+    this.#_.transform = transform;
+    if (subscription) {
+      this.bind(subscription);
+    }
 
     const ref = this;
 
@@ -35,6 +39,7 @@ export class Ref {
             (a) =>
               typeof a === "object" &&
               typeof a !== "function" &&
+              !a.call &&
               !Array.isArray(a)
           ) || {};
 
@@ -44,7 +49,9 @@ export class Ref {
             if (values) return (current) => values.includes(current);
           })();
 
-          const custom = args.find((a) => typeof a === "function");
+          const custom = args.find(
+            (a) => typeof a === "function" || (typeof a === "object" && a.call)
+          );
 
           if (values && !custom) return values;
 
@@ -72,13 +79,13 @@ export class Ref {
         if (options.run) {
           if (
             !condition ||
-            condition(ref.current, {
+            condition.call(ref, ref.current, {
               index: null,
               effect,
               ref,
             })
           ) {
-            effect(ref.current, {
+            effect.call(ref, ref.current, {
               effect,
               index: null,
               ref,
@@ -161,6 +168,53 @@ export class Ref {
     return this.#_.session;
   }
 
+  /* Returns subscription. */
+  get subscription() {
+    return this.#_.subscription;
+  }
+
+  /* NOTE 'transform' can be used to perform simply transformations, 
+  but can also be used as a "reducer", e.g., when the Ref instance is 
+  used as a 'State' effect, or when bound to a 'State' instance.  */
+
+  /* Returns transform function (if set). */
+  get transform() {
+    return this.#_.transform;
+  }
+
+  /* Sets transform function. */
+  set transform(transform) {
+    this.#_.transform = transform;
+  }
+
+  /* Binds ref to subscription (typically a State instance). */
+  bind(subscription, { run = false, transform } = {}) {
+    if (transform) {
+      this.#_.transform = transform;
+    }
+    if (this.#_.subscription) {
+      this.#_.subscription.effects.remove(this.call);
+    }
+    if (subscription) {
+      subscription.effects.add(this.call, { run });
+    }
+    this.#_.subscription = subscription;
+    return this;
+  }
+
+  /* Updates data and notifies effects. 
+  NOTE Allows Ref instances to be used as, e.g., effects/conditions for Ref 
+  and State instances enabling advanced reactive chains. */
+  call(...args) {
+    /* Transform */
+    if (this.transform) {
+      const value = this.transform.call(this, ...args);
+      if (value !== undefined) {
+        this.update(value);
+      }
+    }
+  }
+
   /* Updates data and notifies effects. Chainable. */
   update(value, { silent = false } = {}) {
     /* Abort, if undefined - by convention and for approximate consistency 
@@ -168,6 +222,7 @@ export class Ref {
     if (value === undefined) {
       return this;
     }
+
     if (this.#_.current !== value) {
       /* Update data */
       this.#_.previous = this.#_.current;
@@ -180,13 +235,13 @@ export class Ref {
           .forEach(([effect, { condition, once }], index) => {
             if (
               !condition ||
-              condition(this.current, {
+              condition.call(this, this.current, {
                 effect,
                 index,
                 ref: this,
               })
             ) {
-              effect(this.current, {
+              effect.call(this, this.current, {
                 effect,
                 index,
                 ref: this,

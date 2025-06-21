@@ -43,6 +43,7 @@ export class State {
             (a) =>
               typeof a === "object" &&
               typeof a !== "function" &&
+              !a.call &&
               !Array.isArray(a)
           ) || {};
 
@@ -56,7 +57,9 @@ export class State {
             }
           })();
 
-          const custom = args.find((a) => typeof a === "function");
+          const custom = args.find(
+            (a) => typeof a === "function" || (typeof a === "object" && a.call)
+          );
 
           if (keys && !custom) return keys;
 
@@ -84,13 +87,13 @@ export class State {
         if (options.run) {
           if (
             !condition ||
-            condition(state.change, {
+            condition.call(state, state.change, {
               index: null,
               effect,
               state,
             })
           ) {
-            effect(state.change, {
+            effect.call(state, state.change, {
               effect,
               index: null,
               state,
@@ -206,13 +209,13 @@ export class State {
       ] of this.#_.registries.effects.entries()) {
         if (
           !condition ||
-          condition(this.change, {
+          condition.call(this, this.change, {
             effect,
             index,
             state: this,
           })
         ) {
-          effect(this.change, {
+          effect.call(this, this.change, {
             effect,
             index,
             state: this,
