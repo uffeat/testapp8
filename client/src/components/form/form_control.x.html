@@ -1,0 +1,168 @@
+<!--
+const FormControl = await use("@/components/form/form_control.x.html");
+20250621
+v.1.0
+-->
+
+<style global name="main">
+  rollo-form-control p,
+  rollo-form-control p::after {
+    font-size: 0.9rem;
+    padding-top: 0.25rem;
+    visibility: hidden;
+  }
+
+  /* Prevent vertical shifts, when no message. */
+  rollo-form-control p::after {
+    content: "X";
+  }
+
+  /* Correct Bootstrap standard, where label brushes against border in the 
+  upper position. */
+  rollo-form-control label {
+    margin-left: var(--marginLeft, 0.25rem);
+  }
+
+  /* Soft error-styling of message, if required, empty and non-visited. */
+  rollo-form-control:has(input:required[empty]:not([visited])) p {
+    visibility: visible;
+    color: var(--bs-light);
+  }
+
+  /* Hard error-styling of message, if visited. */
+  rollo-form-control:has(input[visited]) p {
+    visibility: visible;
+    color: var(--bs-form-invalid-color);
+  }
+</style>
+
+<script component type="module">
+  /* TODO
+  - Textarea
+
+  */
+  export default async (assets) => {
+    const { base, component } = await use("@/rollocomponent/");
+    const Input = await use("@/components/form/input.x.html");
+
+    const cls = class extends base() {
+      #_ = {
+        tree: {},
+      };
+
+      constructor() {
+        super();
+        this.classes.add("form-floating");
+      }
+
+      __new__() {
+        super.__new__?.();
+        this.#_.tree.input = Input({ placeholder: " " });
+        this.#_.tree.label = component.label({ for_: this.#_.tree.input.id });
+        this.#_.tree.message = component.p();
+        this.append(
+          this.tree.input,
+          this.tree.label,
+          this.tree.message
+        );
+
+        this.tree.input.states.main.effects.add(
+          (change) => {
+            this.tree.message.text = change.message;
+          },
+          ["message"]
+        );
+      }
+
+      /* Returns label text. */
+      get label() {
+        return this.tree.label.text || null;
+      }
+
+      /* Sets label text. */
+      set label(label) {
+        this.tree.label.text = label;
+      }
+
+      /* Returns tree. */
+      get tree() {
+        return this.#_.tree;
+      }
+
+      /* Returns valid state. */
+      get valid() {
+        return this.tree.input.valid;
+      }
+
+      /* Validates, updates message and returns valid state */
+      validate() {
+        return this.tree.input.validate();
+      }
+
+      __init__() {
+        super.__init__?.();
+
+        this.validate();
+      }
+    };
+
+    [
+      "max",
+      "min",
+      "name",
+      "pattern",
+      "required",
+      "type",
+      "validators",
+      "value",
+    ].forEach((key) => {
+      Object.defineProperty(cls.prototype, key, {
+        configurable: true,
+        enumerable: false,
+        get: function () {
+          return this.tree.input[key];
+        },
+        set: function (value) {
+          this.tree.input[key] = value;
+        },
+      });
+    });
+
+    return cls;
+  };
+</script>
+
+<script example type="module">
+  const FormControl = await use("@/components/form/form_control.x.html");
+
+  const uffe = FormControl({
+    parent: document.body,
+    name: "uffe",
+    //value: 'uff',
+    required: true,
+    validators: [
+      (value) => {
+        if (value !== "uffe") {
+          return "Not uffe";
+        }
+      },
+    ],
+  });
+
+  //uffe.value = 'uff'
+
+  uffe.states.main.effects.add(
+    (change) => {
+      console.log("message:", change.message);
+    },
+    ["message"],
+    { run: true }
+  );
+
+  uffe.states.value.effects.add(
+    (current) => {
+      console.log("value:", current);
+    },
+    { run: true }
+  );
+</script>

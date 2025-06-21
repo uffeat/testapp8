@@ -388,9 +388,9 @@ app.maps
           /* Get cls */
             const cls = await module.default(assets);
             /* Create instance factory */
-            const key = cls.__tag__
-              ? cls.__tag__
-              : `x-${path.stem.replaceAll("_", "-")}`;
+            const key = cls.__key__
+              ? cls.__key__
+              : `rollo-${path.stem.replaceAll("_", "-")}`;
             const factory = author(cls, key);
             /* Expose component assets */
             if (Object.keys(assets)) {
