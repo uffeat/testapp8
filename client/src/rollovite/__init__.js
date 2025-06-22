@@ -356,6 +356,13 @@ app.maps
             sheet.adopt(document);
           }
         }
+        /* Unnamed global sheets */
+        for (const element of wrapper.querySelectorAll(
+          "style[global]:not([name])"
+        )) {
+          new Sheet(element.textContent).adopt(document);
+        }
+
         /* Sheets from src 
         NOTE Injected as classic link-sheets. Not applicable to shadows
         and not included in 'assets'. */
@@ -386,23 +393,14 @@ app.maps
           );
 
           /* Get cls */
-            const cls = await module.default(assets);
-            /* Create instance factory */
-            const key = cls.__key__
-              ? cls.__key__
-              : `rollo-${path.stem.replaceAll("_", "-")}`;
-            const factory = author(cls, key);
-            /* Expose component assets */
-            if (Object.keys(assets)) {
-              Object.defineProperty(factory, "__assets__", {
-                configurable: false,
-                enumerable: true,
-                writable: false,
-                value: Object.freeze(assets),
-              });
-            }
+          const cls = await module.default(assets);
+          /* Create instance factory */
+          const key = cls.__key__
+            ? cls.__key__
+            : `rollo-${path.stem.replaceAll("_", "-")}`;
+          const factory = author(cls, key);
 
-            return factory;
+          return factory;
         } else {
           /* If no script, 'assets' becomes the result. This means that the 
           .x.html format can also be used to only declare sheet and template assets. */

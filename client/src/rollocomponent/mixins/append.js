@@ -16,7 +16,7 @@ export default (parent, config) => {
 
     /* Prepends children. Chainable. */
     prepend(...children) {
-      super.append(...children);
+      super.prepend(...children);
       return this;
     }
   };

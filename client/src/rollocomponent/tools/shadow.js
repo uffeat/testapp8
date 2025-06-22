@@ -46,19 +46,19 @@ const cls = class extends mix(
   attrs,
   classes,
   clear,
-  components,
+  //components,
   connect,
   find,
   handlers,
   hooks,
-  host,
+  //host,
   insert,
-  key,
+  //key,
   parent,
   props,
   send,
-  setup,
-  state,
+  //setup,
+  //state,
   style,
   super_,
   tab,
@@ -84,6 +84,13 @@ const cls = class extends mix(
 
       get owner() {
         return this.#_.owner;
+      }
+
+      get(name) {
+        if (name) {
+          return this.#_.owner.querySelector(`slot[name="${name}"]`);
+        }
+        return this.#_.owner.querySelector(`slot:not([name])`);
       }
 
       has(name) {

@@ -4,7 +4,18 @@ const FormControl = await use("@/components/form/form_control.x.html");
 v.1.0
 -->
 
-<style global name="main">
+<style global>
+  /* . */
+  rollo-form-control {
+    display: block;
+  }
+
+  /* Correct Bootstrap standard, where label brushes against border in the 
+  upper position. */
+  rollo-form-control label {
+    margin-left: var(--marginLeft, 0.25rem);
+  }
+
   rollo-form-control p,
   rollo-form-control p::after {
     font-size: 0.9rem;
@@ -17,57 +28,78 @@ v.1.0
     content: "X";
   }
 
-  /* Correct Bootstrap standard, where label brushes against border in the 
-  upper position. */
-  rollo-form-control label {
-    margin-left: var(--marginLeft, 0.25rem);
-  }
-
   /* Soft error-styling of message, if required, empty and non-visited. */
-  rollo-form-control:has(input:required[empty]:not([visited])) p {
+  rollo-form-control:has([input]:required[empty]:not([visited])) p {
     visibility: visible;
     color: var(--bs-light);
   }
 
   /* Hard error-styling of message, if visited. */
-  rollo-form-control:has(input[visited]) p {
+  rollo-form-control:has([input][visited]) p {
     visibility: visible;
     color: var(--bs-form-invalid-color);
   }
 </style>
 
+
+
 <script component type="module">
   export default async (assets) => {
+    const { bootstrap } = await use("@/rollolibs/bootstrap/bootstrap.js");
     const { base, component } = await use("@/rollocomponent/");
     const Input = await use("@/components/form/input.x.html");
     const Textarea = await use("@/components/form/textarea.x.html");
 
     const cls = class extends base() {
       #_ = {
-        tree: {},
+        slots: {
+          message: component.slot({ name: "message" }),
+          start: component.slot({ name: "start", display: "none" }),
+        },
+        tree: {
+          message: component.p({ slot: "message" })
+        },
       };
 
       constructor() {
         super();
-        this.classes.add("form-floating");
+        this.classes.add("input-group");
+        this.shadow.append(...Object.values(this.#_.slots));
       }
 
       __new__({ updates } = {}) {
         super.__new__?.();
 
-        this.#_.type =  updates.type || 'text'
+        this.#_.type = updates.type || "text";
         delete updates.type;
         if (this.#_.type === "textarea") {
-          this.#_.tree.input = Textarea();
+          this.tree.input = Textarea();
         } else {
-          this.#_.tree.input = Input({type: this.#_.type});
+          this.tree.input = Input({ type: this.#_.type });
         }
 
-        this.#_.tree.input.placeholder = " ";
+        this.tree.input.placeholder = " ";
+        this.tree.input.attribute.input = true;
 
-        this.#_.tree.label = component.label({ for_: this.#_.tree.input.id });
-        this.#_.tree.message = component.p();
-        this.append(this.tree.input, this.tree.label, this.tree.message);
+        this.tree.label = component.label({
+          for_: this.tree.input.id,
+        });
+
+     
+
+        this.#_.slots.start.on.slotchange = (event) => {
+          const _component = this.find(`[slot="start"]`);
+            if (_component) {
+              this.prepend(_component.classes.add("input-group-text"));
+            }
+        };
+
+        
+
+        this.append(
+          component.div("form-floating", this.tree.input, this.tree.label),
+          this.tree.message
+        );
 
         this.tree.input.states.main.effects.add(
           (change) => {
@@ -92,9 +124,9 @@ v.1.0
         return this.#_.tree;
       }
 
+      /* Returns type. */
       get type() {
-        this.#_.type
-
+        this.#_.type;
       }
 
       /* Returns valid state. */
@@ -107,10 +139,11 @@ v.1.0
         return this.tree.input.validate();
       }
 
+      /*
       update(updates = {}) {
-
         super.update?.(updates);
       }
+        */
 
       __init__() {
         super.__init__?.();
@@ -160,5 +193,19 @@ v.1.0
         }
       },
     ],
+  }, 
+  component.span({slot: 'start'}, '@')
+  );
+
+
+  const notes = FormControl({
+    parent: document.body,
+    type: 'textarea',
+    label: "Notes",
+    name: "notes",
+    required: true,
+    
   });
+
+
 </script>

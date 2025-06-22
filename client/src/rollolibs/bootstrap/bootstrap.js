@@ -6,8 +6,6 @@ v.1.0
 */
 
 import { Sheet } from "@/rollosheet/tools/sheet.js";
-import text from "@/libs/bootstrap/bootstrap.css?raw";
+import text from "@/rollolibs/bootstrap/_src/bootstrap.css?raw";
 
-export const bootstrap = new Sheet(text)
-
-
+export const bootstrap = new Sheet(text, { name: "bootstrap" });

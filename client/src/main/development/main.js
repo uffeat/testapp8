@@ -10,32 +10,4 @@ console.info("Vite environment:", import.meta.env.MODE);
 
 document.querySelector("html").dataset.bsTheme = "dark";
 
-const FormControl = await use("@/components/form/form_control.x.html");
-
-  const uffe = FormControl({
-    parent: document.body,
-    label: "Uffe",
-    name: "uffe",
-    //value: 'uff',
-    required: true,
-    validators: [
-      (value) => {
-        if (value !== "uffe") {
-          return "Not uffe";
-        }
-      },
-    ],
-  });
-
-
-  const notes = FormControl({
-    parent: document.body,
-    type: 'textarea',
-    label: "Notes",
-    name: "notes",
-   
-    required: true,
-    
-  });
-
-
+import { component } from "@/rollocomponent/component.js";
