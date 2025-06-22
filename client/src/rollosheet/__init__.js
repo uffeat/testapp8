@@ -1,6 +1,6 @@
 /*
-import { Sheet } from "@/rollosheet/__init__.js";
-const { Sheet } = await use("@/rollosheet/");
+import { Sheet, Sheets } from "@/rollosheet/__init__.js";
+const { Sheet, Sheets } = await use("@/rollosheet/");
 */
 
 

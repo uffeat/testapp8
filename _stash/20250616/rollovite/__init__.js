@@ -4,7 +4,12 @@ import "@/rollovite/__init__.js";
 v.5.0
 */
 
-/* Do NOT import anything from outside 'rollovite' */
+//
+import { author } from "@/rollocomponent/tools/author.js";
+import { component } from "@/rollocomponent/component.js";
+import { Sheet } from "@/rollosheet/tools/sheet.js";
+//
+
 import { assets } from "@/rollovite/_tools/assets.js";
 import { construct } from "@/rollovite/_tools/construct.js";
 import { ImportMap } from "@/rollovite/_tools/import_map.js";
@@ -187,7 +192,7 @@ app.maps
         "/src/**/*.js",
 
         //"/src/rollocomponent/**/*.js",//
-        
+        //"/src/rollobs/**/*.js", //
 
         "!/src/main.js",
         "!/src/assets/**/*.*",
@@ -338,9 +343,6 @@ app.maps
   .processors.add({
     "x.html": new Processor(
       async (result, { owner, path }) => {
-        const { author, component } = await owner.import("@/rollocomponent/");
-        const { Sheet } = await owner.import("@/rollosheet/");
-
         const wrapper = component.div({ innerHTML: result });
         /* Build assets */
         const assets = {};

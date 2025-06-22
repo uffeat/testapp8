@@ -1,13 +1,12 @@
 /*
-const input = await use("@/components/form/mixins/input.js");
-import input from "@/components/form/mixins/input.js";
+const input = await use("/components/form/mixins/input.js");
 20250621
 v.1.0
 */
-import { Ref, State } from "@/rollostate/__init__.js";
-import { is_number } from "@/rollotools/is/is_number.js";
-import { is_numeric } from "@/rollotools/is/is_numeric.js";
-import { create_id } from "@/components/form/tools/id.js";
+const { Ref, State } = await use("@/rollostate/");
+const { is_number } = await use("@/rollotools/is/is_number.js");
+const { is_numeric } = await use("@/rollotools/is/is_numeric.js");
+const { create_id } = await use("/components/form/tools/id.js");
 
 export default (parent, config) => {
   return class extends parent {
@@ -83,7 +82,7 @@ export default (parent, config) => {
 
       this.update({
         id: create_id(),
-        '[rollo': true,
+        "[rollo": true,
         /* Prevent browser default validation message */
         title: " ",
         ".form-control": true,
@@ -93,18 +92,16 @@ export default (parent, config) => {
         },
       });
 
-      if (this.tagName === 'INPUT') {
+      if (this.tagName === "INPUT") {
         this.on.input = (event) => {
-        if (this.type === "numeric") {
-          if (!is_numeric(super.value)) {
-            /* Self-correct numeric input */
-            super.value = super.value.slice(0, -1);
+          if (this.type === "numeric") {
+            if (!is_numeric(super.value)) {
+              /* Self-correct numeric input */
+              super.value = super.value.slice(0, -1);
+            }
           }
-        }
-      };
+        };
       }
-
-      
 
       this.on.input = (event) => {
         if (this.type === "numeric") {

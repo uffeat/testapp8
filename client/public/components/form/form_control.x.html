@@ -1,5 +1,5 @@
 <!--
-const FormControl = await use("@/components/form/form_control.x.html");
+const FormControl = await use("/components/form/form_control.x.html");
 20250621
 v.1.0
 -->
@@ -8,6 +8,12 @@ v.1.0
   /* . */
   rollo-form-control {
     display: block;
+  }
+
+  rollo-form-control .form-floating {
+  }
+
+  rollo-form-control input {
   }
 
   /* Correct Bootstrap standard, where label brushes against border in the 
@@ -29,77 +35,44 @@ v.1.0
   }
 
   /* Soft error-styling of message, if required, empty and non-visited. */
-  rollo-form-control:has([input]:required[empty]:not([visited])) p {
+  rollo-form-control:has(input:required[empty]:not([visited])) p {
     visibility: visible;
     color: var(--bs-light);
   }
 
   /* Hard error-styling of message, if visited. */
-  rollo-form-control:has([input][visited]) p {
+  rollo-form-control:has(input[visited]) p {
     visibility: visible;
     color: var(--bs-form-invalid-color);
   }
 </style>
 
-
-
 <script component type="module">
   export default async (assets) => {
-    const { bootstrap } = await use("@/rollolibs/bootstrap/bootstrap.js");
     const { base, component } = await use("@/rollocomponent/");
-    const Input = await use("@/components/form/input.x.html");
-    const Textarea = await use("@/components/form/textarea.x.html");
+    const Input = await use("/components/form/input.x.html");
 
     const cls = class extends base() {
       #_ = {
         slots: {
-          message: component.slot({ name: "message" }),
           start: component.slot({ name: "start", display: "none" }),
         },
         tree: {
-          message: component.p({ slot: "message" })
+          message: component.p(),
         },
       };
 
       constructor() {
         super();
-        this.classes.add("input-group");
-        this.shadow.append(...Object.values(this.#_.slots));
-      }
+       
+        this.shadow.append(this.#_.slots.start);
 
-      __new__({ updates } = {}) {
-        super.__new__?.();
-
-        this.#_.type = updates.type || "text";
-        delete updates.type;
-        if (this.#_.type === "textarea") {
-          this.tree.input = Textarea();
-        } else {
-          this.tree.input = Input({ type: this.#_.type });
-        }
-
-        this.tree.input.placeholder = " ";
-        this.tree.input.attribute.input = true;
+        this.tree.input = Input({ placeholder: " " });
 
         this.tree.label = component.label({
           for_: this.tree.input.id,
+         
         });
-
-     
-
-        this.#_.slots.start.on.slotchange = (event) => {
-          const _component = this.find(`[slot="start"]`);
-            if (_component) {
-              this.prepend(_component.classes.add("input-group-text"));
-            }
-        };
-
-        
-
-        this.append(
-          component.div("form-floating", this.tree.input, this.tree.label),
-          this.tree.message
-        );
 
         this.tree.input.states.main.effects.add(
           (change) => {
@@ -107,6 +80,32 @@ v.1.0
           },
           ["message"]
         );
+
+        
+      }
+
+      __new__() {
+        super.__new__?.();
+
+        const group = component.div(
+            "input-group",
+            component.div("form-floating", this.tree.input, this.tree.label),
+            
+          )
+
+
+        this.append(
+          group,
+          this.tree.message
+        );
+
+
+        this.#_.slots.start.on.slotchange = (event) => {
+          const _component = this.find(`[slot="start"]`);
+            if (_component) {
+              group.prepend(_component.classes.add("input-group-text"));
+            }
+        };
       }
 
       /* Returns label text. */
@@ -124,11 +123,6 @@ v.1.0
         return this.#_.tree;
       }
 
-      /* Returns type. */
-      get type() {
-        this.#_.type;
-      }
-
       /* Returns valid state. */
       get valid() {
         return this.tree.input.valid;
@@ -139,15 +133,8 @@ v.1.0
         return this.tree.input.validate();
       }
 
-      /*
-      update(updates = {}) {
-        super.update?.(updates);
-      }
-        */
-
       __init__() {
         super.__init__?.();
-
         this.validate();
       }
     };
@@ -158,6 +145,7 @@ v.1.0
       "name",
       "pattern",
       "required",
+      "type",
       "validators",
       "value",
     ].forEach((key) => {
@@ -180,32 +168,21 @@ v.1.0
 <script example type="module">
   const FormControl = await use("@/components/form/form_control.x.html");
 
-  const uffe = FormControl({
-    parent: document.body,
-    label: "Uffe",
-    name: "uffe",
-    //value: 'uff',
-    required: true,
-    validators: [
-      (value) => {
-        if (value !== "uffe") {
-          return "Not uffe";
-        }
-      },
-    ],
-  }, 
-  component.span({slot: 'start'}, '@')
+  const uffe = FormControl(
+    {
+      parent: document.body,
+      label: "Uffe",
+      name: "uffe",
+      //value: 'uff',
+      required: true,
+      validators: [
+        (value) => {
+          if (value !== "uffe") {
+            return "Not uffe";
+          }
+        },
+      ],
+    },
+    component.span({ slot: "start" }, "@")
   );
-
-
-  const notes = FormControl({
-    parent: document.body,
-    type: 'textarea',
-    label: "Notes",
-    name: "notes",
-    required: true,
-    
-  });
-
-
 </script>

@@ -1,5 +1,6 @@
 /*
-const { Base, author, component, mix, mixins } = await use("@/rollocomponent/");
+const { State, author, base, component, mix, mixins } = await use("@/rollocomponent/");
+import { State, author, base, component, mix, mixins } from "@/rollocomponent/__init__.js";
 20250602
 v.2.0
 
@@ -13,8 +14,8 @@ components the same API as the basic Rollo components.
 */
 
 export { State } from "@/rollostate/state.js";
-export { base } from "@/rollocomponent/tools/base.js";
 export { author } from "@/rollocomponent/tools/author.js";
+export { base } from "@/rollocomponent/tools/base.js";
 export { component } from "@/rollocomponent/component.js";
 export { mix } from "@/rollocomponent/tools/mix.js";
 export { mixins } from "@/rollocomponent/mixins/__init__.js";
