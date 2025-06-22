@@ -10,6 +10,8 @@ v.1.0
     display: block;
   }
 
+
+
   /* Correct Bootstrap standard, where label brushes against border in the 
   upper position. */
   rollo-form-control label {
@@ -41,58 +43,32 @@ v.1.0
   }
 </style>
 
-
-
 <script component type="module">
   export default async (assets) => {
-    
     const { base, component } = await use("@/rollocomponent/");
     const Input = await use("/components/form/input.x.html");
-   
 
     const cls = class extends base() {
       #_ = {
         slots: {
-          message: component.slot({ name: "message" }),
           start: component.slot({ name: "start", display: "none" }),
         },
         tree: {
-         
-          message: component.p({ slot: "message" }),
+          message: component.p(),
         },
       };
 
       constructor() {
         super();
-        this.classes.add("input-group");
-        this.shadow.append(this.#_.slots.message, this.#_.slots.start);
+       
+        this.shadow.append(this.#_.slots.start);
 
-        this.tree.input = Input({placeholder: ''})
+        this.tree.input = Input({ placeholder: " " });
 
-       this.tree.label = component.label({
+        this.tree.label = component.label({
           for_: this.tree.input.id,
+         
         });
-
-
-
-      }
-
-      __new__() {
-        super.__new__?.();
-
-        this.#_.slots.start.on.slotchange = (event) => {
-          const _component = this.find(`[slot="start"]`);
-            if (_component) {
-              this.prepend(_component.classes.add("input-group-text"));
-            }
-        };
-
-        
-
-        this.append(
-          component.div("form-floating", this.tree.input, this.tree.label),
-          this.tree.message
-        );
 
         this.tree.input.states.main.effects.add(
           (change) => {
@@ -100,6 +76,32 @@ v.1.0
           },
           ["message"]
         );
+
+        
+      }
+
+      __new__() {
+        super.__new__?.();
+
+        const group = component.div(
+            "input-group",
+            component.div("form-floating", this.tree.input, this.tree.label),
+            
+          )
+
+
+        this.append(
+          group,
+          this.tree.message
+        );
+
+
+        this.#_.slots.start.on.slotchange = (event) => {
+          const _component = this.find(`[slot="start"]`);
+            if (_component) {
+              group.prepend(_component.classes.add("input-group-text"));
+            }
+        };
       }
 
       /* Returns label text. */
@@ -117,11 +119,6 @@ v.1.0
         return this.#_.tree;
       }
 
-      /* Returns type. */
-      get type() {
-        this.#_.type;
-      }
-
       /* Returns valid state. */
       get valid() {
         return this.tree.input.valid;
@@ -132,10 +129,8 @@ v.1.0
         return this.tree.input.validate();
       }
 
-      
       __init__() {
         super.__init__?.();
-
         this.validate();
       }
     };
@@ -164,4 +159,26 @@ v.1.0
 
     return cls;
   };
+</script>
+
+<script example type="module">
+  const FormControl = await use("@/components/form/form_control.x.html");
+
+  const uffe = FormControl(
+    {
+      parent: document.body,
+      label: "Uffe",
+      name: "uffe",
+      //value: 'uff',
+      required: true,
+      validators: [
+        (value) => {
+          if (value !== "uffe") {
+            return "Not uffe";
+          }
+        },
+      ],
+    },
+    component.span({ slot: "start" }, "@")
+  );
 </script>

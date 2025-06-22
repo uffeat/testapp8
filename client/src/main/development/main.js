@@ -16,7 +16,7 @@ const FormControl = await use("/components/form/form_control.x.html");
 
 const uffe = FormControl({
     parent: document.body,
-    label: "Uffe",
+    label: "Your name",
     name: "uffe",
     //value: 'uff',
     required: true,

@@ -10,12 +10,6 @@ v.1.0
     display: block;
   }
 
-  rollo-form-control .form-floating {
-  }
-
-  rollo-form-control input {
-  }
-
   /* Correct Bootstrap standard, where label brushes against border in the 
   upper position. */
   rollo-form-control label {
@@ -57,23 +51,35 @@ v.1.0
         slots: {
           start: component.slot({ name: "start", display: "none" }),
         },
-        tree: {
-          message: component.p(),
-        },
+        tree: {},
       };
 
       constructor() {
         super();
-       
         this.shadow.append(this.#_.slots.start);
+      }
 
-        this.tree.input = Input({ placeholder: " " });
+      __new__() {
+        super.__new__?.();
 
-        this.tree.label = component.label({
-          for_: this.tree.input.id,
-         
-        });
+        /* Build tree */
+        this.append(
+          component.div(
+            "input-group",
+            component.div(
+              "form-floating",
+              Input({ placeholder: " " }, (input) => (this.tree.input = input)),
+              component.label(
+                { for_: this.tree.input.id },
+                (label) => (this.tree.label = label)
+              )
+            ),
+            (group) => (this.tree.group = group)
+          ),
+          component.p((message) => (this.tree.message = message))
+        );
 
+        /* Wire up message*/
         this.tree.input.states.main.effects.add(
           (change) => {
             this.tree.message.text = change.message;
@@ -81,30 +87,12 @@ v.1.0
           ["message"]
         );
 
-        
-      }
-
-      __new__() {
-        super.__new__?.();
-
-        const group = component.div(
-            "input-group",
-            component.div("form-floating", this.tree.input, this.tree.label),
-            
-          )
-
-
-        this.append(
-          group,
-          this.tree.message
-        );
-
-
+        /* Move component added to start slot */
         this.#_.slots.start.on.slotchange = (event) => {
           const _component = this.find(`[slot="start"]`);
-            if (_component) {
-              group.prepend(_component.classes.add("input-group-text"));
-            }
+          if (_component) {
+            this.tree.group.prepend(_component.classes.add("input-group-text"));
+          }
         };
       }
 
