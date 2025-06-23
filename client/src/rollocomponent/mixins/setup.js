@@ -16,12 +16,12 @@ export default (parent, config) => {
 
     /* Sets setup method. */
     set __setup__(setup) {
+      this.#_.setup = setup
       if (setup) {
-        this.#_.setup = setup.bind(this);
         this.setAttribute('setup', '')
       } else {
         this.removeAttribute('setup')
-        this.#_.setup = null
+        
       }
     }
 

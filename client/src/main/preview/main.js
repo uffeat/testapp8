@@ -12,9 +12,23 @@ console.info("Vercel environment:", import.meta.env.VERCEL_ENV);
 document.querySelector("html").dataset.bsTheme = "dark";
 
 
-const Foo = await use("@/components/foo.x.html");
-const foo = Foo({ parent: document.body });
+import { component } from "@/rollocomponent/component.js";
 
-const FooP = await use("/components/foo.x.html");
-const foop = FooP({ parent: document.body });
+const InputControl = await use("/components/form/input_control.x.html");
 
+const uffe = InputControl(
+  {
+    parent: document.body,
+    label: "Your name",
+    name: "uffe",
+    required: true,
+    validators: [
+      (value) => {
+        if (value !== "uffe") {
+          return "Not uffe";
+        }
+      },
+    ],
+  },
+  component.span({ slot: "start" }, "@")
+);

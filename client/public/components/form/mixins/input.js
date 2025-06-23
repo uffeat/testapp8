@@ -12,14 +12,13 @@ export default (parent, config) => {
   return class extends parent {
     #_ = {
       numchars: ["", "-", ".", ","],
-      states: {},
     };
 
     constructor() {
       super();
       /* State slice to manage "message" and "visited"
         NOTE Using 'State', since combined-value effect is required. */
-      this.#_.states.main = new State({
+      this.states.main = new State({
         name: "main",
         owner: this,
       }).effects
@@ -49,7 +48,7 @@ export default (parent, config) => {
 
       /* State slice to manage "value".
         NOTE Separate slice, since updates "message" */
-      this.#_.states.value = new Ref({
+      this.states.value = new Ref({
         name: "value",
         owner: this,
       }).effects
@@ -78,7 +77,8 @@ export default (parent, config) => {
         .effects.add((current, { ref }) => {
           this.validate();
         });
-      Object.freeze(this.#_.states);
+
+      Object.freeze(this.states);
 
       this.update({
         id: create_id(),
@@ -121,14 +121,6 @@ export default (parent, config) => {
       super.__new__?.();
     }
 
-    /* Return state controllers.
-      NOTE Fully exposed; useful for wireing up complex components.
-      Exposure could have been limited, but hard encapsulation is already 
-      not achievable due to the option for direct DOM manipulation etc. */
-    get states() {
-      return this.#_.states;
-    }
-
     /* Returns max constraint. */
     get max() {
       return this.#_.max;
@@ -151,7 +143,8 @@ export default (parent, config) => {
 
     /* Returns valid state. */
     get valid() {
-      return !!this.attribute.message;
+      return this.checkValidity();
+      //return !!this.attribute.message;
     }
 
     /* Returns custom validators. */

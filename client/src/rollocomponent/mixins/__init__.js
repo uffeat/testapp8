@@ -11,6 +11,7 @@ import classes from "@/rollocomponent/mixins/classes.js";
 import clear from "@/rollocomponent/mixins/clear.js";
 import components from "@/rollocomponent/mixins/components.js";
 import connect from "@/rollocomponent/mixins/connect.js";
+import detail from "@/rollocomponent/mixins/detail.js";
 import effect from "@/rollocomponent/mixins/effect.js";
 import find from "@/rollocomponent/mixins/find.js";
 import for_ from "@/rollocomponent/mixins/for_.js";
@@ -25,12 +26,15 @@ import props from "@/rollocomponent/mixins/props.js";
 import send from "@/rollocomponent/mixins/send.js";
 import setup from "@/rollocomponent/mixins/setup.js";
 import shadow from "@/rollocomponent/mixins/shadow.js";
-import state from "@/rollocomponent/mixins/state.js";
+import states from "@/rollocomponent/mixins/states.js";
 import style from "@/rollocomponent/mixins/style.js";
 import super_ from "@/rollocomponent/mixins/super_.js";
 import tab from "@/rollocomponent/mixins/tab.js";
 import text from "@/rollocomponent/mixins/text.js";
+import tree from "@/rollocomponent/mixins/tree.js";
 import vars from "@/rollocomponent/mixins/vars.js";
+
+
 
 // TODO Build from import map
 
@@ -42,6 +46,7 @@ export const mixins = Object.freeze({
   clear,
   components,
   connect,
+  detail,
   effect,
   find,
   for_,
@@ -56,10 +61,11 @@ export const mixins = Object.freeze({
   send,
   setup,
   shadow,
-  state,
+  states,
   style,
   super_,
   tab,
   text,
+  tree,
   vars,
 });

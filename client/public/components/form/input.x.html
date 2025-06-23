@@ -10,19 +10,9 @@ v.1.2
     const input = (await use("/components/form/mixins/input.js")).default;
 
     return class extends mix(base("input"), {}, input) {
-      
-
       #_ = {
         types: ["email", "numeric", "password", "search", "tel", "text", "url"],
       };
-
-      constructor() {
-        super();
-      }
-
-      __new__() {
-        super.__new__?.();
-      }
 
       /* Returns type. */
       get type() {
@@ -39,10 +29,6 @@ v.1.2
           type = "text";
         }
         super.type = type;
-      }
-
-      __init__() {
-        super.__init__?.();
       }
     };
   };

@@ -29,7 +29,7 @@ import parent from "@/rollocomponent/mixins/parent.js";
 import props from "@/rollocomponent/mixins/props.js";
 import send from "@/rollocomponent/mixins/send.js";
 import setup from "@/rollocomponent/mixins/setup.js";
-import state from "@/rollocomponent/mixins/state.js";
+import state from "@/rollocomponent/mixins/states.js";
 import style from "@/rollocomponent/mixins/style.js";
 import super_ from "@/rollocomponent/mixins/super_.js";
 import tab from "@/rollocomponent/mixins/tab.js";

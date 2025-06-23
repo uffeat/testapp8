@@ -11,14 +11,14 @@ console.info("Vite environment:", import.meta.env.MODE);
 document.querySelector("html").dataset.bsTheme = "dark";
 
 import { component } from "@/rollocomponent/component.js";
-//import Input from "/components/form/input.js";
-const FormControl = await use("/components/form/form_control.x.html");
 
-const uffe = FormControl({
+const InputControl = await use("/components/form/input_control.x.html");
+
+const uffe = InputControl(
+  {
     parent: document.body,
     label: "Your name",
     name: "uffe",
-    //value: 'uff',
     required: true,
     validators: [
       (value) => {
@@ -27,6 +27,6 @@ const uffe = FormControl({
         }
       },
     ],
-  }, 
-  component.span({slot: 'start'}, '@')
-  );
+  },
+  component.span({ slot: "start" }, "@")
+);

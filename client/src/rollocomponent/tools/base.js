@@ -15,17 +15,19 @@ export const base = (native, ...__mixins) => {
     mixins.clear,
     mixins.components,
     mixins.connect,
+    mixins.detail,
+    mixins.effect,
     mixins.find,
     mixins.handlers,
     mixins.hooks,
-    //mixins.host,//
+    mixins.host,
     mixins.insert,
-    //mixins.key,//
+    mixins.key,
     mixins.parent,
     mixins.props,
     mixins.send,
-    //mixins.setup,//
-    //mixins.state,//
+    mixins.setup,
+    mixins.states,
     mixins.style,
     mixins.super_,
     mixins.tab,
@@ -68,6 +70,7 @@ export const base = (native, ...__mixins) => {
       {},
       mixins.shadow,
       mixins.text,
+      mixins.tree,
       ..._mixins
     ) {
       constructor() {

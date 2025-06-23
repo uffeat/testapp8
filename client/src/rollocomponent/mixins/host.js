@@ -11,13 +11,16 @@ export default (parent, config) => {
 
     /* Returns 'host'. */
     get host() {
+      if (this.#_.host && this.#_.host instanceof HTMLElement) {
+        return this.#_.host
+      }
       return this.closest("[host]");
     }
 
     /* Sets component's 'host' status. */
     set host(host) {
       this.#_.host = host;
-      if (host) {
+      if (host === true) {
         this.setAttribute("host", "");
       } else {
         this.removeAttribute("host");
@@ -27,11 +30,11 @@ export default (parent, config) => {
     /* Calls '__setup__' on descendants, if component is host. */
     __init__() {
       super.__init__?.();
-      if (this.hasAttribute("host")) {
+      if (this.#_.host === true) {
         this.querySelectorAll(`[setup]`)
           .values()
-          .forEach((c) => {
-            c.__setup__.call(c, this);
+          .forEach((component) => {
+            component.__setup__.call(component, this);
           });
       }
     }

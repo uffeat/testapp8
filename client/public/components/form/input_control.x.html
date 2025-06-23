@@ -1,43 +1,41 @@
 <!--
-const FormControl = await use("/components/form/form_control.x.html");
-20250621
-v.1.0
+const InputControl = await use("/components/form/input_control.x.html");
+20250623
+v.1.1
 -->
 
 <style global>
   /* . */
-  rollo-form-control {
+  rollo-input-control {
     display: block;
   }
 
-
-
   /* Correct Bootstrap standard, where label brushes against border in the 
   upper position. */
-  rollo-form-control label {
+  rollo-input-control label {
     margin-left: var(--marginLeft, 0.25rem);
   }
 
-  rollo-form-control p,
-  rollo-form-control p::after {
+  rollo-input-control p,
+  rollo-input-control p::after {
     font-size: 0.9rem;
     padding-top: 0.25rem;
     visibility: hidden;
   }
 
   /* Prevent vertical shifts, when no message. */
-  rollo-form-control p::after {
+  rollo-input-control p::after {
     content: "X";
   }
 
   /* Soft error-styling of message, if required, empty and non-visited. */
-  rollo-form-control:has(input:required[empty]:not([visited])) p {
+  rollo-input-control:has(input:required[empty]:not([visited])) p {
     visibility: visible;
     color: var(--bs-light);
   }
 
   /* Hard error-styling of message, if visited. */
-  rollo-form-control:has(input[visited]) p {
+  rollo-input-control:has(input[visited]) p {
     visibility: visible;
     color: var(--bs-form-invalid-color);
   }
@@ -49,59 +47,56 @@ v.1.0
     const Input = await use("/components/form/input.x.html");
 
     const cls = class extends base() {
-      #_ = {
-        slots: {
-          start: component.slot({ name: "start", display: "none" }),
-        },
-        tree: {
-          message: component.p(),
-        },
-      };
+      #_ = {};
 
       constructor() {
         super();
-       
-        this.shadow.append(this.#_.slots.start);
-
-        this.tree.input = Input({ placeholder: " " });
-
-        this.tree.label = component.label({
-          for_: this.tree.input.id,
-         
-        });
-
-        this.tree.input.states.main.effects.add(
-          (change) => {
-            this.tree.message.text = change.message;
-          },
-          ["message"]
-        );
-
-        
+        this.shadow.append(component.slot({ name: "start", display: "none" }));
       }
 
       __new__() {
         super.__new__?.();
 
-        const group = component.div(
+        /* Build tree */
+        this.tree(
+          component.div(
             "input-group",
-            component.div("form-floating", this.tree.input, this.tree.label),
-            
-          )
-
-
-        this.append(
-          group,
-          this.tree.message
-        );
-
-
-        this.#_.slots.start.on.slotchange = (event) => {
-          const _component = this.find(`[slot="start"]`);
-            if (_component) {
-              group.prepend(_component.classes.add("input-group-text"));
-            }
-        };
+            { key: "group" },
+            component.div(
+              "form-floating",
+              Input({ key: "input", placeholder: " " }),
+              component.label({
+                key: "label",
+                __setup__: function (host) {
+                  this.for_ = host.tree.input.id;
+                },
+              })
+            )
+          ),
+          component.p({
+            key: "message",
+            __setup__: function (host) {
+              /* Wire up message */
+              host.tree.input.states.main.effects.add(
+                (change) => {
+                  this.text = change.message;
+                },
+                ["message"]
+              );
+            },
+          }),
+          function () {
+            /* Move child component added to start slot */
+            this.shadow.slots.get("start").on.slotchange = (event) => {
+              const _component = this.find(`[slot="start"]`);
+              if (_component) {
+                this.tree.group.prepend(
+                  _component.classes.add("input-group-text")
+                );
+              }
+            };
+          }
+        ).tree.freeze();
       }
 
       /* Returns label text. */
@@ -112,16 +107,6 @@ v.1.0
       /* Sets label text. */
       set label(label) {
         this.tree.label.text = label;
-      }
-
-      /* Returns tree. */
-      get tree() {
-        return this.#_.tree;
-      }
-
-      /* Returns valid state. */
-      get valid() {
-        return this.tree.input.valid;
       }
 
       /* Validates, updates message and returns valid state */
@@ -142,6 +127,7 @@ v.1.0
       "pattern",
       "required",
       "type",
+      "valid",
       "validators",
       "value",
     ].forEach((key) => {
