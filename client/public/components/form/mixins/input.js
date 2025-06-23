@@ -28,6 +28,7 @@ export default (parent, config) => {
             this.attribute.message = change.message;
             /* Send message event */
             //this.send("message", { bubbles: true, detail: change.message });//
+            this.send("message", { detail: change.message });//
           },
           ["message"]
         )
