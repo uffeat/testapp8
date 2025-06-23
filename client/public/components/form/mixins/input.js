@@ -17,7 +17,7 @@ export default (parent, config) => {
     constructor() {
       super();
       /* State slice to manage "message" and "visited"
-        NOTE Using 'State', since combined-value effect is required. */
+      NOTE Using 'State', since combined-value effect is required. */
       this.states.main = new State({
         name: "main",
         owner: this,
@@ -27,7 +27,7 @@ export default (parent, config) => {
             /* Set message attribute */
             this.attribute.message = change.message;
             /* Send message event */
-            this.send("message", { bubbles: true, detail: change.message });//
+            this.send("x-message", { bubbles: true, detail: change.message });//
             //this.send("message", { detail: change.message });//
           },
           ["message"]
