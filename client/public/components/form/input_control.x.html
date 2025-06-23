@@ -51,7 +51,10 @@ v.1.1
 
       constructor() {
         super();
-        this.shadow.append(component.slot({ name: "start", display: "none" }));
+        this.shadow.append(
+          component.slot({ name: "start", display: "none" }),
+          component.slot({ name: "end", display: "none" }),
+        );
       }
 
       __new__() {
