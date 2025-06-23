@@ -10,8 +10,6 @@ import { mix } from "@/rollocomponent/tools/mix.js";
 import { registry } from "@/rollocomponent/tools/registry.js";
 import { Sheets } from "@/rollosheet/tools/sheets.js";
 
-
-
 import append from "@/rollocomponent/mixins/append.js";
 import attrs from "@/rollocomponent/mixins/attrs.js";
 import classes from "@/rollocomponent/mixins/classes.js";
@@ -29,11 +27,12 @@ import parent from "@/rollocomponent/mixins/parent.js";
 import props from "@/rollocomponent/mixins/props.js";
 import send from "@/rollocomponent/mixins/send.js";
 import setup from "@/rollocomponent/mixins/setup.js";
-import state from "@/rollocomponent/mixins/states.js";
+import states from "@/rollocomponent/mixins/states.js";
 import style from "@/rollocomponent/mixins/style.js";
 import super_ from "@/rollocomponent/mixins/super_.js";
 import tab from "@/rollocomponent/mixins/tab.js";
 import text from "@/rollocomponent/mixins/text.js";
+import tree from "@/rollocomponent/mixins/tree.js";
 import vars from "@/rollocomponent/mixins/vars.js";
 
 /* NOTE The native shadow root has limited DOM manipulation features,
@@ -46,23 +45,25 @@ const cls = class extends mix(
   attrs,
   classes,
   clear,
-  //components,
+  components,
   connect,
+  effect,
   find,
   handlers,
   hooks,
-  //host,
+  host,
   insert,
-  //key,
+  key,
   parent,
   props,
   send,
-  //setup,
-  //state,
+  setup,
+  states,
   style,
   super_,
   tab,
   text,
+  tree,
   vars
 ) {
   static __key__ = "rollo-shadow";
@@ -106,7 +107,7 @@ const cls = class extends mix(
 
   __new__() {
     super.__new__?.();
-    this.append(component.slot())
+    this.append(component.slot());
   }
 
   get owner() {

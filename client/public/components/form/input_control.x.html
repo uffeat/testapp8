@@ -5,11 +5,6 @@ v.1.1
 -->
 
 <style global>
-  /* . */
-  rollo-input-control {
-    display: block;
-  }
-
   /* Correct Bootstrap standard, where label brushes against border in the 
   upper position. */
   rollo-input-control label {
@@ -47,20 +42,28 @@ v.1.1
     const Input = await use("/components/form/input.x.html");
 
     const cls = class extends base() {
-      #_ = {};
-
       constructor() {
         super();
         this.shadow.append(
-          component.slot({ name: "start", display: "none" }),
-          component.slot({ name: "end", display: "none" }),
+          component.slot({
+            name: "start",
+            display: "none",
+            _process: (_component) => {
+              this.tree.group.prepend(_component);
+            },
+          }),
+          component.slot({
+            name: "end",
+            display: "none",
+            _process: (_component) => {
+              this.tree.group.append(_component);
+            },
+          })
         );
       }
 
       __new__() {
         super.__new__?.();
-
-        /* Build tree */
         this.tree(
           component.div(
             "input-group",
@@ -89,13 +92,14 @@ v.1.1
             },
           }),
           function () {
-            /* Move child component added to start slot */
-            this.shadow.slots.get("start").on.slotchange = (event) => {
-              const _component = this.find(`[slot="start"]`);
-              if (_component) {
-                this.tree.group.prepend(
-                  _component.classes.add("input-group-text")
-                );
+            /* Handle start and end */
+            this.shadow.on.slotchange = (event) => {
+              const slot = event.target;
+              if (slot.name) {
+                const _component = this.find(`[slot="${slot.name}"]`);
+                if (_component) {
+                  slot._process?.(_component.classes.add("input-group-text"));
+                }
               }
             };
           }
@@ -123,6 +127,7 @@ v.1.1
       }
     };
 
+    /* Mirror props */
     [
       "max",
       "min",
@@ -151,14 +156,13 @@ v.1.1
 </script>
 
 <script example type="module">
-  const FormControl = await use("@/components/form/form_control.x.html");
+  const InputControl = await use("/components/form/input_control.x.html");
 
-  const uffe = FormControl(
+  InputControl(
     {
       parent: document.body,
-      label: "Uffe",
+      label: "Your name",
       name: "uffe",
-      //value: 'uff',
       required: true,
       validators: [
         (value) => {
@@ -168,6 +172,10 @@ v.1.1
         },
       ],
     },
-    component.span({ slot: "start" }, "@")
+    component.span({ slot: "start" }, "@"),
+    component.button(
+      { slot: "end", "@click": (event) => console.log("Clicked") },
+      "!"
+    )
   );
 </script>

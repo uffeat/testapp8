@@ -11,24 +11,20 @@ export default (parent, config) => {
     update(updates = {}) {
       super.update?.(updates);
       for (let [key, value] of Object.entries(updates)) {
-        /* Ignore __ key */
+        /* Ignore __ keys */
         if (key.startsWith("__")) {
           continue;
         }
-        /* Ignore non-prop key, but allow psudo-private */
+        /* Ignore non-prop keys, but allow psudo-private */
         if (!(key in this) && !key.startsWith("_")) {
-          continue;
-        }
-        /* Handle function values */
-        if (typeof value === "function" && !key.startsWith("on")) {
-          value = value.call(this, key);
-        }
-        /* Ignore no change */
-        if (this[key] === value) {
           continue;
         }
         /* Ignore undefined value to, e.g., for efficient use of iife's */
         if (value === undefined) {
+          continue;
+        }
+        /* Ignore no change */
+        if (this[key] === value) {
           continue;
         }
         /* Update */

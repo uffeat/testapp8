@@ -17,7 +17,7 @@ export default (parent, config) => {
 
       const tree = new (class {
         freeze() {
-          Object.freeze(registry)
+          Object.freeze(registry);
         }
       })();
 
@@ -47,16 +47,15 @@ export default (parent, config) => {
         {
           get: (_, key) => {
             if (key in tree) {
-              return tree[key]
+              return tree[key];
             }
-            
-            return registry[key]
+
+            return registry[key];
           },
           set: (_, key, value) => {
             registry[key] = value;
             return true;
           },
-          
         }
       );
     }

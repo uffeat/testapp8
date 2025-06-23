@@ -1,5 +1,4 @@
-// import { pipe } from "@/rollo/tools/pipe";
-// const { pipe } = await import("@/rollo/tools/pipe");
+
 
 
 export function pipe(value, ...functions) {

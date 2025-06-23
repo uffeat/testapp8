@@ -1,7 +1,5 @@
 /* 
-20250304
-src/rollo/tools/assign.js
-https://testapp8dev.anvil.app/_/api/asset?path=src/rollo/tools/assign.js
+const { assign } = await use("@/rollotools/assign.js");
 */
 
 /* Assigns members of source classes' prototypes onto target

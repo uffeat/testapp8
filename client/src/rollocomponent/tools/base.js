@@ -1,5 +1,5 @@
 /*
-import { Base, base } from "@/rollocomponent/base.js";
+import { base } from "@/rollocomponent/tools/base.js";
 20250615
 v.1.0
 */

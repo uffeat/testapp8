@@ -146,8 +146,6 @@ app.maps
     new ImportMap(
       import.meta.glob([
         "/src/**/*.css",
-        "!/src/assets/**/*.*",
-        "!/src/main/**/*.*",
         "!/src/rollotest/**/*.*",
       ]),
       { type: "css" }
@@ -156,8 +154,6 @@ app.maps
       import.meta.glob(
         [
           "/src/**/*.css",
-          "!/src/assets/**/*.*",
-          "!/src/main/**/*.*",
           "!/src/rollotest/**/*.*",
         ],
         {
@@ -171,8 +167,6 @@ app.maps
       import.meta.glob(
         [
           "/src/**/*.html",
-          "!/src/assets/**/*.*",
-          "!/src/main/**/*.*",
           "!/src/rollotest/**/*.*",
         ],
         {
@@ -186,11 +180,10 @@ app.maps
       import.meta.glob([
         "/src/**/*.js",
 
-        //"/src/rollocomponent/**/*.js",//
-        
+       
 
         "!/src/main.js",
-        "!/src/assets/**/*.*",
+       
         "!/src/main/**/*.*",
         "!/src/rollotest/**/*.*",
       ]),
@@ -201,7 +194,6 @@ app.maps
         [
           "/src/**/*.js",
           "!/src/main.js",
-          "!/src/assets/**/*.*",
           "!/src/main/**/*.*",
           "!/src/rollotest/**/*.*",
         ],
@@ -215,8 +207,6 @@ app.maps
     new ImportMap(
       import.meta.glob([
         "/src/**/*.json",
-        "!/src/assets/**/*.*",
-        "!/src/main/**/*.*",
         "!/src/rollotest/**/*.*",
       ]),
       { type: "json" }
@@ -225,8 +215,6 @@ app.maps
       import.meta.glob(
         [
           "/src/**/*.json",
-          "!/src/assets/**/*.*",
-          "!/src/main/**/*.*",
           "!/src/rollotest/**/*.*",
         ],
         {
@@ -240,8 +228,6 @@ app.maps
       import.meta.glob(
         [
           "/src/**/*.svg",
-          "!/src/assets/**/*.*",
-          "!/src/main/**/*.*",
           "!/src/rollotest/**/*.*",
         ],
         {
@@ -259,8 +245,6 @@ app.maps
       import.meta.glob(
         [
           "/src/**/*.csv",
-          "!/src/assets/**/*.*",
-          "!/src/main/**/*.*",
           "!/src/rollotest/**/*.*",
         ],
         {
@@ -285,8 +269,6 @@ app.maps
       import.meta.glob(
         [
           "/src/**/*.md",
-          "!/src/assets/**/*.*",
-          "!/src/main/**/*.*",
           "!/src/rollotest/**/*.*",
         ],
         {
@@ -311,8 +293,6 @@ app.maps
       import.meta.glob(
         [
           "/src/**/*.yaml",
-          "!/src/assets/**/*.*",
-          "!/src/main/**/*.*",
           "!/src/rollotest/**/*.*",
         ],
         {
@@ -332,9 +312,6 @@ app.maps
   })
 
   /* Add support for x.html */
-
-  /* TODO
-  Add support for additional "sub-types" dictated by script attr, e.g. sheet */
   .processors.add({
     "x.html": new Processor(
       async (result, { owner, path }) => {
@@ -382,8 +359,8 @@ app.maps
           assets[name] = html;
         }
 
-        /* NOTE Use `component` attr to accommodate future uses of other scripts. 
-        Also, (to some degree) guards against collision with deployment 
+        /* NOTE Use `component` attr to accommodate future uses of other 
+        scripts. Also, (to some degree) guards against collision with 
         vendors' injection of scripts. */
         const script = wrapper.find("script[component]");
         if (script) {
@@ -398,14 +375,32 @@ app.maps
           const key = cls.__key__
             ? cls.__key__
             : `rollo-${path.stem.replaceAll("_", "-")}`;
-          const factory = author(cls, key);
-
-          return factory;
+          return author(cls, key);
         } else {
           /* If no script, 'assets' becomes the result. This means that the 
           .x.html format can also be used to only declare sheet and template assets. */
           return Object.freeze(assets);
         }
+      },
+      {
+        cache: true,
+      }
+    ),
+  })
+
+  /* Add support for icon.svg */
+  .processors.add({
+    "icon.svg": new Processor(
+      async (result, { owner, path }) => {
+        const { Icon } = await owner.import("@/rollocomponent/");
+
+        return (updates = {}) => {
+          return Icon({
+            __html__: result,
+            __name__: path.stem,
+            ...updates,
+          });
+        };
       },
       {
         cache: true,

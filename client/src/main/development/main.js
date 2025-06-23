@@ -7,9 +7,15 @@ document.querySelector("html").dataset.bsTheme = "dark";
 
 import { component } from "@/rollocomponent/component.js";
 
+const Help = await use("/icons/help.icon.svg");
+
+
+
+
+
 const InputControl = await use("/components/form/input_control.x.html");
 
-const uffe = InputControl(
+InputControl(
   {
     parent: document.body,
     label: "Your name",
@@ -23,5 +29,9 @@ const uffe = InputControl(
       },
     ],
   },
-  component.span({ slot: "start" }, "@")
+  component.span({ slot: "start" }, "@"),
+  component.button(
+    { slot: "end", "@click": (event) => console.log("Clicked") },
+    Help({size: 24, color: 'pink'})
+  )
 );

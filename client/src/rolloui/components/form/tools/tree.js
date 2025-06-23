@@ -1,5 +1,5 @@
 import { component } from "@/rollo/component/component.js";
-import { Help } from "@/rollo/icons/help.js";
+import { Help } from "public/icons/help.js";
 import { PopButton } from "@/rolloui/components/pop_button.js";
 
 export const Tree = () => {

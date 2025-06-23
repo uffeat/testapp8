@@ -96,16 +96,12 @@ export default (parent, config) => {
         if (!key.startsWith(".")) {
           continue;
         }
-        /* Adjust for special syntax */
-        key = key.slice(".".length);
-        /* Handle function values */
-        if (typeof value === "function") {
-          value = value.call(this, key);
-        }
         /* Ignore undefined value to, e.g., for efficient use of iife's */
         if (value === undefined) {
           continue;
         }
+        /* Adjust for special syntax */
+        key = key.slice(".".length);
         /* Update */
         this.classes[value ? "add" : "remove"](key);
       }

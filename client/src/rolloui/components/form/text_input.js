@@ -23,7 +23,7 @@ import { parent } from "@/rollo/component/factories/parent.js";
 import { props } from "@/rollo/component/factories/props.js";
 import { send } from "@/rollo/component/factories/send.js";
 
-import { Help } from "@/rollo/icons/help";
+import { Help } from "public/icons/help";
 import { PopButton } from "@/rolloui/components/pop_button.js";
 
 import { __elements__ } from "@/rolloui/components/factories/__elements__.js";

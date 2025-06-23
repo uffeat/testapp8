@@ -1,9 +1,5 @@
 /*
-20250406
-src/rollo/tools/future.js
-https://testapp8dev.anvil.app/_/api/asset?path=src/rollo/tools/future.js
-import { Future, FutureType } from "rollo/tools/future";
-const { Future, FutureType } = await import("rollo/tools/future");
+
 */
 
 /* 
@@ -30,7 +26,7 @@ NOTE
     - const value = await future.complete();
     OR
     - future.then((value) => console.log('value', value)); */
-export class FutureType {
+export class Future {
   #current;
   #name = null;
   #owner = null;
@@ -133,4 +129,4 @@ export class FutureType {
   }
 }
 
-export const Future = (...args) => new FutureType(...args);
+

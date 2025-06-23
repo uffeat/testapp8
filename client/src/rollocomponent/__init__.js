@@ -22,6 +22,6 @@ export { mixins } from "@/rollocomponent/mixins/__init__.js";
 
 
 
-
+export { Icon } from "@/rollocomponent/tools/icon.js";
 
 

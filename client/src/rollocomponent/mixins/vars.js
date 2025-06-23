@@ -25,7 +25,7 @@ export default (parent, config) => {
             if (!value) return false;
             const priority = target.style.getPropertyPriority(name);
             if (priority) return `${value} !${priority}`;
-            if (value === 'none') return null
+            if (value === "none") return null;
             return value;
           }
           if (import.meta.env.DEV) {
@@ -37,17 +37,13 @@ export default (parent, config) => {
           if (!value) return false;
           const priority = target.style.getPropertyPriority(name);
           if (priority) return `${value} !${priority}`;
-          if (value === 'none') return null
+          if (value === "none") return null;
           return value;
         },
         set(target, name, value) {
           /* Normalize name */
           if (!name.startsWith("--")) {
             name = `--${name}`;
-          }
-          /* Handle function values */
-          if (typeof value === "function") {
-            value = value.call(target, name);
           }
           /* By convention, null is interpreted as 'none' */
           if (value === null) {
@@ -67,14 +63,18 @@ export default (parent, config) => {
             /* By convention, false removes */
             target.style.removeProperty(name);
           } else {
-            /* Handle priority */
-            value = value.trim();
-            if (value.endsWith("!important")) {
-              target.style.setProperty(
-                name,
-                value.slice(0, -"!important".length),
-                "important"
-              );
+            if (typeof value === "string") {
+              value = value.trim();
+              /* Handle priority */
+              if (value.endsWith("!important")) {
+                target.style.setProperty(
+                  name,
+                  value.slice(0, -"!important".length),
+                  "important"
+                );
+              } else {
+                target.style.setProperty(name, value);
+              }
             } else {
               target.style.setProperty(name, value);
             }
@@ -102,7 +102,7 @@ export default (parent, config) => {
         if (!key.startsWith("__")) {
           continue;
         }
-       
+
         /* Update */
         this.__[key.slice("__".length)] = value;
       }

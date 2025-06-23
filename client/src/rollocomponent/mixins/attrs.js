@@ -55,15 +55,9 @@ export default (parent, config) => {
 
         /* Sets one or more attribute values. Chainable with respect to component. */
         set(name, value) {
-          
-          
           /* Normalize name */
           name = kebab(name);
-          /* Handle function values */
-          if (typeof value === "function") {
-            value = value.call(owner, name);
-            
-          }
+
           /* Abort, if undefined value to, e.g., for efficient use of iife's */
           if (value === undefined) {
             return owner;
@@ -135,14 +129,14 @@ export default (parent, config) => {
       return this.#_.attributes;
     }
 
-    /* Updates attributes from '['-syntax. Chainable. */
+    /* Updates attributes from '[]'-syntax. Chainable. */
     update(updates = {}) {
       super.update?.(updates);
       this.attributes.update(
         Object.fromEntries(
           Object.entries(updates)
-            .filter(([k, v]) => k.startsWith("["))
-            .map(([k, v]) => [k.slice("[".length), v])
+            .filter(([k, v]) => k.startsWith("[") && k.endsWith("]"))
+            .map(([k, v]) => [k.slice("[".length, -"]".length), v])
         )
       );
       return this;

@@ -10,9 +10,9 @@ import "@/bootstrap.scss";
 
 import { Sheet, __, important, px } from "@/rollo/sheet/sheet.js";
 
-import { Cancel } from "@/rollo/icons/cancel.js";
-import { Help } from "@/rollo/icons/help.js";
-import { Upload } from "@/rollo/icons/upload.js";
+import { Cancel } from "public/icons/cancel.js";
+import { Help } from "public/icons/help.js";
+import { Upload } from "public/icons/upload.js";
 
 import { $, disabled, focus, selector, tag } from "@/rollo/tools/selector.js";
 import { create_id } from "@/rollo/tools/id.js";

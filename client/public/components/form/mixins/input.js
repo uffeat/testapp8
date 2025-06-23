@@ -27,8 +27,7 @@ export default (parent, config) => {
             /* Set message attribute */
             this.attribute.message = change.message;
             /* Send message event */
-            this.send("x-message", { bubbles: true, detail: change.message });//
-            //this.send("message", { detail: change.message });//
+            this.send("x_message", { bubbles: true, detail: change.message }); //
           },
           ["message"]
         )
@@ -83,7 +82,7 @@ export default (parent, config) => {
 
       this.update({
         id: create_id(),
-        "[rollo": true,
+        "[rollo]": true,
         /* Prevent browser default validation message */
         title: " ",
         ".form-control": true,

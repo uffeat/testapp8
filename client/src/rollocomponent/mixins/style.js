@@ -11,16 +11,15 @@ export default (parent, config) => {
     update(updates = {}) {
       super.update?.(updates);
       for (let [key, value] of Object.entries(updates)) {
-        
+        /* Ignore ambiguos prop/style keys */
+        if (key in this) {
+          continue;
+        }
         /* Ignore non-style prop key */
         if (!(key in this.style)) {
           continue;
         }
-        /* Handle function values */
-        if (typeof value === "function") {
-          value = value.call(this, key);
-          
-        }
+
         /* Ignore undefined value to, e.g., for efficient use of iife's */
         if (value === undefined) {
           continue;
