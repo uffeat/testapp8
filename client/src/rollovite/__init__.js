@@ -156,14 +156,18 @@ app.maps
     new ImportMap(
       import.meta.glob([
         "/src/**/*.js",
-        "!/src/main.js",
+        //"!/src/main.js",
         "!/src/rollotest/**/*.*",
       ]),
       { type: "js" }
     ),
     new ImportMap(
       import.meta.glob(
-        ["/src/**/*.js", "!/src/main.js", "!/src/rollotest/**/*.*"],
+        [
+          "/src/**/*.js",
+          //"!/src/main.js",
+          "!/src/rollotest/**/*.*",
+        ],
         {
           query: "?raw",
           import: "default",

@@ -27,11 +27,13 @@ export default defineConfig(({ mode }) => {
       manifest: true,
       rollupOptions: {
         /* Exclude files from bundle */
+        /*
         external: (path) =>
           path.endsWith(".test.js") &&
           !path.includes("/batch/") &&
           !path.includes("/preview/") &&
           !path.includes("/vercel/"),
+        */
       },
       /* Enable features such as top-level await and async imports */
       target: "es2022",
