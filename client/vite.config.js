@@ -27,16 +27,17 @@ export default defineConfig(({ mode }) => {
       manifest: true,
       rollupOptions: {
         /* Exclude files from bundle (likely redundant due to treeshaking) */
-        external: (path) => path.endsWith(".test.js"),
+        //external: (path) => path.endsWith(".test.js"),
       },
       /* Enable features such as top-level await and async imports */
       target: "es2022",
     },
     plugins: [
       tailwindcss(),
+      react(),
       //vue(),
       //vueDevTools(),
-      //react()
+      
     ],
     resolve: {
       alias: {

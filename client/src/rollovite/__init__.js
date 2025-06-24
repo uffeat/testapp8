@@ -351,16 +351,14 @@ app.maps
             const module = await construct(
               `${script.textContent.trim()}\n//# sourceURL=${path.path}`
             );
-            if ('default' in module) {
-              return await module.default(assets)
+            if ("default" in module) {
+              return await module.default(assets);
             } else {
               if (Object.keys(assets).length) {
-                return Object.freeze({...assets, ...module})
-                
+                return Object.freeze({ ...assets, ...module });
               } else {
-                return module
+                return module;
               }
-              
             }
           } else {
             return Object.freeze(assets);

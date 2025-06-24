@@ -39,8 +39,10 @@
       };
 
       this.#_.target.on["inserted.bs.popover"] = (event) => {
-        /* HACK Injects content into popover body. Mitigates Bootstrap's 
-        failure to correctly set content and enables click handlers on content. */
+        /* NOTE Inject content into popover body to:
+        - Mitigate Bootstrap's failure to correctly set content,
+        - Enable click handlers on content.
+        - Enable use of dynamically set content.  */
         const body = this.#_.target.querySelector(".popover-body");
         body.innerHTML = "";
         body.append(this.#_.content);
@@ -80,6 +82,14 @@
       //return target
     }
 
+    get content() {
+      return this.#_.content
+    }
+
+    set content(content) {
+      this.#_.content = content
+    }
+
     close() {
       this.#_.states.show.$ = false;
     }
@@ -100,6 +110,7 @@
     #init() {
       this.#_.pop = new Popover(this.#_.target, {
         container: this.#_.target,
+        /* NOTE falsy content -> pop does not show! */
         content: " ",
         trigger: "manual",
       });
