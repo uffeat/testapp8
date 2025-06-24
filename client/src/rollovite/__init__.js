@@ -156,7 +156,6 @@ app.maps
     new ImportMap(
       import.meta.glob([
         "/src/**/*.js",
-        //"!/src/main.js",
         "!/src/rollotest/**/*.*",
       ]),
       { type: "js" }
@@ -165,7 +164,6 @@ app.maps
       import.meta.glob(
         [
           "/src/**/*.js",
-          //"!/src/main.js",
           "!/src/rollotest/**/*.*",
         ],
         {
