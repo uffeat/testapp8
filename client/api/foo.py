@@ -11,9 +11,9 @@ class handler(BaseHTTPRequestHandler):
         connect(key)
 
         data = call("foo")
-        ##data = json.dumps(data)
+        data = json.dumps(data)
 
-        data = 'test'
+        
 
         self.send_response(200)
         ##self.send_header("Content-Type", "application/json")
