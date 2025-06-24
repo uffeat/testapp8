@@ -13,4 +13,4 @@ class handler(BaseHTTPRequestHandler):
         self.end_headers()
 
         self.wfile.write(data.encode("utf-8"))
-        ##self.wfile.write(b"From Vercel bar")
+        
