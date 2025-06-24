@@ -8,7 +8,7 @@ main.js
 import "@/rollolibs/bootstrap/__init__.js";
 import "@/main.css";
 import "@/rollovite/__init__.js";
-import "@/app.js";
+import "@/rolloapp/__init__.js";
 import "@/rollotest/__init__.js";
 
 document.querySelector("html").dataset.bsTheme = "dark";

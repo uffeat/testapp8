@@ -17,9 +17,7 @@ body {
   margin: 0;
 }
 
-#app {
-  flex-grow: 1;
-}
+
 
 a {
   text-decoration: none;

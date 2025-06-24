@@ -1,8 +1,10 @@
 
 
 
-import "@/app.js";
-import "@/rollotest/__init__.js";
+
+
+
+await use("@/rollotest/");
 
 document.querySelector("html").dataset.bsTheme = "dark";
 

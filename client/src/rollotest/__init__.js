@@ -4,7 +4,7 @@ import "@/rollotest/__init__.js";
 v.1.1
 */
 
-import { Modules } from "@/rollovite/modules.js";
+import { Modules } from "@/rollotools/modules.js";
 
 if (import.meta.env.DEV || import.meta.env.VERCEL_ENV === "preview") {
   /* Utility for importing test modules. */
