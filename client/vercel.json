@@ -1,10 +1,6 @@
 {
   "rewrites": [
     {
-      "source": "/anvil/:match*",
-      "destination": "https://testapp8dev.anvil.app/:match*"
-    },
-    {
       "source": "/api/:match*",
       "destination": "/api/:match*"
     },

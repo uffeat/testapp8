@@ -12,8 +12,8 @@ const { component } = await use("@/rollocomponent/");
 const { promise, resolve } = Promise.withResolvers();
 
 const anvil = component.iframe("anvil", {
-  //src: "https://testapp8dev.anvil.app",
-  src: '/anvil',
+  src: "https://testapp8dev.anvil.app",
+ 
 
   "@load": (event) => resolve(),
   parent: app,
