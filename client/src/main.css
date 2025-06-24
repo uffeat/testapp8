@@ -15,11 +15,11 @@ body {
   display: flex;
   flex-direction: column;
   margin: 0;
-
-  
 }
 
-
+#app {
+  flex-grow: 1;
+}
 
 a {
   text-decoration: none;
@@ -28,4 +28,3 @@ a {
 img {
   max-width: 100%;
 }
-

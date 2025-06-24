@@ -1,7 +1,7 @@
 /*
 import "@/rollovite/__init__.js";
-20250525
-v.5.0
+20250624
+v.6.0
 */
 
 /* Do NOT import anything from outside 'rollovite' */
@@ -13,13 +13,6 @@ import { Path } from "@/rollovite/_tools/path.js";
 import { Processor } from "@/rollovite/_tools/processor.js";
 import { Processors } from "@/rollovite/_tools/processors.js";
 import { pub } from "@/rollovite/_tools/pub.js";
-
-/* TODO
-- Keep an eye on dir scopes for Vite import maps (globs). 
-  Should effectively have global coverage, but leave out dirs and file 
-  extensions not used by the actual app. Doing so is verbose, but worth it.
-  Such narrowing does of course NOT affect imports from public!
-*/
 
 /* Make 'assets' global */
 Object.defineProperty(window, "assets", {
@@ -118,7 +111,6 @@ const app = new (class {
           }
           return this.maps.get(path, { raw })();
         })();
-
     /* Process */
     /* NOTE No-processing is more likely than processing -> use 'has' 
     initially and not 'get' directly */
@@ -165,19 +157,13 @@ app.maps
       import.meta.glob([
         "/src/**/*.js",
         "!/src/main.js",
-        "!/src/main/**/*.*",
         "!/src/rollotest/**/*.*",
       ]),
       { type: "js" }
     ),
     new ImportMap(
       import.meta.glob(
-        [
-          "/src/**/*.js",
-          "!/src/main.js",
-          "!/src/main/**/*.*",
-          "!/src/rollotest/**/*.*",
-        ],
+        ["/src/**/*.js", "!/src/main.js", "!/src/rollotest/**/*.*"],
         {
           query: "?raw",
           import: "default",
@@ -204,7 +190,6 @@ app.maps
       { type: "svg" }
     )
   )
-
   /* Add csv support */
   .maps.add(
     new ImportMap(
@@ -222,7 +207,6 @@ app.maps
       { cache: false }
     ),
   })
-
   /* Add md support */
   .maps.add(
     new ImportMap(
@@ -240,7 +224,6 @@ app.maps
       { cache: true }
     ),
   })
-
   /* Add yaml support */
   .maps.add(
     new ImportMap(
@@ -258,7 +241,6 @@ app.maps
       { cache: false }
     ),
   })
-
   /* Add support for x.html */
   .processors.add({
     "x.html": new Processor(
@@ -317,7 +299,6 @@ app.maps
           }
         })();
         //console.log("type:", type); //
-
         if (type === "component") {
           const assets = await build_assets(wrapper);
           const script = wrapper.querySelector("script[main]");
@@ -370,7 +351,6 @@ app.maps
       }
     ),
   })
-
   /* Add support for icon.svg */
   .processors.add({
     "icon.svg": new Processor(
@@ -390,6 +370,5 @@ app.maps
       }
     ),
   })
-
   /* Prevent config tampering */
   .freeze();

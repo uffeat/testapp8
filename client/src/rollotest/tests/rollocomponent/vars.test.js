@@ -12,12 +12,12 @@ const connected = component.h1({
 });
 
 console.log(connected);
-console.log(connected.vars.color);
-console.log(connected.vars.height);
+console.log(connected.__.color);
+console.log(connected.__.height);
 
 connected.vars.foo = "pink !important";
-console.log(connected.vars.foo);
-console.log(connected.vars.bar);
+console.log(connected.__.foo);
+console.log(connected.__.bar);
 
 
 const unconnected = component.h1({
@@ -27,9 +27,9 @@ const unconnected = component.h1({
 });
 
 console.log(unconnected);
-console.log(unconnected.vars.color);
-console.log(unconnected.vars.height);
+console.log(unconnected.__.color);
+console.log(unconnected.__.height);
 
-unconnected.vars.foo = "pink !important";
-console.log(unconnected.vars.foo);
-console.log(unconnected.vars.bar);
+unconnected.__.foo = "pink !important";
+console.log(unconnected.__.foo);
+console.log(unconnected.__.bar);
