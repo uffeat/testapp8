@@ -8,20 +8,16 @@ console.info(
 );
 
 const { component } = await use("@/rollocomponent/");
-const { Pop } = await use("/rollolibs/bootstrap/pop.x.html");
 
-const button = component.button("btn.btn-primary", {}, "Pop");
+const { promise, resolve } = Promise.withResolvers();
 
-const menu = component.menu("flex.justify-end", { parent: app }, button);
+const anvil = component.iframe("anvil", {
+  src: "/anvil/",
+  "@load": (event) => resolve(),
+  parent: app,
+});
 
-const inner = component.button(
-  "btn.btn-warning",
-  {
-    "@click": (event) => {
-      console.log("inner clicked");
-    },
-  },
-  "Inner"
-);
+await promise
 
-const pop = new Pop(button, { content: inner });
+console.log('window:', anvil.contentWindow)
+console.log('document:', anvil.contentDocument)
