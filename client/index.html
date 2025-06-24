@@ -16,11 +16,9 @@
       console.info("Vite environment:", import.meta.env.MODE);
       console.info("Vercel environment:", import.meta.env.VERCEL_ENV);
       console.info("Vercel url:", import.meta.env.VERCEL_URL);
-      if (import.meta.env.DEV) {
-        await import("/src/main.js");
-      } else {
-        await import("./src/main.js");
-      }
+      import(`${import.meta.env.BASE_URL}src/main.js`);
+
+      
       
     </script>
   </head>
