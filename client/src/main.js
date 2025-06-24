@@ -1,5 +1,5 @@
 
-import "@/main.css";
+
 import "@/rollovite/__init__.js";
 import "@/app.js";
 import "@/rollotest/__init__.js";
