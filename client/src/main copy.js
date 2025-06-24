@@ -16,6 +16,7 @@ const anvil = await (async () => {
     "@load$once": (event) => resolve({}),
     parent: app,
   });
+
   await promise;
 
   const submission = (() => {
@@ -33,18 +34,25 @@ const anvil = await (async () => {
 
     const response = (event) => {
       const data = event.data;
-      if (data?.__submission__ !== __submission__) return;
+      /* TODO
+      - match submission */
+      console.log('event:', event)
+      console.log('data:', data)
       resolve(data);
+
       window.removeEventListener("message", response);
     };
 
     window.addEventListener("message", response);
+
     return promise;
   };
+
   return iframe;
 })();
 
-/* Test */
-const response = await anvil.call('foo', {'FOO': 42})
+const response = anvil.call('foo', {'FOO': 42})
+//.then((data) => console.log('data:', data))
+
 console.log('response:', response)
 
