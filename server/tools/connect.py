@@ -18,6 +18,6 @@ def connect() -> callable:
         (Path.cwd() / "secrets.json").read_text(encoding="utf-8")
     )
 
-    _connect(secrets.get("anvil.uplink.server"))
+    _connect(secrets.get("anvil.uplink.server.development"))
 
     return wait_forever

@@ -5,11 +5,11 @@ import { app } from "@/rolloapp/_app.js";
 import { author } from "@/rollocomponent/tools/author.js";
 import { base } from "@/rollocomponent/tools/base.js";
 
-import { construct } from "@/rolloapp/tools/construct.js";
-import { ImportMaps } from "@/rolloapp/tools/import_maps.js";
-import { Path } from "@/rolloapp/tools/path.js";
-import { Processors } from "@/rolloapp/tools/processors.js";
-import { pub } from "@/rolloapp/tools/pub.js";
+import { construct } from "@/rolloapp/_tools/construct.js";
+import { ImportMaps } from "@/rolloapp/_tools/import_maps.js";
+import { Path } from "@/rolloapp/_tools/path.js";
+import { Processors } from "@/rolloapp/_tools/processors.js";
+import { pub } from "@/rolloapp/_tools/pub.js";
 
 const App = author(
   class extends base() {

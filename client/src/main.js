@@ -8,9 +8,6 @@ console.info(
 );
 
 const { component } = await use("@/rollocomponent/");
-
-console.log("HERE");
-
 const { Pop } = await use("/rollolibs/bootstrap/pop.x.html");
 
 const button = component.button("btn.btn-primary", {}, "Pop");

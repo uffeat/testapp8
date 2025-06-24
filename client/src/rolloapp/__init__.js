@@ -1,9 +1,9 @@
 /*
 import "@/rolloapp/__init__.js";
 */
-import "@/rolloapp/assets/main.css";
+import "@/rolloapp/_assets/main.css";
 import { app } from "@/rolloapp/_app.js";
-import "@/rolloapp/_config.js";
+import "@/rolloapp/_config/__init__.js";
 
 
 Object.defineProperty(window, "app", {

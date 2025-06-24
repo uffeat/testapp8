@@ -4,7 +4,7 @@ import { Sheet } from "@/rollosheet/tools/sheet.js";
 v.1.0
 */
 
-import { WebComponent } from "@/rollocomponent/tools/web_component.js";
+
 import { remove } from "@/rollotools/array/remove.js";
 
 export class Sheet extends CSSStyleSheet {
