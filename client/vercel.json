@@ -6,7 +6,8 @@
     },
     {
       "source": "/anvil/:match*",
-      "destination": "https://testapp8dev.anvil.app/:match*"
+      "destination": "https://testapp8dev.anvil.app/:match*",
+      "headers": [{ "key": "X-Routed-Through", "value": "Vercel-Anvil-Proxy" }]
     },
     {
       "source": "/(.*)",
