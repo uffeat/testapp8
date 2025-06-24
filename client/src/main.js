@@ -12,7 +12,9 @@ const { component } = await use("@/rollocomponent/");
 const { promise, resolve } = Promise.withResolvers();
 
 const anvil = component.iframe("anvil", {
-  src: "/anvil/",
+  //src: "https://testapp8dev.anvil.app",
+  src: '/anvil/',
+
   "@load": (event) => resolve(),
   parent: app,
 });
@@ -20,4 +22,4 @@ const anvil = component.iframe("anvil", {
 await promise
 
 console.log('window:', anvil.contentWindow)
-console.log('document:', anvil.contentDocument)
+//console.log('document:', anvil.contentDocument)
