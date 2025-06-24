@@ -13,7 +13,7 @@ const { promise, resolve } = Promise.withResolvers();
 
 const anvil = component.iframe("anvil", {
   //src: "https://testapp8dev.anvil.app",
-  src: '/anvil/',
+  src: '/anvil',
 
   "@load": (event) => resolve(),
   parent: app,
