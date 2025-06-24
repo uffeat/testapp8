@@ -1,7 +1,7 @@
 /*
 import "@/rollotest/__init__.js";
-20250526
-v.1.1
+20250624
+v.1.2
 */
 
 import { Modules } from "@/rollotools/modules.js";
