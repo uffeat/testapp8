@@ -13,13 +13,10 @@ class handler(BaseHTTPRequestHandler):
         data = call("foo")
         data = json.dumps(data)
 
-        
-
         self.send_response(200)
-        ##self.send_header("Content-Type", "application/json")
         self.send_header("Content-Type", "text/plain")
         self.end_headers()
 
         self.wfile.write(data.encode("utf-8"))
-        return
+        ##return
         
