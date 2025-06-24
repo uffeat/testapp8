@@ -13,9 +13,14 @@ import "@/rollotest/__init__.js";
 
 document.querySelector("html").dataset.bsTheme = "dark";
 
-console.info("Environment:", import.meta.env.DEV ? 'development' : import.meta.env.VERCEL_ENV);
+console.info(
+  "Environment:",
+  import.meta.env.DEV ? "development" : import.meta.env.VERCEL_ENV
+);
 
 const { component } = await use("@/rollocomponent/");
+
+console.log('HERE')
 
 const { Pop } = await use("/rollolibs/bootstrap/pop.x.html");
 
