@@ -11,7 +11,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig(({ mode }) => {
   return {
-    /* Set base URL for dev and production */
+    /* Set base URL for dev and production (access from code as import.meta.env.BASE_URL) */
     base: mode === "production" ? "./" : "/",
     define: {
       /* Enable use of import.meta.env.VERCEL_ENV */
@@ -27,7 +27,7 @@ export default defineConfig(({ mode }) => {
       manifest: true,
       rollupOptions: {
         /* Exclude files from bundle (likely redundant due to treeshaking) */
-        //external: (path) => path.endsWith(".test.js"),
+        external: (path) => path.endsWith(".test.js"),
       },
       /* Enable features such as top-level await and async imports */
       target: "es2022",
