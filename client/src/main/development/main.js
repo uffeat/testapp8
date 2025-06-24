@@ -7,31 +7,33 @@ document.querySelector("html").dataset.bsTheme = "dark";
 
 import { component } from "@/rollocomponent/component.js";
 
-const Help = await use("/icons/help.icon.svg");
+await use("/app.x.html");
+
+//const { Pop } = await use("@/rollolibs/bootstrap/");
+const { Pop } = await use("/rollolibs/bootstrap/pop.x.html");
 
 
 
 
 
-const InputControl = await use("/components/form/input_control.x.html");
+const button = component.button("btn.btn-primary", {}, "Pop");
 
-InputControl(
+const menu = component.menu("flex.justify-end", { parent: app }, button);
+
+
+
+
+const inner = component.button(
+  "btn.btn-warning",
   {
-    parent: document.body,
-    label: "Your name",
-    name: "uffe",
-    required: true,
-    validators: [
-      (value) => {
-        if (value !== "uffe") {
-          return "Not uffe";
-        }
-      },
-    ],
+    "@click": (event) => {
+      
+      console.log("inner clicked");
+    },
   },
-  component.span({ slot: "start" }, "@"),
-  component.button(
-    { slot: "end", "@click": (event) => console.log("Clicked") },
-    Help({size: 24, color: 'pink'})
-  )
+  "Inner"
 );
+
+const pop = new Pop(button, { content: inner });
+
+//button.on.click = (event) => console.log('event.target:', event.target)

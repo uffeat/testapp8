@@ -1,0 +1,112 @@
+<style global>
+  [pop] .popover-arrow {
+    display: none !important;
+  }
+</style>
+
+<script main type="module">
+  const { Popover } = await use("@/rollolibs/bootstrap/bootstrap.js");
+  const { Ref } = await use("@/rollostate/");
+
+  export class Pop {
+    #_ = {
+      pop: null,
+      states: {},
+    };
+
+    constructor(target, { content } = {}) {
+      this.#_.states.active = new Ref({ initial: false, name: "active" });
+      this.#_.states.show = new Ref({ initial: false, name: "show" });
+
+      this.#_.target = target;
+      this.#_.target.attribute.pop = true;
+
+      this.#_.content = content;
+
+      this.#_.states.active.effects.add(
+        (current) => {
+          this.#dispose();
+        },
+        [false]
+      );
+
+      this.#_.states.active.effects.add((current) => {
+        this.#_.target.attribute.active = current;
+      });
+
+      this.#_.target.on["shown.bs.popover"] = (event) => {
+        this.#_.states.active.$ = true;
+      };
+
+      this.#_.target.on["inserted.bs.popover"] = (event) => {
+        /* HACK Injects content into popover body. Mitigates Bootstrap's 
+        failure to correctly set content and enables click handlers on content. */
+        const body = this.#_.target.querySelector(".popover-body");
+        body.innerHTML = "";
+        body.append(this.#_.content);
+      };
+
+      this.#_.target.on["hidden.bs.popover"] = (event) => {
+        this.#_.states.active.$ = false;
+      };
+
+      this.#_.states.show.effects.add((current) => {
+        if (current) {
+          this.#init();
+          this.#show();
+        } else {
+          this.#hide();
+        }
+      });
+
+      this.#_.target.on.click = (event) => {
+        if (this.#_.states.active.$) {
+          this.#_.states.show.$ = false;
+        } else {
+          this.#_.states.show.$ = true;
+        }
+      };
+      this.#_.target.on.keydown = (event) => {
+        if (event.code === "Escape") {
+          this.#_.states.show.$ = false;
+        }
+      };
+      this.#_.target.on.blur = (event) => {
+        this.#_.states.show.$ = false;
+      };
+
+      target.states.show = this.#_.states.show;
+
+      //return target
+    }
+
+    close() {
+      this.#_.states.show.$ = false;
+    }
+
+    open() {
+      this.#_.states.show.$ = true;
+    }
+
+    #dispose() {
+      this.#_.pop?.dispose();
+      this.#_.pop = null;
+    }
+
+    #hide() {
+      this.#_.pop?.hide();
+    }
+
+    #init() {
+      this.#_.pop = new Popover(this.#_.target, {
+        container: this.#_.target,
+        content: " ",
+        trigger: "manual",
+      });
+    }
+
+    #show() {
+      this.#_.pop?.show();
+    }
+  }
+</script>

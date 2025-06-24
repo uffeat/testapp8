@@ -3,6 +3,7 @@ const InputControl = await use("/components/form/input_control.x.html");
 20250623
 v.1.1
 -->
+<meta type="component" />
 
 <style global>
   /* Correct Bootstrap standard, where label brushes against border in the 
@@ -36,7 +37,7 @@ v.1.1
   }
 </style>
 
-<script component type="module">
+<script main type="module">
   export default async (assets) => {
     const { base, component } = await use("@/rollocomponent/");
     const Input = await use("/components/form/input.x.html");
@@ -156,6 +157,7 @@ v.1.1
 </script>
 
 <script example type="module">
+  const Help = await use("/icons/help.icon.svg");
   const InputControl = await use("/components/form/input_control.x.html");
 
   InputControl(
@@ -175,7 +177,7 @@ v.1.1
     component.span({ slot: "start" }, "@"),
     component.button(
       { slot: "end", "@click": (event) => console.log("Clicked") },
-      "!"
+      Help({ size: 24, color: "pink" })
     )
   );
 </script>

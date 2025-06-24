@@ -265,66 +265,70 @@ app.maps
       async (result, { owner, path }) => {
         const { author, component } = await owner.import("@/rollocomponent/");
         const { Sheet } = await owner.import("@/rollosheet/");
-
-        const build_assets = async (wrapper) => {
-          /* Build assets */
-          const assets = {};
-          /* Named sheets */
-          for (const element of wrapper.querySelectorAll("style[name]")) {
-            const name = element.getAttribute("name");
-            const sheet = new Sheet(element.textContent, {
-              name: `${path.path}/${name}`,
-            });
-            assets[name] = sheet;
-            /* Global sheets */
-            if (element.hasAttribute("global")) {
-              sheet.adopt(document);
-            }
-          }
-          /* Unnamed global sheets */
-          for (const element of wrapper.querySelectorAll(
-            "style[global]:not([name])"
-          )) {
-            new Sheet(element.textContent).adopt(document);
-          }
-
-          /* Sheets from src 
-          NOTE Injected as links. Not included in 'assets'. */
-          for (const element of wrapper.querySelectorAll("style[src]")) {
-            const src = element.getAttribute("src");
-            await owner.import(src);
-          }
-          /* Templates 
-          NOTE Templates can contain (unnamed) styles. These are not sheet-processed. 
-          Can be useful for shadow templates.  */
-          for (const element of wrapper.querySelectorAll("template")) {
-            if (!element.hasAttribute("name")) {
-              throw new Error(`Unnamed <template> in ${path.path}`);
-            }
-            const name = element.getAttribute("name");
-            const html = element.innerHTML;
-            assets[name] = html;
-          }
-          return assets;
-        };
+        
 
         const wrapper = component.div({ innerHTML: result });
 
-        const type = (() => {
-          const meta = wrapper.querySelector(`meta[type]`);
-          if (meta) {
-            return meta.getAttribute("type");
-          }
-        })();
-        //console.log("type:", type); //
 
-        if (type === "component") {
-          const assets = await build_assets(wrapper);
-          const script = wrapper.querySelector("script[main]");
+       
+
+        
+
+       
+        
+
+
+
+        /* Build assets */
+        const assets = {};
+        /* Named sheets */
+        for (const element of wrapper.querySelectorAll("style[name]")) {
+          const name = element.getAttribute("name");
+          const sheet = new Sheet(element.textContent, {
+            name: `${path.path}/${name}`,
+          });
+          assets[name] = sheet;
+          /* Global sheets */
+          if (element.hasAttribute("global")) {
+            sheet.adopt(document);
+          }
+        }
+        /* Unnamed global sheets */
+        for (const element of wrapper.querySelectorAll(
+          "style[global]:not([name])"
+        )) {
+          new Sheet(element.textContent).adopt(document);
+        }
+
+        /* Sheets from src 
+        NOTE Injected as classic link-sheets. Not applicable to shadows
+        and not included in 'assets'. */
+        for (const element of wrapper.querySelectorAll("style[src]")) {
+          const src = element.getAttribute("src");
+          await owner.import(src);
+        }
+        /* Templates 
+        NOTE Templates can contain (unnamed) styles. These are not sheet-processed. 
+        Can be useful for shadow templates.  */
+        for (const element of wrapper.querySelectorAll("template")) {
+          if (!element.hasAttribute("name")) {
+            throw new Error(`Unnamed <template> in ${path.path}`);
+          }
+          const name = element.getAttribute("name");
+          const html = element.innerHTML;
+          assets[name] = html;
+        }
+
+        /* NOTE Use `component` attr to accommodate future uses of other 
+        scripts. Also, (to some degree) guards against collision with 
+        vendors' injection of scripts. */
+        const script = wrapper.find("script[component]");
+        if (script) {
           /* Create module */
           const module = await construct(
-            `${script.textContent.trim()}\n//# sourceURL=${path.path}`
+            `${script.textContent}\n//# sourceURL=${path.path}`
           );
+
           /* Get cls */
           const cls = await module.default(assets);
           /* Create instance factory */
@@ -332,39 +336,15 @@ app.maps
             ? cls.__key__
             : `rollo-${path.stem.replaceAll("_", "-")}`;
           const factory = author(cls, key);
-          /* Handle callback */
           if (cls.__factory__) {
             await cls.__factory__(factory);
           }
+
           return factory;
-        }
-
-        if (type === "assets") {
-          const assets = await build_assets(wrapper);
+        } else {
+          /* If no script, 'assets' becomes the result. This means that the 
+          .x.html format can also be used to only declare sheet and template assets. */
           return Object.freeze(assets);
-        }
-
-        if (!type) {
-          const assets = await build_assets(wrapper);
-          const script = wrapper.querySelector("script[main]");
-          if (script) {
-            const module = await construct(
-              `${script.textContent.trim()}\n//# sourceURL=${path.path}`
-            );
-            if ('default' in module) {
-              return await module.default(assets)
-            } else {
-              if (Object.keys(assets).length) {
-                return Object.freeze({...assets, ...module})
-                
-              } else {
-                return module
-              }
-              
-            }
-          } else {
-            return Object.freeze(assets);
-          }
         }
       },
       {

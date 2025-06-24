@@ -3,6 +3,7 @@ const Textarea = await use("@/components/form/textarea.x.html");
 20250621
 v.1.0
 -->
+<meta type="component" />
 
 <style global name="main">
   textarea[rollo] {
@@ -10,7 +11,7 @@ v.1.0
   }
 </style>
 
-<script component type="module">
+<script main type="module">
   export default async (assets) => {
     const { base, mix } = await use("@/rollocomponent/");
     const input = (await use("/components/form/mixins/input.js")).default;

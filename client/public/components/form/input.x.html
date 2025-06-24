@@ -3,8 +3,9 @@ const Input = await use("@/components/form/input.x.html");
 20250621
 v.1.2
 -->
+<meta type="component" />
 
-<script component type="module">
+<script main type="module">
   export default async (assets) => {
     const { base, mix } = await use("@/rollocomponent/");
     const input = (await use("/components/form/mixins/input.js")).default;

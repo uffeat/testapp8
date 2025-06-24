@@ -9,18 +9,18 @@ export default (parent, config) => {
   return class extends parent {
     static __name__ = "connect";
     
-    /* Fires 'connected' event. 
+    /* Fires 'x_connected' event. 
     Enables hooking into lifecycle without using 'connectedCallback' multiple times. */
     connectedCallback() {
       super.connectedCallback?.();
-      this.dispatchEvent(new CustomEvent("connected"));
+      this.dispatchEvent(new CustomEvent("x_connected"));
     }
 
-    /* Fires 'disconnected' event. 
+    /* Fires 'x_disconnected' event. 
     Enables hooking into lifecycle without using 'disconnectedCallback' multiple times.*/
     disconnectedCallback() {
       super.disconnectedCallback?.();
-      this.dispatchEvent(new CustomEvent("disconnected"));
+      this.dispatchEvent(new CustomEvent("x_disconnected"));
     }
   };
 };
