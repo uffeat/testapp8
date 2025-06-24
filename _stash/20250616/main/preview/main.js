@@ -1,9 +1,10 @@
 import "@/rollotest/__init__.js";
 
 
-console.info("Vite environment:", import.meta.env.MODE);
+console.info("Vercel environment:", import.meta.env.VERCEL_ENV);
 
 document.querySelector("html").dataset.bsTheme = "dark";
+
 
 import { component } from "@/rollocomponent/component.js";
 await use("/app.x.html");

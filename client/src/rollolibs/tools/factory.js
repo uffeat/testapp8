@@ -4,7 +4,8 @@ import { factory } from "@/rollolibs/tools/factory.js";
 v.1.0
 */
 
-import { component } from "@/rollo/component/component.js";
+
+import { component } from "@/rollocomponent/component.js";
 
 const srcdoc = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"></head><body></body></html>`;
 
