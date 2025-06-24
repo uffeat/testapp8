@@ -11,47 +11,47 @@ import { app } from "@/rolloapp/_app.js";
 app.maps
   .add(
     new ImportMap(
-      import.meta.glob(["/src/**/*.css", "!/src/rollotest/**/*.*"]),
+      import.meta.glob(["/src/**/*.css", "!/src/rollotest/tests/**/*.*"]),
       { type: "css" }
     ),
     new ImportMap(
-      import.meta.glob(["/src/**/*.css", "!/src/rollotest/**/*.*"], {
+      import.meta.glob(["/src/**/*.css", "!/src/rollotest/tests/**/*.*"], {
         query: "?raw",
         import: "default",
       }),
       { raw: true, type: "css" }
     ),
     new ImportMap(
-      import.meta.glob(["/src/**/*.html", "!/src/rollotest/**/*.*"], {
+      import.meta.glob(["/src/**/*.html", "!/src/rollotest/tests/**/*.*"], {
         query: "?raw",
         import: "default",
       }),
       { type: "html" }
     ),
     new ImportMap(
-      import.meta.glob(["/src/**/*.js", "!/src/rollotest/**/*.*"]),
+      import.meta.glob(["/src/**/*.js", "!/src/rollotest/tests/**/*.*"]),
       { type: "js" }
     ),
     new ImportMap(
-      import.meta.glob(["/src/**/*.js", "!/src/rollotest/**/*.*"], {
+      import.meta.glob(["/src/**/*.js", "!/src/rollotest/tests/**/*.*"], {
         query: "?raw",
         import: "default",
       }),
       { raw: true, type: "js" }
     ),
     new ImportMap(
-      import.meta.glob(["/src/**/*.json", "!/src/rollotest/**/*.*"]),
+      import.meta.glob(["/src/**/*.json", "!/src/rollotest/tests/**/*.*"]),
       { type: "json" }
     ),
     new ImportMap(
-      import.meta.glob(["/src/**/*.json", "!/src/rollotest/**/*.*"], {
+      import.meta.glob(["/src/**/*.json", "!/src/rollotest/tests/**/*.*"], {
         query: "?raw",
         import: "default",
       }),
       { raw: true, type: "json" }
     ),
     new ImportMap(
-      import.meta.glob(["/src/**/*.svg", "!/src/rollotest/**/*.*"], {
+      import.meta.glob(["/src/**/*.svg", "!/src/rollotest/tests/**/*.*"], {
         query: "?raw",
         import: "default",
       }),
@@ -61,7 +61,7 @@ app.maps
   /* Add csv support */
   .maps.add(
     new ImportMap(
-      import.meta.glob(["/src/**/*.csv", "!/src/rollotest/**/*.*"], {
+      import.meta.glob(["/src/**/*.csv", "!/src/rollotest/tests/**/*.*"], {
         query: "?raw",
         import: "default",
       }),
@@ -78,7 +78,7 @@ app.maps
   /* Add md support */
   .maps.add(
     new ImportMap(
-      import.meta.glob(["/src/**/*.md", "!/src/rollotest/**/*.*"], {
+      import.meta.glob(["/src/**/*.md", "!/src/rollotest/tests/**/*.*"], {
         query: "?raw",
         import: "default",
       }),
@@ -95,7 +95,7 @@ app.maps
   /* Add yaml support */
   .maps.add(
     new ImportMap(
-      import.meta.glob(["/src/**/*.yaml", "!/src/rollotest/**/*.*"], {
+      import.meta.glob(["/src/**/*.yaml", "!/src/rollotest/tests/**/*.*"], {
         query: "?raw",
         import: "default",
       }),

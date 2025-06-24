@@ -1,9 +1,3 @@
-
-
-
-
-
-
 await use("@/rollotest/");
 
 document.querySelector("html").dataset.bsTheme = "dark";
@@ -15,7 +9,7 @@ console.info(
 
 const { component } = await use("@/rollocomponent/");
 
-console.log('HERE')
+console.log("HERE");
 
 const { Pop } = await use("/rollolibs/bootstrap/pop.x.html");
 
