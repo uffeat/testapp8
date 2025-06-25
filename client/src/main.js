@@ -24,20 +24,21 @@ const anvil = await (async () => {
   })();
 
   iframe.call = async (name, data = {}) => {
-    const __submission__ = submission();
+    const _submission = submission();
     const { promise, resolve } = Promise.withResolvers();
     iframe.contentWindow.postMessage(
-      { __name__: name, __submission__, ...data },
+      { name, meta: {submission: _submission}, data },
+      // TODO specific url
       "*"
     );
 
     const response = (event) => {
-      const data = event.data;
-      if (data?.__submission__ !== __submission__) return;
-      resolve(data);
+      const data = event.data || {};
+      const meta = data.meta || {}
+      if (meta.submission !== _submission) return;
+      resolve(data.data || {});
       window.removeEventListener("message", response);
     };
-
     window.addEventListener("message", response);
     return promise;
   };
@@ -45,6 +46,6 @@ const anvil = await (async () => {
 })();
 
 /* Test */
-const response = await anvil.call('foo', {'FOO': 42})
+const response = await anvil.call('foo', {'number': 42})
 console.log('response:', response)
 
