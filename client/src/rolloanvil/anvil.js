@@ -2,24 +2,25 @@ import origins from "@/rollometa/rolloanvil/origins.json";
 
 /* Util for Anvil-related stuff. */
 export const anvil = new (class {
-  #URL;
+  #_ = {}
   constructor() {
     if (import.meta.env.VERCEL_ENV === "production") {
-      this.#URL = origins.production;
+      this.#_.URL = origins.production;
     } else {
-      this.#URL = origins.development;
+      this.#_.URL = origins.development;
     }
   }
 
   /* Returns origin of Anvil server. */
   get URL() {
-    return this.#URL;
+    return this.#_.URL;
   }
 
   /* Returns client api controller. */
   get client() {
-    /* TODO
-    Load iframe lazily */
+    if (!this.#_.client) {
+      
+    }
 
   }
 

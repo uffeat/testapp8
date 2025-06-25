@@ -1,3 +1,4 @@
+import { anvil } from "@/rolloanvil/anvil.js";
 await use("@/rollotest/");
 
 document.querySelector("html").dataset.bsTheme = "dark";
@@ -7,15 +8,12 @@ console.info(
   import.meta.env.DEV ? "development" : import.meta.env.VERCEL_ENV
 );
 
-
-
 const { component } = await use("@/rollocomponent/");
 
-const anvil = await (async () => {
+const iframe = await (async () => {
   const { promise, resolve } = Promise.withResolvers();
   const iframe = component.iframe("anvil", {
-    // TODO Env-specific non-hard-coded url
-    src: "https://testapp8dev.anvil.app",
+    src: anvil.URL,
     "@load$once": (event) => resolve({}),
     parent: app,
   });
@@ -30,14 +28,13 @@ const anvil = await (async () => {
     const _submission = submission();
     const { promise, resolve } = Promise.withResolvers();
     iframe.contentWindow.postMessage(
-      { name, meta: {submission: _submission}, data },
-      // TODO specific url
-      "*"
+      { name, meta: { submission: _submission }, data },
+      anvil.URL
     );
 
     const response = (event) => {
       const data = event.data || {};
-      const meta = data.meta || {}
+      const meta = data.meta || {};
       if (meta.submission !== _submission) return;
       resolve(data.data || {});
       window.removeEventListener("message", response);
@@ -49,6 +46,5 @@ const anvil = await (async () => {
 })();
 
 /* Test */
-const response = await anvil.call('foo', {'number': 42})
-console.log('response:', response)
-
+const response = await iframe.call("foo", { number: 42 });
+console.log("response:", response);
