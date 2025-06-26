@@ -10,7 +10,10 @@ import { app } from "@/rolloapp/_app.js";
 app.maps
   .add(
     new ImportMap(
-      import.meta.glob(["/src/**/*.css", "!/src/rollotest/tests/**/*.*"]),
+      import.meta.glob([
+        "/src/**/*.css", 
+        "!/src/rollotest/tests/**/*.*"
+      ]),
       { type: "css" }
     ),
     new ImportMap(

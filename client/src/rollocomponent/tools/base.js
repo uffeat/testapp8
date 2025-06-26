@@ -1,5 +1,5 @@
 /*
-import { base } from "@/rollocomponent/tools/base.js";
+import { base } from "@/rollocomponent/base.js";
 20250615
 v.1.0
 */
@@ -8,7 +8,12 @@ import { is_shadow_ready } from "@/rollotools/is/is_shadow_ready.js";
 import { mix } from "@/rollocomponent/tools/mix.js";
 import { mixins } from "@/rollocomponent/mixins/__init__.js";
 
-export const base = (native, ...__mixins) => {
+
+
+export const base = (...args) => {
+  const native = args.find((a) => typeof a === 'string') || null
+  const __mixins = args.filter((a) => typeof a === 'function')
+
   const _mixins = [
     mixins.attrs,
     mixins.classes,

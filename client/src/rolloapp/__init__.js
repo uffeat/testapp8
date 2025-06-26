@@ -6,6 +6,7 @@ import { app } from "@/rolloapp/_app.js";
 import "@/rolloapp/_config/__init__.js";
 
 
+
 Object.defineProperty(window, "app", {
   configurable: false,
   enumerable: true,

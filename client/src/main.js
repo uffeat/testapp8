@@ -10,41 +10,17 @@ console.info(
 
 const { component } = await use("@/rollocomponent/");
 
-const iframe = await (async () => {
-  const { promise, resolve } = Promise.withResolvers();
-  const iframe = component.iframe("anvil", {
-    src: anvil.URL,
-    "@load$once": (event) => resolve({}),
-    parent: app,
-  });
-  await promise;
 
-  const submission = (() => {
-    let submission = 0;
-    return () => submission++;
-  })();
 
-  iframe.call = async (name, data = {}) => {
-    const _submission = submission();
-    const { promise, resolve } = Promise.withResolvers();
-    iframe.contentWindow.postMessage(
-      { name, meta: { submission: _submission }, data },
-      anvil.URL
-    );
-
-    const response = (event) => {
-      const data = event.data || {};
-      const meta = data.meta || {};
-      if (meta.submission !== _submission) return;
-      resolve(data.data || {});
-      window.removeEventListener("message", response);
-    };
-    window.addEventListener("message", response);
-    return promise;
-  };
-  return iframe;
+/* Test */
+(async () => {
+const response = await anvil.client.foo({ number: 42 });
+console.log("client response:", response);
 })();
 
 /* Test */
-const response = await iframe.call("foo", { number: 42 });
-console.log("response:", response);
+(async () => {
+const response = await anvil.server.foo({ number: 42 });
+console.log("server response:", response);
+})();
+

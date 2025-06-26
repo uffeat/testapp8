@@ -4,6 +4,8 @@ import { app } from "@/rolloapp/_app.js";
 
 import { author } from "@/rollocomponent/tools/author.js";
 import { base } from "@/rollocomponent/tools/base.js";
+import { component } from "@/rollocomponent/component.js";
+
 
 import { construct } from "@/rolloapp/_tools/construct.js";
 import { ImportMaps } from "@/rolloapp/_tools/import_maps.js";
@@ -11,8 +13,12 @@ import { Path } from "@/rolloapp/_tools/path.js";
 import { Processors } from "@/rolloapp/_tools/processors.js";
 import { pub } from "@/rolloapp/_tools/pub.js";
 
+import foo from "@/rolloapp/_mixins/foo.js";
+
+
+
 const App = author(
-  class extends base() {
+  class extends base(foo) {
     static __key__ = "rollo-app";
 
     #_ = {};
@@ -20,6 +26,7 @@ const App = author(
     constructor() {
       super();
       this.id = "app";
+      this.shadow.append(component.div({display: 'none'}, component.slot({name: 'anvil'})))
 
       this.#_.maps = new ImportMaps(this);
       this.#_.processors = new Processors(this);

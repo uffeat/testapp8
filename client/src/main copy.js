@@ -1,3 +1,4 @@
+import { anvil } from "@/rolloanvil/anvil.js";
 await use("@/rollotest/");
 
 document.querySelector("html").dataset.bsTheme = "dark";
@@ -9,14 +10,19 @@ console.info(
 
 const { component } = await use("@/rollocomponent/");
 
-const anvil = await (async () => {
+
+
+const iframe = await (async () => {
   const { promise, resolve } = Promise.withResolvers();
   const iframe = component.iframe("anvil", {
-    src: "https://testapp8dev.anvil.app",
-    "@load$once": (event) => resolve({}),
+    src: anvil.URL,
+    "@load$once": (event) => {
+      console.log('Loaded')//
+      resolve()
+    },
     parent: app,
+    slot: 'anvil'
   });
-
   await promise;
 
   const submission = (() => {
@@ -25,34 +31,26 @@ const anvil = await (async () => {
   })();
 
   iframe.call = async (name, data = {}) => {
-    const __submission__ = submission();
+    const _submission = submission();
     const { promise, resolve } = Promise.withResolvers();
     iframe.contentWindow.postMessage(
-      { __name__: name, __submission__, ...data },
-      "*"
+      { name, meta: { submission: _submission }, data },
+      anvil.URL
     );
 
     const response = (event) => {
-      const data = event.data;
-      /* TODO
-      - match submission */
-      console.log('event:', event)
-      console.log('data:', data)
-      resolve(data);
-
+      const data = event.data || {};
+      const meta = data.meta || {};
+      if (meta.submission !== _submission) return;
+      resolve(data.data || {});
       window.removeEventListener("message", response);
     };
-
     window.addEventListener("message", response);
-
     return promise;
   };
-
   return iframe;
 })();
 
-const response = anvil.call('foo', {'FOO': 42})
-//.then((data) => console.log('data:', data))
-
-console.log('response:', response)
-
+/* Test */
+const response = await iframe.call("foo", { number: 42 });
+console.log("response:", response);
