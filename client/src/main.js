@@ -10,17 +10,21 @@ console.info(
 
 const { component } = await use("@/rollocomponent/");
 
-
-
 /* Test */
-(async () => {
-const response = await anvil.client.foo({ number: 42 });
-console.log("client response:", response);
-})();
+anvil.server
+  .echo({ number: 42 })
+  .then((response) => console.log("server response:", response));
 
-/* Test */
-(async () => {
-const response = await anvil.server.foo({ number: 42 });
-console.log("server response:", response);
-})();
+anvil.client
+  .echo({ number: 42 })
+  .then((response) => console.log("client response:", response));
 
+  anvil.client
+  .echo({ number: 42 })
+  .then((response) => {
+    console.log("client submission:", anvil.client.submission);
+    console.log("client response:", response)
+  });
+
+
+   

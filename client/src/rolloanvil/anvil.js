@@ -1,3 +1,8 @@
+/*
+import { anvil } from "@/rolloanvil/anvil.js";
+const { anvil } = await use("@/rolloanvil/anvil.js");
+*/
+
 import { component } from "@/rollocomponent/component.js";
 import origins from "@/rollometa/rolloanvil/origins.json";
 
@@ -13,7 +18,7 @@ export const anvil = new (class {
 
     const owner = this;
 
-    const server = new (class {
+    const source = new (class {
       #_ = {
         base: `${owner.URL}/_/api`,
         options: {
@@ -22,6 +27,10 @@ export const anvil = new (class {
         },
         submission: 0,
       };
+
+      get submission() {
+        return this.#_.submission;
+      }
 
       /* Sends post request to server endpoint and returns parsed response. */
       async call(name, data = {}, { raw = false } = {}) {
@@ -50,8 +59,11 @@ export const anvil = new (class {
       {},
       {
         get: (_, name) => {
+          if (name in source) {
+            return source[name];
+          }
           return (...args) => {
-            return server.call(name, ...args);
+            return source.call(name, ...args);
           };
         },
       }
@@ -68,7 +80,7 @@ export const anvil = new (class {
     if (!this.#_.client) {
       const owner = this;
 
-      const client = new (class {
+      const source = new (class {
         #_ = {
           iframe: {},
           submission: 0,
@@ -89,6 +101,28 @@ export const anvil = new (class {
             parent: app,
             slot: "anvil",
           });
+
+          this.#_.config = new (class {
+            #_ = {
+              timeout: 3000,
+            };
+
+            get timeout() {
+              return this.#_.timeout;
+            }
+
+            set timeout(timeout) {
+              this.#_.timeout = timeout;
+            }
+          })();
+        }
+
+        get config() {
+          return this.#_.config;
+        }
+
+        get submission() {
+          return this.#_.submission;
         }
 
         /* Calls "client-side endpoint" and returns result. */
@@ -97,23 +131,40 @@ export const anvil = new (class {
             await this.#_.iframe.promise;
           }
           const submission = this.#_.submission++;
-          const { promise, resolve } = Promise.withResolvers();
+          const { promise, resolve, reject } = Promise.withResolvers();
+
+          const timer = setTimeout(() => {
+            const error = new Error(
+              `Client api '${name}' did not respond in time.`
+            );
+            if (import.meta.env.DEV) {
+              reject(error);
+            } else {
+              resolve(error);
+            }
+
+            window.removeEventListener("message", onmessage);
+          }, this.config.timeout);
+
           this.#_.iframe.component.contentWindow.postMessage(
-            { name, meta: { submission }, data },
+            { name, submission, data },
             owner.URL
           );
-          const onmessage = (event) => {
-            const data = event.data || {};
-            const meta = data.meta || {};
-            if (meta.submission !== submission) return;
-            if (meta.error) {
-              console.error("meta:", meta);
-              throw new Error(meta.error);
+
+          function onmessage(event) {
+            if (!event.origin || event.origin !== owner.URL) return;
+            const data = event.data;
+            if (data.submission !== submission) return;
+            clearTimeout(timer);
+            if (data.error) {
+              reject(new Error(data.error));
+            } else {
+              resolve(data.data || null);
             }
-            resolve(data.data || null);
             window.removeEventListener("message", onmessage);
-          };
+          }
           window.addEventListener("message", onmessage);
+
           return promise;
         }
       })();
@@ -122,8 +173,11 @@ export const anvil = new (class {
         {},
         {
           get: (_, name) => {
+            if (name in source) {
+              return source[name];
+            }
             return (...args) => {
-              return client.call(name, ...args);
+              return source.call(name, ...args);
             };
           },
         }
@@ -134,6 +188,6 @@ export const anvil = new (class {
 
   /* Returns server api controller. */
   get server() {
-    return this.#_.server
+    return this.#_.server;
   }
 })();

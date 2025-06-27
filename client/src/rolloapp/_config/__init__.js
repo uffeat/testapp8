@@ -31,7 +31,10 @@ app.maps
       { type: "html" }
     ),
     new ImportMap(
-      import.meta.glob(["/src/**/*.js", "!/src/rollotest/tests/**/*.*"]),
+      import.meta.glob([
+        "/src/**/*.js", 
+        "!/src/rollotest/tests/**/*.*"
+        ]),
       { type: "js" }
     ),
     new ImportMap(

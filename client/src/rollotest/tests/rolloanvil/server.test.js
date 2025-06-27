@@ -2,25 +2,20 @@
 rolloanvil/server
 */
 
-
-const { server } = await use("@/rolloanvil/server.js")
+const { anvil } = await use("@/rolloanvil/anvil.js");
 
 await (async () => {
- const data = {
+  const data = {
     email: "name@company.com",
     score: 8,
     accept: true,
     bar: null,
     stuff: false,
   };
-  
+
   const result = await server.foo(data);
   console.log("result:", result);
-  
-  const raw = await server.foo(data, { raw: true });
+
+  const raw = await anvil.server.foo(data, { raw: true });
   console.log("raw:", raw);
 })();
-
-
-
-
