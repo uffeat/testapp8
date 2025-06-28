@@ -4,7 +4,7 @@ const { anvil } = await use("@/rolloanvil/anvil.js");
 */
 
 import { component } from "@/rollocomponent/component.js";
-import origins from "@/rollometa/rolloanvil/origins.json";
+
 
 /* Util for Anvil-related stuff. */
 export const anvil = new (class {
@@ -94,6 +94,7 @@ export const anvil = new (class {
           const { promise, resolve, reject } = Promise.withResolvers();
 
           const timer = setTimeout(() => {
+            console.error('submission:', submission)
             const error = new Error(
               `Client api '${name}' did not respond in time.`
             );
@@ -112,8 +113,12 @@ export const anvil = new (class {
           );
 
           function onmessage(event) {
+
+            //console.log('event:', event)////
+
+
             if (!event.origin || event.origin !== anvil.origin) return;
-            const data = event.data;
+            const data = event.data || {};
             if (data.submission !== submission) return;
             clearTimeout(timer);
             if (data.error) {
@@ -210,3 +215,4 @@ anvil.config.origins = Object.freeze({
   development: "https://testapp8dev.anvil.app",
   production: "https://testapp8.anvil.app",
 });
+

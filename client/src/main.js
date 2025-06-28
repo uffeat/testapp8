@@ -1,4 +1,4 @@
-//import { anvil } from "@/rolloanvil/anvil.js";
+
 await use("@/rollotest/");
 
 document.querySelector("html").dataset.bsTheme = "dark";
@@ -12,7 +12,33 @@ const { component } = await use("@/rollocomponent/");
 const { Modal } = await use("@/rollolibs/bootstrap/bootstrap.js");
 const { anvil } = await use("@/rolloanvil/anvil.js");
 
-const element = component.div(
+
+
+/*
+const iframe = component.iframe('plot', {
+  src: 'https://testapp8dev.anvil.app/bar',
+})
+app.append(iframe)
+*/
+
+
+
+
+
+app.anvil.client
+  .echo({ number: 42 })
+  .then((response) => console.log("client response:", response));
+
+
+app.anvil.server
+  .echo({ number: 42 })
+  .then((response) => console.log("server response:", response));
+
+
+  /*
+  
+(() => {
+  const element = component.div(
   "modal.anvil",
   {
     tab: -1,
@@ -37,16 +63,12 @@ const modal = new Modal(element, {});
 
 const container = element.find(".modal-body");
 
-const iframe = component.iframe({src: 'https://testapp8dev.anvil.app/foo'})
-container.append(iframe)
+const iframe = component.iframe('plot', {
+  src: 'https://testapp8dev.anvil.app/bar',
+})
 
+container.append(iframe)
 modal.show();
 
-app.anvil.client
-  .echo({ number: 42 })
-  .then((response) => console.log("client response:", response));
-
-
-app.anvil.server
-  .echo({ number: 42 })
-  .then((response) => console.log("server response:", response));
+})();
+  */
