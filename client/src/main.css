@@ -25,4 +25,21 @@ img {
   max-width: 100%;
 }
 
+/*
+TODO Move modal stuff to Modal parcel or .x.html
+*/
+
+.modal.anvil .modal-body {
+  display: flex;
+  flex-direction: column;
+
+
+  background-color: pink;
+  height: 800px;
+}
+
+.modal.anvil .modal-body iframe {
+  height: 100%;
+}
+
 

@@ -16,17 +16,24 @@ export class Sheets {
     this.#_.owner = owner;
   }
 
-  get sheets() {
-
+  /* */
+  get owner() {
+    return this.#_.owner;
   }
 
+  /* */
+  get sheets() {
+    return Object.freeze(Array.from(this.#_.registry.values()));
+  }
+
+  /* */
   add(...sheets) {
     sheets.forEach((sheet) => {
-      if (!this.#_.registry.has(sheet)) {
+      if (!this.has(sheet)) {
         if (sheet instanceof Sheet) {
-          sheet.adopt(this.#_.owner);
+          sheet.adopt(this.owner);
         } else {
-          this.#_.owner.adoptedStyleSheets.push(sheet);
+          this.owner.adoptedStyleSheets.push(sheet);
         }
         this.#_.registry.add(sheet);
       }
@@ -34,13 +41,40 @@ export class Sheets {
     return this;
   }
 
+  /* */
+  find(name) {
+    for (const sheet of this.#_.registry.values()) {
+      if (name === sheet.name) {
+        return sheet;
+      }
+    }
+  }
+
+  /* */
+  has(sheet) {
+    return this.#_.registry.has(sheet);
+  }
+
+  /* */
+  async import(...paths) {
+    for (const path of paths) {
+      const sheet = await use(
+        path.endsWith(".sheet.css") ? path : `${path}.sheet.css`
+      );
+      sheet.adopt(this.owner);
+    }
+
+    return this;
+  }
+
+  /* */
   remove(...sheets) {
     sheets.forEach((sheet) => {
-      if (this.#_.registry.has(sheet)) {
+      if (this.has(sheet)) {
         if (sheet instanceof Sheet) {
-          sheet.unadopt(this.#_.owner);
+          sheet.unadopt(this.owner);
         } else {
-          remove(this.#_.owner.adoptedStyleSheets, sheet);
+          remove(this.owner.adoptedStyleSheets, sheet);
         }
         this.#_.registry.add(sheet);
       }

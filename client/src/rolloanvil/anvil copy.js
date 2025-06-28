@@ -10,35 +10,77 @@ import origins from "@/rollometa/rolloanvil/origins.json";
 export const anvil = new (class {
   #_ = {};
   constructor() {
-    this.#_.config = new (class {
-      #_ = {};
+    if (import.meta.env.VERCEL_ENV === "production") {
+      this.#_.origin = origins.production;
+    } else {
+      this.#_.origin = origins.development;
+    }
 
-      get origins() {
-        return this.#_.origins;
+    const anvil = this;
+
+    const server = new (class {
+      #_ = {
+        base: `${anvil.origin}/_/api`,
+        options: {
+          headers: { "content-type": "text/plain" },
+          method: "POST",
+        },
+        submission: 0,
+      };
+
+      get submission() {
+        return this.#_.submission;
       }
 
-      set origins(origins) {
-        this.#_.origins = origins;
+      /* Sends post request to server endpoint and returns parsed response. */
+      async call(name, data = {}, { raw = false } = {}) {
+        /* NOTE 'submission' query item busts any silent browser caching and 
+        provides meta for use server-side. */
+        const response = await fetch(
+          `${this.#_.base}/${name}?submission=${this.#_.submission++}`,
+          {
+            body: JSON.stringify(data),
+            ...this.#_.options,
+          }
+        );
+        if (raw) {
+          return response.text();
+        }
+        const result = await response.json();
+        /* Check for error cue */
+        if ("__error__" in result) {
+          throw new Error(result.__error__);
+        }
+        return result;
       }
     })();
-  }
 
-  get config() {
-    return this.#_.config;
+    this.#_.server = new Proxy(
+      {},
+      {
+        get: (_, name) => {
+          if (name in server) {
+            return server[name];
+          }
+          return (...args) => {
+            return server.call(name, ...args);
+          };
+        },
+      }
+    );
   }
 
   /* Returns origin of Anvil app. */
   get origin() {
-    if (import.meta.env.VERCEL_ENV === "production") {
-      return this.config.origins.production;
-    }
-    return this.config.origins.development;
+    return this.#_.origin;
   }
 
   /* Returns client api controller. */
   get client() {
     if (!this.#_.client) {
+
       const anvil = this;
+      
 
       const client = new (class {
         #_ = {
@@ -148,65 +190,6 @@ export const anvil = new (class {
 
   /* Returns server api controller. */
   get server() {
-    if (!this.#_.server) {
-      const anvil = this;
-
-      const server = new (class {
-        #_ = {
-          base: `${anvil.origin}/_/api`,
-          options: {
-            headers: { "content-type": "text/plain" },
-            method: "POST",
-          },
-          submission: 0,
-        };
-
-        get submission() {
-          return this.#_.submission;
-        }
-
-        /* Sends post request to server endpoint and returns parsed response. */
-        async call(name, data = {}, { raw = false } = {}) {
-          /* NOTE 'submission' query item busts any silent browser caching and 
-        provides meta for use server-side. */
-          const response = await fetch(
-            `${this.#_.base}/${name}?submission=${this.#_.submission++}`,
-            {
-              body: JSON.stringify(data),
-              ...this.#_.options,
-            }
-          );
-          if (raw) {
-            return response.text();
-          }
-          const result = await response.json();
-          /* Check for error cue */
-          if ("__error__" in result) {
-            throw new Error(result.__error__);
-          }
-          return result;
-        }
-      })();
-
-      this.#_.server = new Proxy(
-        {},
-        {
-          get: (_, name) => {
-            if (name in server) {
-              return server[name];
-            }
-            return (...args) => {
-              return server.call(name, ...args);
-            };
-          },
-        }
-      );
-    }
     return this.#_.server;
   }
 })();
-
-anvil.config.origins = Object.freeze({
-  development: "https://testapp8dev.anvil.app",
-  production: "https://testapp8.anvil.app",
-});

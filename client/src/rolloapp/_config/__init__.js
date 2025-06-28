@@ -11,8 +11,9 @@ app.maps
   .add(
     new ImportMap(
       import.meta.glob([
-        "/src/**/*.css", 
-        "!/src/rollotest/tests/**/*.*"
+        "/src/**/*.css",
+        "!/src/rollotest/tests/**/*.*",
+        //"!/src/nowhere/**/*.*"//
       ]),
       { type: "css" }
     ),
@@ -31,10 +32,7 @@ app.maps
       { type: "html" }
     ),
     new ImportMap(
-      import.meta.glob([
-        "/src/**/*.js", 
-        "!/src/rollotest/tests/**/*.*"
-        ]),
+      import.meta.glob(["/src/**/*.js", "!/src/rollotest/tests/**/*.*"]),
       { type: "js" }
     ),
     new ImportMap(
@@ -155,12 +153,12 @@ app.maps
         }
 
         if (type === "assets") {
-          const assets = await build(wrapper);
+          const assets = await build(wrapper, { path });
           return Object.freeze(assets);
         }
 
         if (!type) {
-          const assets = await build(wrapper);
+          const assets = await build(wrapper, { path });
           const script = wrapper.querySelector("script[main]");
           if (script) {
             const module = await construct(
@@ -203,4 +201,32 @@ app.maps
         cache: true,
       }
     ),
+  })
+
+  /* Add .sheet.css support */
+  .signatures.add({
+    "sheet.css": (options, { owner, path }) => {
+      options.raw = true;
+    },
+  })
+  .processors.add({
+    "sheet.css": new Processor(
+      async (result, { owner, path }) => {
+        const { Sheet } = await owner.import("@/rollosheet/");
+        const sheet = new Sheet(result, {
+          name: path.path,
+        });
+        return sheet;
+      },
+
+      { cache: true }
+    ),
   });
+
+
+  /*
+app.anvil.config.origins = {
+  development: "https://testapp8dev.anvil.app",
+  production: "https://testapp8.anvil.app",
+};
+*/

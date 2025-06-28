@@ -1,0 +1,3 @@
+:has(> slot[name="anvil"]) {
+  display: none;
+}

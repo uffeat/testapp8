@@ -15,6 +15,10 @@ export class ImportMaps {
     this.#_.owner = owner;
   }
 
+  get types() {
+    return Object.freeze(Array.from(this.#_.registry.keys()))
+  }
+
   /* Adds import maps. Chainable with respect to owner. */
   add(...specs) {
     specs.forEach((import_map) => {

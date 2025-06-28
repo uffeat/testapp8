@@ -27,7 +27,7 @@ export class Sheet extends CSSStyleSheet {
   }
 
   get targets() {
-    return Object.freeze(Array.from(this.#_.targets.keys()));
+    return Object.freeze(Array.from(this.#_.targets.values()));
   }
 
   get text() {

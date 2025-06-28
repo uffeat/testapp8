@@ -1,6 +1,6 @@
 /*
-import { Popover } from "@/rollolibs/bootstrap/bootstrap.js";
-const { Popover } = await use("@/rollolibs/bootstrap/bootstrap.js");
+import { Modal, Popover } from "@/rollolibs/bootstrap/bootstrap.js";
+const { Modal, Popover } = await use("@/rollolibs/bootstrap/bootstrap.js");
 */
 
 export { default as Alert } from "./_src/alert.js";
