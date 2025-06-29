@@ -1,3 +1,3 @@
-:has(> slot[name="anvil"]) {
+:has(> slot[name="data"]) {
   display: none;
 }

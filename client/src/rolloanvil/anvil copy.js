@@ -108,20 +108,23 @@ export const anvil = new (class {
           }, this.config.timeout);
 
           this.#_.iframe.component.contentWindow.postMessage(
-            { data, meta: {name, submission} },
+            { name, submission, data },
             anvil.origin
           );
 
           function onmessage(event) {
+
+            //console.log('event:', event)////
+
+
             if (!event.origin || event.origin !== anvil.origin) return;
-            if (!event.data) return;
-            if (!event.data.meta) return;
-            if (event.data.meta.submission !== submission) return;
+            const data = event.data || {};
+            if (data.submission !== submission) return;
             clearTimeout(timer);
-            if (event.data.meta.error) {
-              reject(new Error(event.data.meta.error));
+            if (data.error) {
+              reject(new Error(data.error));
             } else {
-              resolve(event.data.data || null);
+              resolve(data.data || null);
             }
             window.removeEventListener("message", onmessage);
           }

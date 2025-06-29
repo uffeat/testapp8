@@ -13,7 +13,7 @@ app.maps
       import.meta.glob([
         "/src/**/*.css",
         "!/src/rollotest/tests/**/*.*",
-        //"!/src/nowhere/**/*.*"//
+        "!/src/nowhere/**/*.*"//
       ]),
       { type: "css" }
     ),
@@ -224,9 +224,3 @@ app.maps
   });
 
 
-  /*
-app.anvil.config.origins = {
-  development: "https://testapp8dev.anvil.app",
-  production: "https://testapp8.anvil.app",
-};
-*/
