@@ -2,9 +2,9 @@
 import "@/rolloapp/_config.js";
 */
 
-import { ImportMap } from "@/rolloapp/_tools/import_map.js";
-import { Processor } from "@/rolloapp/_tools/processor.js";
-import { app } from "@/rolloapp/_app.js";
+import { ImportMap } from "@/rolloapp/tools/import_map.js";
+import { Processor } from "@/rolloapp/tools/processor.js";
+import { app } from "@/rolloapp/app.js";
 
 /* Add support for common file types */
 app.maps
@@ -13,7 +13,7 @@ app.maps
       import.meta.glob([
         "/src/**/*.css",
         "!/src/rollotest/tests/**/*.*",
-        "!/src/nowhere/**/*.*"//
+        //"!/src/nowhere/**/*.*"//
       ]),
       { type: "css" }
     ),
@@ -117,7 +117,7 @@ app.maps
     "x.html": new Processor(
       async (result, { owner, path }) => {
         const { author, component } = await owner.import("@/rollocomponent/");
-        const { build } = await owner.import("@/rolloapp/_tools/assets.js");
+        const { build } = await owner.import("@/rolloapp/tools/assets.js");
         const { construct } = await owner.import(
           "@/rolloapp/_tools/construct.js"
         );

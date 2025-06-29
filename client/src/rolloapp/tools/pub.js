@@ -1,10 +1,10 @@
 /*
-import { pub } from "@/rolloapp/_tools/pub.js";
+import { pub } from "@/rolloapp/tools/pub.js";
 20250526
 v.2.0
 */
 
-import { construct } from "@/rolloapp/_tools/construct.js";
+import { construct } from "@/rolloapp/tools/construct.js";
 
 /* Utility for importing public files. */
 export const pub = new (class {

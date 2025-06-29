@@ -9,43 +9,37 @@ console.info(
 
 const { component } = await use("@/rollocomponent/");
 const { Modal } = await use("@/rollolibs/bootstrap/bootstrap.js");
-//const { anvil } = await use("@/rolloanvil/anvil.js");
-const { Client } = await use("@/rolloanvil/client.js");
+const { Client, anvil } = await use("@/rolloanvil/");
 
-const client = Client({slot: 'data', parent: app})
-const client_2 = Client({parent: app, src: 'bar'})
+
+const client_1 = Client({slot: 'data', parent: app})
+const client_3 = Client({parent: app, src: 'bar'})
 
 await (async () => {
-  const response = await client.call('echo', { number: 42 }, {timeout: 2000})
+  const response = await client_1.$.echo({ number: 42 })
+  console.log("client response:", response)
+})();
+
+await (async () => {
+  const response = await client_1.call('echo', { number: 42 }, {timeout: 2000})
+  console.log("client response:", response)
+})();
+
+await (async () => {
+  const response = await anvil.client.echo({ number: 42 })
   console.log("client response:", response)
 })();
 
 
 
 
-//const bar = AnvilClient({parent: app, src: 'bar'})
-
-
-/*
-const iframe = component.iframe('plot', {
-  src: 'https://testapp8dev.anvil.app/bar',
-})
-app.append(iframe)
-*/
-
 await (async () => {
-  //const response = await app.anvil.client.echo({ number: 42 })
-  //console.log("client response:", response)
+  const response = await anvil.server.echo({ number: 42 }, {timeout: 2000})
+  console.log("server response:", response)
 })();
 
 
-/*
-app.anvil.client
-  .echo({ number: 42 })
-  .then((response) => {
-    console.log("client response:", response)
-  });
-  */
+
 
 
 /*

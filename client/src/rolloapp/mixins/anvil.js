@@ -1,9 +1,9 @@
 /*
-import anvil from "@/rolloapp/_mixins/anvil.js";
+import anvil from "@/rolloapp/mixins/anvil.js";
 202505626
 v.1.0
 */
-import { anvil } from "@/rolloanvil/anvil.js";
+
 
 export default (parent, config) => {
   return class extends parent {
@@ -18,7 +18,7 @@ export default (parent, config) => {
     }
 
     get anvil() {
-      return anvil
+     
     }
   };
 };

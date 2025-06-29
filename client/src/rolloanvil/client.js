@@ -1,11 +1,13 @@
-import origins from "@/rollometa/rolloanvil/origins.json";
+/*
+import { Client } from "@/rolloanvil/client.js";
+const { Client } = await use("@/rolloanvil/client.js");
+*/
+
+import "@/rolloanvil/assets/main.css";
 import { author } from "@/rollocomponent/tools/author.js";
 import { base } from "@/rollocomponent/tools/base.js";
-
-const BASE_ORIGIN =
-  import.meta.env.VERCEL_ENV === "production"
-    ? origins.production
-    : origins.development;
+import config from "@/rolloanvil/config.json";
+import { Listener } from "@/rolloanvil/tools/listener";
 
 const cls = class extends base("iframe") {
   static __key__ = "anvil-client";
@@ -20,7 +22,11 @@ const cls = class extends base("iframe") {
 
   constructor() {
     super();
-    this.id = this.constructor.id();
+    this.id = `${this.constructor.__key__}-${this.constructor.id()}`;
+    this.#_.origin =
+      import.meta.env.VERCEL_ENV === "production"
+        ? config.origins.production
+        : config.origins.development;
   }
 
   /* . */
@@ -28,9 +34,17 @@ const cls = class extends base("iframe") {
     super.__new__?.();
     this.attribute[this.constructor.__key__] = true;
 
+    this.#_.$ = new Proxy(this, {
+      get: (target, name) => {
+        return (...args) => {
+          return target.call(name, ...args);
+        };
+      },
+    });
+
     this.#_.config = new (class {
       #_ = {
-        timeout: 3000,
+        timeout: config.timeout.client,
       };
 
       get timeout() {
@@ -43,31 +57,32 @@ const cls = class extends base("iframe") {
     })();
   }
 
+  get $() {
+    return this.#_.$;
+  }
+
   get config() {
     return this.#_.config;
   }
 
-  get submission() {
-    return this.#_.submission;
-  }
-
   get src() {
-    return this.#_.src || BASE_ORIGIN;
+    return this.#_.src || this.#_.origin;
   }
 
   set src(src) {
     if (this.#_.src) {
       throw new Error(`'src' cannot be changed.`);
     }
+    this.#_.src = `${this.#_.origin}/${src}`;
+  }
 
-    this.#_.src = `${BASE_ORIGIN}/${src}`;
+  get submission() {
+    return this.#_.submission;
   }
 
   /* Calls "client-side endpoint" and returns result. */
   async call(name, data, options = {}) {
-    const owner = this;
-
-    if (!this.#_.ready) {
+    if (this.#_.promise) {
       await this.#_.promise;
     }
 
@@ -99,102 +114,13 @@ const cls = class extends base("iframe") {
 
     const { promise, resolve } = Promise.withResolvers();
     this.#_.promise = promise;
-    this.#_.resolve = resolve;
 
     this.on.load$once = (event) => {
       this.#_.ready = true;
-      this.#_.resolve(this);
+      delete this.#_.promise;
+      resolve(this);
     };
   }
 };
 
 export const Client = author(cls);
-
-class Listener {
-  #_ = {};
-
-  constructor({
-    data,
-    name,
-    options = {},
-    owner,
-    reject,
-    resolve,
-    submission,
-  }) {
-    this.#_.data = data;
-    this.#_.name = name;
-    this.#_.owner = owner;
-    this.#_.submission = submission;
-    this.#_.options = options;
-    this.#_.reject = reject;
-    this.#_.resolve = resolve;
-
-    if (![false, null].includes(this.options.timeout)) {
-      this.#_.timer = setTimeout(() => {
-        const error = new Error(
-          `'${name}' did not respond in time for submission: ${this.submission}.`
-        );
-        if (import.meta.env.DEV) {
-          this.reject(error);
-        } else {
-          this.resolve(error);
-        }
-        window.removeEventListener("message", this.onmessage);
-      }, this.options.timeout === undefined ? this.owner.config.timeout : this.options.timeout);
-    } 
-
-    this.#_.onmessage = (event) => {
-      console.log('RUNNING')//
-      if (!event.data || !event.origin || !event.source) return;
-      if (event.origin !== this.owner.src) return;
-      if (!event.data.meta) return;
-      if (event.data.meta.id !== this.owner.id) return;
-      if (event.data.meta.submission !== this.submission) return;
-      this.timer && clearTimeout(this.timer);
-      if (event.data.meta.error) {
-        this.reject(new Error(event.data.meta.error));
-      } else {
-        this.resolve(event.data.data || null);
-      }
-      window.removeEventListener("message", this.onmessage);
-    };
-    window.addEventListener("message", this.onmessage);
-  }
-
-  get data() {
-    return this.#_.data;
-  }
-
-  get name() {
-    return this.#_.name;
-  }
-
-  get onmessage() {
-    return this.#_.onmessage;
-  }
-
-  get options() {
-    return this.#_.options;
-  }
-
-  get owner() {
-    return this.#_.owner;
-  }
-
-  get submission() {
-    return this.#_.submission;
-  }
-
-  get reject() {
-    return this.#_.reject;
-  }
-
-  get resolve() {
-    return this.#_.resolve;
-  }
-
-  get timer() {
-    return this.#_.timer;
-  }
-}

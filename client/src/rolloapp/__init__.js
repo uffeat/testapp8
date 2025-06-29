@@ -2,9 +2,9 @@
 import "@/rolloapp/__init__.js";
 */
 
-import "@/rolloapp/_assets/main.css";
-import { app } from "@/rolloapp/_app.js";
-import "@/rolloapp/_config/__init__.js";
+import "@/rolloapp/assets/main.css";
+import { app } from "@/rolloapp/app.js";
+import "@/rolloapp/config/__init__.js";
 
 
 
@@ -27,4 +27,4 @@ Object.defineProperty(window, "use", {
 });
 
 
-await app.shadow.sheets.import("@/rolloapp/_assets/shadow");
+await app.shadow.sheets.import("@/rolloapp/assets/shadow");

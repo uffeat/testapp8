@@ -3,213 +3,156 @@ import { anvil } from "@/rolloanvil/anvil.js";
 const { anvil } = await use("@/rolloanvil/anvil.js");
 */
 
-import { component } from "@/rollocomponent/component.js";
 
+import config from "@/rolloanvil/config.json";
+import { Client } from "@/rolloanvil/client.js";
 
 /* Util for Anvil-related stuff. */
 export const anvil = new (class {
   #_ = {};
   constructor() {
-    this.#_.config = new (class {
-      #_ = {};
+    this.#_.origin =
+      import.meta.env.VERCEL_ENV === "production"
+        ? config.origins.production
+        : config.origins.development;
 
-      get origins() {
-        return this.#_.origins;
-      }
+    const anvil = this;
 
-      set origins(origins) {
-        this.#_.origins = origins;
-      }
-    })();
-  }
-
-  get config() {
-    return this.#_.config;
-  }
-
-  /* Returns origin of Anvil app. */
-  get origin() {
-    if (import.meta.env.VERCEL_ENV === "production") {
-      return this.config.origins.production;
-    }
-    return this.config.origins.development;
-  }
-
-  /* Returns client api controller. */
-  get client() {
-    if (!this.#_.client) {
-      const anvil = this;
-
-      const client = new (class {
-        #_ = {
-          iframe: {},
-          submission: 0,
+    const client = Client({ slot: "data", parent: app });
+    this.#_.client = new Proxy(client, {
+      get: (target, name) => {
+        return (...args) => {
+          return target.call(name, ...args);
         };
+      },
+    });
 
-        constructor() {
-          (() => {
-            const { promise, resolve } = Promise.withResolvers();
-            this.#_.iframe.promise = promise;
-            this.#_.iframe.resolve = resolve;
-          })();
-          this.#_.iframe.component = component.iframe("anvil", {
-            src: anvil.origin,
-            "@load$once": (event) => {
-              this.#_.iframe.resolve();
-              this.#_.iframe.ready = true;
-            },
-            parent: app,
-            slot: "anvil",
-          });
+    const server = new (class {
+      #_ = {
+        base: `${anvil.origin}/_/api`,
+        options: {
+          headers: { "content-type": "text/plain" },
+          method: "POST",
+        },
+        submission: 0,
+      };
 
-          this.#_.config = new (class {
-            #_ = {
-              timeout: 3000,
-            };
+      constructor() {
+        this.#_.config = new (class {
+          #_ = {
+            timeout: config.timeout.server,
+          };
 
-            get timeout() {
-              return this.#_.timeout;
-            }
-
-            set timeout(timeout) {
-              this.#_.timeout = timeout;
-            }
-          })();
-        }
-
-        get config() {
-          return this.#_.config;
-        }
-
-        get submission() {
-          return this.#_.submission;
-        }
-
-        /* Calls "client-side endpoint" and returns result. */
-        async call(name, data = {}) {
-          if (!this.#_.iframe.ready) {
-            await this.#_.iframe.promise;
+          get timeout() {
+            return this.#_.timeout;
           }
-          const submission = this.#_.submission++;
-          const { promise, resolve, reject } = Promise.withResolvers();
 
-          const timer = setTimeout(() => {
-            console.error('submission:', submission)
-            const error = new Error(
-              `Client api '${name}' did not respond in time.`
+          set timeout(timeout) {
+            this.#_.timeout = timeout;
+          }
+        })();
+      }
+
+      get config() {
+        return this.#_.config;
+      }
+
+      get submission() {
+        return this.#_.submission;
+      }
+
+      /* Sends post request to server endpoint and returns parsed response. */
+      async call(name, data = {}, { raw = false, timeout } = {}) {
+        const { promise, resolve, reject } = Promise.withResolvers();
+
+        const timer = (() => {
+          if (![false, null].includes(timeout)) {
+            return setTimeout(
+              () => {
+                const error = new Error(`'${name}' did not respond in time.`);
+                if (import.meta.env.DEV) {
+                  reject(error);
+                } else {
+                  resolve(error);
+                }
+              },
+              timeout === undefined ? anvil.config.server.timeout : timeout
             );
+          }
+        })();
+
+        /* NOTE 'submission' query item busts any silent browser caching and 
+        provides meta for use server-side. */
+        const response = await fetch(
+          `${this.#_.base}/${name}?submission=${this.#_.submission++}`,
+          {
+            body: JSON.stringify(data),
+            ...this.#_.options,
+          }
+        );
+        if (raw) {
+          const result = await response.text();
+          timer && clearTimeout(timer);
+          resolve(result);
+        } else {
+          const result = await response.json();
+          /* Check for error cue */
+          if ("__error__" in result) {
+            timer && clearTimeout(timer);
+            const error = new Error(result.__error__);
+
             if (import.meta.env.DEV) {
               reject(error);
             } else {
               resolve(error);
             }
-
-            window.removeEventListener("message", onmessage);
-          }, this.config.timeout);
-
-          this.#_.iframe.component.contentWindow.postMessage(
-            { data, meta: {name, submission} },
-            anvil.origin
-          );
-
-          function onmessage(event) {
-            if (!event.origin || event.origin !== anvil.origin) return;
-            if (!event.data) return;
-            if (!event.data.meta) return;
-            if (event.data.meta.submission !== submission) return;
-            clearTimeout(timer);
-            if (event.data.meta.error) {
-              reject(new Error(event.data.meta.error));
-            } else {
-              resolve(event.data.data || null);
-            }
-            window.removeEventListener("message", onmessage);
+          } else {
+            timer && clearTimeout(timer);
+            resolve(result);
           }
-          window.addEventListener("message", onmessage);
-
-          return promise;
         }
-      })();
+        return promise;
+      }
+    })();
 
-      this.#_.client = new Proxy(
-        {},
-        {
-          get: (_, name) => {
-            if (name in client) {
-              return client[name];
-            }
-            return (...args) => {
-              return client.call(name, ...args);
-            };
-          },
-        }
-      );
-    }
+    this.#_.server = new Proxy(server, {
+      get: (target, name) => {
+        return (...args) => {
+          return target.call(name, ...args);
+        };
+      },
+    });
+
+    this.#_.config = new (class {
+      #_ = {};
+
+      get client() {
+        return client.config;
+      }
+
+      get server() {
+        return server.config;
+      }
+    })();
+  }
+
+  /* Returns client controller. */
+  get client() {
     return this.#_.client;
   }
 
-  /* Returns server api controller. */
+  /* . */
+  get config() {
+    return this.#_.config;
+  }
+
+  /* . */
+  get origin() {
+    return this.#_.origin;
+  }
+
+  /* Returns server controller. */
   get server() {
-    if (!this.#_.server) {
-      const anvil = this;
-
-      const server = new (class {
-        #_ = {
-          base: `${anvil.origin}/_/api`,
-          options: {
-            headers: { "content-type": "text/plain" },
-            method: "POST",
-          },
-          submission: 0,
-        };
-
-        get submission() {
-          return this.#_.submission;
-        }
-
-        /* Sends post request to server endpoint and returns parsed response. */
-        async call(name, data = {}, { raw = false } = {}) {
-          /* NOTE 'submission' query item busts any silent browser caching and 
-        provides meta for use server-side. */
-          const response = await fetch(
-            `${this.#_.base}/${name}?submission=${this.#_.submission++}`,
-            {
-              body: JSON.stringify(data),
-              ...this.#_.options,
-            }
-          );
-          if (raw) {
-            return response.text();
-          }
-          const result = await response.json();
-          /* Check for error cue */
-          if ("__error__" in result) {
-            throw new Error(result.__error__);
-          }
-          return result;
-        }
-      })();
-
-      this.#_.server = new Proxy(
-        {},
-        {
-          get: (_, name) => {
-            if (name in server) {
-              return server[name];
-            }
-            return (...args) => {
-              return server.call(name, ...args);
-            };
-          },
-        }
-      );
-    }
     return this.#_.server;
   }
 })();
-
-anvil.config.origins = Object.freeze({
-  development: "https://testapp8dev.anvil.app",
-  production: "https://testapp8.anvil.app",
-});
-

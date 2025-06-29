@@ -1,0 +1,9 @@
+:has(> iframe[anvil-client]) {
+  position: relative;
+}
+
+iframe[anvil-client] {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
