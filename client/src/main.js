@@ -40,6 +40,15 @@ await (async () => {
 
 
 
+anvil.channels.add('foo', (data) => {
+  console.log('foo channel got data:', data)
+})
+
+anvil.client.foo({ number: 42 })
+
+
+
+
 /*
 (() => {
   const element = component.div(

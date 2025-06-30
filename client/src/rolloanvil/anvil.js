@@ -5,7 +5,7 @@ const { anvil } = await use("@/rolloanvil/anvil.js");
 
 import config from "@/rolloanvil/config.json";
 import { Client } from "@/rolloanvil/client.js";
-import { Message } from "@/rolloanvil/tools/message.js";
+
 
 /* Util for Anvil-related stuff. */
 export const anvil = new (class {
@@ -146,74 +146,11 @@ export const anvil = new (class {
         return this.#_._.server.config;
       }
     })();
-
-    /* channels */
-    (() => {
-      this.#_.channels = new (class {
-        #_ = {
-          registry: new Map(),
-        };
-
-        constructor() {
-          this.#_.onmessage = (event) => {
-            const message = new Message(event, {
-              id: anvil.#_._.client.id,
-              origin: anvil.origin,
-            });
-
-            if (!message.validate()) return;
-            if (!("channel" in message.meta)) return;
-            if (this.has(message.meta.channel)) {
-              const effect = this.get(message.meta.channel);
-              effect.call(anvil, message.data);
-            }
-          };
-        }
-
-        get size() {
-          return this.#_.registry.size;
-        }
-
-        add(channel, effect) {
-          if (this.has(channel)) {
-            throw new Error(`Duplicate channel: ${channel}`);
-          }
-
-          this.#_.registry.set(channel, effect);
-
-          if (!this.#_.active) {
-            window.addEventListener("message", this.#_.onmessage);
-            this.#_.active = true;
-          }
-
-          return anvil;
-        }
-
-        get() {
-          return this.#_.registry.get(channel);
-        }
-
-        has(channel) {
-          return this.#_.registry.has(channel);
-        }
-
-        remove(channel) {
-          this.#_.registry.delete(channel);
-
-          if (!this.size) {
-            window.removeEventListener("message", this.#_.onmessage);
-            this.#_.active = false;
-          }
-
-          return anvil;
-        }
-      })();
-    })();
   }
 
   /* Returns channels controller. */
   get channels() {
-    return this.#_.channels;
+    return this.#_._.client.channels;
   }
 
   /* Returns client controller. */

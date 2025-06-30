@@ -8,6 +8,7 @@ import { author } from "@/rollocomponent/tools/author.js";
 import { base } from "@/rollocomponent/tools/base.js";
 import config from "@/rolloanvil/config.json";
 import { Listener } from "@/rolloanvil/tools/listener.js";
+import { Message } from "@/rolloanvil/tools/message.js";
 
 const cls = class extends base("iframe") {
   static __key__ = "anvil-client";
@@ -22,16 +23,25 @@ const cls = class extends base("iframe") {
 
   constructor() {
     super();
+    const owner = this
+
     this.id = `${this.constructor.__key__}-${this.constructor.id()}`;
+
     this.#_.origin =
       import.meta.env.VERCEL_ENV === "production"
         ? config.origins.production
         : config.origins.development;
+
+    
   }
 
   /* . */
   __new__() {
     super.__new__?.();
+
+    const owner = this;
+
+
     this.attribute[this.constructor.__key__] = true;
 
     this.#_.$ = new Proxy(this, {
@@ -55,10 +65,79 @@ const cls = class extends base("iframe") {
         this.#_.timeout = timeout;
       }
     })();
+
+
+    /* channels */
+    (() => {
+      this.#_.channels = new (class {
+        #_ = {
+          registry: new Map(),
+        };
+
+        constructor() {
+          this.#_.onmessage = (event) => {
+            const message = new Message(event, {
+              id: owner.id,
+              origin: owner.src,
+            });
+
+            if (!message.validate()) return;
+            if (!("channel" in message.meta)) return;
+            if (this.has(message.meta.channel)) {
+              const effect = this.get(message.meta.channel);
+              effect.call(owner, message.data, {owner});
+            }
+          };
+        }
+
+        get size() {
+          return this.#_.registry.size;
+        }
+
+        add(channel, effect) {
+          if (this.has(channel)) {
+            throw new Error(`Duplicate channel: ${channel}`);
+          }
+
+          this.#_.registry.set(channel, effect);
+
+          if (!this.#_.active) {
+            window.addEventListener("message", this.#_.onmessage);
+            this.#_.active = true;
+          }
+
+          return owner;
+        }
+
+        get(channel) {
+          return this.#_.registry.get(channel);
+        }
+
+        has(channel) {
+          return this.#_.registry.has(channel);
+        }
+
+        remove(channel) {
+          this.#_.registry.delete(channel);
+
+          if (!this.size) {
+            window.removeEventListener("message", this.#_.onmessage);
+            this.#_.active = false;
+          }
+
+          return owner;
+        }
+      })();
+    })();
   }
 
   get $() {
     return this.#_.$;
+  }
+
+  /* Returns channels controller. */
+  get channels() {
+    return this.#_.channels;
   }
 
   get config() {
