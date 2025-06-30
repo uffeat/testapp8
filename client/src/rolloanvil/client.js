@@ -7,7 +7,7 @@ import "@/rolloanvil/assets/main.css";
 import { author } from "@/rollocomponent/tools/author.js";
 import { base } from "@/rollocomponent/tools/base.js";
 import config from "@/rolloanvil/config.json";
-import { Listener } from "@/rolloanvil/tools/listener";
+import { Listener } from "@/rolloanvil/tools/listener.js";
 
 const cls = class extends base("iframe") {
   static __key__ = "anvil-client";
@@ -90,7 +90,6 @@ const cls = class extends base("iframe") {
     const { promise, resolve, reject } = Promise.withResolvers();
 
     new Listener({
-      data,
       name,
       options,
       owner: this,

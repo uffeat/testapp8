@@ -12,25 +12,23 @@ const { Modal } = await use("@/rollolibs/bootstrap/bootstrap.js");
 const { Client, anvil } = await use("@/rolloanvil/");
 
 
-const client_1 = Client({slot: 'data', parent: app})
-const client_3 = Client({parent: app, src: 'bar'})
+//const client_1 = Client({slot: 'data', parent: app})
+//const client_3 = Client({parent: app, src: 'bar'})
 
 await (async () => {
-  const response = await client_1.$.echo({ number: 42 })
-  console.log("client response:", response)
+  //const response = await client_1.$.echo({ number: 42 })
+  //console.log("client response:", response)
 })();
 
 await (async () => {
-  const response = await client_1.call('echo', { number: 42 }, {timeout: 2000})
-  console.log("client response:", response)
+  //const response = await client_1.call('echo', { number: 42 }, {timeout: 2000})
+  //console.log("client response:", response)
 })();
 
 await (async () => {
   const response = await anvil.client.echo({ number: 42 })
   console.log("client response:", response)
 })();
-
-
 
 
 await (async () => {

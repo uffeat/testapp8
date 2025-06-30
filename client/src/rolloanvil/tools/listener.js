@@ -1,12 +1,12 @@
 /*
-
+import { Listener } from "@/rolloanvil/tools/listener.js";
 */
+import { Message } from "@/rolloanvil/tools/message.js";
 
 export class Listener {
   #_ = {};
 
   constructor({
-    data,
     name,
     options = {},
     owner,
@@ -14,7 +14,6 @@ export class Listener {
     resolve,
     submission,
   }) {
-    this.#_.data = data;
     this.#_.name = name;
     this.#_.owner = owner;
     this.#_.submission = submission;
@@ -23,10 +22,11 @@ export class Listener {
     this.#_.resolve = resolve;
 
     if (![false, null].includes(this.options.timeout)) {
+
       this.#_.timer = setTimeout(
         () => {
           const error = new Error(
-            `'${name}' did not respond in time for submission: ${this.submission}.`
+            `'${this.name}' did not respond in time for submission: ${this.submission}.`
           );
           if (import.meta.env.DEV) {
             this.reject(error);
@@ -42,24 +42,23 @@ export class Listener {
     }
 
     this.#_.onmessage = (event) => {
-      if (!event.data || !event.origin || !event.source) return;
-      if (event.origin !== this.owner.src) return;
-      if (!event.data.meta) return;
-      if (event.data.meta.id !== this.owner.id) return;
-      if (event.data.meta.submission !== this.submission) return;
+      const message = new Message(event, {
+        id: this.owner.id,
+        origin: this.owner.src,
+        submission: this.submission,
+      });
+
+      if (!message.validate()) return;
+
       this.timer && clearTimeout(this.timer);
-      if (event.data.meta.error) {
-        this.reject(new Error(event.data.meta.error));
+      if (message.meta.error) {
+        this.reject(new Error(message.meta.error));
       } else {
-        this.resolve(event.data.data || null);
+        this.resolve(message.data);
       }
       window.removeEventListener("message", this.onmessage);
     };
     window.addEventListener("message", this.onmessage);
-  }
-
-  get data() {
-    return this.#_.data;
   }
 
   get name() {
