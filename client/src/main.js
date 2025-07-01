@@ -8,80 +8,32 @@ console.info(
 );
 
 const { component } = await use("@/rollocomponent/");
-const { Modal } = await use("@/rollolibs/bootstrap/bootstrap.js");
-const { Client, anvil } = await use("@/rolloanvil/");
 
-
-//const client_1 = Client({slot: 'data', parent: app})
-//const client_3 = Client({parent: app, src: 'bar'})
-
-await (async () => {
-  //const response = await client_1.$.echo({ number: 42 })
-  //console.log("client response:", response)
-})();
-
-await (async () => {
-  //const response = await client_1.call('echo', { number: 42 }, {timeout: 2000})
-  //console.log("client response:", response)
-})();
-
-await (async () => {
-  const response = await anvil.client.echo({ number: 42 })
-  console.log("client response:", response)
-})();
-
-
-await (async () => {
-  const response = await anvil.server.echo({ number: 42 }, {timeout: 2000})
-  console.log("server response:", response)
-})();
-
-
-
-
-
-anvil.channels.add('foo', (data) => {
-  console.log('foo channel got data:', data)
-})
-
-anvil.client.foo({ number: 42 })
-
-
-
+const { anvil } = await use("@/rolloanvil/");
 
 /*
-(() => {
-  const element = component.div(
-  "modal.anvil",
-  {
-    tab: -1,
-  },
-  component.div(
-    "modal-dialog.modal-lg",
-    {},
-    component.div(
-      "modal-content",
-      {},
-      component.div(
-        "modal-header",
-        {},
-        component.button("btn-close", { type: "button" })
-      ),
-      component.div('modal-body')
-    )
-  )
-);
+anvil.client.__component__.classes.add('bar')
+await anvil.client.__component__.pending
 
-const modal = new Modal(element, {});
 
-const container = element.find(".modal-body");
+anvil.client({'.foo': true})
+*/
+anvil.channels.add("foo", (data) => {
+  console.log("foo channel got data:", data);
+});
 
-const iframe = component.iframe('plot', {
-  src: 'https://testapp8dev.anvil.app/bar',
-})
-
-container.append(iframe)
-modal.show();
-
+await (async () => {
+  const response = await anvil.server.echo({ number: 42 }, { timeout: 2000 });
+  console.log("server response:", response);
 })();
+
+await (async () => {
+  const response = await anvil.client.echo({ number: 42 }, { timeout: 800 });
+  console.log("client response:", response);
+})();
+
+/*
+await anvil.client.__component__.pending
+
+console.log('HERE')
 */

@@ -10,9 +10,8 @@ export class Message {
     this.#_.origin = event.origin;
     this.#_.source = event.source;
 
-    this.#_.data = event.data?.data || null;
-
-    this.#_.meta = Object.freeze(event.data?.meta || {});
+    this.#_.data = event.data.data || null;
+    this.#_.meta = Object.freeze(event.data.meta || {});
 
     this.#_.context = Object.freeze(context);
   }
@@ -53,10 +52,11 @@ export class Message {
       return false;
     }
 
-    if (
-      "submission" in this.context &&
-      this.meta.submission !== this.context.submission
-    ) {
+    if ("id" in this.context && this.meta.id !== this.context.id) {
+      return false;
+    }
+
+    if ("submission" in this.context && this.meta.submission !== this.context.submission) {
       return false;
     }
 

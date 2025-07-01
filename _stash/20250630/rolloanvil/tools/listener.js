@@ -43,6 +43,7 @@ export class Listener {
 
     this.#_.onmessage = (event) => {
       const message = new Message(event, {
+        id: this.owner.id,
         origin: this.owner.src,
         submission: this.submission,
       });
