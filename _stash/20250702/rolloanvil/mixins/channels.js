@@ -25,15 +25,11 @@ export default (parent) => {
 
         constructor() {
           this.#_.onmessage = (event) => {
-            //
-            //
             const message = new Message(event, {
-              id: owner.id,
               origin: owner.origin,
             });
+
             if (!message.validate()) return;
-            //
-            //
             if (!("channel" in message.meta)) return;
 
             //console.log('event:', event)//

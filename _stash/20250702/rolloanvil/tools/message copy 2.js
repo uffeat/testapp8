@@ -12,6 +12,9 @@ export class Message {
 
     this.#_.data = event.data?.data || null;
 
+   
+    
+    
     this.#_.meta = Object.freeze(event.data?.meta || {});
 
     this.#_.context = Object.freeze(context);
@@ -49,21 +52,37 @@ export class Message {
 
   /* */
   validate() {
+
+    //console.log("meta:", this.meta); //
+
+
     if ("origin" in this.context && this.origin !== this.context.origin) {
+      console.log("Invalid origin:", this.origin); //
       return false;
     }
 
-    if (
-      "id" in this.context &&
-      this.meta.id !== this.context.id
-    ) {
+    
+
+    if (!this.meta.name) {
+      console.log("no name"); //
+      return false;
+    }
+    
+
+    if ("name" in this.context && this.meta.name !== this.context.name) {
+      console.log("Invalid name:", this.meta.name); //
       return false;
     }
 
-    if (
-      "submission" in this.context &&
-      this.meta.submission !== this.context.submission
-    ) {
+    if (this.meta.submission === null) {
+      console.log("no submission"); //
+      return false;
+    }
+
+    
+
+    if ("submission" in this.context && this.meta.submission !== this.context.submission) {
+      console.log("Invalid submission:", this.meta.submission); //
       return false;
     }
 

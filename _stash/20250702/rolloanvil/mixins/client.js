@@ -4,6 +4,8 @@ import client from "@/rolloanvil/mixins/client.js";
 v.1.0
 */
 
+
+
 /* TODO
 - add id - also to meta */
 
@@ -16,7 +18,6 @@ export default (parent) => {
 
     #_ = {
       submission: 0,
-      promises: {},
     };
 
     constructor() {
@@ -31,10 +32,11 @@ export default (parent) => {
       /* Load */
       (() => {
         const { promise, resolve } = Promise.withResolvers();
-        this.#_.promises.load = promise;
+        this.#_.promise = promise;
 
         this.on.load$once = (event) => {
-          delete this.#_.promises.load;
+          this.#_.ready = true;
+          delete this.#_.promise;
           resolve(this);
         };
       })();
@@ -42,7 +44,9 @@ export default (parent) => {
       /* client */
       (() => {
         const call = async (name, data = {}, { timeout } = {}) => {
-          await this.connect();
+          if (this.#_.promise) {
+            await this.#_.promise;
+          }
 
           const submission = this.#_.submission++;
           const { promise, resolve, reject } = Promise.withResolvers();
@@ -65,18 +69,13 @@ export default (parent) => {
           })();
 
           function onmessage(event) {
-
-
-            //
-            //
             const message = new Message(event, {
-              id: owner.id,
+              id: owner.id,//
               origin: owner.origin,
               submission,
             });
+
             if (!message.validate()) return;
-            //
-            //
 
             timer && clearTimeout(timer);
             if (message.meta.error) {
@@ -115,43 +114,15 @@ export default (parent) => {
       return this.#_.client;
     }
 
+    /* Returns promise that resolves to component, when loaded.
+    NOTE Useful before operations that require iframe load.  */
     get ready() {
-      return this.#_.ready || false;
-    }
-
-    /* */
-    async connect() {
-      const owner = this;
-
-      if (this.#_.ready) {
-        return this;
+      if (this.#_.promise) {
+        return this.#_.promise;
       }
-
-      if (this.#_.promises.load) {
-        await this.#_.promises.load;
-      }
-
-      const { promise, resolve, reject } = Promise.withResolvers();
-
-      /* TODO
-      - Add timer */
-
-      function handshake(event) {
-        if (owner.origin !== event.origin) {
-          return;
-        }
-        if (owner.id !== event.data.id) {
-          return;
-        }
-        owner.#_.ready = true;
-        resolve(owner);
-        window.removeEventListener("message", handshake);
-      }
-
-      window.addEventListener("message", handshake);
-      this.contentWindow.postMessage({ id: this.id }, this.origin);
-
-      return promise;
+      return new Promise((resolve, reject) => {
+        resolve(this);
+      });
     }
 
     __init__() {

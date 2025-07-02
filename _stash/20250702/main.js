@@ -12,16 +12,14 @@ const { component } = await use("@/rollocomponent/");
 const { anvil } = await use("@/rolloanvil/");
 
 
-await anvil.connect()
 
 
 
 anvil.channels.add("foo", (data) => {
   console.log("foo channel got data:", data);
 });
-/*
+
 anvil.client.foo({'.foo': true})
-*/
 
 
 
