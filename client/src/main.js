@@ -9,32 +9,39 @@ console.info(
 
 const { component } = await use("@/rollocomponent/");
 
-const { anvil } = await use("@/rolloanvil/");
+const { AnvilComponent } = await use("@/rolloanvil/component.js");
+
+const bar = AnvilComponent({ src: "bar", parent: app });
+
+await bar.anvil({
+    data: [
+      {
+        name: "Europe",
+        x: [2019, 2020, 2021, 2022, 2023],
+        y: [510, 620, 687, 745, 881],
+      },
+      {
+        name: "America",
+        x: [2019, 2020, 2021, 2022, 2023],
+        y: [733, 880, 964, 980, 1058],
+      },
+      {
+        name: "Asia",
+        x: [2019, 2020, 2021, 2022, 2023],
+        y: [662, 728, 794, 814, 906],
+      },
+    ],
+  });
 
 
-await anvil.connect()
+bar.remove()
+bar.parent = app
+
+//await bar.pending
+await bar.anvil();
 
 
-
-anvil.channels.add("foo", (data) => {
-  console.log("foo channel got data:", data);
-});
-/*
-anvil.client.foo({'.foo': true})
-*/
-
-
-
-await (async () => {
-  //const response = await anvil.server.echo({ number: 42 }, { timeout: 5000 });
-  //console.log("server response:", response);
-})();
-
-await (async () => {
-  const response = await anvil.client.echo({ number: 42 }, { timeout: 800 });
-  console.log("client response:", response);
-})();
-
-
+//await bar.connect()
+//await bar.anvil();
 
 

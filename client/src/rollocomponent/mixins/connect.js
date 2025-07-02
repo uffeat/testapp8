@@ -13,6 +13,7 @@ export default (parent, config) => {
     Enables hooking into lifecycle without using 'connectedCallback' multiple times. */
     connectedCallback() {
       super.connectedCallback?.();
+      this.dispatchEvent(new CustomEvent("connect"));
       this.dispatchEvent(new CustomEvent("x_connected"));
     }
 
@@ -20,6 +21,7 @@ export default (parent, config) => {
     Enables hooking into lifecycle without using 'disconnectedCallback' multiple times.*/
     disconnectedCallback() {
       super.disconnectedCallback?.();
+      this.dispatchEvent(new CustomEvent("disconnect"));
       this.dispatchEvent(new CustomEvent("x_disconnected"));
     }
   };

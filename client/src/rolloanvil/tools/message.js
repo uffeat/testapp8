@@ -2,9 +2,10 @@
 import { Message } from "@/rolloanvil/tools/message.js";
 */
 
+/* Util for managing message event props. */
 export class Message {
   #_ = {};
-  constructor(event, context = {}) {
+  constructor(event) {
     this.#_.event = event;
 
     this.#_.origin = event.origin;
@@ -13,13 +14,6 @@ export class Message {
     this.#_.data = event.data?.data || null;
 
     this.#_.meta = Object.freeze(event.data?.meta || {});
-
-    this.#_.context = Object.freeze(context);
-  }
-
-  /* Returns context. */
-  get context() {
-    return this.#_.context;
   }
 
   /* Returns data. */
@@ -45,28 +39,5 @@ export class Message {
   /* Returns source. */
   get source() {
     return this.#_.source;
-  }
-
-  /* */
-  validate() {
-    if ("origin" in this.context && this.origin !== this.context.origin) {
-      return false;
-    }
-
-    if (
-      "id" in this.context &&
-      this.meta.id !== this.context.id
-    ) {
-      return false;
-    }
-
-    if (
-      "submission" in this.context &&
-      this.meta.submission !== this.context.submission
-    ) {
-      return false;
-    }
-
-    return true;
   }
 }

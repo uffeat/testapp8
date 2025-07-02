@@ -1,12 +1,10 @@
 /*
 import server from "@/rolloanvil/mixins/server.js";
-20250630
-v.1.0
+20250701
+v.1.1
 */
 
 import config from "@/rolloanvil/config.json";
-
-
 
 export default (parent) => {
   return class extends parent {
@@ -19,10 +17,6 @@ export default (parent) => {
       },
       submission: 0,
     };
-
-    constructor() {
-      super();
-    }
 
     __new__() {
       super.__new__?.();
@@ -46,10 +40,13 @@ export default (parent) => {
           }
         })();
 
-        /* NOTE 'submission' query item busts any silent browser caching and 
-          provides meta for use server-side. */
+        /* The 'id' query item can be used server-side to discriminate between
+        calls made from different component instances.
+        The 'submission' query item busts any silent browser caching and 
+        provides meta for use server-side. */
         const response = await fetch(
-          `${this.origin}/_/api/${name}?submission=${this.#_.submission++}`,
+          `${this.origin}/_/api/${name}?id=${this.id}&submission=${this.#_
+            .submission++}`,
           {
             body: JSON.stringify(data),
             ...this.#_.options,
@@ -95,10 +92,6 @@ export default (parent) => {
     /* Returns server controller. */
     get server() {
       return this.#_.server;
-    }
-
-    __init__() {
-      super.__init__?.();
     }
   };
 };

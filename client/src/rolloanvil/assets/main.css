@@ -1,8 +1,12 @@
-:has(> iframe[anvil-client]) {
+/*
+import "@/rolloanvil/assets/main.css";
+*/
+
+:has(> iframe[anvil-component]) {
   position: relative;
 }
 
-iframe[anvil-client] {
+iframe[anvil-component] {
   position: absolute;
   width: 100%;
   height: 100%;

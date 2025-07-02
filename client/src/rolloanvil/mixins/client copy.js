@@ -17,19 +17,9 @@ export default (parent) => {
     })();
 
     #_ = {
-      promise: false,
       submission: 0,
+      promises: {},
     };
-
-    connectedCallback() {
-    super.connectedCallback?.();
-    this.connect()
-  }
-
-    disconnectedCallback() {
-      super.disconnectedCallback?.();
-      this.#_.promise = false;
-    }
 
     __new__() {
       super.__new__?.();
@@ -38,7 +28,16 @@ export default (parent) => {
       this.id = `${this.constructor.__key__}-${this.constructor.id()}`;
       this.attribute[this.constructor.__key__] = true;
 
-     
+      /* Load */
+      (() => {
+        const { promise, resolve } = Promise.withResolvers();
+        this.#_.promises.load = promise;
+
+        this.on.load$once = (event) => {
+          delete this.#_.promises.load;
+          resolve(this);
+        };
+      })();
 
       /* client */
       (() => {
@@ -116,9 +115,10 @@ export default (parent) => {
       return this.#_.client;
     }
 
-    /* . */
-    get pending() {
-      return this.#_.promise;
+    /* Returns flag that indicates, if iframe has been loaded and 
+    handshake completed. */
+    get ready() {
+      return this.#_.ready || false;
     }
 
     /* Performs handshake with iframe to establish secure communication bridge. 
@@ -127,21 +127,15 @@ export default (parent) => {
     async connect({ timeout } = {}) {
       const owner = this;
 
-      if (this.#_.promise) {
-        return this.#_.promise;
+      if (this.#_.ready) {
+        return this;
       }
 
-      await (() => {
-        const { promise, resolve } = Promise.withResolvers();
-        this.on.load$once = (event) => {
-          resolve(this);
-        };
-        return promise;
-      })();
+      if (this.#_.promises.load) {
+        await this.#_.promises.load;
+      }
 
       const { promise, resolve, reject } = Promise.withResolvers();
-      this.#_.promise = promise
-
 
       const timer = (() => {
         if (![false, null].includes(timeout)) {
@@ -168,8 +162,7 @@ export default (parent) => {
           return;
         }
         timer && clearTimeout(timer);
-
-        owner.#_.promise = false
+        owner.#_.ready = true;
         resolve(owner);
         window.removeEventListener("message", onhandshake);
       }
