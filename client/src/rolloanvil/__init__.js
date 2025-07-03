@@ -1,2 +1,12 @@
-export { AnvilComponent } from "@/rolloanvil/component.js";
-export { anvil } from "@/rolloanvil/anvil.js";
+//export { AnvilComponent } from "@/rolloanvil/component.js";
+import { Anvil } from "@/rolloanvil/anvil.js";
+
+
+
+
+const anvil = Anvil({ slot: "data", parent: app });
+
+
+
+
+export { Anvil, anvil };

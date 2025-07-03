@@ -25,11 +25,7 @@ export default (parent) => {
 
         constructor() {
           /* Quasi-permanent message handler for channels. */
-          this.#_.onchannel = async (event) => {
-
-            await this.connect();
-
-
+          this.#_.onchannel = (event) => {
             const message = new Message(event);
             /* Filter-out non-relevant events. */
             if (owner.origin !== message.origin) {
