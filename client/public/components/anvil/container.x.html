@@ -2,21 +2,19 @@
 const { AnvilContainer } = await use("/components/anvil/container.x.html");
 -->
 <style global>
-  [anvil-container]:has(iframe[anvil-component]) {
-    --radius: 12px;
-
-
+  [anvil-container]:has(> iframe[anvil-component]) {
     visibility: hidden;
     opacity: 0.5;
-    transition: opacity, visibility var(--time, 0) ease-in-out;
+    transition: opacity, var(--time, 0) ease-in-out;
 
-    
-    border: 2px solid red;
-    border-radius: var(--radius);
-    margin: 4px;
+    border: 2px solid var(--bs-border-color-translucent);
+    border-radius: var(--bs-border-radius);
+    margin: 2px;
+
+    box-shadow: var(--bs-box-shadow);
   }
 
-  [anvil-container][visible]:has(iframe[anvil-component]) {
+  [anvil-container][visible]:has(> iframe[anvil-component]) {
     visibility: visible;
     opacity: 1;
   }
@@ -25,9 +23,8 @@ const { AnvilContainer } = await use("/components/anvil/container.x.html");
     width: 100%;
     height: var(--height, 450px);
 
-    
-    border-bottom-left-radius: calc(var(--radius) - 2px);
-    border-bottom-right-radius: calc(var(--radius) - 2px);
+    border-bottom-left-radius: calc(var(--bs-border-radius) - 2px);
+    border-bottom-right-radius: calc(var(--bs-border-radius) - 2px);
   }
 </style>
 
@@ -36,7 +33,7 @@ const { AnvilContainer } = await use("/components/anvil/container.x.html");
   const { AnvilComponent } = await use("@/rolloanvil/component.js");
   const { assign } = await use("@/rollotools/assign.js");
 
-  const TIME = 400;
+  const TIME = 200;
 
   export const AnvilContainer = async ({ src }) => {
     const anvil = AnvilComponent({ src });
@@ -53,7 +50,6 @@ const { AnvilContainer } = await use("/components/anvil/container.x.html");
 
     await anvil.connect();
 
-    console.log("setup:", anvil.setup);
     anvil.__.height = anvil.setup.height;
     container.__.time = `${TIME}ms`;
 
@@ -70,7 +66,7 @@ const { AnvilContainer } = await use("/components/anvil/container.x.html");
         }
 
         show() {
-          container.style.display = "initial";
+          container.style.display = "block";
           container.attribute.visible = true;
           return this;
         }

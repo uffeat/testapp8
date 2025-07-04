@@ -1,5 +1,8 @@
-const { component } = await use("@/rollocomponent/");
-const { anvil } = await use("@/rolloanvil/anvil.js");
+/*
+rolloanvil/echo
+*/
+
+const { anvil } = await use("@/rolloanvil/");
 
 /* Test */
 anvil.server

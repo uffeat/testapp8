@@ -1,6 +1,10 @@
+/*
+rolloanvil/component
+*/
+
 const { AnvilComponent } = await use("@/rolloanvil/component.js");
 
-const bar = AnvilComponent({ src: "bar", parent: app });
+const bar = AnvilComponent('h-screen', { src: "bar", parent: app });
 
 await bar.connect();
 
@@ -23,6 +27,10 @@ await bar.component.update({data: [
     y: [662, 728, 794, 814, 906],
   },
 ]})
+
+await bar.component.title('My Plot')
+
+
 
 
 /* Alternatively: 
