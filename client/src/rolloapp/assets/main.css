@@ -2,4 +2,8 @@ rollo-app {
   flex-grow: 1;
 }
 
+rollo-app:has(.modal) {
+  position: relative;
+}
+
 

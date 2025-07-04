@@ -25,19 +25,4 @@ img {
   max-width: 100%;
 }
 
-/*
-TODO Move modal stuff to Modal parcel or .x.html
-*/
-
-.modal.anvil .modal-body {
-  display: flex;
-  flex-direction: column;
-  padding: 0;
-  min-height: 480px;
-}
-
-.modal.anvil .modal-body iframe {
-  width: 100%;
-  flex-grow: 1;
-}
 

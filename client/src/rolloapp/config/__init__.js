@@ -119,7 +119,7 @@ app.maps
         const { author, component } = await owner.import("@/rollocomponent/");
         const { build } = await owner.import("@/rolloapp/tools/assets.js");
         const { construct } = await owner.import(
-          "@/rolloapp/_tools/construct.js"
+          "@/rolloapp/tools/construct.js"
         );
 
         const wrapper = component.div({ innerHTML: result });

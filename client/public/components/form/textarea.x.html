@@ -17,10 +17,6 @@ v.1.0
     const input = (await use("/components/form/mixins/input.js")).default;
 
     return class extends mix(base("textarea"), {}, input) {
-      
-
-      
-
       get resize() {
         return this.__.resize || null;
       }
@@ -28,8 +24,6 @@ v.1.0
       set resize(resize) {
         this.__.resize = resize;
       }
-
-      
     };
   };
 </script>
@@ -41,6 +35,6 @@ v.1.0
     parent: document.body,
     name: "notes",
     required: true,
-    resize: 'both'
+    resize: "both",
   });
 </script>

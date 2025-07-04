@@ -1,0 +1,94 @@
+<style global>
+  .modal-body:has(iframe[anvil-component]) {
+    /* Applies to both flex and position version */
+    min-height: var(--height, 480px);
+    padding: 0 !important;
+
+    /* flex version */
+    display: flex;
+    flex-direction: column;
+
+    /* position version: */
+    /*
+    position: relative !important;
+    */
+  }
+
+  .modal-body iframe[anvil-component] {
+    /* flex version */
+    position: initial;
+    width: 100%;
+    flex-grow: 1;
+
+    /* position version: */
+    /*
+    position: absolute !important;
+    width: 100%;
+    height: 100%;
+    */
+  }
+</style>
+
+<script main type="module">
+  const { Modal } = await use("@/rollolibs/bootstrap/");
+  const { component } = await use("@/rollocomponent/");
+  const { AnvilComponent } = await use("@/rolloanvil/component.js");
+  const { assign } = await use("@/rollotools/assign.js");
+
+  export const AnvilModal = async (src) => {
+    
+
+    const anvil = AnvilComponent({ src });
+
+    const body = component.div("modal-body", {}, anvil)
+
+    const tree = component.div(
+        "modal",
+        { tab: -1, slot: "modal", parent: app },
+        component.div(
+          "modal-dialog",
+          {},
+          component.div(
+            "modal-content",
+            {},
+            component.div(
+              "modal-header",
+              {},
+              component.button("btn-close", {
+                type: "button",
+                "[dataBsDismiss]": "modal",
+                "[ariaLabel]": "Close",
+                "@click": (event) => event.target.blur(),
+              })
+            ),
+            body
+          )
+        )
+      )
+
+    const modal = new Modal(
+      tree,
+      { backdrop: "static" }
+    );
+
+    await anvil.connect();
+
+    console.log('setup:', anvil.setup)
+    body.__.height = anvil.setup.height
+
+    return assign(
+      anvil,
+      class {
+        hide() {
+          modal.hide();
+          return this;
+        }
+
+        show() {
+          modal.show();
+          return this;
+        }
+      }
+    );
+  };
+</script>

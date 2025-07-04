@@ -8,27 +8,16 @@ console.info(
 );
 
 const { component } = await use("@/rollocomponent/");
+const { AnvilModal } = await use("/components/anvil/modal.x.html");
 
-const { Modal } = await use("@/rollolibs/bootstrap/");
 
-const element = component.div(
-  "modal",
-  { tab: -1 },
-  component.div(
-    "modal-dialog",
-    {},
-    component.div(
-      "modal-content",
-      {},
-      component.div("modal-header", {},
-        component.button('btn-close', {type:"button", '[dataBsDismiss]': "modal", '[ariaLabel]': "Close"}),
-      ),
-      component.div("modal-body", {}),
-      component.div("modal-footer", {})
-    )
-  )
+
+const bar = await AnvilModal("bar");
+
+component.menu('px-2.flex.gap-x-2',
+  { parent: app },
+  component.button("btn.btn-primary", { "@click": (event) => bar.show() }, 'Show'),
+ 
 );
 
-const modal = new Modal(element)
 
-modal.show()

@@ -29,7 +29,10 @@ const App = author(
 
       this.id = "app";
 
-      this.shadow.append(component.div({}, component.slot({ name: "data" })));
+      this.shadow.append(
+        component.div({}, component.slot({ name: "data" })),
+        component.div({}, component.slot({ name: "modal" }))
+      );
     }
 
     __new__() {
@@ -48,9 +51,7 @@ const App = author(
       this.attribute.anvilOrigin =
         import.meta.env.VERCEL_ENV === "production"
           ? anvilconfig.origins.production
-          : anvilconfig.origins.development
-
-      
+          : anvilconfig.origins.development;
     }
 
     /* Returns maps controller. */
