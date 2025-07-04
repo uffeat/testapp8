@@ -1,0 +1,86 @@
+<!--
+const { AnvilContainer } = await use("/components/anvil/container.x.html");
+-->
+<style global>
+  [anvil-container]:has(iframe[anvil-component]) {
+    --radius: 12px;
+
+
+    visibility: hidden;
+    opacity: 0.5;
+    transition: opacity, visibility var(--time, 0) ease-in-out;
+
+    
+    border: 2px solid red;
+    border-radius: var(--radius);
+    margin: 4px;
+  }
+
+  [anvil-container][visible]:has(iframe[anvil-component]) {
+    visibility: visible;
+    opacity: 1;
+  }
+
+  [anvil-container] iframe[anvil-component] {
+    width: 100%;
+    height: var(--height, 450px);
+
+    
+    border-bottom-left-radius: calc(var(--radius) - 2px);
+    border-bottom-right-radius: calc(var(--radius) - 2px);
+  }
+</style>
+
+<script main type="module">
+  const { component } = await use("@/rollocomponent/");
+  const { AnvilComponent } = await use("@/rolloanvil/component.js");
+  const { assign } = await use("@/rollotools/assign.js");
+
+  const TIME = 400;
+
+  export const AnvilContainer = async ({ src }) => {
+    const anvil = AnvilComponent({ src });
+
+    const button = component.button("btn-close.ms-auto", {
+      type: "button",
+    });
+
+    const container = component.div(
+      { parent: app, "[anvilContainer]": true, "[visible]": true },
+      component.menu("p-2.flex", {}, button),
+      anvil
+    );
+
+    await anvil.connect();
+
+    console.log("setup:", anvil.setup);
+    anvil.__.height = anvil.setup.height;
+    container.__.time = `${TIME}ms`;
+
+    assign(
+      anvil,
+      class {
+        hide() {
+          container.attribute.visible = null;
+          setTimeout(() => {
+            container.style.display = "none";
+          }, TIME);
+
+          return this;
+        }
+
+        show() {
+          container.style.display = "initial";
+          container.attribute.visible = true;
+          return this;
+        }
+      }
+    );
+
+    button.on.click = (event) => {
+      anvil.hide();
+    };
+
+    return anvil;
+  };
+</script>

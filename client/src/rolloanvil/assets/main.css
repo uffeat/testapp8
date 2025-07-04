@@ -2,7 +2,7 @@
 import "@/rolloanvil/assets/main.css";
 */
 
-
+/*
 :has(> iframe[anvil-component]) {
   position: relative;
 }
@@ -11,7 +11,15 @@ iframe[anvil-component] {
   position: absolute;
   width: 100%;
   height: 100%;
+
 }
-  
+  */
 
 
+  /*
+iframe[anvil-component] {
+  width: 100%;
+
+  height: var(--height, 500px);
+}
+  */
