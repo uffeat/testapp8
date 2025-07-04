@@ -6,14 +6,14 @@ import { author } from "@/rollocomponent/tools/author.js";
 import { base } from "@/rollocomponent/tools/base.js";
 import { component } from "@/rollocomponent/component.js";
 
+import anvilconfig from "@/rolloanvil/config.json";
+
 import { construct } from "@/rolloapp/tools/construct.js";
 import { ImportMaps } from "@/rolloapp/tools/import_maps.js";
 import { Path } from "@/rolloapp/tools/path.js";
 import { Processors } from "@/rolloapp/tools/processors.js";
 import { Signatures } from "@/rolloapp/tools/signatures.js";
 import { pub } from "@/rolloapp/tools/pub.js";
-
-
 
 const App = author(
   class extends base() {
@@ -30,6 +30,27 @@ const App = author(
       this.id = "app";
 
       this.shadow.append(component.div({}, component.slot({ name: "data" })));
+    }
+
+    __new__() {
+      super.__new__?.();
+      this.attribute.environment = import.meta.env.DEV
+        ? "development"
+        : import.meta.env.VERCEL_ENV;
+
+      this.attribute.orgin = location.origin;
+
+      this.attribute.anvilEnvironment =
+        import.meta.env.VERCEL_ENV === "production"
+          ? "production"
+          : "development";
+
+      this.attribute.anvilOrigin =
+        import.meta.env.VERCEL_ENV === "production"
+          ? anvilconfig.origins.production
+          : anvilconfig.origins.development
+
+      
     }
 
     /* Returns maps controller. */
@@ -85,4 +106,3 @@ const App = author(
 );
 
 export const app = App({ id: "app", parent: document.body });
-

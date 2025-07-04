@@ -1,7 +1,7 @@
 /*
 import client from "@/rolloanvil/mixins/client.js";
-20250701
-v.1.2
+20250703
+v.1.3
 */
 
 import config from "@/rolloanvil/config.json";
@@ -18,11 +18,13 @@ export default (parent) => {
 
     #_ = {
       ready: false,
+      setup: {},
       submission: 0,
     };
 
-    connectedCallback() {
-      super.connectedCallback?.();
+    constructor() {
+      super();
+      this.id = `${this.constructor.__key__}-${this.constructor.id()}`;
     }
 
     disconnectedCallback() {
@@ -34,7 +36,6 @@ export default (parent) => {
       super.__new__?.();
       const owner = this;
 
-      this.id = `${this.constructor.__key__}-${this.constructor.id()}`;
       this.attribute[this.constructor.__key__] = true;
 
       /* Channels */
@@ -84,8 +85,6 @@ export default (parent) => {
 
           /* Quasi-permanent message handler for channels. */
           #onchannel = async (event) => {
-            await owner.connect();
-
             const message = new Message(event);
             /* Filter-out non-relevant events. */
             if (owner.origin !== message.origin) {
@@ -111,8 +110,7 @@ export default (parent) => {
 
       /* Client callables */
       (() => {
-        const call = async (name, data = {}, { timeout } = {}) => {
-          await this.connect();
+        const call = async (name, data, { timeout } = {}) => {
           const submission = this.#_.submission++;
           const { promise, resolve, reject } = Promise.withResolvers();
 
@@ -166,10 +164,12 @@ export default (parent) => {
             };
           })();
 
-          this.contentWindow.postMessage(
-            { data, meta: { id: this.id, name, submission } },
-            this.origin
-          );
+          const message = { meta: { id: this.id, name, submission } };
+          if (data !== undefined) {
+            message.data = data;
+          }
+
+          this.contentWindow.postMessage(message, this.origin);
 
           return promise;
         };
@@ -197,12 +197,17 @@ export default (parent) => {
       return this.#_.client;
     }
 
-    /* . */
+    /* Returns ready flag. */
     get ready() {
       return this.#_.ready;
     }
 
-    /* . */
+    /* Returns setup. */
+    get setup() {
+      return this.#_.setup;
+    }
+
+    /* Initializes parent-iframe communication bridge. */
     async connect({ timeout } = {}) {
       const owner = this;
 
@@ -263,10 +268,13 @@ export default (parent) => {
             this.timer && clearTimeout(this.timer);
             resolve(owner);
             window.removeEventListener("message", this.onmessage);
+
+            if (event.data.setup) {
+              Object.assign(owner.setup, event.data.setup);
+            }
+            Object.freeze(owner.setup);
           };
         })();
-
-        
 
         this.contentWindow.postMessage({ id: this.id }, this.origin);
 

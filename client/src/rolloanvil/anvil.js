@@ -1,6 +1,8 @@
 /*
-import { Anvil, anvil } from "@/rolloanvil/anvil.js";
-const { Anvil, anvil } = await use("@/rolloanvil/anvil.js");
+import { Anvil } from "@/rolloanvil/anvil.js";
+const { Anvil } = await use("@/rolloanvil/anvil.js");
+20250703
+v.1.3
 */
 
 import { author } from "@/rollocomponent/tools/author.js";

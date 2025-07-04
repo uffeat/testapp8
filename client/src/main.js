@@ -9,49 +9,26 @@ console.info(
 
 const { component } = await use("@/rollocomponent/");
 
-const { Anvil, anvil } = await use("@/rolloanvil/");
+const { Modal } = await use("@/rollolibs/bootstrap/");
 
+const element = component.div(
+  "modal",
+  { tab: -1 },
+  component.div(
+    "modal-dialog",
+    {},
+    component.div(
+      "modal-content",
+      {},
+      component.div("modal-header", {},
+        component.button('btn-close', {type:"button", '[dataBsDismiss]': "modal", '[ariaLabel]': "Close"}),
+      ),
+      component.div("modal-body", {}),
+      component.div("modal-footer", {})
+    )
+  )
+);
 
+const modal = new Modal(element)
 
-const custom = Anvil({ slot: "data", parent: app });
-const custom_2 = Anvil({ slot: "data", parent: app });
-
-custom.channels.add("foo", (data) => {
-  console.log("custom foo channel got data:", data);
-});
-
-
-
-await (async () => {
-  const response = await custom.client.echo({ ding: "DING" });
-  console.log("client response from custom:", response);
-})();
-
-await (async () => {
-  const response = await custom_2.client.echo({ dong: "DONG" });
-  console.log("client response from custom_2:", response);
-})();
-
-await (async () => {
-  const response = await anvil.server.echo({ number: 42 }, { timeout: 5000 });
-  console.log("server response:", response);
-})();
-
-
-
-
-
-
-
-
-
-
-
-console.log('HERE');
-
-await (async () => {
-  const response = await anvil.client.echo({ number: 8 });
-  console.log("client response:", response);
-})();
-
-
+modal.show()
