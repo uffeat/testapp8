@@ -7,17 +7,21 @@ v.1.2
 export default (parent, config) => {
   return class extends parent {
     static __name__ = "find";
-    /* Unified (optional) alternative to 'querySelector' and 'querySelectorAll' 
+    /* Unified alternative to 'querySelector' and 'querySelectorAll' 
     with a leaner syntax. */
     find(selector) {
       /* Most likely use concerns search for single descendant, 
       therefore start with querySelector */
-      const result = this.querySelector(selector);
-      if (result) {
-        return result;
+      const element = this.querySelector(selector);
+      if (element) {
+        return element;
       }
-      /* NOTE Return values() to enable direct use of iterator helpers. */
-      return this.querySelectorAll(selector).values();
+      const elements = this.querySelectorAll(selector)
+      if (elements.length) {
+        /* NOTE Return values() to enable direct use of iterator helpers. */
+        return elements.values();
+      }
+      return null
     }
   };
 };

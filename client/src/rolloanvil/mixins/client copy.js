@@ -1,7 +1,7 @@
 /*
 import client from "@/rolloanvil/mixins/client.js";
-20250704
-v.1.4
+20250703
+v.1.3
 */
 
 import config from "@/rolloanvil/config.json";
@@ -202,27 +202,6 @@ export default (parent) => {
       return this.#_.ready;
     }
 
-    /* Returns src. */
-    get src() {
-      return super.src;
-    }
-
-    /* Sets src from path fragment. */
-    set src(path) {
-      if (super.src) {
-        throw new Error(`Cannot change 'src'.`);
-      }
-      if (path) {
-        path = String(path).trim();
-        if (!path.startsWith("/")) {
-          path = `/${path}`;
-        }
-        super.src = `${this.origin}${path}`;
-      } else {
-        super.src = this.origin;
-      }
-    }
-
     /* Returns setup. */
     get setup() {
       return this.#_.setup;
@@ -304,14 +283,6 @@ export default (parent) => {
 
       this.#_.ready = true;
       return this;
-    }
-
-    __init__() {
-      super.__init__?.();
-      /* Set default src, if none provided */
-      if (!String(super.src).trim()) {
-        super.src = `${this.origin}/main`;
-      }
     }
   };
 };

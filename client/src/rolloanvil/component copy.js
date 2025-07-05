@@ -38,7 +38,15 @@ const cls = class extends base("iframe", client) {
     return this.#_.origin;
   }
 
-  
+  /* Returns src. */
+  get src() {
+    return super.src;
+  }
+
+  /* Set src from path fragment. */
+  set src(path) {
+    super.src = `${this.origin}/${path}`;
+  }
 };
 
 export const AnvilComponent = author(cls);

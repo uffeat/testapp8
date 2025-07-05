@@ -28,7 +28,7 @@ const cls = class extends base(
     /* 'origin' is used for 
     - construction of endpoint base url
     - iframe src. */
-    this.#_.origin = 
+    this.#_.origin = this.src =
       import.meta.env.VERCEL_ENV === "production"
         ? config.origins.production
         : config.origins.development;

@@ -8,4 +8,3 @@ console.info(
 );
 
 const { component } = await use("@/rollocomponent/");
-

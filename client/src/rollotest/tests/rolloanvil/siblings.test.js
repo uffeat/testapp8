@@ -26,10 +26,6 @@ await (async () => {
   console.log("client response from custom_2:", response);
 })();
 
-await (async () => {
-  const response = await anvil.server.echo({ number: 42 }, { timeout: 5000 });
-  console.log("server response:", response);
-})();
 
 await (async () => {
   const response = await anvil.client.echo({ number: 8 });
