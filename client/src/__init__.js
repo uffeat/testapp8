@@ -10,6 +10,17 @@ import {
 } from "@/rollocomponent/__init__.js";
 import { Sheet } from "@/rollosheet/__init__.js";
 
+/* Add js imports */
+app.imports.add(import.meta.glob(["/src/rollotools/**/*.js"])).imports
+/* Add html imports */
+.add(
+  import.meta.glob(["/src/**/*.html"], {
+    query: "?raw",
+    import: "default",
+  }),
+  { raw: true }
+);
+
 /* Add .sheet.css support */
 app.signatures
   .add({

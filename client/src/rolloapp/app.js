@@ -11,46 +11,11 @@ import { Processors } from "@/rolloapp/tools/processors.js";
 import { Signatures } from "@/rolloapp/tools/signatures.js";
 import { pub } from "@/rolloapp/tools/pub.js";
 
+import { Imports } from "@/rolloapp/tools/imports.js";
 
 
 
-const imports = new (class {
-  #_ = {
-    registry: new Map(),
-  };
 
-  get size() {
-    return this.#_.registry.size;
-  }
-
-  config(map) {
-    for (const [path, load] of Object.entries(map)) {
-      if (this.has(path)) {
-        throw new Error(`Duplicate path: ${path}`);
-      }
-      this.#_.registry.set(path, load);
-    }
-  }
-
-  get(path) {
-    if (!this.has(path)) {
-      throw new Error(`Invalid path: ${path}`);
-    }
-
-    console.log("path:", path); //
-    const load = this.#_.registry.get(path);
-    console.log("load:", load); //
-
-    return load;
-  }
-
-  has(path) {
-    return this.#_.registry.has(path);
-  }
-})();
-
-//imports.config(map);
-//console.log("size:", imports.size);
 
 
 
@@ -66,6 +31,10 @@ const App = author(
 
       this.#_.processors = new Processors(this);
       this.#_.signatures = new Signatures(this);
+
+      this.#_.imports = new Imports(this);
+
+
 
       this.id = "app";
 
@@ -129,6 +98,11 @@ const App = author(
       return this.#_.meta;
     }
 
+    /* Returns imports controller. */
+    get imports() {
+      return this.#_.imports;
+    }
+
     /* Returns processors controller. */
     get processors() {
       return this.#_.processors;
@@ -151,12 +125,23 @@ const App = author(
       const { cache = true, raw = false } = options;
 
       /* Import */
-      const result = await pub.import(path, { cache, raw });
+      //const result = await pub.import(path, { cache, raw });
+
       /*
+      let result
+      if (path.public) {
+        result = await pub.import(path, { cache, raw })
+      } else {
+        result = await this.imports.import(path);
+      }
+        */
+      
+      
       const result = path.public
-        ? pub.import(path, { cache, raw })
-        : imports.get(path.path)();
-      */
+        ? await pub.import(path, { cache, raw })
+        : await this.imports.import(path, { raw });
+        
+      
 
       /* Process */
       if (this.#_.processors.has(path.types)) {
