@@ -6,11 +6,10 @@ v.1.3
 */
 import "@/rolloanvil/assets/main.css";
 
+import { meta } from "@/rollometa/meta.js";
 import { author } from "@/rollocomponent/tools/author.js";
 import { base } from "@/rollocomponent/tools/base.js";
-
-import config from "@/rolloanvil/config.json";
-
+import { origins } from "@/rolloanvil/origins.js";
 import server from "@/rolloanvil/mixins/server.js";
 import worker from "@/rolloanvil/mixins/worker.js";
 
@@ -25,9 +24,7 @@ const cls = class extends base("iframe", worker, server) {
     - construction of endpoint base url
     - iframe src. */
     this.#_.origin =
-      import.meta.env.VERCEL_ENV === "production"
-        ? config.origins.production
-        : config.origins.development;
+      meta.env.name === "production" ? origins.production : origins.development;
   }
 
   __new__() {

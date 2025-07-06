@@ -4,7 +4,8 @@ import client from "@/rolloanvil/mixins/client.js";
 v.1.4
 */
 
-import config from "@/rolloanvil/config.json";
+import { meta } from "@/rollometa/meta.js";
+import { config } from "@/rolloanvil/config.js";
 import { Message } from "@/rolloanvil/tools/message.js";
 
 export default (parent) => {
@@ -123,14 +124,14 @@ export default (parent) => {
                     const error = new Error(
                       `'${name}' did not respond in time.`
                     );
-                    if (import.meta.env.DEV) {
+                    if (meta.env.DEV) {
                       reject(error);
                     } else {
                       resolve(error);
                     }
                     window.removeEventListener("message", this.onmessage);
                   },
-                  timeout === undefined ? config.timeout.client : timeout
+                  timeout === undefined ? config.timeout.worker : timeout
                 );
               }
               window.addEventListener("message", this.onmessage);
@@ -192,11 +193,6 @@ export default (parent) => {
       return this.#_.channels;
     }
 
-    /* Returns controller for calling Anvil app's client-side callables. */
-    get worker() {
-      return this.#_.worker;
-    }
-
     /* Returns ready flag. */
     get ready() {
       return this.#_.ready;
@@ -226,6 +222,11 @@ export default (parent) => {
     /* Returns setup. */
     get setup() {
       return this.#_.setup;
+    }
+
+    /* Returns controller for calling Anvil app's client-side callables. */
+    get worker() {
+      return this.#_.worker;
     }
 
     /* Initializes parent-iframe communication bridge. */
@@ -269,7 +270,7 @@ export default (parent) => {
                   }
                   window.removeEventListener("message", this.onmessage);
                 },
-                timeout === undefined ? config.timeout.client : timeout
+                timeout === undefined ? config.timeout.worker : timeout
               );
             }
             window.addEventListener("message", this.onmessage);

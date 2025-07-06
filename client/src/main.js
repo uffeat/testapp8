@@ -4,7 +4,7 @@
 
 document.querySelector("html").dataset.bsTheme = "dark";
 
-console.info("Environment:", app.meta.env.name);
+console.info("Environment:", meta.env.name);
 
 const { Modules } = await use("@/rollotools/modules.js");
 

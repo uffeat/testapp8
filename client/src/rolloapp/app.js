@@ -2,23 +2,15 @@
 import { app } from "@/rolloapp/app.js";
 */
 
+import { meta } from "@/rollometa/meta.js";
 import { author } from "@/rollocomponent/tools/author.js";
 import { base } from "@/rollocomponent/tools/base.js";
 import { component } from "@/rollocomponent/component.js";
-
 import { Path } from "@/rolloapp/tools/path.js";
 import { Processors } from "@/rolloapp/tools/processors.js";
 import { Signatures } from "@/rolloapp/tools/signatures.js";
 import { pub } from "@/rolloapp/tools/pub.js";
-
 import { Imports } from "@/rolloapp/tools/imports.js";
-
-
-
-
-
-
-
 
 const App = author(
   class extends base() {
@@ -34,8 +26,6 @@ const App = author(
 
       this.#_.imports = new Imports(this);
 
-
-
       this.id = "app";
 
       this.shadow.append(
@@ -48,54 +38,9 @@ const App = author(
       super.__new__?.();
       const owner = this;
 
-      this.#_.meta = new (class {
-        #_ = {};
-
-        constructor() {
-          this.#_.env = new (class {
-            #_ = {};
-
-            constructor() {
-              this.#_.DEV = location.origin.startsWith("http://localhost:");
-
-              if (this.#_.DEV) {
-                this.#_.name = "development";
-              } else {
-                if (location.origin === "https://testapp8.vercel.app") {
-                  this.#_.name = "production";
-                } else {
-                  this.#_.name = "preview";
-                }
-              }
-
-              owner.attribute.dev = this.#_.DEV;
-              owner.attribute.environment = this.#_.name;
-              owner.attribute.origin = location.origin;
-            }
-
-            get DEV() {
-              return this.#_.DEV;
-            }
-
-            get name() {
-              return this.#_.name;
-            }
-
-            get origin() {
-              return location.origin;
-            }
-          })();
-        }
-
-        get env() {
-          return this.#_.env;
-        }
-      })();
-    }
-
-    /* . */
-    get meta() {
-      return this.#_.meta;
+      this.attribute.dev = meta.env.DEV;
+      this.attribute.environment = meta.env.name;
+      this.attribute.origin = meta.env.origin;
     }
 
     /* Returns imports controller. */
@@ -135,13 +80,10 @@ const App = author(
         result = await this.imports.import(path);
       }
         */
-      
-      
+
       const result = path.public
         ? await pub.import(path, { cache, raw })
         : await this.imports.import(path, { raw });
-        
-      
 
       /* Process */
       if (this.#_.processors.has(path.types)) {

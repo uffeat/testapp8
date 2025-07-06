@@ -4,7 +4,8 @@ import server from "@/rolloanvil/mixins/server.js";
 v.1.1
 */
 
-import config from "@/rolloanvil/config.json";
+
+import { config } from "@/rolloanvil/config.js";
 
 export default (parent) => {
   return class extends parent {
