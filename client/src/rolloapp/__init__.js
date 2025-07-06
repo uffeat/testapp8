@@ -2,10 +2,21 @@
 import "@/rolloapp/__init__.js";
 */
 
-import "@/rolloapp/assets/main.css";
-import { app } from "@/rolloapp/app.js";
-import "@/rolloapp/config/__init__.js";
 
+
+import "@/rolloapp/config/__init__.js";
+import { component } from "@/rollocomponent/component.js";
+
+await app.import('/rolloapp/assets/main.css')
+
+
+
+Object.defineProperty(window, "component", {
+  configurable: false,
+  enumerable: true,
+  writable: false,
+  value: component,
+});
 
 
 
@@ -27,4 +38,4 @@ Object.defineProperty(window, "use", {
 });
 
 
-await app.shadow.sheets.import("@/rolloapp/assets/shadow");
+await app.shadow.sheets.import("/rolloapp/assets/shadow");

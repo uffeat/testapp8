@@ -8,8 +8,7 @@ import { component } from "@/rollocomponent/component.js";
 
 import anvilconfig from "@/rolloanvil/config.json";
 
-import { construct } from "@/rolloapp/tools/construct.js";
-import { ImportMaps } from "@/rolloapp/tools/import_maps.js";
+
 import { Path } from "@/rolloapp/tools/path.js";
 import { Processors } from "@/rolloapp/tools/processors.js";
 import { Signatures } from "@/rolloapp/tools/signatures.js";
@@ -23,7 +22,7 @@ const App = author(
 
     constructor() {
       super();
-      this.#_.maps = new ImportMaps(this);
+      
       this.#_.processors = new Processors(this);
       this.#_.signatures = new Signatures(this);
 
@@ -54,10 +53,7 @@ const App = author(
           : anvilconfig.origins.development;
     }
 
-    /* Returns maps controller. */
-    get maps() {
-      return this.#_.maps;
-    }
+    
 
     /* Returns processors controller. */
     get processors() {
@@ -81,16 +77,7 @@ const App = author(
       const { cache = true, raw = false } = options;
 
       /* Import */
-      const result = path.public
-        ? await pub.import(path, { cache, raw })
-        : await (async () => {
-            /* Special case: uncached js module */
-            if (!path.public && path.type === "js" && cache === false) {
-              const text = (await this.maps.get(path, { raw: true })()).trim();
-              return await construct(`${text}\n//# sourceURL=${path.file}`);
-            }
-            return this.maps.get(path, { raw })();
-          })();
+      const result = await pub.import(path, { cache, raw })
       /* Process */
       if (this.#_.processors.has(path.types)) {
         const processor = this.#_.processors.get(path.types);
@@ -102,6 +89,10 @@ const App = author(
         if (processed !== undefined) return processed;
       }
       return result;
+    }
+
+    __init__() {
+      super.__init__?.();
     }
   }
 );

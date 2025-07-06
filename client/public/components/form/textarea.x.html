@@ -12,8 +12,8 @@ v.1.0
 </style>
 
 <script main type="module">
-  export default async (assets) => {
-    const { base, mix } = await use("@/rollocomponent/");
+  export default async ({assets, base, mix}) => {
+   
     const input = (await use("/components/form/mixins/input.js")).default;
 
     return class extends mix(base("textarea"), {}, input) {

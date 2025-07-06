@@ -38,8 +38,8 @@ v.1.1
 </style>
 
 <script main type="module">
-  export default async (assets) => {
-    const { base, component } = await use("@/rollocomponent/");
+  export default async ({assets, base}) => {
+  
     const Input = await use("/components/form/input.x.html");
 
     const cls = class extends base() {

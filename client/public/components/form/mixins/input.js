@@ -3,9 +3,9 @@ const input = await use("/components/form/mixins/input.js");
 20250621
 v.1.0
 */
-const { Ref, State } = await use("@/rollostate/");
-const { is_number } = await use("@/rollotools/is/is_number.js");
-const { is_numeric } = await use("@/rollotools/is/is_numeric.js");
+const { Ref, State } = await use("/rollostate/");
+const { is_number } = await use("/rollotools/is/is_number.js");
+const { is_numeric } = await use("/rollotools/is/is_numeric.js");
 const { create_id } = await use("/components/form/tools/id.js");
 
 export default (parent, config) => {

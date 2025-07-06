@@ -1,6 +1,3 @@
-
-
-
 export function pipe(value, ...functions) {
   const context = this === globalThis ? null : this;
   const detail = { context, data: {}, pipe: functions, size: functions.length };
@@ -11,7 +8,6 @@ export function pipe(value, ...functions) {
   }
   return value;
 }
-
 
 export async function pipe_async(value, ...functions) {
   const context = this === globalThis ? null : this;
