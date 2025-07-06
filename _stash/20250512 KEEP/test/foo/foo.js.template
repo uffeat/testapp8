@@ -1,5 +1,0 @@
-<template script>
-  <script type="module">
-    export const foo = "FOO";
-  </script>
-</template>

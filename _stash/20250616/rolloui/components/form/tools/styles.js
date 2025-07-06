@@ -1,1 +1,0 @@
-export const styles = "d-flex.flex-column.row-gap-1.px-3.py-2.rollo_form_control"

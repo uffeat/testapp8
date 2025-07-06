@@ -1,5 +1,5 @@
 /*
-vercel/foo
+vercel/ding
 */
 
 const actual = await (await fetch("/api/ding")).text();

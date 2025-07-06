@@ -23,15 +23,18 @@ if (meta.env.DEV || meta.env.name === "preview") {
       const KEY = "unit_test";
       const path = prompt("Path:", localStorage.getItem(KEY) || "");
       if (path) {
-        await use(`/rollotest/${path}.test.js`)
+        if (test.has(`tests/${path}.test.js`)) {
+          await test.import(`tests/${path}.test.js`);
+        } else {
+          await use(`/rollotest/${path}.test.js`);
+        }
         localStorage.setItem(KEY, path);
       }
       return;
     }
     /* Runs batch tests */
     if (event.code === "KeyT" && event.shiftKey) {
-      await test.batch();
-
+      await test.batch((path) => path.includes("/batch/"));
       return;
     }
   });

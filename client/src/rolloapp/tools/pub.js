@@ -53,14 +53,26 @@ export const pub = new (class {
 
   /* Returns import from public. */
   async import(path, { cache, raw }) {
-    if (!raw && path.type === "js")
-      return await this.#_.import.call(path, { cache });
+    try {
+      if (!raw && path.type === "js")
+        return await this.#_.import.call(path, { cache });
+    } catch (error) {
+      console.error("Original error:", error);
+      throw new Error(`Could not import: ${path.specifier}`);
+    }
+
     /* Mimic Vite: css becomes global (albeit via link) */
     if (!raw && path.type === "css") return await this.#link(path.path);
-    const result = await this.#_.fetch.call(path, { cache });
-    /* Mimic Vite: Return uncached parsed json */
-    if (!raw && path.type === "json") return JSON.parse(result);
-    return result;
+
+    try {
+      const result = await this.#_.fetch.call(path, { cache });
+      /* Mimic Vite: Return uncached parsed json */
+      if (!raw && path.type === "json") return JSON.parse(result);
+      return result;
+    } catch (error) {
+      console.error("Original error:", error);
+      throw new Error(`Could not fetch: ${path.specifier}`);
+    }
   }
 
   /* Adds and returns stylesheet link. */
