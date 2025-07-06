@@ -16,7 +16,7 @@ anvil.client
   anvil.client
   .echo({ number: 42 })
   .then((response) => {
-    console.log("client submission:", anvil.client.submission);
+    console.log("client submission:", anvil.worker.submission);
     console.log("client response:", response)
   });
 
