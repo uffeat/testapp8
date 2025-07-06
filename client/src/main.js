@@ -12,7 +12,8 @@ console.info(
 
 //const { anvil } = await use("@/rolloanvil/");
 
-import { Papa } from "./rollolibs/papa.js";
+//import { Papa } from "./rollolibs/papa.js";
+const {Papa} = await use('/rollolibs/papa/')
 console.log('Papa:', Papa)
 
 await (async () => {
