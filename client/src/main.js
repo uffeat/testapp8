@@ -12,19 +12,14 @@ console.info(
 
 //const { anvil } = await use("@/rolloanvil/");
 
-const Input = await use("/components/form/input.x.html");
+await (async () => {
+  const result = await use("/test/foo/foo.md")
+  console.log('result:', result)
+})();
 
-  const uffe = Input({
-    parent: app,
-    name: "uffe",
-    //value: 'uff',
-    required: true,
-    validators: [
-      (value) => {
-        if (value !== "uffe") {
-          return "Not uffe";
-        }
-      },
-    ],
-  });
+
+await (async () => {
+  const result = (await use("/test/foo/foo.yaml")).foo
+  console.log('result:', result)
+})();
 

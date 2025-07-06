@@ -10,6 +10,8 @@ import { construct } from "@/rolloapp/tools/construct.js";
 
 import { Sheet } from "@/rollosheet/__init__.js";
 
+import { yaml } from "@/rollolibs/yaml/__init__.js";
+
 import {
   author,
   base,
@@ -17,6 +19,7 @@ import {
   mix,
   mixins,
 } from "@/rollocomponent/__init__.js";
+
 
 /* Add .sheet.css support */
 app.signatures
@@ -102,4 +105,20 @@ app.processors.add({
       cache: true,
     }
   ),
+});
+
+/* Add md support */
+app.processors.add({
+  md: new Processor(
+    async (result, { owner, path }) =>
+      (await owner.import("/rollolibs/marked.js")).parse(result).trim(),
+    { cache: true }
+  ),
+});
+
+/* Add yaml support */
+app.processors.add({
+  yaml: new Processor(async (result, { owner, path }) => yaml(result), {
+    cache: false,
+  }),
 });

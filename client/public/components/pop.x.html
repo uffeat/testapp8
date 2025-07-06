@@ -5,8 +5,8 @@
 </style>
 
 <script main type="module">
-  const { Popover } = await use("@/rollolibs/bootstrap/bootstrap.js");
-  const { Ref } = await use("@/rollostate/");
+  
+  const { Ref } = await use("/rollostate/");
 
   export class Pop {
     #_ = {
@@ -108,7 +108,7 @@
     }
 
     #init() {
-      this.#_.pop = new Popover(this.#_.target, {
+      this.#_.pop = new bootstrap.Popover(this.#_.target, {
         container: this.#_.target,
         /* NOTE falsy content -> pop does not show! */
         content: " ",
