@@ -2,27 +2,24 @@
 
 document.querySelector("html").dataset.bsTheme = "dark";
 
-console.info(
-  "Environment:",
-  import.meta.env.DEV ? "development" : import.meta.env.VERCEL_ENV
-);
+console.info("Environment:", app.meta.env.name);
 
-//const { anvil } = await use("@/rolloanvil/");
-
-await (async () => {
-  const result = await use("/test/foo/foo.md");
-  console.log("result:", result);
-})();
+//import { anvil } from "@/rolloanvil/__init__.js";
+//import { Anvil } from "@/rolloanvil/anvil.js";
+//const anvil = Anvil({parent: app, slot: 'data'})
 
 await (async () => {
-  const result = (await use("/test/foo/foo.yaml")).foo;
+  const data = {
+    email: "name@company.com",
+    score: 8,
+    accept: true,
+    bar: null,
+    stuff: false,
+  };
+
+  const result = await app.anvil.server.foo(data);
   console.log("result:", result);
-})();
 
-await (async () => {
-  const result = await use("/test/foo/foo.csv");
-  console.log("result:", result);
-
-
- 
+  const raw = await app.anvil.server.foo(data, { raw: true });
+  console.log("raw:", raw);
 })();

@@ -6,8 +6,7 @@ import { author } from "@/rollocomponent/tools/author.js";
 import { base } from "@/rollocomponent/tools/base.js";
 import { component } from "@/rollocomponent/component.js";
 
-import anvilconfig from "@/rolloanvil/config.json";
-
+import { Anvil } from "@/rolloanvil/anvil.js";
 
 import { Path } from "@/rolloapp/tools/path.js";
 import { Processors } from "@/rolloapp/tools/processors.js";
@@ -22,7 +21,7 @@ const App = author(
 
     constructor() {
       super();
-      
+
       this.#_.processors = new Processors(this);
       this.#_.signatures = new Signatures(this);
 
@@ -36,24 +35,64 @@ const App = author(
 
     __new__() {
       super.__new__?.();
-      this.attribute.environment = import.meta.env.DEV
-        ? "development"
-        : import.meta.env.VERCEL_ENV;
+      const owner = this;
 
-      this.attribute.orgin = location.origin;
+      this.#_.meta = new (class {
+        #_ = {};
 
-      this.attribute.anvilEnvironment =
-        import.meta.env.VERCEL_ENV === "production"
-          ? "production"
-          : "development";
+        constructor() {
+          this.#_.env = new (class {
+            #_ = {};
 
-      this.attribute.anvilOrigin =
-        import.meta.env.VERCEL_ENV === "production"
-          ? anvilconfig.origins.production
-          : anvilconfig.origins.development;
+            constructor() {
+              this.#_.DEV = location.origin.startsWith("http://localhost:");
+
+              if (this.#_.DEV) {
+                this.#_.name = "development";
+              } else {
+                if (location.origin === "https://testapp8.vercel.app") {
+                  this.#_.name = "production";
+                } else {
+                  this.#_.name = "preview";
+                }
+              }
+
+              owner.attribute.dev = this.#_.DEV;
+              owner.attribute.environment = this.#_.name;
+              owner.attribute.origin = location.origin;
+            }
+
+            get DEV() {
+              return this.#_.DEV;
+            }
+
+            get name() {
+              return this.#_.name;
+            }
+
+            get origin() {
+              return location.origin;
+            }
+          })();
+        }
+
+        get env() {
+          return this.#_.env;
+        }
+      })();
+
+      this.#_.anvil = Anvil({slot: 'data'})
+      this.append(this.#_.anvil)
     }
 
-    
+    get anvil() {
+      return this.#_.anvil;
+    }
+
+    /* . */
+    get meta() {
+      return this.#_.meta;
+    }
 
     /* Returns processors controller. */
     get processors() {
@@ -77,7 +116,7 @@ const App = author(
       const { cache = true, raw = false } = options;
 
       /* Import */
-      const result = await pub.import(path, { cache, raw })
+      const result = await pub.import(path, { cache, raw });
       /* Process */
       if (this.#_.processors.has(path.types)) {
         const processor = this.#_.processors.get(path.types);

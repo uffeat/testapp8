@@ -34,6 +34,13 @@ const cls = class extends base(
         : config.origins.development;
   }
 
+  __new__() {
+      super.__new__?.();
+      this.attribute.origin = this.origin;
+
+
+  }
+
   /* Returns env-adjusted origin of companion Anvil app. */
   get origin() {
     return this.#_.origin;
