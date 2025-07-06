@@ -11,6 +11,7 @@ import { Anvil } from "@/rolloanvil/anvil.js";
 const anvil = Anvil({
   slot: "data",
   parent: app,
+  display: 'none'
 });
 
 await anvil.connect();

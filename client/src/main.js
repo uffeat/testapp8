@@ -6,7 +6,7 @@ document.querySelector("html").dataset.bsTheme = "dark";
 
 console.info("Environment:", app.meta.env.name);
 
-const { camel_to_kebab } = await use("@/rollotools/text/case.js");
+const { Modules } = await use("@/rollotools/modules.js");
 
 await (async () => {
   const data = {

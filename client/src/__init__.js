@@ -1,3 +1,8 @@
+/* TODO
+Config Anvil
+... Perhaps global config?
+*/
+
 import { Processor, app, build, construct } from "@/rolloapp/__init__.js";
 import { anvil } from "@/rolloanvil/__init__.js";
 import { bootstrap } from "@/rollolibs/bootstrap/__init__.js";
@@ -8,18 +13,36 @@ import {
   mix,
   mixins,
 } from "@/rollocomponent/__init__.js";
-import { Sheet } from "@/rollosheet/__init__.js";
 
-/* Add js imports */
-app.imports.add(import.meta.glob(["/src/rollotools/**/*.js"])).imports
-/* Add html imports */
-.add(
-  import.meta.glob(["/src/**/*.html"], {
-    query: "?raw",
-    import: "default",
-  }),
-  { raw: true }
-);
+import { Sheet } from "@/rollosheet/tools/sheet.js";
+
+console.log("HERE"); ////
+
+/* Add raw css imports */
+app.imports
+  .add(
+    import.meta.glob(["/src/**/*.css"], {
+      query: "?raw",
+      import: "default",
+    }),
+    { raw: true }
+  )
+
+  /* Add html imports */
+  .imports.add(
+    import.meta.glob(["/src/**/*.html"], {
+      query: "?raw",
+      import: "default",
+    }),
+    { raw: true }
+  )
+
+  /* Add js imports */
+  .imports.add(import.meta.glob([
+    '/src/rolloanvil/anvil.js',
+    "/src/rollostate/**/*.js",
+    "/src/rollotools/**/*.js",
+  ]));
 
 /* Add .sheet.css support */
 app.signatures

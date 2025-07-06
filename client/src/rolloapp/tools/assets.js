@@ -7,6 +7,9 @@ v.1.0
 import { Sheet } from "@/rollosheet/tools/sheet.js";
 
 export const build = async (wrapper, { path } = {}) => {
+ 
+
+
   /* Build assets */
   const assets = {};
   /* Named sheets */

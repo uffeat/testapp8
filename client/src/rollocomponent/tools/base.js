@@ -4,10 +4,8 @@ import { base } from "@/rollocomponent/tools/base.js";
 v.1.0
 */
 
-import { is_shadow_ready } from "@/rollotools/is/is_shadow_ready.js";
 import { mix } from "@/rollocomponent/tools/mix.js";
 import { mixins } from "@/rollocomponent/mixins/__init__.js";
-
 
 
 export const base = (...args) => {
@@ -84,3 +82,12 @@ export const base = (...args) => {
     };
   }
 };
+
+function is_shadow_ready (element)  {
+  try {
+    element.attachShadow({ mode: "open" });
+    return true
+  } catch {
+    return false
+  }
+}
