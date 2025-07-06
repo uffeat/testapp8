@@ -4,7 +4,7 @@ document.querySelector("html").dataset.bsTheme = "dark";
 
 console.info("Environment:", app.meta.env.name);
 
-//import { anvil } from "@/rolloanvil/__init__.js";
+const { anvil } = await use("@/rolloanvil/");
 //import { Anvil } from "@/rolloanvil/anvil.js";
 //const anvil = Anvil({parent: app, slot: 'data'})
 
@@ -17,9 +17,9 @@ await (async () => {
     stuff: false,
   };
 
-  const result = await app.anvil.server.foo(data);
+  const result = await anvil.server.foo(data);
   console.log("result:", result);
 
-  const raw = await app.anvil.server.foo(data, { raw: true });
+  const raw = await anvil.server.foo(data, { raw: true });
   console.log("raw:", raw);
 })();

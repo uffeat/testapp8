@@ -29,9 +29,9 @@ const { AnvilContainer } = await use("/components/anvil/container.x.html");
 </style>
 
 <script main type="module">
-  const { component } = await use("@/rollocomponent/");
+  
   const { AnvilComponent } = await use("@/rolloanvil/component.js");
-  const { assign } = await use("@/rollotools/assign.js");
+  const { assign } = await use("/rollotools/assign.js");
 
   const TIME = 200;
 

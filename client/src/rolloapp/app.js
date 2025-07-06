@@ -6,12 +6,18 @@ import { author } from "@/rollocomponent/tools/author.js";
 import { base } from "@/rollocomponent/tools/base.js";
 import { component } from "@/rollocomponent/component.js";
 
-import { Anvil } from "@/rolloanvil/anvil.js";
-
 import { Path } from "@/rolloapp/tools/path.js";
 import { Processors } from "@/rolloapp/tools/processors.js";
 import { Signatures } from "@/rolloapp/tools/signatures.js";
 import { pub } from "@/rolloapp/tools/pub.js";
+
+const map = import.meta.glob([
+  "/src/rolloanvil/__init__.js",
+  "/src/rollosheet/__init__.js",
+  "/src/rollostate/__init__.js",
+  "/src/rollotools/**/*.js",
+
+])
 
 const App = author(
   class extends base() {
@@ -80,13 +86,6 @@ const App = author(
           return this.#_.env;
         }
       })();
-
-      this.#_.anvil = Anvil({slot: 'data'})
-      this.append(this.#_.anvil)
-    }
-
-    get anvil() {
-      return this.#_.anvil;
     }
 
     /* . */
@@ -116,7 +115,21 @@ const App = author(
       const { cache = true, raw = false } = options;
 
       /* Import */
-      const result = await pub.import(path, { cache, raw });
+      //const result = await pub.import(path, { cache, raw });
+      let result
+      if (path.public) {
+        result = await pub.import(path, { cache, raw });
+      } else {
+        const load = map[path.path];
+        result = await load()
+        
+      }
+
+
+
+
+
+
       /* Process */
       if (this.#_.processors.has(path.types)) {
         const processor = this.#_.processors.get(path.types);

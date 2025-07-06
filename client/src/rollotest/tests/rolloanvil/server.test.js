@@ -2,7 +2,7 @@
 rolloanvil/server
 */
 
-const { anvil } = await use("@/rolloanvil/anvil.js");
+import { anvil } from "@/rolloanvil/__init__.js";
 
 await (async () => {
   const data = {
@@ -13,7 +13,7 @@ await (async () => {
     stuff: false,
   };
 
-  const result = await server.foo(data);
+  const result = await anvil.server.foo(data);
   console.log("result:", result);
 
   const raw = await anvil.server.foo(data, { raw: true });

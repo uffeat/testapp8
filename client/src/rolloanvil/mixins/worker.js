@@ -10,7 +10,7 @@ import { Message } from "@/rolloanvil/tools/message.js";
 export default (parent) => {
   /* Enables invokation of iframe callables. */
   return class extends parent {
-    static __name__ = "client";
+    static __name__ = "worker";
     static id = (() => {
       let id = 0;
       return () => id++;
@@ -174,7 +174,7 @@ export default (parent) => {
           return promise;
         };
 
-        this.#_.client = new Proxy(
+        this.#_.worker = new Proxy(
           {},
           {
             get: (target, name) => {
@@ -193,8 +193,8 @@ export default (parent) => {
     }
 
     /* Returns controller for calling Anvil app's client-side callables. */
-    get client() {
-      return this.#_.client;
+    get worker() {
+      return this.#_.worker;
     }
 
     /* Returns ready flag. */

@@ -4,22 +4,18 @@ const { Anvil } = await use("@/rolloanvil/anvil.js");
 20250703
 v.1.3
 */
+import "@/rolloanvil/assets/main.css";
 
 import { author } from "@/rollocomponent/tools/author.js";
 import { base } from "@/rollocomponent/tools/base.js";
 
 import config from "@/rolloanvil/config.json";
 
-import client from "@/rolloanvil/mixins/client.js";
 import server from "@/rolloanvil/mixins/server.js";
+import worker from "@/rolloanvil/mixins/worker.js";
 
-const cls = class extends base(
-  "iframe",
-  
-  client,
-  server
-) {
-  static __key__ = "data-anvil";
+const cls = class extends base("iframe", worker, server) {
+  static __key__ = "rollo-anvil";
 
   #_ = {};
 
@@ -28,17 +24,15 @@ const cls = class extends base(
     /* 'origin' is used for 
     - construction of endpoint base url
     - iframe src. */
-    this.#_.origin = 
+    this.#_.origin =
       import.meta.env.VERCEL_ENV === "production"
         ? config.origins.production
         : config.origins.development;
   }
 
   __new__() {
-      super.__new__?.();
-      this.attribute.origin = this.origin;
-
-
+    super.__new__?.();
+    this.attribute.origin = this.origin;
   }
 
   /* Returns env-adjusted origin of companion Anvil app. */
@@ -47,7 +41,6 @@ const cls = class extends base(
   }
 };
 
-
 /* Returns component instance from which 
 - server endpoint calls can be made.
 - "client endpoint" calls can be made. These are endpoint-like callables that 
@@ -55,4 +48,3 @@ const cls = class extends base(
   Python-based worker with full access to DOM apis.
 - "channels" can be setup. */
 export const Anvil = author(cls);
-

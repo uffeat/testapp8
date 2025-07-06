@@ -2,7 +2,7 @@
 import "@/rolloanvil/assets/main.css";
 */
 
-iframe[anvil-component] {
+iframe[rollo-anvil] {
   width: 100%;
 }
 
