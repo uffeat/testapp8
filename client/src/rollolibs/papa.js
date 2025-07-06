@@ -4,17 +4,24 @@
 v.1.1
 */
 
-import { factory } from "@/rollolibs/tools/factory.js";
 
-if (import.meta.env.DEV) {
-  console.info("Loading PapaParse...");
-}
+
+console.log(location.origin)
 
 /* Create and add iframe with scripts injected */
-const iframe = await factory("rollolibs/papa/main.js");
+const { promise, resolve } = Promise.withResolvers();
+const iframe = component.iframe({
+  parent: document.head,
+  src: `${location.origin}/rollolibs/papa/main.html`,
+  
+});
 
-/* Harvest */
-export const Papa = iframe.contentWindow.Papa;
+iframe.onload = (event) => resolve()
 
-/* Clean up */
-iframe.remove();
+await promise;
+
+const Papa = iframe.contentWindow.Papa
+
+iframe.remove()
+
+export { Papa };
