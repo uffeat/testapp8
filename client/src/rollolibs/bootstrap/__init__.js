@@ -1,6 +1,6 @@
 /*
-import { Pop } from "@/rollolibs/bootstrap/__init__.js";
-const { Pop } = await use("@/rollolibs/bootstrap/");
+import { bootstrap } from "@/rollolibs/bootstrap/__init__.js";
+
 
 */
 
@@ -89,11 +89,7 @@ const bootstrap = new (class {
   }
 })();
 
-Object.defineProperty(window, "bootstrap", {
-  configurable: false,
-  enumerable: true,
-  writable: false,
-  value: bootstrap,
-});
+
+
 
 export { bootstrap };

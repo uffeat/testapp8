@@ -1,41 +1,13 @@
 /*
-import "@/rolloapp/__init__.js";
+import {app} from "@/rolloapp/__init__.js";
 */
 
-
-
-import "@/rolloapp/config/__init__.js";
-import { component } from "@/rollocomponent/component.js";
-
-await app.import('/rolloapp/assets/main.css')
-
-
-
-Object.defineProperty(window, "component", {
-  configurable: false,
-  enumerable: true,
-  writable: false,
-  value: component,
-});
+//import "@/rolloapp/config/__init__.js";
+import { app } from "@/rolloapp/app.js";
+import { Processor } from "@/rolloapp/tools/processor.js";
+import { build } from "@/rolloapp/tools/assets.js";
+import { construct } from "@/rolloapp/tools/construct.js";
 
 
 
-Object.defineProperty(window, "app", {
-  configurable: false,
-  enumerable: true,
-  writable: false,
-  value: app,
-});
-
-Object.defineProperty(window, "use", {
-  configurable: false,
-  enumerable: true,
-  writable: false,
-  value: new Proxy(() => {}, {
-    get: (_, key) => app[key],
-    apply: (_, __, args) => app.import(...args),
-  }),
-});
-
-
-await app.shadow.sheets.import("/rolloapp/assets/shadow");
+export { Processor, app, build, construct };

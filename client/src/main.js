@@ -4,9 +4,7 @@ document.querySelector("html").dataset.bsTheme = "dark";
 
 console.info("Environment:", app.meta.env.name);
 
-const { anvil } = await use("@/rolloanvil/");
-//import { Anvil } from "@/rolloanvil/anvil.js";
-//const anvil = Anvil({parent: app, slot: 'data'})
+
 
 await (async () => {
   const data = {

@@ -1,5 +1,5 @@
 /*
-import { app } from "@/rolloapp/_app.js";
+import { app } from "@/rolloapp/app.js";
 */
 
 import { author } from "@/rollocomponent/tools/author.js";
@@ -11,13 +11,49 @@ import { Processors } from "@/rolloapp/tools/processors.js";
 import { Signatures } from "@/rolloapp/tools/signatures.js";
 import { pub } from "@/rolloapp/tools/pub.js";
 
-const map = import.meta.glob([
-  "/src/rolloanvil/__init__.js",
-  "/src/rollosheet/__init__.js",
-  "/src/rollostate/__init__.js",
-  "/src/rollotools/**/*.js",
 
-])
+
+
+const imports = new (class {
+  #_ = {
+    registry: new Map(),
+  };
+
+  get size() {
+    return this.#_.registry.size;
+  }
+
+  config(map) {
+    for (const [path, load] of Object.entries(map)) {
+      if (this.has(path)) {
+        throw new Error(`Duplicate path: ${path}`);
+      }
+      this.#_.registry.set(path, load);
+    }
+  }
+
+  get(path) {
+    if (!this.has(path)) {
+      throw new Error(`Invalid path: ${path}`);
+    }
+
+    console.log("path:", path); //
+    const load = this.#_.registry.get(path);
+    console.log("load:", load); //
+
+    return load;
+  }
+
+  has(path) {
+    return this.#_.registry.has(path);
+  }
+})();
+
+//imports.config(map);
+//console.log("size:", imports.size);
+
+
+
 
 const App = author(
   class extends base() {
@@ -115,20 +151,12 @@ const App = author(
       const { cache = true, raw = false } = options;
 
       /* Import */
-      //const result = await pub.import(path, { cache, raw });
-      let result
-      if (path.public) {
-        result = await pub.import(path, { cache, raw });
-      } else {
-        const load = map[path.path];
-        result = await load()
-        
-      }
-
-
-
-
-
+      const result = await pub.import(path, { cache, raw });
+      /*
+      const result = path.public
+        ? pub.import(path, { cache, raw })
+        : imports.get(path.path)();
+      */
 
       /* Process */
       if (this.#_.processors.has(path.types)) {
