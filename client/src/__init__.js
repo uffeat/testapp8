@@ -88,7 +88,7 @@ import { Sheet } from "@/rollosheet/tools/sheet.js";
               dom: wrapper,
               mix,
               mixins,
-              path
+              path,
             });
             /* Create instance factory */
             const key = cls.__key__
@@ -115,7 +115,7 @@ import { Sheet } from "@/rollosheet/tools/sheet.js";
                 `${script.textContent.trim()}\n//# sourceURL=${path.path}`
               );
               if ("default" in module) {
-                return await module.default({assets, dom: wrapper, path});
+                return await module.default({ assets, dom: wrapper, path });
               } else {
                 if (Object.keys(assets).length) {
                   return Object.freeze({ ...assets, ...module });
@@ -170,45 +170,39 @@ import { Sheet } from "@/rollosheet/tools/sheet.js";
 
 /* Add globals */
 (() => {
-  Object.defineProperty(window, "app", {
+  const options = {
     configurable: false,
     enumerable: true,
     writable: false,
+  };
+
+  Object.defineProperty(window, "app", {
     value: app,
+    ...options,
   });
   Object.defineProperty(window, "anvil", {
-    configurable: false,
-    enumerable: true,
-    writable: false,
     value: anvil,
+    ...options,
   });
 
   Object.defineProperty(window, "bootstrap", {
-    configurable: false,
-    enumerable: true,
-    writable: false,
     value: bootstrap,
+    ...options,
   });
   Object.defineProperty(window, "component", {
-    configurable: false,
-    enumerable: true,
-    writable: false,
     value: component,
+    ...options,
   });
   Object.defineProperty(window, "meta", {
-    configurable: false,
-    enumerable: true,
-    writable: false,
     value: meta,
+    ...options,
   });
   Object.defineProperty(window, "use", {
-    configurable: false,
-    enumerable: true,
-    writable: false,
     value: new Proxy(() => {}, {
       get: (_, key) => app[key],
       apply: (_, __, args) => app.import(...args),
     }),
+    ...options,
   });
 })();
 
