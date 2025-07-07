@@ -1,4 +1,3 @@
-
 import "@/main.css";
 import { Processor, app, build, construct } from "@/rolloapp/__init__.js";
 import { anvil } from "@/rolloanvil/__init__.js";
@@ -12,8 +11,6 @@ import {
 } from "@/rollocomponent/__init__.js";
 import { meta } from "@/rollometa/meta.js";
 import { Sheet } from "@/rollosheet/tools/sheet.js";
-
-
 
 /* Configure import capabilities */
 (() => {
@@ -39,7 +36,7 @@ import { Sheet } from "@/rollosheet/tools/sheet.js";
     /* Add js imports */
     .imports.add(
       import.meta.glob([
-        "/src/rolloanvil/anvil.js",
+        "/src/rolloanvil/__init__.js",
         "/src/rollostate/**/*.js",
         "/src/rollotools/**/*.js",
       ])
@@ -76,7 +73,6 @@ import { Sheet } from "@/rollosheet/tools/sheet.js";
               return meta.getAttribute("type");
             }
           })();
-          //console.log("type:", type); //
           if (type === "component") {
             const assets = await build(wrapper);
             const script = wrapper.querySelector("script[main]");
@@ -89,8 +85,10 @@ import { Sheet } from "@/rollosheet/tools/sheet.js";
               assets,
               author,
               base,
+              dom: wrapper,
               mix,
               mixins,
+              path
             });
             /* Create instance factory */
             const key = cls.__key__
@@ -117,7 +115,7 @@ import { Sheet } from "@/rollosheet/tools/sheet.js";
                 `${script.textContent.trim()}\n//# sourceURL=${path.path}`
               );
               if ("default" in module) {
-                return await module.default(assets);
+                return await module.default({assets, dom: wrapper, path});
               } else {
                 if (Object.keys(assets).length) {
                   return Object.freeze({ ...assets, ...module });

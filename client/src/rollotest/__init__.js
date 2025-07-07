@@ -23,6 +23,7 @@ if (meta.env.DEV || meta.env.name === "preview") {
       const KEY = "unit_test";
       const path = prompt("Path:", localStorage.getItem(KEY) || "");
       if (path) {
+        /* First, check if test in src */
         if (test.has(`tests/${path}.test.js`)) {
           await test.import(`tests/${path}.test.js`);
         } else {

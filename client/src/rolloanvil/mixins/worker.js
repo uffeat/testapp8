@@ -4,6 +4,10 @@ import client from "@/rolloanvil/mixins/client.js";
 v.1.4
 */
 
+/* TODO
+- Collapse to single message listener that can also send initial data.
+- Revisit idea re auto-connect from call/channel */
+
 import { meta } from "@/rollometa/meta.js";
 import { config } from "@/rolloanvil/config.js";
 import { Message } from "@/rolloanvil/tools/message.js";
@@ -288,6 +292,9 @@ export default (parent) => {
               return;
             }
             this.timer && clearTimeout(this.timer);
+            if (meta.env.DEV) {
+              console.info(`Anvil worker ready.`)
+            }
             resolve(owner);
             window.removeEventListener("message", this.onmessage);
 
