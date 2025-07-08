@@ -1,6 +1,6 @@
 import "@/main.css";
 import { Processor, app, build, construct } from "@/rolloapp/__init__.js";
-import { anvil } from "@/rolloanvil/__init__.js";
+//import { anvil } from "@/rolloanvil/__init__.js";////
 import { bootstrap } from "@/rollolibs/bootstrap/__init__.js";
 import {
   author,
@@ -36,7 +36,7 @@ import { Sheet } from "@/rollosheet/tools/sheet.js";
     /* Add js imports */
     .imports.add(
       import.meta.glob([
-        "/src/rolloanvil/__init__.js",
+        //"/src/rolloanvil/__init__.js",////
         "/src/rollostate/**/*.js",
         "/src/rollotools/**/*.js",
       ])
@@ -180,10 +180,14 @@ import { Sheet } from "@/rollosheet/tools/sheet.js";
     value: app,
     ...options,
   });
+
+
+  /*
   Object.defineProperty(window, "anvil", {
     value: anvil,
     ...options,
   });
+  */
 
   Object.defineProperty(window, "bootstrap", {
     value: bootstrap,
