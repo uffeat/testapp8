@@ -4,18 +4,15 @@ document.querySelector("html").dataset.bsTheme = "dark";
 
 console.info("Environment:", meta.env.name);
 
-import { server } from "@/rolloanvil/server.js";
+
+import { anvil } from "@/rolloanvil/__init__.js";
 
 
-server
-  .echo([1,2,3])
-  .then((response) => console.log("server response:", response));
+anvil.channels.add("foo", (data) => {
+  console.log("foo channel got data:", data);
+});
 
-server
-  .echo([1,2,3])
-  .then((response) => console.log("server response:", response));
-
-
-server
-  .foo()
-  .then((response) => console.log("server response:", response));
+await (async () => {
+  const response = await anvil.worker.echo({ number: 42 });
+  console.log("client response:", response);
+})();

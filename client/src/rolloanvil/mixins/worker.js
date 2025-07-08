@@ -22,8 +22,6 @@ export default (parent) => {
     })();
 
     #_ = {
-      listening: false,
-      loaded: false,
       ready: false,
       setup: {},
       submission: 0,
@@ -36,45 +34,7 @@ export default (parent) => {
 
     disconnectedCallback() {
       super.disconnectedCallback?.();
-      this.#_.listening = false;
-      this.#_.loaded = false;
       this.#_.ready = false;
-    }
-
-    async listen() {
-      const owner = this;
-
-      /* Load iframe */
-      if (!this.#_.loaded) {
-        
-        await (async () => {
-          const { promise, resolve } = Promise.withResolvers();
-          this.on.load$once = (event) => {
-            this.#_.loaded = false;
-            resolve(this);
-          };
-          return promise;
-        })();
-      }
-
-      /* Listen for messages from worker */
-      if (!this.#_.listening) {
-        window.addEventListener("message", (event) => {
-          /* Parse message */
-          const message = new Message(event);
-          /* Filter-out non-relevant events. */
-          if (owner.origin !== message.origin) {
-            return;
-          }
-          if (owner.id !== message.meta.id) {
-            return;
-          }
-          /* Pass on message */
-          this.send("x_message", { detail: message });
-        });
-
-        this.#_.listening = true;
-      }
     }
 
     __new__() {
@@ -213,6 +173,7 @@ export default (parent) => {
           if (data !== undefined) {
             message.data = data;
           }
+
           this.contentWindow.postMessage(message, this.origin);
 
           return promise;
@@ -332,7 +293,7 @@ export default (parent) => {
             }
             this.timer && clearTimeout(this.timer);
             if (meta.env.DEV) {
-              console.info(`Anvil worker ready.`);
+              console.info(`Anvil worker ready.`)
             }
             resolve(owner);
             window.removeEventListener("message", this.onmessage);

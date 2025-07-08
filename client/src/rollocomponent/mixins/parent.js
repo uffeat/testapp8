@@ -7,6 +7,10 @@ v.1.0
 export default (parent, config) => {
   return class extends parent {
     static __name__ = "parent";
+
+    #_ = {}
+
+
     /* Returns parent. */
     get parent() {
       return this.parentElement;
@@ -25,6 +29,32 @@ export default (parent, config) => {
       } else {
         parent.append(this);
       }
+    }
+
+    get __parent__() {
+      return this.#_.parent;
+    }
+
+    set __parent__(parent) {
+      this.#_.parent = parent
+    }
+
+    update(updates = {}) {
+      super.update?.(updates);
+      if (updates.__parent__) {
+        this.__parent__ = updates.__parent__;
+      }
+      return this;
+    }
+
+
+    __init__() {
+      super.__init__?.();
+      if (this.__parent__) {
+        this.parent = this.__parent__
+      }
+
+     
     }
   };
 };
