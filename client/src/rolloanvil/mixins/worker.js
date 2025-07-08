@@ -16,6 +16,8 @@ export default (parent) => {
   /* Enables invokation of iframe callables. */
   return class extends parent {
     static __name__ = "worker";
+
+    
     static id = (() => {
       let id = 0;
       return () => id++;
