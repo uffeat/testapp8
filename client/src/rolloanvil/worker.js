@@ -138,17 +138,17 @@ const cls = class extends base("iframe") {
                 } else {
                   resolve(error);
                 }
-                window.removeEventListener("message", this.onmessage);
+                window.removeEventListener("message", this.onresponse);
               }, timeout);
             }
-            window.addEventListener("message", this.onmessage);
+            window.addEventListener("message", this.onresponse);
           }
 
           get timer() {
             return this.#_.timer;
           }
 
-          onmessage = async (event) => {
+          onresponse = async (event) => {
             const message = new Message(event);
 
             /* Filter-out non-relevant events. */
@@ -168,7 +168,7 @@ const cls = class extends base("iframe") {
             } else {
               resolve(message.data);
             }
-            window.removeEventListener("message", this.onmessage);
+            window.removeEventListener("message", this.onresponse);
           };
         })();
 

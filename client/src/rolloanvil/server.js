@@ -48,7 +48,7 @@ const __server__ = new (class {
     }
 
     const response = await fetch(url, {
-      body: JSON.stringify(data),////
+      body: JSON.stringify(data), ////
       ...this.#_.options,
     });
 
@@ -78,12 +78,12 @@ const __server__ = new (class {
 })();
 
 export const server = new Proxy(
-        {},
-        {
-          get: (target, name) => {
-            return (...args) => {
-              return __server__.call(name, ...args);
-            };
-          },
-        }
-      );
+  {},
+  {
+    get: (target, name) => {
+      return (...args) => {
+        return __server__.call(name, ...args);
+      };
+    },
+  }
+);
