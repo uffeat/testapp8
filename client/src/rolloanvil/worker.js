@@ -319,7 +319,7 @@ const cls = class extends base("iframe") {
         };
       })();
 
-      this.contentWindow.postMessage({ id: this.id }, this.origin);
+      this.contentWindow.postMessage({ id: this.id, assets: 'ASSETS' }, this.origin);
 
       return promise;
     })();
