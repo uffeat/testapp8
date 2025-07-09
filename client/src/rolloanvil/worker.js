@@ -10,9 +10,7 @@ import "@/rolloanvil/assets/main.css";
 import { meta } from "@/rollometa/meta.js";
 import { author } from "@/rollocomponent/tools/author.js";
 import { base } from "@/rollocomponent/tools/base.js";
-import { origins } from "@/rolloanvil/origins.js";
 
-import { config } from "@/rolloanvil/config.js";
 import { Message } from "@/rolloanvil/tools/message.js";
 
 const cls = class extends base("iframe") {
@@ -27,17 +25,11 @@ const cls = class extends base("iframe") {
     ready: false,
     setup: {},
     submission: 0,
-    timeout: 3000
+    timeout: 3000,
   };
 
   constructor() {
     super();
-
-    /* 'origin' is used for 
-    - construction of endpoint base url
-    - iframe src. */
-    this.#_.origin =
-      meta.env.name === "production" ? origins.production : origins.development;
 
     this.id = `${this.constructor.__key__}-${this.constructor.id()}`;
   }
@@ -106,7 +98,7 @@ const cls = class extends base("iframe") {
           if (owner.origin !== message.origin) {
             return;
           }
-          if (owner.id !== message.meta.id) {
+          if (owner.id !== message.id) {//
             return;
           }
           if (!("channel" in message.meta)) return;
@@ -127,6 +119,11 @@ const cls = class extends base("iframe") {
     /* Client callables */
     (() => {
       const call = async (name, data, { timeout } = {}) => {
+        /* Use default timeout, if non provided */
+        if (timeout === undefined) {
+          timeout = this.#_.timeout;
+        }
+
         const submission = this.#_.submission++;
         const { promise, resolve, reject } = Promise.withResolvers();
 
@@ -134,18 +131,15 @@ const cls = class extends base("iframe") {
           #_ = {};
           constructor() {
             if (![false, null].includes(timeout)) {
-              this.#_.timer = setTimeout(
-                () => {
-                  const error = new Error(`'${name}' did not respond in time.`);
-                  if (meta.env.DEV) {
-                    reject(error);
-                  } else {
-                    resolve(error);
-                  }
-                  window.removeEventListener("message", this.onmessage);
-                },
-                timeout === undefined ? config.timeout.worker : timeout
-              );
+              this.#_.timer = setTimeout(() => {
+                const error = new Error(`'${name}' did not respond in time.`);
+                if (meta.env.DEV) {
+                  reject(error);
+                } else {
+                  resolve(error);
+                }
+                window.removeEventListener("message", this.onmessage);
+              }, timeout);
             }
             window.addEventListener("message", this.onmessage);
           }
@@ -161,7 +155,7 @@ const cls = class extends base("iframe") {
             if (owner.origin !== message.origin) {
               return;
             }
-            if (owner.id !== message.meta.id) {
+            if (owner.id !== message.id) {
               return;
             }
             if (submission !== message.meta.submission) {
@@ -178,7 +172,7 @@ const cls = class extends base("iframe") {
           };
         })();
 
-        const message = { meta: { id: this.id, name, submission } };
+        const message = { id: this.id, meta: {  name, submission } };
         if (data !== undefined) {
           message.data = data;
         }
@@ -188,7 +182,7 @@ const cls = class extends base("iframe") {
         return promise;
       };
 
-      this.#_.worker = new Proxy(
+      this.#_.api = new Proxy(
         {},
         {
           get: (target, name) => {
@@ -203,7 +197,7 @@ const cls = class extends base("iframe") {
 
   /* Returns env-adjusted origin of companion Anvil app. */
   get origin() {
-    return this.#_.origin;
+    return meta.anvil.origin;
   }
 
   /* Returns channels controller. */
@@ -243,8 +237,17 @@ const cls = class extends base("iframe") {
   }
 
   /* Returns controller for calling Anvil app's client-side callables. */
-  get worker() {
-    return this.#_.worker;
+  get api() {
+    return this.#_.api;
+  }
+
+  async #load() {
+    const { promise, resolve } = Promise.withResolvers();
+    this.on.load$once = (event) => {
+      console.log(`iframe with id ${this.id} loaded`); ////
+      resolve(this);
+    };
+    return promise;
   }
 
   /* Initializes parent-iframe communication bridge. */
@@ -256,14 +259,13 @@ const cls = class extends base("iframe") {
       return this;
     }
 
+    /* Use default timeout, if non provided */
+    if (timeout === undefined) {
+      timeout = this.#_.timeout;
+    }
+
     /* Load */
-    await (() => {
-      const { promise, resolve } = Promise.withResolvers();
-      this.on.load$once = (event) => {
-        resolve(this);
-      };
-      return promise;
-    })();
+    await this.#load();
 
     /* Handshake */
     await (() => {
@@ -276,27 +278,24 @@ const cls = class extends base("iframe") {
         #_ = {};
         constructor() {
           if (![false, null].includes(timeout)) {
-            this.#_.timer = setTimeout(
-              () => {
-                const error = new Error(`Handshake did not complete in time.`);
-                if (import.meta.env.DEV) {
-                  reject(error);
-                } else {
-                  resolve(error);
-                }
-                window.removeEventListener("message", this.onmessage);
-              },
-              timeout === undefined ? owner.#_.timeout : timeout
-            );
+            this.#_.timer = setTimeout(() => {
+              const error = new Error(`Handshake did not complete in time.`);
+              if (import.meta.env.DEV) {
+                reject(error);
+              } else {
+                resolve(error);
+              }
+              window.removeEventListener("message", this.onhandshake);
+            }, timeout);
           }
-          window.addEventListener("message", this.onmessage);
+          window.addEventListener("message", this.onhandshake);
         }
 
         get timer() {
           return this.#_.timer;
         }
 
-        onmessage = async (event) => {
+        onhandshake = async (event) => {
           if (owner.origin !== event.origin) {
             return;
           }
@@ -305,10 +304,10 @@ const cls = class extends base("iframe") {
           }
           this.timer && clearTimeout(this.timer);
           if (meta.env.DEV) {
-            console.info(`Anvil worker ready.`);
+            console.info(`Handshake completed.`);
           }
           resolve(owner);
-          window.removeEventListener("message", this.onmessage);
+          window.removeEventListener("message", this.onhandshake);
 
           if (event.data.setup) {
             Object.assign(owner.setup, event.data.setup);
@@ -344,9 +343,8 @@ const cls = class extends base("iframe") {
 const AnvilWorker = author(cls);
 
 export const worker = AnvilWorker({
-
-  parent: document.head,
-
-})
+  //parent: document.head,
+  parent: app,
+});
 
 await worker.connect();

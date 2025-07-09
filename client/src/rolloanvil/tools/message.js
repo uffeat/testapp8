@@ -13,6 +13,12 @@ export class Message {
 
     this.#_.data = event.data?.data || null;
 
+    this.#_.id = event.data?.id || null;
+
+    
+
+
+
     this.#_.meta = Object.freeze(event.data?.meta || {});
   }
 
@@ -24,6 +30,11 @@ export class Message {
   /* Returns event. */
   get event() {
     return this.#_.event;
+  }
+
+  /* Returns id. */
+  get id() {
+    return this.#_.id;
   }
 
   /* Returns meta. */
