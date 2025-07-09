@@ -33,3 +33,5 @@ await (async () => {
   const response = await worker.api.bar();
   console.log("client response:", response);
 })();
+
+//worker.api.nodice()
