@@ -98,7 +98,8 @@ const cls = class extends base("iframe") {
           if (owner.origin !== message.origin) {
             return;
           }
-          if (owner.id !== message.id) {//
+          if (owner.id !== message.id) {
+            //
             return;
           }
           if (!("channel" in message.meta)) return;
@@ -158,7 +159,8 @@ const cls = class extends base("iframe") {
             if (owner.id !== message.id) {
               return;
             }
-            if (submission !== message.meta.submission) {
+
+            if (submission !== message.submission) {
               return;
             }
 
@@ -166,13 +168,14 @@ const cls = class extends base("iframe") {
             if (message.meta.error) {
               reject(new Error(message.meta.error));
             } else {
-              resolve(message.data);
+              resolve(message.result);
             }
             window.removeEventListener("message", this.onresponse);
           };
         })();
 
-        const message = { id: this.id, meta: {  name, submission } };
+        const message = { id: this.id, submission, name };
+
         if (data !== undefined) {
           message.data = data;
         }

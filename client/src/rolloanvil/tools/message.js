@@ -12,19 +12,23 @@ export class Message {
     this.#_.source = event.source;
 
     this.#_.data = event.data?.data || null;
+    this.#_.result = event.data?.result || null;
 
     this.#_.id = event.data?.id || null;
 
-    
-
-
+    this.#_.submission = event.data?.submission;
 
     this.#_.meta = Object.freeze(event.data?.meta || {});
   }
 
-  /* Returns data. */
+  /* Returns result. */
   get data() {
     return this.#_.data;
+  }
+
+  /* Returns result. */
+  get result() {
+    return this.#_.result;
   }
 
   /* Returns event. */
@@ -50,5 +54,10 @@ export class Message {
   /* Returns source. */
   get source() {
     return this.#_.source;
+  }
+
+  /* Returns submission. */
+  get submission() {
+    return this.#_.submission;
   }
 }
