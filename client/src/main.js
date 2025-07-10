@@ -4,34 +4,53 @@ document.querySelector("html").dataset.bsTheme = "dark";
 
 console.info("Environment:", meta.env.name);
 
+import { AnvilWorker, worker } from "@/rolloanvil/worker.js";
 
+await worker.connect();
 
-import { worker } from "@/rolloanvil/worker.js";
-
-//await worker.connect()
 
 worker.channels.add("foo", (data) => {
   console.log("foo channel got data:", data);
 });
 
+worker.channels.add("ding", (data) => {
+  console.log("ding channel got data:", data);
+  return "Result from ding"
+  
+});
+
 await (async () => {
   const response = await worker.api.echo({ number: 42 });
-  console.log("client response:", response);
+  console.log("echo response:", response);
 })();
 
 await (async () => {
   const response = await worker.api.echo({ number: 42 });
-  console.log("client response:", response);
+  console.log("echo response:", response);
+})();
+
+
+
+
+
+await (async () => {
+  const response = await worker.api.bar();
+  console.log("bar response:", response);
 })();
 
 await (async () => {
   const response = await worker.api.foo();
-  console.log("client response:", response);
+  console.log("foo response:", response);
 })();
 
+/*
+const custom = AnvilWorker({ parent: app });
+await custom.connect();
+
 await (async () => {
-  const response = await worker.api.bar();
-  console.log("client response:", response);
+  const response = await custom.api.echo({ custom: 42 });
+  console.log("custom echo response:", response);
 })();
+*/
 
 //worker.api.nodice()

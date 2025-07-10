@@ -1,5 +1,5 @@
 /*
-import { worker } from "@/rolloanvil/worker.js";
+import { AnvilWorker, worker } from "@/rolloanvil/worker.js";
 
 20250703
 v.1.3
@@ -231,10 +231,14 @@ const cls = class extends base("iframe") {
       }
 
       onhandshake = async (event) => {
-        if (owner.origin !== event.origin) {
+
+        const message = Message(event);
+
+
+        if (owner.origin !== message.origin) {
           return;
         }
-        if (owner.id !== event.data.id) {
+        if (owner.id !== message.id) {
           return;
         }
         this.timer && clearTimeout(this.timer);
@@ -276,11 +280,11 @@ const cls = class extends base("iframe") {
   reside in the companion Anvil app's client code and can be used as a 
   Python-based worker with full access to DOM apis.
 - "channels" can be setup. */
-const AnvilWorker = author(cls);
+export const AnvilWorker = author(cls);
 
 export const worker = AnvilWorker({
   //parent: document.head,
   parent: app,
 });
 
-await worker.connect();
+//await worker.connect();

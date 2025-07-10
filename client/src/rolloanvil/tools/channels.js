@@ -75,11 +75,17 @@ export class Channels {
     /* Invoke channel (effect) */
     if (this.has(message.channel)) {
       const effect = this.get(message.channel);
-      effect.call(this.owner, message.data, {
+      const result = await effect.call(this.owner, message.data, {
         effect,
         channel: message.channel,
         owner: this.owner,
       });
+      if (result !== undefined) {
+        this.owner.contentWindow.postMessage(
+          { id: this.owner.id, channel: message.channel, result },
+          this.owner.origin
+        );
+      }
     }
   };
 }
