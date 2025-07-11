@@ -177,13 +177,22 @@ const cls = class extends base("iframe") {
   }
 
   /* Initializes parent-iframe communication bridge. */
-  async connect({ timeout } = {}) {
+  async connect({ assets, channels, timeout } = {}) {
     /* Guard against multiple runs */
     if (this.#_.ready) {
       return this;
     }
     await this.#load();
-    await this.#handshake(timeout);
+    await this.#handshake({ assets, timeout });
+
+    this.channels.add("use", async (path) => {
+      return await use(path, { raw: true });
+    });
+
+    if (channels) {
+      Object.entries(channels).forEach((item) => this.channels.add(...item));
+    }
+
     this.#_.ready = true;
     return this;
   }
@@ -197,7 +206,7 @@ const cls = class extends base("iframe") {
   }
 
   /* */
-  async #handshake(timeout) {
+  async #handshake({ assets, timeout } = {}) {
     const owner = this;
 
     /* Use default timeout, if none provided */
@@ -231,9 +240,7 @@ const cls = class extends base("iframe") {
       }
 
       onhandshake = async (event) => {
-
         const message = Message(event);
-
 
         if (owner.origin !== message.origin) {
           return;
@@ -255,10 +262,7 @@ const cls = class extends base("iframe") {
       };
     })();
 
-    this.contentWindow.postMessage(
-      { id: this.id, assets: "ASSETS" },
-      this.origin
-    );
+    this.contentWindow.postMessage({ id: this.id, assets }, this.origin);
 
     return promise;
   }

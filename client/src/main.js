@@ -6,18 +6,22 @@ console.info("Environment:", meta.env.name);
 
 import { AnvilWorker, worker } from "@/rolloanvil/worker.js";
 
-await worker.connect();
-
-
-worker.channels.add("foo", (data) => {
-  console.log("foo channel got data:", data);
+await worker.connect({
+  assets: "ASSETS",
+  channels: {
+    foo: (data) => {
+      console.log("foo channel got data:", data);
+    },
+    ding: (data) => {
+      console.log("ding channel got data:", data);
+      return "Result from ding";
+    },
+  },
 });
 
-worker.channels.add("ding", (data) => {
-  console.log("ding channel got data:", data);
-  return "Result from ding"
-  
-});
+
+
+
 
 await (async () => {
   const response = await worker.api.echo({ number: 42 });
@@ -28,10 +32,6 @@ await (async () => {
   const response = await worker.api.echo({ number: 42 });
   console.log("echo response:", response);
 })();
-
-
-
-
 
 await (async () => {
   const response = await worker.api.bar();
