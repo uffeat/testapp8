@@ -25,6 +25,7 @@ const cls = class extends base("iframe") {
     ready: false,
     setup: {},
     submission: 0,
+    /* Dfault timeout for calling worker api's */
     timeout: 3000,
   };
 
@@ -107,7 +108,7 @@ const cls = class extends base("iframe") {
     return this.#_.api;
   }
 
-  /* */
+  /* Calls worker api. */
   async call(name, data, { timeout } = {}) {
     const owner = this;
 
@@ -143,15 +144,11 @@ const cls = class extends base("iframe") {
 
       onresponse = async (event) => {
         const message = Message(event);
-
-        /* Filter-out non-relevant events. */
-        if (owner.origin !== message.origin) {
-          return;
-        }
-        if (owner.id !== message.id) {
-          return;
-        }
-        if (submission !== message.submission) {
+        if (
+          owner.origin !== message.origin ||
+          owner.id !== message.id ||
+          submission !== message.submission
+        ) {
           return;
         }
 
@@ -166,13 +163,10 @@ const cls = class extends base("iframe") {
     })();
 
     const message = { id: this.id, submission, name };
-
     if (data !== undefined) {
       message.data = data;
     }
-
     this.contentWindow.postMessage(message, this.origin);
-
     return promise;
   }
 
@@ -183,11 +177,27 @@ const cls = class extends base("iframe") {
       return this;
     }
     await this.#load();
-    await this.#handshake({ assets, timeout });
 
-    this.channels.add("use", async (path) => {
-      return await use(path, { raw: true });
+    /* use */
+    window.addEventListener("message", async (event) => {
+      const message = Message(event);
+      if (
+        this.origin !== message.origin ||
+        this.id !== message.id ||
+        !message.path
+      ) {
+        return;
+      }
+      const text = await use(message.path, { raw: true });
+      //console.log(`use handler imported text:`, text); ////
+
+      this.contentWindow.postMessage(
+        { id: this.id, path: message.path, text },
+        this.origin
+      );
     });
+
+    await this.#handshake({ assets, timeout });
 
     if (channels) {
       Object.entries(channels).forEach((item) => this.channels.add(...item));
