@@ -9,6 +9,14 @@ import { AnvilWorker, worker } from "@/rolloanvil/worker.js";
 await worker.connect();
 
 
+
+worker.receiver.add((message) => {
+  console.log('Got signal data:', message.data)
+  return true
+
+})
+
+
 await (async () => {
   const response = await worker.api.bar();
   console.log("bar response:", response);

@@ -31,7 +31,6 @@ const cls = class extends base("iframe") {
 
   constructor() {
     super();
-
     this.id = `${this.constructor.__key__}-${this.constructor.id()}`;
   }
 
@@ -42,14 +41,76 @@ const cls = class extends base("iframe") {
 
   __new__() {
     super.__new__?.();
+    const owner = this;
 
     this.attribute[this.constructor.__key__] = true;
     this.attribute.origin = this.origin;
 
+    /* receiver */
+    this.#_.receiver = new (class {
+      #_ = {
+        registry: new Map(),
+      };
+      constructor() {
+        owner.on.signal = (event) => {
+          const message = event.detail;
+
+          const submission = message.__submission__
+
+
+          for (const [effect, condition] of this.#_.registry.entries()) {
+            if (
+              condition &&
+              !condition.call(owner, message, {
+                condition,
+                effect,
+              })
+            ) {
+              continue;
+            }
+
+            const result = effect.call(owner, message, {
+              condition,
+              effect,
+            });
+
+            if (result === undefined || submission === null) {
+              continue;
+            }
+
+            const _message = {
+              id: owner.id,
+                  __type__: "duplex",
+                  __submission__: submission,
+                  
+                  result,
+                 
+                };
+                console.log("Sending duplex:", _message); ////
+                owner.contentWindow.postMessage(_message, this.origin);
+
+
+
+        
+          }
+        };
+      }
+
+      add(effect, condition) {
+        this.#_.registry.set(effect, condition);
+        return effect;
+      }
+
+      remove(effect) {
+        this.#_.registry.delete(effect);
+        return owner;
+      }
+    })();
+
     /* channels */
     this.#_.channels = new Channels(this);
 
-    /* api */
+    /* Create proxy-version of 'call' */
     this.#_.api = new Proxy(
       {},
       {
@@ -75,6 +136,11 @@ const cls = class extends base("iframe") {
   /* Returns ready flag. */
   get ready() {
     return this.#_.ready;
+  }
+
+  /* Returns receiver controller. */
+  get receiver() {
+    return this.#_.receiver;
   }
 
   /* Returns src. */
@@ -162,7 +228,7 @@ const cls = class extends base("iframe") {
       };
     })();
 
-    const message = { id: this.id, submission, name };
+    const message = { __type__: "api", id: this.id, submission, name };
     if (data !== undefined) {
       message.data = data;
     }
@@ -178,26 +244,39 @@ const cls = class extends base("iframe") {
     }
     await this.#load();
 
-    /* use */
+    await this.#handshake({ assets, timeout });
+
+    /* Set up special-purpose permanent handler for importing assets from 
+    worker */
     window.addEventListener("message", async (event) => {
       const message = Message(event);
       if (
         this.origin !== message.origin ||
         this.id !== message.id ||
+        message.__type__ !== "use" ||
         !message.path
       ) {
         return;
       }
       const text = await use(message.path, { raw: true });
-      //console.log(`use handler imported text:`, text); ////
-
       this.contentWindow.postMessage(
-        { id: this.id, path: message.path, text },
+        { __type__: "use", id: this.id, path: message.path, text },
         this.origin
       );
     });
 
-    await this.#handshake({ assets, timeout });
+    /* Set up permanent handler for sending signals from worker */
+    window.addEventListener("message", async (event) => {
+      const message = Message(event);
+      if (
+        this.origin !== message.origin ||
+        this.id !== message.id ||
+        message.__type__ !== "signal"
+      ) {
+        return;
+      }
+      this.send("signal", { detail: message });
+    });
 
     if (channels) {
       Object.entries(channels).forEach((item) => this.channels.add(...item));
