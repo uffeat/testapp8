@@ -236,7 +236,7 @@ const cls = class extends base("iframe") {
   }
 
   /* Initializes parent-iframe communication bridge. */
-  async connect({ config, timeout } = {}) {
+  async connect({ config, papi, timeout } = {}) {
     const owner = this;
 
     /* Guard against multiple runs */
@@ -339,6 +339,11 @@ const cls = class extends base("iframe") {
       this.contentWindow.postMessage(_message, this.origin);
     });
 
+    /* Add papi's */
+      if (papi) {
+        Object.entries(papi).forEach(([name, target]) => this.papi.add(name, target))
+      }
+
     this.#_.ready = true;
     return this;
   }
@@ -428,12 +433,7 @@ const cls = class extends base("iframe") {
   }
 };
 
-/* Returns component instance from which 
-- server endpoint calls can be made.
-- "client endpoint" calls can be made. These are endpoint-like callables that 
-  reside in the companion Anvil app's client code and can be used as a 
-  Python-based worker with full access to DOM apis.
-- "channels" can be setup. */
+/* . */
 export const AnvilWorker = author(cls);
 
 export const worker = AnvilWorker({

@@ -6,15 +6,24 @@ console.info("Environment:", meta.env.name);
 
 import { AnvilWorker, worker } from "@/rolloanvil/worker.js";
 
-await worker.connect({ config: { message: "Message from config" } });
+await worker.connect({
+  config: {
+    message: "Message from config",
+  },
+  papi: {
+      echo: (data) => {
+        return data;
+      },
+    },
+});
 
 //console.log("setup:", worker.setup);////
 //console.log("config:", worker.config);////
 
-worker.papi.add('ding', (data) => {
-  console.log("ding papi got data:", data);////
-  return {ding: 'DING'}
-})
+worker.papi.add("ding", (data) => {
+  console.log("ding papi got data:", data); ////
+  return { ding: "DING" };
+});
 
 worker.receiver.add((message) => {
   console.log("Got signal data:", message.data);
