@@ -55,8 +55,7 @@ const cls = class extends base("iframe") {
         owner.on.signal = (event) => {
           const message = event.detail;
 
-          const submission = message.__submission__
-
+          const submission = message.__submission__;
 
           for (const [effect, condition] of this.#_.registry.entries()) {
             if (
@@ -79,19 +78,13 @@ const cls = class extends base("iframe") {
             }
 
             const _message = {
-              id: owner.id,
-                  __type__: "duplex",
-                  __submission__: submission,
-                  
-                  result,
-                 
-                };
-                console.log("Sending duplex:", _message); ////
-                owner.contentWindow.postMessage(_message, this.origin);
-
-
-
-        
+              __id__: owner.id,
+              __type__: "duplex",
+              __submission__: submission,
+              result,
+              data: message.data,
+            };
+            owner.contentWindow.postMessage(_message, owner.origin);
           }
         };
       }
@@ -121,6 +114,11 @@ const cls = class extends base("iframe") {
         },
       }
     );
+  }
+
+  /* Returns config. */
+  get config() {
+    return this.#_.config;
   }
 
   /* Returns env-adjusted origin of companion Anvil app. */
@@ -212,15 +210,15 @@ const cls = class extends base("iframe") {
         const message = Message(event);
         if (
           owner.origin !== message.origin ||
-          owner.id !== message.id ||
-          submission !== message.submission
+          owner.id !== message.__id__ ||
+          submission !== message.__submission__
         ) {
           return;
         }
 
         this.timer && clearTimeout(this.timer);
-        if (message.error) {
-          reject(new Error(message.error));
+        if (message.__error__) {
+          reject(new Error(message.__error__));
         } else {
           resolve(message.result);
         }
@@ -228,7 +226,12 @@ const cls = class extends base("iframe") {
       };
     })();
 
-    const message = { __type__: "api", id: this.id, submission, name };
+    const message = {
+      __type__: "api",
+      __id__: this.id,
+      __submission__: submission,
+      name,
+    };
     if (data !== undefined) {
       message.data = data;
     }
@@ -237,14 +240,14 @@ const cls = class extends base("iframe") {
   }
 
   /* Initializes parent-iframe communication bridge. */
-  async connect({ assets, channels, timeout } = {}) {
+  async connect({ channels, config, timeout } = {}) {
     /* Guard against multiple runs */
     if (this.#_.ready) {
       return this;
     }
     await this.#load();
 
-    await this.#handshake({ assets, timeout });
+    await this.#handshake({ config, timeout });
 
     /* Set up special-purpose permanent handler for importing assets from 
     worker */
@@ -252,7 +255,7 @@ const cls = class extends base("iframe") {
       const message = Message(event);
       if (
         this.origin !== message.origin ||
-        this.id !== message.id ||
+        this.id !== message.__id__ ||
         message.__type__ !== "use" ||
         !message.path
       ) {
@@ -260,7 +263,7 @@ const cls = class extends base("iframe") {
       }
       const text = await use(message.path, { raw: true });
       this.contentWindow.postMessage(
-        { __type__: "use", id: this.id, path: message.path, text },
+        { __type__: "use", __id__: this.id, path: message.path, text },
         this.origin
       );
     });
@@ -270,7 +273,7 @@ const cls = class extends base("iframe") {
       const message = Message(event);
       if (
         this.origin !== message.origin ||
-        this.id !== message.id ||
+        this.id !== message.__id__ ||
         message.__type__ !== "signal"
       ) {
         return;
@@ -295,7 +298,13 @@ const cls = class extends base("iframe") {
   }
 
   /* */
-  async #handshake({ assets, timeout } = {}) {
+  async #handshake({ config, timeout } = {}) {
+    if (config) {
+      this.#_.config = Object.freeze(config)
+    }
+
+
+
     const owner = this;
 
     /* Use default timeout, if none provided */
@@ -313,7 +322,7 @@ const cls = class extends base("iframe") {
         if (![false, null].includes(timeout)) {
           this.#_.timer = setTimeout(() => {
             const error = new Error(`Handshake did not complete in time.`);
-            if (import.meta.env.DEV) {
+            if (meta.env.DEV) {
               reject(error);
             } else {
               resolve(error);
@@ -334,7 +343,7 @@ const cls = class extends base("iframe") {
         if (owner.origin !== message.origin) {
           return;
         }
-        if (owner.id !== message.id) {
+        if (owner.id !== message.__id__) {
           return;
         }
         this.timer && clearTimeout(this.timer);
@@ -344,14 +353,14 @@ const cls = class extends base("iframe") {
         resolve(owner);
         window.removeEventListener("message", this.onhandshake);
 
-        if (event.data.setup) {
-          Object.assign(owner.setup, event.data.setup);
+        if (message.setup) {
+          Object.assign(owner.setup, message.setup);
         }
         Object.freeze(owner.setup);
       };
     })();
 
-    this.contentWindow.postMessage({ id: this.id, assets }, this.origin);
+    this.contentWindow.postMessage({ __id__: this.id, config }, this.origin);
 
     return promise;
   }
@@ -360,7 +369,7 @@ const cls = class extends base("iframe") {
   async #load() {
     const { promise, resolve } = Promise.withResolvers();
     this.on.load$once = (event) => {
-      console.log(`iframe with id ${this.id} loaded`);
+      //console.log(`iframe with id ${this.id} loaded`);////
       resolve(this);
     };
     return promise;
