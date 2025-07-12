@@ -6,19 +6,20 @@ console.info("Environment:", meta.env.name);
 
 import { AnvilWorker, worker } from "@/rolloanvil/worker.js";
 
-await worker.connect({config: {message: 'Message from config'}});
+await worker.connect({ config: { message: "Message from config" } });
 
-console.log('setup:', worker.setup)
-console.log('config:', worker.config)
+//console.log("setup:", worker.setup);////
+//console.log("config:", worker.config);////
 
-
-
-worker.receiver.add((message) => {
-  console.log('Got signal data:', message.data)
-  return true
-
+worker.papi.add('ding', (data) => {
+  console.log("ding papi got data:", data);////
+  return {ding: 'DING'}
 })
 
+worker.receiver.add((message) => {
+  console.log("Got signal data:", message.data);
+  return true;
+});
 
 await (async () => {
   const response = await worker.api.bar();
@@ -29,13 +30,6 @@ await (async () => {
   const response = await worker.api.foo();
   console.log("foo response:", response);
 })();
-
-await (async () => {
-  const response = await worker.api.foo();
-  console.log("foo response:", response);
-})();
-
-
 
 /*
 const custom = AnvilWorker({ parent: app });

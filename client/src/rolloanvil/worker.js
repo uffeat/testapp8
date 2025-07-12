@@ -10,7 +10,6 @@ import "@/rolloanvil/assets/main.css";
 import { meta } from "@/rollometa/meta.js";
 import { author } from "@/rollocomponent/tools/author.js";
 import { base } from "@/rollocomponent/tools/base.js";
-import { Channels } from "@/rolloanvil/tools/channels.js";
 import { Message } from "@/rolloanvil/tools/message.js";
 
 const cls = class extends base("iframe") {
@@ -100,9 +99,6 @@ const cls = class extends base("iframe") {
       }
     })();
 
-    /* channels */
-    this.#_.channels = new Channels(this);
-
     /* Create proxy-version of 'call' */
     this.#_.api = new Proxy(
       {},
@@ -126,9 +122,9 @@ const cls = class extends base("iframe") {
     return meta.anvil.origin;
   }
 
-  /* Returns channels controller. */
-  get channels() {
-    return this.#_.channels;
+  /* Return papi controller. */
+  get papi() {
+    return this.#_.papi;
   }
 
   /* Returns ready flag. */
@@ -240,7 +236,9 @@ const cls = class extends base("iframe") {
   }
 
   /* Initializes parent-iframe communication bridge. */
-  async connect({ channels, config, timeout } = {}) {
+  async connect({ config, timeout } = {}) {
+    const owner = this;
+
     /* Guard against multiple runs */
     if (this.#_.ready) {
       return this;
@@ -281,9 +279,65 @@ const cls = class extends base("iframe") {
       this.send("signal", { detail: message });
     });
 
-    if (channels) {
-      Object.entries(channels).forEach((item) => this.channels.add(...item));
-    }
+    this.#_.papi = new (class {
+      #_ = {
+        registry: new Map(),
+      };
+
+      add(name, target) {
+        this.#_.registry.set(name, target);
+      }
+
+      get(name) {
+        return this.#_.registry.get(name);
+      }
+
+      has(name) {
+        return this.#_.registry.has(name);
+      }
+
+      remove(name) {
+        this.#_.registry.delete(name);
+        return owner;
+      }
+    })();
+
+    /* Set up permanent handler for papi */
+    window.addEventListener("message", async (event) => {
+      const message = Message(event);
+      if (
+        this.origin !== message.origin ||
+        this.id !== message.__id__ ||
+        message.__type__ !== "papi" ||
+        !message.name ||
+        !("__submission__" in message)
+      ) {
+        return;
+      }
+
+      /* TODO Error */
+      if (!this.papi.has(message.name)) {
+        return;
+      }
+
+      const target = this.papi.get(message.name);
+      const result = await target.call(this, message.data, {
+        owner: this,
+        name: message.name,
+        submission: message.__submission__,
+        target,
+      });
+
+      const _message = {
+        __type__: "papi",
+        __id__: this.id,
+        __submission__: message.__submission__,
+        name: message.name,
+        result,
+      };
+
+      this.contentWindow.postMessage(_message, this.origin);
+    });
 
     this.#_.ready = true;
     return this;
@@ -297,13 +351,11 @@ const cls = class extends base("iframe") {
     }
   }
 
-  /* */
+  /* Returns promise that resolves, when handshake completed. */
   async #handshake({ config, timeout } = {}) {
     if (config) {
-      this.#_.config = Object.freeze(config)
+      this.#_.config = Object.freeze(config);
     }
-
-
 
     const owner = this;
 
@@ -365,7 +417,7 @@ const cls = class extends base("iframe") {
     return promise;
   }
 
-  /* */
+  /* Returns promise that resolves, when ifram loaded. */
   async #load() {
     const { promise, resolve } = Promise.withResolvers();
     this.on.load$once = (event) => {
