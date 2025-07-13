@@ -52,7 +52,7 @@ const cls = class extends base("iframe") {
         registry: new Map(),
       };
       constructor() {
-        owner.on.x_signal = (event) => {
+        owner.on.x_signal = async (event) => {
           const message = event.detail;
           for (const [effect, condition] of this.#_.registry.entries()) {
             if (
@@ -64,7 +64,7 @@ const cls = class extends base("iframe") {
             ) {
               continue;
             }
-            effect.call(owner, message, {
+            await effect.call(owner, message, {
               condition,
               effect,
             });
@@ -74,7 +74,7 @@ const cls = class extends base("iframe") {
 
       /* */
       get size() {
-        return this.#_.registry.size
+        return this.#_.registry.size;
       }
 
       /* */
@@ -233,7 +233,7 @@ const cls = class extends base("iframe") {
   }
 
   /* Initializes parent-iframe communication bridge. */
-  async connect({ config, papi, timeout } = {}) {
+  async connect({ config, papi, receivers, timeout } = {}) {
     const owner = this;
 
     /* Guard against multiple runs */
@@ -298,6 +298,17 @@ const cls = class extends base("iframe") {
         return owner;
       }
     })();
+    /* Add receivers */
+    if (receivers) {
+      receivers.forEach((item) => {
+        if (Array.isArray(item)) {
+          this.receivers.add(...item);
+        } else {
+          this.receivers.add(item);
+        }
+        
+      });
+    }
 
     /* Set up permanent handler for papi */
     window.addEventListener("message", async (event) => {
@@ -335,7 +346,6 @@ const cls = class extends base("iframe") {
 
       this.contentWindow.postMessage(_message, this.origin);
     });
-
     /* Add papi's */
     if (papi) {
       Object.entries(papi).forEach(([name, target]) =>

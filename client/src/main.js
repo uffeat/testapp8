@@ -11,24 +11,25 @@ await worker.connect({
     message: "Message from config",
   },
   papi: {
-      echo: (data) => {
-        return data;
-      },
+    echo: (data) => {
+      return data;
     },
+    ding: (data) => {
+  console.log("ding papi got data:", data); ////
+  return { ding: "DING" };
+}
+  },
+  receivers: [
+    (message) => {
+      console.log("Got signal data:", message.data);
+    },
+  ],
 });
 
 //console.log("setup:", worker.setup);////
 //console.log("config:", worker.config);////
 
-worker.papi.add("ding", (data) => {
-  console.log("ding papi got data:", data); ////
-  return { ding: "DING" };
-});
 
-worker.receivers.add((message) => {
-  console.log("Got signal data:", message.data);
-  return true;
-});
 
 await (async () => {
   const response = await worker.api.bar();
