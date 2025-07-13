@@ -25,7 +25,7 @@ worker.papi.add("ding", (data) => {
   return { ding: "DING" };
 });
 
-worker.receiver.add((message) => {
+worker.receivers.add((message) => {
   console.log("Got signal data:", message.data);
   return true;
 });

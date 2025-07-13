@@ -40,22 +40,20 @@ const cls = class extends base("iframe") {
 
   __new__() {
     super.__new__?.();
+
     const owner = this;
 
     this.attribute[this.constructor.__key__] = true;
     this.attribute.origin = this.origin;
 
     /* receiver */
-    this.#_.receiver = new (class {
+    this.#_.receivers = new (class {
       #_ = {
         registry: new Map(),
       };
       constructor() {
-        owner.on.signal = (event) => {
+        owner.on.x_signal = (event) => {
           const message = event.detail;
-
-          const submission = message.__submission__;
-
           for (const [effect, condition] of this.#_.registry.entries()) {
             if (
               condition &&
@@ -66,33 +64,32 @@ const cls = class extends base("iframe") {
             ) {
               continue;
             }
-
-            const result = effect.call(owner, message, {
+            effect.call(owner, message, {
               condition,
               effect,
             });
-
-            if (result === undefined || submission === null) {
-              continue;
-            }
-
-            const _message = {
-              __id__: owner.id,
-              __type__: "duplex",
-              __submission__: submission,
-              result,
-              data: message.data,
-            };
-            owner.contentWindow.postMessage(_message, owner.origin);
           }
         };
       }
 
+      /* */
+      get size() {
+        return this.#_.registry.size
+      }
+
+      /* */
       add(effect, condition) {
         this.#_.registry.set(effect, condition);
         return effect;
       }
 
+      /* */
+      clear() {
+        this.#_.registry.clear();
+        return owner;
+      }
+
+      /* */
       remove(effect) {
         this.#_.registry.delete(effect);
         return owner;
@@ -132,9 +129,9 @@ const cls = class extends base("iframe") {
     return this.#_.ready;
   }
 
-  /* Returns receiver controller. */
-  get receiver() {
-    return this.#_.receiver;
+  /* Returns receivers controller. */
+  get receivers() {
+    return this.#_.receivers;
   }
 
   /* Returns src. */
@@ -266,7 +263,7 @@ const cls = class extends base("iframe") {
       );
     });
 
-    /* Set up permanent handler for sending signals from worker */
+    /* Set up permanent handler for re-sending signals from worker */
     window.addEventListener("message", async (event) => {
       const message = Message(event);
       if (
@@ -276,7 +273,7 @@ const cls = class extends base("iframe") {
       ) {
         return;
       }
-      this.send("signal", { detail: message });
+      this.send("x_signal", { detail: message });
     });
 
     this.#_.papi = new (class {
@@ -340,9 +337,11 @@ const cls = class extends base("iframe") {
     });
 
     /* Add papi's */
-      if (papi) {
-        Object.entries(papi).forEach(([name, target]) => this.papi.add(name, target))
-      }
+    if (papi) {
+      Object.entries(papi).forEach(([name, target]) =>
+        this.papi.add(name, target)
+      );
+    }
 
     this.#_.ready = true;
     return this;
