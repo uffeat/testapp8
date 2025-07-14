@@ -1,0 +1,81 @@
+/*
+import { main } from "@/rolloanvil/main.js";
+*/
+
+import { meta } from "@/rollometa/meta.js";
+import { component } from "@/rollocomponent/component.js";
+
+export const main = new (class {
+    #_ = {
+      loaders: new Map(),
+    };
+
+    constructor() {
+      this.#_.Submission = new (class {
+        #_ = {
+          submission: 0,
+        };
+
+        create() {
+          return this.#_.submission++;
+        }
+      })();
+
+      this.#_.iframe = component.iframe({
+        parent: document.head,
+        src: meta.anvil.origin,
+      });
+    }
+
+    use(api) {
+      api = api.slice(0, -".py".length);
+      if (this.#_.loaders.has(api)) {
+        return this.#_.loaders.get(api);
+      }
+
+      const loader = async (data) => {
+        if (!this.#_.loaded) {
+          console.log("Iframe loaded."); ////
+          await this.#load();
+          this.#_.loaded = true;
+        }
+        return this.#call(api, data);
+      };
+
+      this.#_.loaders.set(api, loader);
+      return loader;
+    }
+
+    #call(api, data) {
+      const submission = this.#_.Submission.create();
+      const { promise, resolve } = Promise.withResolvers();
+
+      function onmessage(event) {
+        if (event.origin !== meta.anvil.origin) {
+          return;
+        }
+        if (event.data.submission !== submission) {
+          return;
+        }
+        window.removeEventListener("message", onmessage);
+        resolve(event.data.result);
+      }
+
+      window.addEventListener("message", onmessage);
+      this.#_.iframe.contentWindow.postMessage(
+        { api, data, submission },
+        meta.anvil.origin
+      );
+
+      return promise;
+    }
+
+    #load() {
+      const { promise, resolve } = Promise.withResolvers();
+      this.#_.iframe.on.load$once = (event) => {
+        resolve();
+      };
+      return promise;
+    }
+  })();
+

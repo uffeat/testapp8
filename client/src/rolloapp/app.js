@@ -11,6 +11,7 @@ import { Processors } from "@/rolloapp/tools/processors.js";
 import { Signatures } from "@/rolloapp/tools/signatures.js";
 import { pub } from "@/rolloapp/tools/pub.js";
 import { Imports } from "@/rolloapp/tools/imports.js";
+import { TypeHooks } from "@/rolloapp/tools/type_hooks.js";
 
 const App = author(
   class extends base() {
@@ -23,8 +24,8 @@ const App = author(
 
       this.#_.processors = new Processors(this);
       this.#_.signatures = new Signatures(this);
-
       this.#_.imports = new Imports(this);
+      this.#_.typeHooks = new TypeHooks(this);
 
       this.id = "app";
 
@@ -58,29 +59,32 @@ const App = author(
       return this.#_.signatures;
     }
 
+    /* Returns typeHooks controller. */
+    get typeHooks() {
+      return this.#_.typeHooks;
+    }
+
     /* Returns import from src or public, subject to any processing. */
     async import(specifier, options = {}) {
       const path = new Path(specifier);
+
+      /* Type hooks */
+      if (this.#_.typeHooks.has(path.type)) {
+        const loader = this.#_.typeHooks.get(path.type)
+        return await loader(specifier)
+        
+      }
+
+
+
       /* Signature */
       if (this.#_.signatures.has(path.types)) {
         const handler = this.#_.signatures.get(path.types);
         await handler(options, { owner: this, path });
       }
-
       const { cache = true, raw = false } = options;
 
       /* Import */
-      //const result = await pub.import(path, { cache, raw });
-
-      /*
-      let result
-      if (path.public) {
-        result = await pub.import(path, { cache, raw })
-      } else {
-        result = await this.imports.import(path);
-      }
-        */
-
       const result = path.public
         ? await pub.import(path, { cache, raw })
         : await this.imports.import(path, { raw });

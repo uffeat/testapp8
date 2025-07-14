@@ -11,9 +11,17 @@ import {
 } from "@/rollocomponent/__init__.js";
 import { meta } from "@/rollometa/meta.js";
 import { Sheet } from "@/rollosheet/tools/sheet.js";
+import { main } from "@/rolloanvil/main.js";
 
 /* Configure import capabilities */
 (() => {
+
+  app.typeHooks.add({ py: (specifier) => main.use(specifier) });
+
+
+
+
+
   /* Add raw css imports */
   app.imports
     .add(
@@ -36,7 +44,6 @@ import { Sheet } from "@/rollosheet/tools/sheet.js";
     /* Add js imports */
     .imports.add(
       import.meta.glob([
-        //"/src/rolloanvil/__init__.js",////
         "/src/rollostate/**/*.js",
         "/src/rollotools/**/*.js",
       ])
@@ -180,15 +187,6 @@ import { Sheet } from "@/rollosheet/tools/sheet.js";
     value: app,
     ...options,
   });
-
-
-  /*
-  Object.defineProperty(window, "anvil", {
-    value: anvil,
-    ...options,
-  });
-  */
-
   Object.defineProperty(window, "bootstrap", {
     value: bootstrap,
     ...options,
