@@ -1,6 +1,9 @@
 /*
-import { main } from "@/rolloanvil/main.js";
+import { AnvilLoaders } from "@/rolloanvil/main.js";
 */
+
+/* TODO
+- timeout */
 
 import { meta } from "@/rollometa/meta.js";
 import { component } from "@/rollocomponent/component.js";
@@ -19,6 +22,9 @@ const iframe = component.iframe({
   parent: document.head,
   src: meta.anvil.origin,
 });
+
+iframe.attribute.anvil =
+  meta.env.name === "production" ? "production" : "development";
 
 await (() => {
   const { promise, resolve } = Promise.withResolvers();
@@ -73,7 +79,61 @@ export const AnvilLoaders = new (class {
   }
 })();
 
+export const Receivers = new (class {
+  #_ = {
+    registry: new Set(),
+  };
+  constructor() {}
 
+  /* */
+  get size() {
+    return this.#_.registry.size;
+  }
 
+  /* */
+  add(effect) {
+    this.#_.registry.add(effect);
+    return effect;
+  }
 
+  /* */
+  clear() {
+    this.#_.registry.clear();
+    return this;
+  }
 
+  /* */
+  effects() {
+    return this.#_.registry.values();
+  }
+
+  /* */
+  remove(effect) {
+    this.#_.registry.delete(effect);
+    return this;
+  }
+})();
+
+window.addEventListener("message", async (event) => {
+  if (event.origin !== meta.anvil.origin) {
+    return;
+  }
+  if (!event.data.signal) {
+    return;
+  }
+  if (!Receivers.size) {
+    return;
+  }
+  for (const effect of Receivers.effects()) {
+    await effect(event.data.data);
+  }
+});
+
+const onsignal = (event) => {
+  if (event.origin !== meta.anvil.origin) {
+    return;
+  }
+  if (!event.data.signal) {
+    return;
+  }
+};

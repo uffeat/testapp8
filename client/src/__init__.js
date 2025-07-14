@@ -12,7 +12,7 @@ import {
 import { meta } from "@/rollometa/meta.js";
 import { Sheet } from "@/rollosheet/tools/sheet.js";
 //import { main } from "@/rolloanvil/main.js";
-import {AnvilLoaders} from "@/rolloanvil/main.js";
+import { AnvilLoaders } from "@/rolloanvil/main.js";
 
 /* Configure import capabilities */
 (() => {
