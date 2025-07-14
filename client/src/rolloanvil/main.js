@@ -130,4 +130,4 @@ export const Receivers = new (class {
 })();
 
 
-app.typeHooks.add({ py: (specifier) => AnvilLoaders.create(specifier) });
+//app.typeHooks.add({ py: (specifier) => AnvilLoaders.create(specifier) });
