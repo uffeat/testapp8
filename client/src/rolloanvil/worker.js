@@ -46,7 +46,7 @@ const cls = class extends base("iframe") {
     this.attribute[this.constructor.__key__] = true;
     this.attribute.origin = this.origin;
 
-    /* receiver */
+    /* receivers */
     this.#_.receivers = new (class {
       #_ = {
         registry: new Map(),

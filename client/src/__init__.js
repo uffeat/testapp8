@@ -11,16 +11,13 @@ import {
 } from "@/rollocomponent/__init__.js";
 import { meta } from "@/rollometa/meta.js";
 import { Sheet } from "@/rollosheet/tools/sheet.js";
-import { main } from "@/rolloanvil/main.js";
+//import { main } from "@/rolloanvil/main.js";
+import {AnvilLoaders} from "@/rolloanvil/main.js";
 
 /* Configure import capabilities */
 (() => {
-
-  app.typeHooks.add({ py: (specifier) => main.use(specifier) });
-
-
-
-
+  //app.typeHooks.add({ py: (specifier) => main.use(specifier) });
+  app.typeHooks.add({ py: (specifier) => AnvilLoaders.create(specifier) });
 
   /* Add raw css imports */
   app.imports
@@ -43,10 +40,7 @@ import { main } from "@/rolloanvil/main.js";
 
     /* Add js imports */
     .imports.add(
-      import.meta.glob([
-        "/src/rollostate/**/*.js",
-        "/src/rollotools/**/*.js",
-      ])
+      import.meta.glob(["/src/rollostate/**/*.js", "/src/rollotools/**/*.js"])
     );
 
   /* Add .sheet.css support */
