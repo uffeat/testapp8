@@ -4,7 +4,7 @@ document.querySelector("html").dataset.bsTheme = "dark";
 
 console.info("Environment:", meta.env.name);
 
-import { Receivers } from "@/rolloanvil/main.js";
+const { Receivers } = await use("/rolloanvil/receivers.js");
 
 
 Receivers.add((data) => {

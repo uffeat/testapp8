@@ -21,10 +21,11 @@ const Submission = new (class {
 const iframe = component.iframe({
   parent: document.head,
   src: meta.anvil.origin,
+  '[anvil]': "production" ? "production" : "development",
+  '[main]': true,
 });
 
-iframe.attribute.anvil =
-  meta.env.name === "production" ? "production" : "development";
+
 
 await (() => {
   const { promise, resolve } = Promise.withResolvers();
@@ -130,4 +131,3 @@ export const Receivers = new (class {
 })();
 
 
-//app.typeHooks.add({ py: (specifier) => AnvilLoaders.create(specifier) });
