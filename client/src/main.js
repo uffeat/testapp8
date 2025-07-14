@@ -26,10 +26,17 @@ await worker.connect({
   ],
 });
 
+
+worker.signal('Signal from parent')
+worker.signal('Signal from parent')
+
 //console.log("setup:", worker.setup);////
 //console.log("config:", worker.config);////
 
-
+await (async () => {
+  const response = await worker.api.echo({ number: 42 });
+  console.log("echo response:", response);
+})();
 
 await (async () => {
   const response = await worker.api.bar();

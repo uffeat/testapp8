@@ -306,7 +306,6 @@ const cls = class extends base("iframe") {
         } else {
           this.receivers.add(item);
         }
-        
       });
     }
 
@@ -355,6 +354,15 @@ const cls = class extends base("iframe") {
 
     this.#_.ready = true;
     return this;
+  }
+
+  /* */
+  signal(data) {
+    this.contentWindow.postMessage(
+      { __type__: "signal", __id__: this.id, data },
+      this.origin
+    );
+    return this
   }
 
   __init__() {
