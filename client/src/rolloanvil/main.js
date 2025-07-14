@@ -83,7 +83,27 @@ export const Receivers = new (class {
   #_ = {
     registry: new Set(),
   };
-  constructor() {}
+  constructor() {
+    window.addEventListener("message", async (event) => {
+  if (event.origin !== meta.anvil.origin) {
+    return;
+  }
+  if (!event.data.signal) {
+    return;
+  }
+  if (!Receivers.size) {
+    return;
+  }
+  for (const effect of this.effects()) {
+    await effect(event.data.data);
+  }
+});
+
+
+
+
+
+  }
 
   /* */
   get size() {
@@ -114,28 +134,5 @@ export const Receivers = new (class {
   }
 })();
 
-window.addEventListener("message", async (event) => {
-  if (event.origin !== meta.anvil.origin) {
-    return;////
-  }
-  if (!event.data.signal) {
-    return;
-  }
-  if (!Receivers.size) {
-    return;
-  }
-  for (const effect of Receivers.effects()) {
-    await effect(event.data.data);
-  }
-});
 
 
-
-const onsignal = (event) => {
-  if (event.origin !== meta.anvil.origin) {
-    return;
-  }
-  if (!event.data.signal) {
-    return;
-  }
-};
