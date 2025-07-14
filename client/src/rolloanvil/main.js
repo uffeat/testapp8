@@ -85,24 +85,19 @@ export const Receivers = new (class {
   };
   constructor() {
     window.addEventListener("message", async (event) => {
-  if (event.origin !== meta.anvil.origin) {
-    return;
-  }
-  if (!event.data.signal) {
-    return;
-  }
-  if (!Receivers.size) {
-    return;
-  }
-  for (const effect of this.effects()) {
-    await effect(event.data.data);
-  }
-});
-
-
-
-
-
+      if (event.origin !== meta.anvil.origin) {
+        return;
+      }
+      if (!event.data.signal) {
+        return;
+      }
+      if (!Receivers.size) {
+        return;
+      }
+      for (const effect of this.effects()) {
+        await effect(event.data.data);
+      }
+    });
   }
 
   /* */
@@ -135,4 +130,4 @@ export const Receivers = new (class {
 })();
 
 
-
+app.typeHooks.add({ py: (specifier) => AnvilLoaders.create(specifier) });
