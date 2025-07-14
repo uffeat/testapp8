@@ -4,58 +4,47 @@ document.querySelector("html").dataset.bsTheme = "dark";
 
 console.info("Environment:", meta.env.name);
 
-import { AnvilWorker, worker } from "@/rolloanvil/worker.js";
+const Submission = new (class {
+  #_ = {
+    submission: 0,
+  };
 
-await worker.connect({
-  config: {
-    message: "Message from config",
-  },
-  papi: {
-    echo: (data) => {
-      return data;
-    },
-    ding: (data) => {
-  console.log("ding papi got data:", data); ////
-  return { ding: "DING" };
-}
-  },
-  receivers: [
-    (message) => {
-      console.log("Got signal data:", message.data);
-    },
-  ],
-});
-
-
-worker.signal('Signal from parent')
-worker.signal('Signal from parent')
-
-//console.log("setup:", worker.setup);////
-//console.log("config:", worker.config);////
-
-await (async () => {
-  const response = await worker.api.echo({ number: 42 });
-  console.log("echo response:", response);
+  create() {
+    return this.#_.submission++;
+  }
 })();
 
-await (async () => {
-  const response = await worker.api.bar();
-  console.log("bar response:", response);
-})();
+const worker = component.iframe({ parent: app, src: meta.anvil.origin });
 
 await (async () => {
-  const response = await worker.api.foo();
-  console.log("foo response:", response);
+  const { promise, resolve } = Promise.withResolvers();
+  worker.on.load$once = (event) => {
+    resolve();
+  };
+  return promise;
 })();
 
-/*
-const custom = AnvilWorker({ parent: app });
-await custom.connect();
+console.log("worker loaded");
 
-await (async () => {
-  const response = await custom.api.echo({ custom: 42 });
-  console.log("custom echo response:", response);
-})();
-*/
+const call_api = (api, data) => {
+  const submission = Submission.create();
+  const { promise, resolve } = Promise.withResolvers();
 
-//worker.api.nodice()
+  function onmessage(event) {
+    if (event.origin !== meta.anvil.origin) {
+      return;
+    }
+    if (event.data.submission !== submission) {
+      return;
+    }
+    window.removeEventListener("message", onmessage);
+    resolve(event.data.result);
+  }
+
+  window.addEventListener("message", onmessage);
+  worker.contentWindow.postMessage({ api, data, submission }, meta.anvil.origin);
+
+  return promise;
+};
+
+call_api('echo', {echo: 'Oh, my echo!'}).then((result) => console.log(result))
