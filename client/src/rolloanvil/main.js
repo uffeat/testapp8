@@ -116,7 +116,7 @@ export const Receivers = new (class {
 
 window.addEventListener("message", async (event) => {
   if (event.origin !== meta.anvil.origin) {
-    //return;////
+    return;////
   }
   if (!event.data.signal) {
     return;
