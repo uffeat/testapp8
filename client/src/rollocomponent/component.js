@@ -4,10 +4,8 @@ import { component } from "@/rollocomponent/component.js";
 
 import { factory } from "@/rollocomponent/tools/factory.js";
 import { mix } from "@/rollocomponent/tools/mix.js";
-import { mixins } from "@/rollocomponent/mixins/__init__.js";
+import { mixins } from "@/rollocomponent/mixins/mixins.js";
 import { registry } from "@/rollocomponent/tools/registry.js";
-
-
 
 const get = (tag) => {
   const key = `x-${tag}`;
@@ -22,31 +20,9 @@ const get = (tag) => {
     throw new Error(`'${tag}' is not native.`);
   }
 
-  const _mixins = [
-    mixins.append,
-    mixins.attrs,
-    mixins.classes,
-    mixins.clear,
-    mixins.components,
-    mixins.connect,
-    mixins.detail,
-    mixins.effect,
-    mixins.find,
-    mixins.handlers,
-    mixins.hooks,
-    mixins.host,
-    mixins.insert,
-    mixins.key,
-    mixins.parent,
-    mixins.props,
-    mixins.send,
-    mixins.setup,
-    mixins.states,
-    mixins.style,
-    mixins.super_,
-    mixins.tab,
-    mixins.vars,
-  ];
+  const _mixins = Object.entries(mixins)
+    .filter(([name, mixin]) => !["for_", "novalidation", "text"].includes(name))
+    .map(([name, mixin]) => mixin);
 
   if ("textContent" in ref) {
     _mixins.push(mixins.text);

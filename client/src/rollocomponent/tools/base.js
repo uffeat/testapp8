@@ -5,38 +5,22 @@ v.1.0
 */
 
 import { mix } from "@/rollocomponent/tools/mix.js";
-import { mixins } from "@/rollocomponent/mixins/__init__.js";
+import { mixins } from "@/rollocomponent/mixins/mixins.js";
+import shadow from "@/rollocomponent/mixins/shadow.js";
 
 /* */
 export const base = (...args) => {
-  const native = args.find((a) => typeof a === 'string') || null
-  const __mixins = args.filter((a) => typeof a === 'function')
+  const native = args.find((a) => typeof a === "string") || null;
+  const __mixins = args.filter((a) => typeof a === "function");
 
-  const _mixins = [
-    mixins.attrs,
-    mixins.classes,
-    mixins.clear,
-    mixins.components,
-    mixins.connect,
-    mixins.detail,
-    mixins.effect,
-    mixins.find,
-    mixins.handlers,
-    mixins.hooks,
-    mixins.host,
-    mixins.insert,
-    mixins.key,
-    mixins.parent,
-    mixins.props,
-    mixins.send,
-    mixins.setup,
-    mixins.states,
-    mixins.style,
-    mixins.super_,
-    mixins.tab,
-    mixins.vars,
-    ...__mixins,
-  ];
+  const _mixins = Object.entries(mixins)
+    .filter(
+      ([name, mixin]) =>
+        !["append", "for_", "novalidation", "text", "tree"].includes(name)
+    )
+    .map(([name, mixin]) => mixin);
+
+  _mixins.push(...__mixins);
 
   if (native) {
     const ref = document.createElement(native);
@@ -46,7 +30,7 @@ export const base = (...args) => {
       throw new Error(`'${tag}' is not native.`);
     }
     if (is_shadow_ready(ref)) {
-      _mixins.push(mixins.shadow);
+      _mixins.push(shadow);
     } else {
       _mixins.push(mixins.append);
     }
@@ -70,7 +54,7 @@ export const base = (...args) => {
     return class extends mix(
       HTMLElement,
       {},
-      mixins.shadow,
+      shadow,
       mixins.text,
       mixins.tree,
       ..._mixins
@@ -82,11 +66,11 @@ export const base = (...args) => {
   }
 };
 
-function is_shadow_ready (element)  {
+function is_shadow_ready(element) {
   try {
     element.attachShadow({ mode: "open" });
-    return true
+    return true;
   } catch {
-    return false
+    return false;
   }
 }

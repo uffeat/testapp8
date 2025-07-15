@@ -12,32 +12,17 @@ import { Sheets } from "@/rollosheet/tools/sheets.js";
 import { component } from "@/rollocomponent/component.js";
 import { factory } from "@/rollocomponent/tools/factory.js";
 import { mix } from "@/rollocomponent/tools/mix.js";
+import { mixins } from "@/rollocomponent/mixins/mixins.js";
 import { registry } from "@/rollocomponent/tools/registry.js";
 
-import append from "@/rollocomponent/mixins/append.js";
-import attrs from "@/rollocomponent/mixins/attrs.js";
-import classes from "@/rollocomponent/mixins/classes.js";
-import clear from "@/rollocomponent/mixins/clear.js";
-import components from "@/rollocomponent/mixins/components.js";
-import connect from "@/rollocomponent/mixins/connect.js";
-import effect from "@/rollocomponent/mixins/effect.js";
-import find from "@/rollocomponent/mixins/find.js";
-import handlers from "@/rollocomponent/mixins/handlers.js";
-import hooks from "@/rollocomponent/mixins/hooks.js";
-import host from "@/rollocomponent/mixins/host.js";
-import insert from "@/rollocomponent/mixins/insert.js";
-import key from "@/rollocomponent/mixins/key.js";
-import parent from "@/rollocomponent/mixins/parent.js";
-import props from "@/rollocomponent/mixins/props.js";
-import send from "@/rollocomponent/mixins/send.js";
-import setup from "@/rollocomponent/mixins/setup.js";
-import states from "@/rollocomponent/mixins/states.js";
-import style from "@/rollocomponent/mixins/style.js";
-import super_ from "@/rollocomponent/mixins/super_.js";
-import tab from "@/rollocomponent/mixins/tab.js";
-import text from "@/rollocomponent/mixins/text.js";
-import tree from "@/rollocomponent/mixins/tree.js";
-import vars from "@/rollocomponent/mixins/vars.js";
+const _mixins = Object.entries(mixins)
+    .filter(
+      ([name, mixin]) =>
+        !["for_", "novalidation"].includes(name)
+    )
+    .map(([name, mixin]) => mixin);
+
+
 
 /* NOTE The native shadow root has limited DOM manipulation features,
 therefore use the special Shadow component. */
@@ -45,30 +30,7 @@ therefore use the special Shadow component. */
 const cls = class extends mix(
   HTMLElement,
   {},
-  append,
-  attrs,
-  classes,
-  clear,
-  components,
-  connect,
-  effect,
-  find,
-  handlers,
-  hooks,
-  host,
-  insert,
-  key,
-  parent,
-  props,
-  send,
-  setup,
-  states,
-  style,
-  super_,
-  tab,
-  text,
-  tree,
-  vars
+  ..._mixins
 ) {
   static __key__ = "rollo-shadow";
 

@@ -8,9 +8,6 @@ import {
   mix,
   mixins,
 } from "@/rollocomponent/rollocomponent.js";
-
-
-
 import { meta } from "@/meta.js";
 import { Sheet } from "@/rollosheet/tools/sheet.js";
 

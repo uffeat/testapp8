@@ -1,5 +1,5 @@
 /*
-import tab from "@/rollocomponent/mixins/tab.js";
+import parent from "@/rollocomponent/mixins/parent.js";
 20250530
 v.1.0
 */

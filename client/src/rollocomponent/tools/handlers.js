@@ -31,11 +31,6 @@ export class Handlers {
     Object.entries(spec).forEach(([key, handler]) => {
       const [type, ...dirs] = key.split("$");
 
-
-  
-
-
-
       if (dirs.includes("once")) {
         const original = handler;
         const wrapper = (event) => {
@@ -45,17 +40,12 @@ export class Handlers {
         handler = wrapper;
       }
 
-     
-
-
-
       owner.addEventListener(type, handler);
 
       if (dirs.includes("run")) {
         handler({ target: owner });
       }
     });
-
 
     return owner;
   }

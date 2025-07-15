@@ -1,5 +1,5 @@
 /*
-import { Icon } from "@/rollocomponent/icon.js";
+import { Icon } from "@/rollocomponent/tools/icon.js";
 20250622
 v.1.0
 */
