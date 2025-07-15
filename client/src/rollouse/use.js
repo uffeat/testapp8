@@ -99,7 +99,7 @@ await (async () => {
       "!/src/index.js",
       "!/src/main.js",
       "!/src/setup.js",
-      "!/src/rollolibs/**/*.js",
+      "!/src/rollolibs/bootstrap/_src/**/*.js",
       "!/src/rollotest/**/*.js",
       "!/src/rollouse/**/*.js",
     ])

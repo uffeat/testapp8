@@ -4,8 +4,8 @@ import { bootstrap } from "@/rollolibs/bootstrap/bootstrap.js";
 
 */
 
-import { main } from "@/rollolibs/bootstrap/sheets/main.js";
-import { reboot } from "@/rollolibs/bootstrap/sheets/reboot.js";
+//import { main } from "@/rollolibs/bootstrap/sheets/main.js";
+//import { reboot } from "@/rollolibs/bootstrap/sheets/reboot.js";
 
 import Alert from "./_src/alert.js";
 import Button from "./_src/button.js";
@@ -19,6 +19,9 @@ import ScrollSpy from "./_src/scrollspy.js";
 import Tab from "./_src/tab.js";
 import Toast from "./_src/toast.js";
 import Tooltip from "./_src/tooltip.js";
+
+const { main } = await use("@/rollolibs/bootstrap/sheets/main.js");
+const { reboot } = await use("@/rollolibs/bootstrap/sheets/reboot.js");
 
 main.adopt(document);
 
