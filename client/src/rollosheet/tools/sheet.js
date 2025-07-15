@@ -7,6 +7,8 @@ v.1.0
 
 import { remove } from "@/rollotools/array/remove.js";
 
+console.log('In sheet')////
+
 export class Sheet extends CSSStyleSheet {
   #_ = {
     targets: new Set(),

@@ -6,6 +6,8 @@ v.1.1
 
 import { Args } from "@/rollocomponent/tools/args.js";
 
+console.log('In factory')////
+
 /* Returns instance factory function.
 NOTE
 - cls can be a component class (or other constructor function) or a component 

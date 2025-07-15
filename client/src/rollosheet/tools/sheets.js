@@ -7,6 +7,8 @@ v.1.0
 import { remove } from "@/rollotools/array/remove.js";
 import { Sheet } from "@/rollosheet/tools/sheet.js";
 
+console.log('In sheets')////
+
 export class Sheets {
   #_ = {
     registry: new Set(),

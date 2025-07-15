@@ -6,6 +6,8 @@ v.1.0
 
 import { meta } from "@/meta.js";
 
+console.log('In registry')////
+
 export const registry = new (class {
   #_ = {
     registry: new Map(),
