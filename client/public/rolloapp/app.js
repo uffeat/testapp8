@@ -1,23 +1,15 @@
 /*
-import { app } from "@/rolloapp/app.js";
+
 */
 
-import { meta } from "@/meta.js";
-import { author } from "@/rollocomponent/tools/author.js";
-import { base } from "@/rollocomponent/tools/base.js";
-import { component } from "@/rollocomponent/rollocomponent.js";
-
-
-import { Path } from "@/rolloapp/tools/path.js";
-import { Processors } from "@/rolloapp/tools/processors.js";
-import { Signatures } from "@/rolloapp/tools/signatures.js";
-import { pub } from "@/rolloapp/tools/pub.js";
-import { Imports } from "@/rolloapp/tools/imports.js";
-import { TypeHooks } from "@/rolloapp/tools/type_hooks.js";
-
-
-
-
+const { meta } = await use("/meta.js");
+const { author, base, component } = await use("/rollocomponent/");
+const { Path } = await use("/rolloapp/tools/path.js");
+const { Processors } = await use("/rolloapp/tools/processors.js");
+const { Signatures } = await use("/rolloapp/tools/signatures.js");
+const { pub } = await use("/rolloapp/tools/pub.js");
+const { Imports } = await use("/rolloapp/tools/imports.js");
+const { TypeHooks } = await use("/rolloapp/tools/type_hooks.js");
 
 const App = author(
   class extends base() {
@@ -102,7 +94,6 @@ const App = author(
         });
         if (processed !== undefined) return processed;
       }
-      
       return result;
     }
 

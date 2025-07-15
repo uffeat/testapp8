@@ -1,65 +1,54 @@
 import "@/main.css";
-
-import { Use } from "@/rollouse/use.js";
-
-import { build } from "@/rolloapp/tools/assets.js";
-import { construct } from "@/rollouse/tools/construct.js";
-import { Processor } from "@/rollouse/tools/processor.js";
-
-
-
-
-import { app } from "@/rolloapp/rolloapp.js";
-
-
-
+import { Processor, app, build, construct } from "@/rolloapp/rolloapp.js";
 import "@/rollolibs/bootstrap/bootstrap.js";
-
-
-
-
+import {
+  author,
+  base,
+  component,
+  mix,
+  mixins,
+} from "@/rollocomponent/rollocomponent.js";
 import { meta } from "@/meta.js";
-
-
 import { Sheet } from "@/rollosheet/tools/sheet.js";
 
 //import { AnvilLoaders } from "@/rolloanvil/main.js";///
 
-Object.defineProperty(window, "app", {
-  configurable: false,
-  enumerable: true,
-  writable: false,
-  value: app,
-});
-
-
-Object.defineProperty(window, "use", {
-  configurable: false,
-  enumerable: true,
-  writable: false,
-  value: new Proxy(() => {}, {
-    get: (_, key) => Use[key],
-    apply: (_, __, args) => Use.module(...args),
-  }),
-});
-
-
-const { author, base,
-  component,
-  mix,
-  mixins } = await Use.module("/rollocomponent/");
-
-
-
-
-
-
-
 /* Configure import capabilities */
 //app.typeHooks.add({ py: (specifier) => AnvilLoaders.create(specifier) });//
 
+/* Add raw css imports */
+app.imports
+  .add(
+    import.meta.glob(["/src/**/*.css"], {
+      query: "?raw",
+      import: "default",
+    }),
+    { raw: true }
+  )
+
+  /* Add html imports */
+  .imports.add(
+    import.meta.glob(["/src/**/*.html"], {
+      query: "?raw",
+      import: "default",
+    }),
+    { raw: true }
+  )
+
+  /* Add js imports */
+  .imports.add(
+    import.meta.glob([
+      "/src/meta.js",
+      "/src/rollocomponent/rollocomponent.js",
+      "/src/rollolibs/bootstrap/bootstrap.js",
+      "/src/rollosheet/rollosheet.js",
+      "/src/rollostate/rollostate.js",
+      "/src/rollotools/**/*.js",
+    ])
+  );
+
 /* Add .sheet.css support */
-Use.signatures
+app.signatures
   .add({
     "sheet.css": (options, { owner, path }) => {
       options.raw = true;
@@ -153,7 +142,7 @@ Use.signatures
   .processors.add({
     md: new Processor(
       async (result, { owner, path }) => {
-        const { parse } = await owner.module("/rollolibs/marked.js");
+        const { parse } = await owner.import("/rollolibs/marked.js");
         return parse(result).trim();
       },
       { cache: true }
@@ -164,8 +153,8 @@ Use.signatures
   .processors.add({
     yaml: new Processor(
       async (result, { owner, path }) => {
-        const { parse } = await owner.module("/rollolibs/yaml/");
-        return parse(result);
+        const { yaml } = await owner.import("/rollolibs/yaml/");
+        return yaml(result);
       },
       {
         cache: false,
@@ -176,7 +165,7 @@ Use.signatures
   .processors.add({
     csv: new Processor(
       async (result, { owner, path }) => {
-        const { Papa } = await owner.module("/rollolibs/papa/");
+        const { Papa } = await owner.import("/rollolibs/papa/");
         return Papa.parse(result);
       },
       { cache: false }
@@ -191,9 +180,22 @@ Use.signatures
     writable: false,
   };
 
+  Object.defineProperty(window, "app", {
+    value: app,
+    ...options,
+  });
+
   /* */
   Object.defineProperty(window, "meta", {
     value: meta,
+    ...options,
+  });
+
+  Object.defineProperty(window, "use", {
+    value: new Proxy(() => {}, {
+      get: (_, key) => app[key],
+      apply: (_, __, args) => app.import(...args),
+    }),
     ...options,
   });
 })();
