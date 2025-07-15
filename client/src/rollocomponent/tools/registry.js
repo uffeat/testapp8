@@ -24,12 +24,12 @@ export const registry = new (class {
       customElements.define(key, cls, {
         extends: native,
       });
-      if (import.meta.env.DEV) {
+      if (meta.env.DEV) {
         console.info(`Defined '${key}' component extended from '${native}'.`);
       }
     } else {
       customElements.define(key, cls);
-      if (import.meta.env.DEV) {
+      if (meta.env.DEV) {
         console.info(`Defined '${key}' component.`);
       }
     }
