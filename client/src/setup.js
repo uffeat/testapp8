@@ -5,7 +5,7 @@ import "@/rollolibs/bootstrap/bootstrap.js";
 /* Dark mode */
 document.querySelector("html").dataset.bsTheme = "dark";
 /* app */
-await use("/rolloapp/");
+await use("@/rolloapp/");
 /* Env */
-const { meta } = await use("/meta.js");
+const { meta } = await use("@/meta.js");
 console.info("Environment:", meta.env.name);

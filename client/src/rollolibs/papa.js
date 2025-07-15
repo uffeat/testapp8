@@ -4,7 +4,7 @@ const { component } = await use("@/rollocomponent/");
 const { promise, resolve } = Promise.withResolvers();
 const iframe = component.iframe({
   parent: document.head,
-  src: `${location.origin}/rollolibs/papa/main.html`,
+  src: `${location.origin}/rollolibs/papa.html`,
 });
 
 iframe.onload = (event) => resolve()

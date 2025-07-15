@@ -92,25 +92,47 @@ Object.defineProperty(window, "use", {
 
 /* Configure import capabilities */
 await (async () => {
-
-
   /* Add js imports */
-  Use.imports.add(import.meta.glob([
-    "/src/**/*.js", 
-    "!/src/index.js",
-    "!/src/main.js",
-    "!/src/setup.js",
-    "!/src/rollolibs/**/*.js",
-    "!/src/rollotest/**/*.js",
-    "!/src/rollouse/**/*.js",
-  ]));
+  Use.imports.add(
+    import.meta.glob([
+      "/src/**/*.js",
+      "!/src/index.js",
+      "!/src/main.js",
+      "!/src/setup.js",
+      "!/src/rollolibs/**/*.js",
+      "!/src/rollotest/**/*.js",
+      "!/src/rollouse/**/*.js",
+    ])
+  );
+
+  /* Add css imports */
+  Use.imports.add(import.meta.glob(["/src/**/*.css", "!/src/main.css"]));
+
+  /* Add raw css imports */
+  Use.imports
+    .add(
+      import.meta.glob(["/src/**/*.css"], {
+        query: "?raw",
+        import: "default",
+      }),
+      { raw: true }
+    )
+
+    /* Add html imports */
+    .imports.add(
+      import.meta.glob(["/src/**/*.html"], {
+        query: "?raw",
+        import: "default",
+      }),
+      { raw: true }
+    );
 
   const { author, base, component, mix, mixins } = await Use.module(
-    "/rollocomponent/"
+    "@/rollocomponent/"
   );
 
   const build = async (wrapper, { path } = {}) => {
-    const { Sheet } = await Use.module("/rollosheet/");
+    const { Sheet } = await Use.module("@/rollosheet/");
     /* Build assets */
     const assets = {};
     /* Named sheets */
@@ -164,7 +186,7 @@ await (async () => {
     .processors.add({
       "sheet.css": new Processor(
         async (result, { owner, path }) => {
-          const { Sheet } = await owner.module("/rollosheet/");
+          const { Sheet } = await owner.module("@/rollosheet/");
           const sheet = new Sheet(result, {
             name: path.path,
           });
@@ -250,7 +272,7 @@ await (async () => {
     .processors.add({
       md: new Processor(
         async (result, { owner, path }) => {
-          const { parse } = await owner.module("/rollolibs/marked.js");
+          const { parse } = await owner.module("@/rollolibs/marked.js");
           return parse(result).trim();
         },
         { cache: true }
@@ -261,7 +283,7 @@ await (async () => {
     .processors.add({
       yaml: new Processor(
         async (result, { owner, path }) => {
-          const { parse } = await owner.module("/rollolibs/yaml/");
+          const { parse } = await owner.module("@/rollolibs/yaml/");
           return parse(result);
         },
         {
@@ -273,7 +295,7 @@ await (async () => {
     .processors.add({
       csv: new Processor(
         async (result, { owner, path }) => {
-          const { Papa } = await owner.module("/rollolibs/papa/");
+          const { Papa } = await owner.module("@/rollolibs/papa/");
           return Papa.parse(result);
         },
         { cache: false }
