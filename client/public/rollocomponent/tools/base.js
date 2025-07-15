@@ -4,15 +4,9 @@ import { base } from "@/rollocomponent/tools/base.js";
 v.1.0
 */
 
-
 const { mix } = await use("/rollocomponent/tools/mix.js");
-
-
 const { mixins } = await use("/rollocomponent/mixins/mixins.js");
-
 const shadow = (await use("/rollocomponent/mixins/shadow.js")).default;
-
-
 
 /* */
 export const base = (...args) => {

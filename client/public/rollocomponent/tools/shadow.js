@@ -4,9 +4,6 @@ import { Shadow } from "@/rollocomponent/shadow.js";
 v.1.1
 */
 
-
-
-
 const { Sheets } = await use("/rollosheet/");
 const { component } = await use("/rollocomponent/component.js");
 const { factory } = await use("/rollocomponent/tools/factory.js");
@@ -14,29 +11,14 @@ const { mix } = await use("/rollocomponent/tools/mix.js");
 const { mixins } = await use("/rollocomponent/mixins/mixins.js");
 const { registry } = await use("/rollocomponent/tools/registry.js");
 
-
-
-
-
-
-
 const _mixins = Object.entries(mixins)
-    .filter(
-      ([name, mixin]) =>
-        !["for_", "novalidation"].includes(name)
-    )
-    .map(([name, mixin]) => mixin);
-
-
+  .filter(([name, mixin]) => !["for_", "novalidation"].includes(name))
+  .map(([name, mixin]) => mixin);
 
 /* NOTE The native shadow root has limited DOM manipulation features,
 therefore use the special Shadow component. */
 
-const cls = class extends mix(
-  HTMLElement,
-  {},
-  ..._mixins
-) {
+const cls = class extends mix(HTMLElement, {}, ..._mixins) {
   static __key__ = "shadow-root";
 
   #_ = {};

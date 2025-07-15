@@ -4,7 +4,7 @@ const { Sheet, Sheets } = await use("@/rollosheet/");
 */
 
 
-const { Sheet }  = await use("@/rollosheet/sheet.js");
-const { Sheets }  = await use("@/rollosheet/sheets.js");
+const { Sheet }  = await use("/rollosheet/tools/sheet.js");
+const { Sheets }  = await use("/rollosheet/tools/sheets.js");
 
 export {Sheet, Sheets}

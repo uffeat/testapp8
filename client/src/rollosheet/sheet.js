@@ -4,7 +4,7 @@ import { Sheet } from "@/rollosheet/tools/sheet.js";
 v.1.0
 */
 
-const { remove } = await use("@/rollotools/array/remove.js");
+const { remove } = await use("/rollotools/array/remove.js");
 
 export class Sheet extends CSSStyleSheet {
   #_ = {
