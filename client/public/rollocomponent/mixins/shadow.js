@@ -2,7 +2,6 @@
 
 */
 
-//const { Shadow } = await use("/rollocomponent/tools/shadow.js");
 const { Sheets } = await use("/rollosheet/");
 const { component } = await use("/rollocomponent/component.js");
 const { factory } = await use("/rollocomponent/tools/factory.js");

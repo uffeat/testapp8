@@ -1,15 +1,13 @@
 /*
-import { Shadow } from "@/rollocomponent/shadow.js";
-20250605
-v.1.1
+
 */
 
-const { Sheets } = await use("/rollosheet/");
-const { component } = await use("/rollocomponent/component.js");
-const { factory } = await use("/rollocomponent/tools/factory.js");
-const { mix } = await use("/rollocomponent/tools/mix.js");
-const { mixins } = await use("/rollocomponent/mixins/mixins.js");
-const { registry } = await use("/rollocomponent/tools/registry.js");
+const { Sheets } = await use("@/rollosheet/");
+const { component } = await use("@/rollocomponent/component.js");
+const { factory } = await use("@/rollocomponent/tools/factory.js");
+const { mix } = await use("@/rollocomponent/tools/mix.js");
+const { mixins } = await use("@/rollocomponent/mixins/mixins.js");
+const { registry } = await use("@/rollocomponent/tools/registry.js");
 
 const _mixins = Object.entries(mixins)
   .filter(([name, mixin]) => !["for_", "novalidation"].includes(name))
@@ -19,7 +17,7 @@ const _mixins = Object.entries(mixins)
 therefore use the special Shadow component. */
 
 const cls = class extends mix(HTMLElement, {}, ..._mixins) {
-  static __key__ = "shadow-root";
+  static __key__ = "rollo-shadow";
 
   #_ = {};
 
@@ -88,4 +86,46 @@ registry.add(cls);
 export const Shadow = (owner) => {
   /* Ensure that __new__ and __init__ methods are called */
   return factory(new cls(owner))();
+};
+
+export default (parent, config) => {
+  return class extends parent {
+    static __name__ = "shadow";
+
+    #_ = {};
+
+    constructor() {
+      super();
+      this.#_.shadow = Shadow(this);
+    }
+
+    get shadow() {
+      return this.#_.shadow;
+    }
+
+    append(...children) {
+      this.#check(...children);
+      super.append(...children);
+      return this;
+    }
+
+    prepend(...children) {
+      this.#check(...children);
+      super.prepend(...children);
+      return this;
+    }
+
+    /* Checks slots */
+    #check(...children) {
+      children.forEach((child) => {
+        if (!this.shadow.slots.has(child.slot)) {
+          if (child.slot) {
+            throw new Error(`No default slot.`);
+          } else {
+            throw new Error(`Invalid slot: ${child.slot}.`);
+          }
+        }
+      });
+    }
+  };
 };

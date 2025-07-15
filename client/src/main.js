@@ -2,7 +2,7 @@
 
 
 const { server } = await use("/rolloanvil/");
-const { component } = await use("/rollocomponent/");
+const { component } = await use("@/rollocomponent/");
 
 server.echo({ echo: "Oh, my echo!" }).then((result) => {
   console.log(result)
