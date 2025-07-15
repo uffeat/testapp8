@@ -1,7 +1,7 @@
 //import "@/rollotest/__init__.js";
 
 
-const { server } = await use("/rolloanvil/");
+const { server } = await use("@/rolloanvil/");
 const { component } = await use("@/rollocomponent/");
 
 server.echo({ echo: "Oh, my echo!" }).then((result) => {

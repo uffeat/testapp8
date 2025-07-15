@@ -7,7 +7,7 @@ v.1.0
 
 //import { Sheet } from "@/rollosheet/tools/sheet.js";
 import text from "@/rollolibs/bootstrap/_src/reboot.css?raw";
-const { Sheet } = await use("/rollosheet/");
+const { Sheet } = await use("@/rollosheet/");
 
 export const reboot = new Sheet(text, {name: 'reboot'})
 

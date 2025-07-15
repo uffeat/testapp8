@@ -2,8 +2,6 @@
 import { meta } from "@/meta.js";
 */
 
-console.log('In meta')////
-
 export const meta = new (class {
   #_ = {};
 
