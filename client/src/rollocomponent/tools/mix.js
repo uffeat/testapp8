@@ -5,6 +5,9 @@ const { mix } = await use("@/rollocomponent/tools/mix.js");
 v.1.1
 */
 
+
+console.log('In mix')////
+
 /* Utility for prototype chain inspection. 
 Can be used to access members of classes in prototype chain, 
 when the use of 'super' is inadequate. */

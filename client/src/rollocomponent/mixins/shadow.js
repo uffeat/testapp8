@@ -6,6 +6,8 @@ v.1.1
 */
 import { Shadow } from "@/rollocomponent/tools/shadow.js";
 
+console.log('In shadow mixin')////
+
 export default (parent, config) => {
   return class extends parent {
     static __name__ = "shadow";

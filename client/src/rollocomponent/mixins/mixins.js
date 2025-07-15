@@ -4,6 +4,8 @@ const { mixins } = await use("@/rollocomponent/mixins/");
 
 */
 
+console.log('In mixins')////
+
 const mixins = {};
 for (const [path, load] of Object.entries(
   import.meta.glob(["/src/rollocomponent/mixins/mixins/*.js"])

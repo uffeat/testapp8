@@ -15,6 +15,8 @@ import { mix } from "@/rollocomponent/tools/mix.js";
 import { mixins } from "@/rollocomponent/mixins/mixins.js";
 import { registry } from "@/rollocomponent/tools/registry.js";
 
+console.log('In shadow tool')////
+
 const _mixins = Object.entries(mixins)
     .filter(
       ([name, mixin]) =>
