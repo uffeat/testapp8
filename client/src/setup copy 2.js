@@ -1,84 +1,15 @@
-/*
+import "@/main.css";
+
 import { Use } from "@/rollouse/use.js";
-*/
 
-import { Imports } from "@/rollouse/tools/imports.js";
-import { Path } from "@/rollouse/tools/path.js";
-import { Processors } from "@/rollouse/tools/processors.js";
-import { Signatures } from "@/rollouse/tools/signatures.js";
-import { TypeHooks } from "@/rollouse/tools/type_hooks.js";
-import { pub } from "@/rollouse/tools/pub.js";
-
+import { build } from "@/rollouse/tools/assets.js";
 import { construct } from "@/rollouse/tools/construct.js";
 import { Processor } from "@/rollouse/tools/processor.js";
 
+import "@/rollolibs/bootstrap/bootstrap.js";
+
+
 //import { AnvilLoaders } from "@/rolloanvil/main.js";///
-
-export const Use = new (class {
-  #_ = {};
-
-  constructor() {
-    this.#_.processors = new Processors(this);
-    this.#_.signatures = new Signatures(this);
-    this.#_.imports = new Imports(this);
-    this.#_.typeHooks = new TypeHooks(this);
-  }
-
-  /* Returns imports controller. */
-  get imports() {
-    return this.#_.imports;
-  }
-
-  /* Returns processors controller. */
-  get processors() {
-    return this.#_.processors;
-  }
-
-  /* Returns signatures controller. */
-  get signatures() {
-    return this.#_.signatures;
-  }
-
-  /* Returns typeHooks controller. */
-  get typeHooks() {
-    return this.#_.typeHooks;
-  }
-
-  async module(specifier, options = {}) {
-    const path = new Path(specifier);
-
-    /* Type hooks */
-    if (this.typeHooks.has(path.type)) {
-      const loader = this.typeHooks.get(path.type);
-      return await loader(specifier);
-    }
-
-    /* Signature */
-    if (this.signatures.has(path.types)) {
-      const handler = this.signatures.get(path.types);
-      await handler(options, { owner: this, path });
-    }
-    const { cache = true, raw = false } = options;
-
-    /* Import */
-    const result = path.public
-      ? await pub.import(path, { cache, raw })
-      : await this.imports.import(path, { raw });
-
-    /* Process */
-    if (this.processors.has(path.types)) {
-      const processor = this.processors.get(path.types);
-      const processed = await processor.call(path.path, result, {
-        owner: this,
-        path,
-        cache,
-      });
-      if (processed !== undefined) return processed;
-    }
-
-    return result;
-  }
-})();
 
 Object.defineProperty(window, "use", {
   configurable: false,
@@ -94,48 +25,6 @@ const { author, base, component, mix, mixins } = await Use.module(
   "/rollocomponent/"
 );
 
-const build = async (wrapper, { path } = {}) => {
-  const { Sheet } = await Use.module("/rollosheet/");
-
-  /* Build assets */
-  const assets = {};
-  /* Named sheets */
-  for (const element of wrapper.querySelectorAll("style[name]")) {
-    const name = element.getAttribute("name");
-    const sheet = new Sheet(element.textContent, {
-      name: `${path.path}/${name}`,
-    });
-    assets[name] = sheet;
-    /* Global sheets */
-    if (element.hasAttribute("global")) {
-      sheet.adopt(document);
-    }
-  }
-  /* Unnamed global sheets */
-  for (const element of wrapper.querySelectorAll("style[global]:not([name])")) {
-    new Sheet(element.textContent).adopt(document);
-  }
-
-  /* Sheets from src 
-          NOTE Injected as links. Not included in 'assets'. */
-  for (const element of wrapper.querySelectorAll("style[src]")) {
-    const src = element.getAttribute("src");
-    await use(src);
-  }
-  /* Templates 
-          NOTE Templates can contain (unnamed) styles. These are not sheet-processed. 
-          Can be useful for shadow templates.  */
-  for (const element of wrapper.querySelectorAll("template")) {
-    if (!element.hasAttribute("name")) {
-      throw new Error(`Unnamed <template> in ${path.path}`);
-    }
-    const name = element.getAttribute("name");
-    const html = element.innerHTML;
-    assets[name] = html;
-  }
-  return assets;
-};
-
 /* Configure import capabilities */
 //app.typeHooks.add({ py: (specifier) => AnvilLoaders.create(specifier) });//
 
@@ -149,7 +38,7 @@ Use.signatures
   .processors.add({
     "sheet.css": new Processor(
       async (result, { owner, path }) => {
-        const { Sheet } = await owner.module("/rollosheet/");
+        const {Sheet} = await owner.module('/rollosheet/')
         const sheet = new Sheet(result, {
           name: path.path,
         });
@@ -264,3 +153,23 @@ Use.signatures
       { cache: false }
     ),
   });
+
+
+
+/* Dark mode */
+document.querySelector("html").dataset.bsTheme = "dark";
+
+/* app */
+const { app } = await Use.module("/rolloapp/");
+Object.defineProperty(window, "app", {
+  configurable: false,
+  enumerable: true,
+  writable: false,
+  value: app,
+});
+await app.shadow.sheets.import("/rolloapp/assets/shadow");
+await Use.module("/rolloapp/assets/main.css");
+
+
+const { meta } = await Use.module("/meta.js");
+console.info("Environment:", meta.env.name);

@@ -5,7 +5,8 @@ const { main } = await use("@/rollolibs/bootstrap/sheets/main.js")
 v.1.0
 */
 
-import { Sheet } from "@/rollosheet/tools/sheet.js";
+//import { Sheet } from "@/rollosheet/tools/sheet.js";
 import text from "@/rollolibs/bootstrap/_src/bootstrap.css?raw";
+const { Sheet } = await use("/rollosheet/");
 
 export const main = new Sheet(text, { name: "bootstrap" });

@@ -5,7 +5,7 @@ v.1.0
 */
 
 
-console.log('In processor')////
+
 
 /* Utility for managing a single processor callable. */
 export class Processor {
