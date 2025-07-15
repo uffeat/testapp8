@@ -1,13 +1,15 @@
 /*
-import { component } from "@/rollocomponent/component.js";
-20250602
-v.2.0
+import { rollocomponent } from "@/rollocomponent/rollocomponent.js";
 */
 
 import { factory } from "@/rollocomponent/tools/factory.js";
 import { mix } from "@/rollocomponent/tools/mix.js";
 import { mixins } from "@/rollocomponent/mixins/__init__.js";
 import { registry } from "@/rollocomponent/tools/registry.js";
+
+export { factory, mix, mixins, registry };
+export { author } from "@/rollocomponent/tools/author.js";
+export { base } from "@/rollocomponent/tools/base.js";
 
 const get = (tag) => {
   const key = `x-${tag}`;

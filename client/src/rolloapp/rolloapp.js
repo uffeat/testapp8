@@ -1,17 +1,25 @@
 /*
-import { app } from "@/rolloapp/app.js";
+import { rolloapp } from "@/rolloapp/rolloapp.js";
 */
 
-import { meta } from "@/rollometa/meta.js";
+import { meta } from "@/meta.js";
 import { author } from "@/rollocomponent/tools/author.js";
 import { base } from "@/rollocomponent/tools/base.js";
-import { component } from "@/rollocomponent/component.js";
+import { component } from "@/rollocomponent/rollocomponent.js";
 import { Path } from "@/rolloapp/tools/path.js";
 import { Processors } from "@/rolloapp/tools/processors.js";
 import { Signatures } from "@/rolloapp/tools/signatures.js";
 import { pub } from "@/rolloapp/tools/pub.js";
 import { Imports } from "@/rolloapp/tools/imports.js";
 import { TypeHooks } from "@/rolloapp/tools/type_hooks.js";
+
+
+export { Processor } from "@/rolloapp/tools/processor.js";
+export { build } from "@/rolloapp/tools/assets.js";
+export { construct } from "@/rolloapp/tools/construct.js";
+
+
+
 
 const App = author(
   class extends base() {
@@ -70,12 +78,9 @@ const App = author(
 
       /* Type hooks */
       if (this.#_.typeHooks.has(path.type)) {
-        const loader = this.#_.typeHooks.get(path.type)
-        return await loader(specifier)
-        
+        const loader = this.#_.typeHooks.get(path.type);
+        return await loader(specifier);
       }
-
-
 
       /* Signature */
       if (this.#_.signatures.has(path.types)) {

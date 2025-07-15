@@ -1,5 +1,5 @@
 /*
-import { meta } from "@/rollometa/meta.js";
+import { meta } from "@/meta.js";
 */
 
 export const meta = new (class {

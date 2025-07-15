@@ -17,14 +17,20 @@ export class Path {
     parcel: false,
   };
 
-  constructor(specifier, {owner} = {}) {
+  constructor(specifier, { owner } = {}) {
     this.#_.owner = owner;
     /* Specifier and parcel */
     if (specifier.endsWith("/")) {
       /* Accommodate the (Python-package-like) "parcel" short-hand syntax */
-      specifier = `${specifier}__init__.js`;
+
+      //specifier = `${specifier}__init__.js`;////
+
+      const parent = specifier.split("/").reverse()[1]; ////
+
+      specifier = `${specifier}${parent}.js`; ////
+
       this.#_.parcel = true;
-    } 
+    }
     this.#_.specifier = specifier;
     /* File name */
     this.#_.file = specifier.split("/").reverse()[0];

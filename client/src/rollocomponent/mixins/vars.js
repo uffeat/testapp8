@@ -3,6 +3,7 @@ import vars from "@/rollocomponent/mixins/vars.js";
 20250530
 v.1.2
 */
+import { meta } from "@/meta.js";
 
 export default (parent, config) => {
   return class extends parent {

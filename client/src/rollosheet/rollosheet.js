@@ -1,5 +1,5 @@
 /*
-import { Sheet, Sheets } from "@/rollosheet/__init__.js";
+import { Sheet, Sheets } from "@/rollosheet/rollosheet.js";
 const { Sheet, Sheets } = await use("@/rollosheet/");
 */
 

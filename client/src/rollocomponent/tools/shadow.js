@@ -4,10 +4,7 @@ import { Shadow } from "@/rollocomponent/shadow.js";
 v.1.1
 */
 
-import { component } from "@/rollocomponent/component.js";
-import { factory } from "@/rollocomponent/tools/factory.js";
-import { mix } from "@/rollocomponent/tools/mix.js";
-import { registry } from "@/rollocomponent/tools/registry.js";
+import { component, factory, mix, registry } from "@/rollocomponent/rollocomponent.js";
 import { Sheets } from "@/rollosheet/tools/sheets.js";
 
 import append from "@/rollocomponent/mixins/append.js";

@@ -3,6 +3,5 @@ index.js
 */
 
 
-import "@/__init__.js";
-
+import "@/setup.js";
 import("@/main.js");

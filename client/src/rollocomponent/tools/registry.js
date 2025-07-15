@@ -4,6 +4,8 @@ import { registry } from "@/rollocomponent/tools/registry.js";
 v.1.0
 */
 
+import { meta } from "@/meta.js";
+
 export const registry = new (class {
   #_ = {
     registry: new Map(),

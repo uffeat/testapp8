@@ -1,5 +1,5 @@
 /*
-import { bootstrap } from "@/rollolibs/bootstrap/__init__.js";
+import { bootstrap } from "@/rollolibs/bootstrap/bootstrap.js";
 
 
 */
@@ -22,7 +22,7 @@ import Tooltip from "./_src/tooltip.js";
 
 main.adopt(document);
 
-const bootstrap = new (class {
+export const bootstrap = new (class {
   #_ = {};
   constructor() {
     this.#_.sheets = new (class {
@@ -92,4 +92,4 @@ const bootstrap = new (class {
 
 
 
-export { bootstrap };
+
