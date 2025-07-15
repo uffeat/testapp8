@@ -8,7 +8,7 @@ import { mix } from "@/rollocomponent/tools/mix.js";
 import { mixins } from "@/rollocomponent/mixins/mixins.js";
 import shadow from "@/rollocomponent/mixins/shadow.js";
 
-
+console.log('In base')////
 
 /* */
 export const base = (...args) => {

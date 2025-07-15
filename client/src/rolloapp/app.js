@@ -14,7 +14,7 @@ import { Imports } from "@/rolloapp/tools/imports.js";
 import { TypeHooks } from "@/rolloapp/tools/type_hooks.js";
 
 
-
+console.log('In app')////
 
 
 const App = author(

@@ -7,6 +7,8 @@ import { mix } from "@/rollocomponent/tools/mix.js";
 import { mixins } from "@/rollocomponent/mixins/mixins.js";
 import { registry } from "@/rollocomponent/tools/registry.js";
 
+console.log('In component')////
+
 const get = (tag) => {
   const key = `x-${tag}`;
 
