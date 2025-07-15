@@ -6,12 +6,12 @@ const { component } = await use("/rollocomponent/");
 
 server.echo({ echo: "Oh, my echo!" }).then((result) => {
   console.log(result)
-  component.h1({ parent: document.body }, result.data.echo);
+  component.h1({ parent: app }, result.data.echo);
   
 });
 
 
-console.log('HERE')
+
 
 /*
 const { Receivers } = await use("/rolloanvil/receivers.js");

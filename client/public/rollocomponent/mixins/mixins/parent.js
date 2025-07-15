@@ -17,8 +17,6 @@ export default (parent, config) => {
 
     /* Appends component to parent or removes component. */
     set parent(parent) {
-      console.log("Got parent:", parent);
-
       /* Abort, if parent is undefined */
       if (parent === undefined) return;
       /* Abort, if no change */
@@ -28,6 +26,29 @@ export default (parent, config) => {
         this.remove();
       } else {
         parent.append(this);
+      }
+    }
+
+    get __parent__() {
+      return this.#_.parent;
+    }
+
+    set __parent__(parent) {
+      this.#_.parent = parent;
+    }
+
+    update(updates = {}) {
+      super.update?.(updates);
+      if (updates.__parent__) {
+        this.__parent__ = updates.__parent__;
+      }
+      return this;
+    }
+
+    __init__() {
+      super.__init__?.();
+      if (this.__parent__) {
+        this.parent = this.__parent__;
       }
     }
   };

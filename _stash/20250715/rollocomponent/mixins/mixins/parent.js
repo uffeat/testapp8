@@ -8,8 +8,7 @@ export default (parent, config) => {
   return class extends parent {
     static __name__ = "parent";
 
-    #_ = {}
-
+    #_ = {};
 
     /* Returns parent. */
     get parent() {
@@ -36,7 +35,7 @@ export default (parent, config) => {
     }
 
     set __parent__(parent) {
-      this.#_.parent = parent
+      this.#_.parent = parent;
     }
 
     update(updates = {}) {
@@ -47,14 +46,11 @@ export default (parent, config) => {
       return this;
     }
 
-
     __init__() {
       super.__init__?.();
       if (this.__parent__) {
-        this.parent = this.__parent__
+        this.parent = this.__parent__;
       }
-
-     
     }
   };
 };

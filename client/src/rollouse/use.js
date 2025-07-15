@@ -90,7 +90,10 @@ Object.defineProperty(window, "use", {
   }),
 });
 
-const { author, base, component, mix, mixins } = await Use.module(
+/* Configure import capabilities */
+await (async function capabilities() {
+
+  const { author, base, component, mix, mixins } = await Use.module(
   "/rollocomponent/"
 );
 
@@ -120,7 +123,7 @@ const build = async (wrapper, { path } = {}) => {
           NOTE Injected as links. Not included in 'assets'. */
   for (const element of wrapper.querySelectorAll("style[src]")) {
     const src = element.getAttribute("src");
-    await use(src);
+    await Use.module(src);
   }
   /* Templates 
           NOTE Templates can contain (unnamed) styles. These are not sheet-processed. 
@@ -136,7 +139,7 @@ const build = async (wrapper, { path } = {}) => {
   return assets;
 };
 
-/* Configure import capabilities */
+
 //app.typeHooks.add({ py: (specifier) => AnvilLoaders.create(specifier) });//
 
 /* Add .sheet.css support */
@@ -264,3 +267,10 @@ Use.signatures
       { cache: false }
     ),
   });
+
+
+
+
+
+})();
+
