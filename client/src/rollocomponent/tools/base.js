@@ -7,7 +7,7 @@ v.1.0
 import { mix } from "@/rollocomponent/tools/mix.js";
 import { mixins } from "@/rollocomponent/mixins/__init__.js";
 
-
+/* */
 export const base = (...args) => {
   const native = args.find((a) => typeof a === 'string') || null
   const __mixins = args.filter((a) => typeof a === 'function')
@@ -50,7 +50,6 @@ export const base = (...args) => {
     } else {
       _mixins.push(mixins.append);
     }
-
     if ("textContent" in ref) {
       _mixins.push(mixins.text);
     }
