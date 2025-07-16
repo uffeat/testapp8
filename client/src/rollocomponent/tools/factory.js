@@ -4,9 +4,7 @@ import { factory } from "@/rollocomponent/tools/factory.js";
 v.1.1
 */
 
-const { Args } = await use("@/rollocomponent/tools/args.js");
-
-
+import { Args } from "./args.js";
 
 /* Returns instance factory function.
 NOTE
@@ -18,7 +16,7 @@ export const factory = (cls) => {
     args = new Args(args);
 
     const instance = typeof cls === "function" ? new cls(args) : cls;
-    
+
     /* Call '__new__' to invoke pre-config actions */
     instance.constructor.__new__?.call(instance, args);
     instance.__new__?.(args);

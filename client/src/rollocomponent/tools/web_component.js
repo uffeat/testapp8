@@ -5,7 +5,7 @@ v.1.1
 */
 
 
-const { author } = await use("@/rollocomponent/");
+import { author } from "./author.js";
 
 /* Returns instance of basic autonomous web component. */
 export const WebComponent = author(HTMLElement, "web-component");

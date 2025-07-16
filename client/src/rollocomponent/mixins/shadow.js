@@ -2,12 +2,13 @@
 
 */
 
+import { mixins } from "./mixins.js";
+import { component } from "../component.js";
+import { factory } from "../tools/factory.js";
+import { mix } from "../tools/mix.js";
+import { registry } from "../tools/registry.js";
+
 const { Sheets } = await use("@/rollosheet/");
-const { component } = await use("@/rollocomponent/component.js");
-const { factory } = await use("@/rollocomponent/tools/factory.js");
-const { mix } = await use("@/rollocomponent/tools/mix.js");
-const { mixins } = await use("@/rollocomponent/mixins/mixins.js");
-const { registry } = await use("@/rollocomponent/tools/registry.js");
 
 const _mixins = Object.entries(mixins)
   .filter(([name, mixin]) => !["for_", "novalidation"].includes(name))

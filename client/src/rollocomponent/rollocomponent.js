@@ -2,13 +2,14 @@
 import { component } from "@/rollocomponent/rollocomponent.js";
 */
 
-const { Icon } = await use("@/rollocomponent/tools/icon.js");
-const { author } = await use("@/rollocomponent/tools/author.js");
-const { base } = await use("@/rollocomponent/tools/base.js");
-const { component } = await use("@/rollocomponent/component.js");
-const { factory } = await use("@/rollocomponent/tools/factory.js");
-const { mix } = await use("@/rollocomponent/tools/mix.js");
-const { mixins } = await use("@/rollocomponent/mixins/mixins.js");
-const { registry } = await use("@/rollocomponent/tools/registry.js");
+export { Icon } from "./tools/icon.js";
+export { author } from "./tools/author.js";
+export { base } from "./tools/base.js";
+export { component } from "./component.js";
+export { factory } from "./tools/factory.js";
+export { mix } from "./tools/mix.js";
+export { mixins } from "./mixins/mixins.js";
+export { registry } from "./tools/registry.js";
 
-export { Icon, author, base, component, factory, mix, mixins, registry };
+
+

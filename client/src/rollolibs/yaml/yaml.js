@@ -1,3 +1,1 @@
-import { parse } from "./index.js";
-
-export { parse };
+export { parse } from "./src/index.js";

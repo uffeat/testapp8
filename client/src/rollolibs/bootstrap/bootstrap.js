@@ -4,24 +4,21 @@ import { bootstrap } from "@/rollolibs/bootstrap/bootstrap.js";
 
 */
 
-//import { main } from "@/rollolibs/bootstrap/sheets/main.js";
-//import { reboot } from "@/rollolibs/bootstrap/sheets/reboot.js";
+import Alert from "./src/alert.js";
+import Button from "./src/button.js";
+import Carousel from "./src/carousel.js";
+import Collapse from "./src/collapse.js";
+import Dropdown from "./src/dropdown.js";
+import Modal from "./src/modal.js";
+import Offcanvas from "./src/offcanvas.js";
+import Popover from "./src/popover.js";
+import ScrollSpy from "./src/scrollspy.js";
+import Tab from "./src/tab.js";
+import Toast from "./src/toast.js";
+import Tooltip from "./src/tooltip.js";
 
-import Alert from "./_src/alert.js";
-import Button from "./_src/button.js";
-import Carousel from "./_src/carousel.js";
-import Collapse from "./_src/collapse.js";
-import Dropdown from "./_src/dropdown.js";
-import Modal from "./_src/modal.js";
-import Offcanvas from "./_src/offcanvas.js";
-import Popover from "./_src/popover.js";
-import ScrollSpy from "./_src/scrollspy.js";
-import Tab from "./_src/tab.js";
-import Toast from "./_src/toast.js";
-import Tooltip from "./_src/tooltip.js";
-
-const { main } = await use("@/rollolibs/bootstrap/sheets/main.js");
-const { reboot } = await use("@/rollolibs/bootstrap/sheets/reboot.js");
+import { main } from "./sheets/main.js";
+import { reboot } from "./sheets/reboot.js";
 
 main.adopt(document);
 
@@ -91,8 +88,3 @@ export const bootstrap = new (class {
     return Tooltip;
   }
 })();
-
-
-
-
-

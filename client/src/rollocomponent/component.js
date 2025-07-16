@@ -2,10 +2,10 @@
 import { component } from "@/rollocomponent/component.js";
 */
 
-const { factory } = await use("@/rollocomponent/tools/factory.js");
-const { mix } = await use("@/rollocomponent/tools/mix.js");
-const { mixins } = await use("@/rollocomponent/mixins/mixins.js");
-const { registry } = await use("@/rollocomponent/tools/registry.js");
+import { factory } from "./tools/factory.js";
+import { mix } from "./tools/mix.js";
+import { mixins } from "./mixins/mixins.js";
+import { registry } from "./tools/registry.js";
 
 const get = (tag) => {
   const key = `x-${tag}`;

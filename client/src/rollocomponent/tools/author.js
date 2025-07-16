@@ -4,8 +4,9 @@ import { author } from "@/rollocomponent/tools/author.js";
 v.1.0
 */
 
-const { factory } = await use("@/rollocomponent/tools/factory.js");
-const { registry } = await use("@/rollocomponent/tools/registry.js");
+import { factory } from "./factory.js";
+import { registry } from "./registry.js";
+
 
 /* Defines web component and returns instance factory function. */
 export const author = (cls, key, native) => {

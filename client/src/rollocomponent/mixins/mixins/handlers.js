@@ -4,7 +4,7 @@ import handlers from "@/rollocomponent/mixins/handlers.js";
 v.1.0
 */
 
-const { Handlers } = await use("@/rollocomponent/tools/handlers.js");
+import { Handlers } from "../../tools/handlers.js";
 
 /* TODO
 - If ever needed: Relatively easy to register handlers in custom registry. 

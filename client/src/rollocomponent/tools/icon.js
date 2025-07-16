@@ -4,8 +4,8 @@ import { Icon } from "@/rollocomponent/tools/icon.js";
 v.1.0
 */
 
-const { author } = await use("@/rollocomponent/tools/author.js");
-const { base } = await use("@/rollocomponent/tools/base.js");
+import { author } from "./author.js";
+import { base } from "./base.js";
 
 export const Icon = author(
   class extends base() {

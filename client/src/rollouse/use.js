@@ -14,8 +14,6 @@ import { Processor } from "./tools/processor.js";
 
 //import { AnvilLoaders } from "@/rolloanvil/main.js";///
 
-console.log('Creating Use...')////
-
 export const Use = new (class {
   #_ = {};
 
@@ -82,6 +80,7 @@ export const Use = new (class {
   }
 })();
 
+/* Add 'use' to global namespace */
 Object.defineProperty(window, "use", {
   configurable: false,
   enumerable: true,
@@ -92,64 +91,58 @@ Object.defineProperty(window, "use", {
   }),
 });
 
-/* Configure import capabilities */
-await (async () => {
-
-  console.log('Building import maps...')////
-
-
-
-  /* Add js imports */
-  Use.imports.add(
-    import.meta.glob([
-      "/src/**/*.js",
-      "!/src/index.js",
-      //"!/src/setup.js",
-      "!/src/rollolibs/bootstrap/_src/**/*.js",
-      "!/src/rollotest/**/*.js",
-      "!/src/rollouse/**/*.js",
-    ])
+/* Add capability to import selected JS modules from src. */
+Use.imports.add(
+  import.meta.glob([
+    "/src/main.js",
+    "/src/meta.js",
+    "/src/rolloapp/rolloapp.js",
+    "/src/rollocomponent/rollocomponent.js",
+    "/src/rollolibs/bootstrap/bootstrap.js",
+    "/src/rollolibs/yaml/yaml.js",
+    "/src/rollolibs/marked.js",
+    "/src/rollolibs/papa.js",
+    "/src/rollosheet/rollosheet.js",
+  ])
+);
+/* Add capability to import CSS modules from src */
+Use.imports.add(import.meta.glob(["/src/**/*.css", "!/src/main.css"]));
+/* Add capability to import raw CSS modules from src */
+Use.imports
+  .add(
+    import.meta.glob(["/src/**/*.css"], {
+      query: "?raw",
+      import: "default",
+    }),
+    { raw: true }
+  )
+  /* Add capability to import raw HTML modules from src */
+  .imports.add(
+    import.meta.glob(["/src/**/*.html"], {
+      query: "?raw",
+      import: "default",
+    }),
+    { raw: true }
   );
 
-  /* Add css imports */
-  Use.imports.add(import.meta.glob(["/src/**/*.css", "!/src/main.css"]));
-
-  /* Add raw css imports */
-  Use.imports
-    .add(
-      import.meta.glob(["/src/**/*.css"], {
-        query: "?raw",
-        import: "default",
-      }),
-      { raw: true }
-    )
-
-    /* Add html imports */
-    .imports.add(
-      import.meta.glob(["/src/**/*.html"], {
-        query: "?raw",
-        import: "default",
-      }),
-      { raw: true }
-    );
-
+await (async () => {
   //console.log('Importing component stuff...')////
-  //const { author, base, component, mix, mixins } = await Use.module("@/rollocomponent/");
+  const { author, base, component, mix, mixins } = await Use.module(
+    "@/rollocomponent/"
+  );
 
-  console.log('Importing mixins...')////
+  /*
+  console.log("Importing mixins..."); ////
   const { mixins } = await Use.module("@/rollocomponent/mixins/mixins.js");
-
-  console.log('Importing author...')////
+  console.log("Importing author..."); ////
   const { author } = await Use.module("@/rollocomponent/tools/author.js");
-
-  console.log('Importing base...')////
-  const { base} = await Use.module("@/rollocomponent/tools/base.js");
-
-  console.log('Importing component...')////
+  console.log("Importing base..."); ////
+  const { base } = await Use.module("@/rollocomponent/tools/base.js");
+  console.log("Importing component..."); ////
   const { component } = await Use.module("@/rollocomponent/component.js");
-
-  console.log('Importing mix...')////
+  console.log("Importing mix..."); ////
   const { mix } = await Use.module("@/rollocomponent/tools/mix.js");
+  */
 
   const build = async (wrapper, { path } = {}) => {
     const { Sheet } = await Use.module("@/rollosheet/");
@@ -196,8 +189,7 @@ await (async () => {
 
   //app.typeHooks.add({ py: (specifier) => AnvilLoaders.create(specifier) });//
 
-
-  console.log('Creating processors...')////
+  console.log("Creating processors..."); ////
 
   /* Add .sheet.css support */
   Use.signatures
@@ -318,7 +310,7 @@ await (async () => {
     .processors.add({
       csv: new Processor(
         async (result, { owner, path }) => {
-          const { Papa } = await owner.module("@/rollolibs/papa/");
+          const { Papa } = await owner.module("@/rollolibs/papa.js");
           return Papa.parse(result);
         },
         { cache: false }

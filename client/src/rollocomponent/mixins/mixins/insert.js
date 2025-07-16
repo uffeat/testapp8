@@ -4,13 +4,13 @@ import insert from "@/rollocomponent/mixins/insert.js";
 v.1.0
 */
 
-const { Insert } = await use("@/rollocomponent/tools/insert.js");
+import { Insert } from "../../tools/insert.js";
 
 export default (parent, config, ...mixins) => {
   return class extends parent {
     static __name__ = "insert";
     #_ = {};
-    
+
     __new__() {
       super.__new__?.();
       this.#_.insert = new Insert(this);
