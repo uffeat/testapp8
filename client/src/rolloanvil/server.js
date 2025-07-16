@@ -86,3 +86,12 @@ export const server = new Proxy(
     },
   }
 );
+
+console.log("use.typeHooks:", use.typeHooks);
+
+use.typeHooks.add({
+  server:
+    (specifier) =>
+    (...args) =>
+      __server__.call(specifier.slice(0, -".server".length), ...args),
+});

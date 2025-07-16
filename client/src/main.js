@@ -2,7 +2,7 @@
 
 const { component } = await use("@/rollocomponent/");
 
-component.h1({ parent: app }, 'On a roll!')
+component.h1({ parent: app }, "On a roll!");
 
 await (async () => {
   const Input = await use("/components/form/input.x.html");
@@ -10,7 +10,6 @@ await (async () => {
   const uffe = Input({
     parent: app,
     name: "uffe",
-    //value: 'uff',
     required: true,
     validators: [
       (value) => {
@@ -22,13 +21,25 @@ await (async () => {
   });
 })();
 
+await (async () => {
+  const { server } = await use("@/rolloanvil/");
+  server.echo({ echo: "Oh, my echo!" }).then((result) => {
+    console.log(result);
+    component.h1({ parent: app }, result.data.echo);
+  });
+})();
 
-const { server } = await use("@/rolloanvil/");
-server.echo({ echo: "Oh, my echo!" }).then((result) => {
-  console.log(result);
-  component.h1({ parent: app }, result.data.echo);
-});
 
+await (async () => {
+  const echo = await use('echo.server')
+  echo({ echo: "Echo-echo!" }).then((result) => {
+    console.log(result);
+    component.h1({ parent: app }, result.data.echo);
+  });
+
+
+  
+})();
 
 /*
 const { Receivers } = await use("/rolloanvil/receivers.js");

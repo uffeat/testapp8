@@ -3,7 +3,7 @@ index.js
 */
 
 
-//import "@/setup.js";
+
 import "@/main.css";
 import "@/rollouse/use.js";
 
