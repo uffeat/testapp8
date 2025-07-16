@@ -3,20 +3,16 @@ use("@/rollotest/");
 
 const { component } = await use("@/rollocomponent/");
 
-component.h1({ parent: app }, "On a roll, Hugo!");
+component.h1({ parent: app }, "On a roll!");
 
 
-const { main } = await use("@/rolloanvil/");
-
-
-
-main.receivers.add((signal) => console.log('Receiver got signal:', signal.data))
-
-
-//await main.connect({receivers: [ (signal) => console.log('Receiver got signal:', signal.data)]})
+const { worker } = await use("@/rolloanvil/");
+await worker.connect({receivers: [
+  (signal) => console.log('Receiver got signal:', signal.data)
+]})
 
 await (async () => {
-  main.api.echo({echo: 'Oh, my echo!'}).then((result) => console.log('Result:', result))
+  worker.api.echo({echo: 'Oh, my echo!'}).then((result) => console.log('Result:', result))
 })();
 
 

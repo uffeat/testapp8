@@ -17,6 +17,7 @@ const App = author(
       this.id = "app";
 
       this.shadow.append(
+        component.div({}, component.slot({ name: "anvil" })),
         component.div({}, component.slot({ name: "data" })),
         component.div({}, component.slot({ name: "modal" }))
       );
