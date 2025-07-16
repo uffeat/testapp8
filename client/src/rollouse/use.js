@@ -1,7 +1,7 @@
 /*
 import { Use } from "@/rollouse/use.js";
 */
-
+import { Assets } from "./tools/assets.js";
 import { Imports } from "./tools/imports.js";
 import { Path } from "./tools/path.js";
 import { Processors } from "./tools/processors.js";
@@ -96,6 +96,7 @@ Use.imports.add(
   import.meta.glob([
     "/src/main.js",
     "/src/meta.js",
+    "/src/rolloanvil/rolloanvil.js",
     "/src/rolloapp/rolloapp.js",
     "/src/rollocomponent/rollocomponent.js",
     "/src/rollolibs/bootstrap/bootstrap.js",
@@ -109,199 +110,153 @@ Use.imports.add(
 );
 /* Add capability to import CSS modules from src */
 Use.imports.add(import.meta.glob(["/src/**/*.css", "!/src/main.css"]));
+
 /* Add capability to import raw CSS modules from src */
-Use.imports
-  .add(
-    import.meta.glob(["/src/**/*.css"], {
-      query: "?raw",
-      import: "default",
-    }),
-    { raw: true }
-  )
-  /* Add capability to import raw HTML modules from src */
-  .imports.add(
-    import.meta.glob(["/src/**/*.html"], {
-      query: "?raw",
-      import: "default",
-    }),
-    { raw: true }
-  );
+Use.imports.add(
+  import.meta.glob(["/src/**/*.css"], {
+    query: "?raw",
+    import: "default",
+  }),
+  { raw: true }
+);
 
-await (async () => {
-  //console.log('Importing component stuff...')////
+/* Add capability to import raw HTML modules from src */
+Use.imports.add(
+  import.meta.glob(["/src/**/*.html"], {
+    query: "?raw",
+    import: "default",
+  }),
+  { raw: true }
+);
 
-  const { author, component } = await Use.module(
-    "@/rollocomponent/"
-  );
+//Use.typeHooks.add({ py: (specifier) => AnvilLoaders.create(specifier) });//
 
-
-
-  const build = async (dom, { path } = {}) => {
-    const { Sheet } = await Use.module("@/rollosheet/");
-    /* Build assets */
-    const assets = {};
-    /* Named sheets */
-    for (const element of dom.querySelectorAll("style[name]")) {
-      const name = element.getAttribute("name");
-      const sheet = new Sheet(element.textContent, {
-        name: `${path.path}/${name}`,
-      });
-      assets[name] = sheet;
-      /* Global sheets */
-      if (element.hasAttribute("global")) {
-        sheet.adopt(document);
-      }
-    }
-    /* Unnamed global sheets */
-    for (const element of dom.querySelectorAll(
-      "style[global]:not([name])"
-    )) {
-      new Sheet(element.textContent).adopt(document);
-    }
-
-    /* Sheets from src 
-          NOTE Injected as links. Not included in 'assets'. */
-    for (const element of dom.querySelectorAll("style[src]")) {
-      const src = element.getAttribute("src");
-      await Use.module(src);
-    }
-    /* Templates 
-          NOTE Templates can contain (unnamed) styles. These are not sheet-processed. 
-          Can be useful for shadow templates.  */
-    for (const element of dom.querySelectorAll("template")) {
-      if (!element.hasAttribute("name")) {
-        throw new Error(`Unnamed <template> in ${path.path}`);
-      }
-      const name = element.getAttribute("name");
-      const html = element.innerHTML;
-      assets[name] = html;
-    }
-    return assets;
-  };
-
-  //app.typeHooks.add({ py: (specifier) => AnvilLoaders.create(specifier) });//
-
-  /* Add .sheet.css support */
-  Use.signatures
-    .add({
-      "sheet.css": (options, { owner, path }) => {
-        options.raw = true;
+/* Add '.sheet.css' processor */
+Use.signatures
+  .add({
+    "sheet.css": (options, { owner, path }) => {
+      options.raw = true;
+    },
+  })
+  .processors.add({
+    "sheet.css": new Processor(
+      async (result, { owner, path }) => {
+        const { Sheet } = await owner.module("@/rollosheet/");
+        const sheet = new Sheet(result, {
+          name: path.path,
+        });
+        return sheet;
       },
-    })
-    .processors.add({
-      "sheet.css": new Processor(
-        async (result, { owner, path }) => {
-          const { Sheet } = await owner.module("@/rollosheet/");
-          const sheet = new Sheet(result, {
-            name: path.path,
-          });
-          return sheet;
-        },
 
-        { cache: true }
-      ),
-    })
-    /* Add support for x.html */
-    .processors.add({
-      "x.html": new Processor(
-        async (result, { owner, path }) => {
-          const dom = component.div({ innerHTML: result });
+      { cache: true }
+    ),
+  });
 
-          const type = (() => {
-            const meta = dom.querySelector(`meta[type]`);
-            if (meta) {
-              return meta.getAttribute("type");
-            }
-          })();
-          if (type === "component") {
-            const assets = await build(dom);
-            const script = dom.querySelector("script[main]");
-            /* Create module */
-            const module = await construct(
-              `${script.textContent.trim()}\n//# sourceURL=${path.path}`
-            );
-            /* Get cls */
-            const cls = await module.default({
-              assets,
-              
-              dom,
-              
-              path,
-            });
-            /* Create instance factory */
-            const key = cls.__key__
-              ? cls.__key__
-              : `rollo-${path.stem.replaceAll("_", "-")}`;
-            const factory = author(cls, key);
-            /* Handle callback */
-            if (cls.__factory__) {
-              await cls.__factory__(factory);
-            }
-            return factory;
-          }
-
-          if (type === "assets") {
-            const assets = await build(dom, { path });
-            return Object.freeze(assets);
-          }
-
-          if (!type) {
-            const assets = await build(dom, { path });
-            const script = dom.querySelector("script[main]");
-            if (script) {
-              const module = await construct(
-                `${script.textContent.trim()}\n//# sourceURL=${path.path}`
-              );
-              if ("default" in module) {
-                return await module.default({ assets, dom, path });
-              } else {
-                if (Object.keys(assets).length) {
-                  return Object.freeze({ ...assets, ...module });
-                } else {
-                  return module;
-                }
-              }
+/* Add '.x.html' processor */
+Use.processors.add({
+  "x.html": new Processor(
+    async (result, { owner, path }) => {
+      const { component } = await owner.module("@/rollocomponent/");
+      const dom = component.div({ innerHTML: result });
+      /* Get type */
+      const type = (() => {
+        const meta = dom.querySelector(`meta[type]`);
+        if (meta) {
+          return meta.getAttribute("type");
+        }
+      })();
+      /* 'component' type */
+      if (type === "component") {
+        const { author } = await owner.module("@/rollocomponent/");
+        const assets = await Assets.create(dom);
+        const script = dom.querySelector("script[main]");
+        /* Create module */
+        const module = await construct(
+          `${script.textContent.trim()}\n//# sourceURL=${path.path}`
+        );
+        /* Get cls */
+        const cls = await module.default({
+          assets,
+          dom,
+          path,
+        });
+        /* Create instance factory */
+        const key = cls.__key__
+          ? cls.__key__
+          : `rollo-${path.stem.replaceAll("_", "-")}`;
+        const factory = author(cls, key);
+        /* Handle callback */
+        if (cls.__factory__) {
+          await cls.__factory__(factory);
+        }
+        return factory;
+      }
+      /* 'assets' type */
+      if (type === "assets") {
+        const assets = await Assets.create(dom, { path });
+        return Object.freeze(assets);
+      }
+      /* Unspecified type */
+      if (!type) {
+        const assets = await Assets.create(dom, { path });
+        const script = dom.querySelector("script[main]");
+        if (script) {
+          const module = await construct(
+            `${script.textContent.trim()}\n//# sourceURL=${path.path}`
+          );
+          if ("default" in module) {
+            return await module.default({ assets, dom, path });
+          } else {
+            if (Object.keys(assets).length) {
+              return Object.freeze({ ...assets, ...module });
             } else {
-              return Object.freeze(assets);
+              return module;
             }
           }
-        },
-        {
-          cache: true,
+        } else {
+          return Object.freeze(assets);
         }
-      ),
-    })
-    /* Add md support */
-    .processors.add({
-      md: new Processor(
-        async (result, { owner, path }) => {
-          const { parse } = await owner.module("@/rollolibs/marked.js");
-          return parse(result).trim();
-        },
-        { cache: true }
-      ),
-    })
+      }
+    },
+    {
+      cache: true,
+    }
+  ),
+});
 
-    /* Add yaml support */
-    .processors.add({
-      yaml: new Processor(
-        async (result, { owner, path }) => {
-          const { parse } = await owner.module("@/rollolibs/yaml/");
-          return parse(result);
-        },
-        {
-          cache: false,
-        }
-      ),
-    })
-    /* Add csv support */
-    .processors.add({
-      csv: new Processor(
-        async (result, { owner, path }) => {
-          const { Papa } = await owner.module("@/rollolibs/papa.js");
-          return Papa.parse(result);
-        },
-        { cache: false }
-      ),
-    });
-})();
+/* Add '.md' processor */
+Use.processors.add({
+  md: new Processor(
+    async (result, { owner, path }) => {
+      const { parse } = await owner.module("@/rollolibs/marked.js");
+      return parse(result).trim();
+    },
+    { cache: true }
+  ),
+});
+
+/* Add '.yaml' processor */
+Use.processors.add({
+  yaml: new Processor(
+    async (result, { owner, path }) => {
+      const { parse } = await owner.module("@/rollolibs/yaml/");
+      return parse(result);
+    },
+    {
+      cache: false,
+    }
+  ),
+});
+
+/* Add '.csv' processor */
+Use.processors.add({
+  csv: new Processor(
+    async (result, { owner, path }) => {
+      const { Papa } = await owner.module("@/rollolibs/papa.js");
+      return Papa.parse(result);
+    },
+    { cache: false }
+  ),
+});
+
+

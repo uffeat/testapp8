@@ -13,21 +13,23 @@ export class Processor {
     registry: new Map(),
   };
 
-  constructor(source, { cache = true } = {}) {
+  constructor(source, { cache = true, detail } = {}) {
     this.#_.source = source;
-    this.#_.cache = cache;
+    this.#_.detail = detail;
   }
 
   /* Calls source, subject to caching logic (inherent or as per call). */
   async call(key, result, { owner, path, cache = true } = {}) {
     if (!cache || !this.#_.cache) {
-      return await this.#_.source.call(null, result, {
+      return await this.#_.source.call(owner, result, {
+        detail: this.#_.detail,
         owner,
         path,
       });
     }
     if (this.#_.registry.has(key)) return this.#_.registry.get(key);
-    const processed = await this.#_.source.call(null, result, {
+    const processed = await this.#_.source.call(owner, result, {
+      detail: this.#_.detail,
       owner,
       path,
     });

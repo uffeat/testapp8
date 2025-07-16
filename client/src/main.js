@@ -22,13 +22,13 @@ await (async () => {
   });
 })();
 
-/*
+
 const { server } = await use("@/rolloanvil/");
 server.echo({ echo: "Oh, my echo!" }).then((result) => {
   console.log(result);
   component.h1({ parent: app }, result.data.echo);
 });
-*/
+
 
 /*
 const { Receivers } = await use("/rolloanvil/receivers.js");
