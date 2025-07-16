@@ -1,19 +1,16 @@
 //import "@/rollotest/__init__.js";
 
-
-const { server } = await use("@/rolloanvil/");
 const { component } = await use("@/rollocomponent/");
 
+component.h1({ parent: app }, 'On a roll!')
+
+/*
+const { server } = await use("@/rolloanvil/");
 server.echo({ echo: "Oh, my echo!" }).then((result) => {
-  console.log(result)
+  console.log(result);
   component.h1({ parent: app }, result.data.echo);
-  
 });
-
-
-
-
-
+*/
 
 /*
 const { Receivers } = await use("/rolloanvil/receivers.js");
