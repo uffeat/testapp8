@@ -41,6 +41,8 @@ await (async () => {
   
 })();
 
+//anvil/server
+
 /*
 const { Receivers } = await use("/rolloanvil/receivers.js");
 Receivers.add((data) => {

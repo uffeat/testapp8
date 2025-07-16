@@ -87,8 +87,6 @@ export const server = new Proxy(
   }
 );
 
-console.log("use.typeHooks:", use.typeHooks);
-
 use.typeHooks.add({
   server:
     (specifier) =>

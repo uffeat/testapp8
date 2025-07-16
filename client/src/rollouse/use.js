@@ -105,6 +105,7 @@ Use.imports.add(
     "/src/rollolibs/papa.js",
     "/src/rollosheet/rollosheet.js",
     "/src/rollostate/rollostate.js",
+    "/src/rollotest/rollotest.js",
     "/src/rollotools/**/*.js",
   ])
 );
@@ -258,5 +259,3 @@ Use.processors.add({
     { cache: false }
   ),
 });
-
-

@@ -1,10 +1,11 @@
 /*
-import "@/rollotest/__init__.js";
+import "@/rollotest/rollotest.js
 20250624
 v.1.2
 */
 
-import { Modules } from "@/rollotools/modules.js";
+const { Modules } = await use("@/rollotools/modules.js");
+const { meta } = await use("@/meta.js");
 
 if (meta.env.DEV || meta.env.name === "preview") {
   /* Utility for importing test modules. */
