@@ -133,11 +133,17 @@ await (async () => {
       { raw: true }
     );
 
-  console.log('Importing component stuff...')////
+  //console.log('Importing component stuff...')////
+  //const { author, base, component, mix, mixins } = await Use.module("@/rollocomponent/");
 
-  const { author, base, component, mix, mixins } = await Use.module(
-    "@/rollocomponent/"
-  );
+  console.log('Importing mixins...')////
+  const { mixins } = await Use.module("@/rollocomponent/mixins/mixins.js");
+
+  console.log('Importing author...')////
+  const { author } = await Use.module("@/rollocomponent/tools/author.js");
+  const { base} = await Use.module("@/rollocomponent/tools/base.js");
+  const { component } = await Use.module("@/rollocomponent/component.js");
+  const { mix } = await Use.module("@/rollocomponent/tools/mix.js");
 
   const build = async (wrapper, { path } = {}) => {
     const { Sheet } = await Use.module("@/rollosheet/");
