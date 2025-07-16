@@ -1,5 +1,5 @@
 /* tests */
-use("@/rollotest/")
+use("@/rollotest/");
 
 const { component } = await use("@/rollocomponent/");
 
@@ -30,17 +30,15 @@ await (async () => {
   });
 })();
 
-
 await (async () => {
-  const echo = await use('echo.server')
+  const echo = await use("echo.server");
   echo({ echo: "Echo-echo!" }).then((result) => {
     console.log(result);
     component.h1({ parent: app }, result.data.echo);
   });
-
-
-  
 })();
+
+console.log('size:', use.imports.size())
 
 //anvil/server
 

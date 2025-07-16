@@ -5,10 +5,7 @@ import { Imports } from "@/rollouse/tools/imports.js";
 
 export class Imports {
   #_ = {
-    regisitres: {
-      raw: new Map(),
-      unraw: new Map(),
-    },
+    regisitres: {},
   };
 
   constructor(owner) {
@@ -16,40 +13,41 @@ export class Imports {
   }
 
   add(map, { raw = false } = {}) {
-    const registry = raw ? this.#_.regisitres.raw : this.#_.regisitres.unraw;
-    for (const [path, load] of Object.entries(map)) {
-      if (registry.has(path.path)) {
-        throw new Error(`Duplicate path: ${path}`);
+    if (raw) {
+      if (this.#_.regisitres.raw) {
+        Object.assign(this.#_.regisitres.raw, map);
+      } else {
+        this.#_.regisitres.raw = map;
       }
-      registry.set(path, load);
+    } else {
+      if (this.#_.regisitres.unraw) {
+        Object.assign(this.#_.regisitres.unraw, map);
+      } else {
+        this.#_.regisitres.unraw = map;
+      }
     }
+
     return this.#_.owner;
   }
 
   import(path, { raw = false } = {}) {
     const registry = raw ? this.#_.regisitres.raw : this.#_.regisitres.unraw;
-    if (!registry.has(path.path)) {
+    const load = registry[path.path];
+    if (!load) {
       throw new Error(`Invalid path: ${path.specifier}`);
     }
-    const load = registry.get(path.path);
     return load();
   }
 
-  maps({ filter, raw = false } = {}) {
-    const registry = raw ? this.#_.regisitres.raw : this.#_.regisitres.unraw;
-    
-    const entries = Array.from(registry.entries(), ([path, load]) => [
-      `@/${path.slice("/src/".length)}`,
-      load,
-    ])
-    if (filter) {
-      return Object.fromEntries(entries.filter(filter));
-    }
-    return Object.fromEntries(entries);
-  }
+  
 
   size(raw = false) {
     const registry = raw ? this.#_.regisitres.raw : this.#_.regisitres.unraw;
-    return registry.size;
+    return Object.keys(registry).length;
+  }
+
+  __registry__(raw = false) {
+    const registry = raw ? this.#_.regisitres.raw : this.#_.regisitres.unraw;
+    return registry
   }
 }

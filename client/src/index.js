@@ -15,12 +15,6 @@ await use("@/rolloapp/");
 /* Env */
 const { meta } = await use("@/meta.js");
 console.info("Environment:", meta.env.name);
-
-
-
-
-
-
 /* main */
 await use("@/main.js")
 
