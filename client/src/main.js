@@ -6,9 +6,13 @@ const { component } = await use("@/rollocomponent/");
 component.h1({ parent: app }, "On a roll!");
 
 
+const { worker } = await use("@/rolloanvil/");
+await worker.connect({receivers: [
+  (signal) => console.log('Receiver got signal:', signal.data)
+]})
+
 await (async () => {
-  const { worker } = await use("@/rolloanvil/");
-  await worker.connect()
+  
   worker.api.echo({echo: 'Oh, my echo!'}).then((result) => console.log('Result:', result))
 })();
 
