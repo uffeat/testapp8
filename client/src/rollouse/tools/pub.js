@@ -4,7 +4,7 @@ import { pub } from "@/rollouse/tools/pub.js";
 v.2.0
 */
 
-import { construct } from "@/rollouse/tools/construct.js";
+import { construct } from "./construct.js";
 
 /* Utility for importing public files. */
 export const pub = new (class {

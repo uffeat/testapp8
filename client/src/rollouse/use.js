@@ -2,15 +2,15 @@
 import { Use } from "@/rollouse/use.js";
 */
 
-import { Imports } from "@/rollouse/tools/imports.js";
-import { Path } from "@/rollouse/tools/path.js";
-import { Processors } from "@/rollouse/tools/processors.js";
-import { Signatures } from "@/rollouse/tools/signatures.js";
-import { TypeHooks } from "@/rollouse/tools/type_hooks.js";
-import { pub } from "@/rollouse/tools/pub.js";
+import { Imports } from "./tools/imports.js";
+import { Path } from "./tools/path.js";
+import { Processors } from "./tools/processors.js";
+import { Signatures } from "./tools/signatures.js";
+import { TypeHooks } from "./tools/type_hooks.js";
+import { pub } from "./tools/pub.js";
 
-import { construct } from "@/rollouse/tools/construct.js";
-import { Processor } from "@/rollouse/tools/processor.js";
+import { construct } from "./tools/construct.js";
+import { Processor } from "./tools/processor.js";
 
 //import { AnvilLoaders } from "@/rolloanvil/main.js";///
 
@@ -141,8 +141,14 @@ await (async () => {
 
   console.log('Importing author...')////
   const { author } = await Use.module("@/rollocomponent/tools/author.js");
+
+  console.log('Importing base...')////
   const { base} = await Use.module("@/rollocomponent/tools/base.js");
+
+  console.log('Importing component...')////
   const { component } = await Use.module("@/rollocomponent/component.js");
+
+  console.log('Importing mix...')////
   const { mix } = await Use.module("@/rollocomponent/tools/mix.js");
 
   const build = async (wrapper, { path } = {}) => {
