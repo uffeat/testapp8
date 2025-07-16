@@ -9,9 +9,7 @@ component.h1({ parent: app }, "On a roll!");
 await (async () => {
   const { worker } = await use("@/rolloanvil/");
   await worker.connect()
-
   worker.api.echo({echo: 'Oh, my echo!'}).then((result) => console.log('Result:', result))
-  
 })();
 
 
