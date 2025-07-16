@@ -97,7 +97,7 @@ await (async () => {
     import.meta.glob([
       "/src/**/*.js",
       "!/src/index.js",
-      "!/src/main.js",
+      //"!/src/main.js",////
       "!/src/setup.js",
       "!/src/rollolibs/bootstrap/_src/**/*.js",
       "!/src/rollotest/**/*.js",

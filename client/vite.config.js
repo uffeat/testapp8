@@ -22,7 +22,7 @@ export default defineConfig(({ mode }) => {
     build: {
       //minify: false,//
       /* Enable /src outside /client */
-      //emptyOutDir: true,//
+      emptyOutDir: true,//
 
       /* Enable manifest.json generation */
       manifest: true,
