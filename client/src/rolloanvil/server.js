@@ -20,8 +20,12 @@ const __server__ = new (class {
   async call(name, data = {}, { raw = false, timeout } = {}) {
     const { promise, resolve, reject } = Promise.withResolvers();
 
+    if (timeout === true) {
+      timeout = this.#_.timeout
+    }
+
     const timer = (() => {
-      if (![false, null].includes(timeout)) {
+      if (timeout) {
         return setTimeout(
           () => {
             const error = new Error(`'${name}' did not respond in time.`);
@@ -31,7 +35,7 @@ const __server__ = new (class {
               resolve(error);
             }
           },
-          timeout === undefined ? this.#_.timeout : timeout
+          timeout
         );
       }
     })();
