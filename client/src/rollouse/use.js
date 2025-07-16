@@ -103,6 +103,8 @@ Use.imports.add(
     "/src/rollolibs/marked.js",
     "/src/rollolibs/papa.js",
     "/src/rollosheet/rollosheet.js",
+    "/src/rollostate/rollostate.js",
+    "/src/rollotools/**/*.js",
   ])
 );
 /* Add capability to import CSS modules from src */
@@ -127,29 +129,19 @@ Use.imports
 
 await (async () => {
   //console.log('Importing component stuff...')////
-  const { author, base, component, mix, mixins } = await Use.module(
+
+  const { author, component } = await Use.module(
     "@/rollocomponent/"
   );
 
-  /*
-  console.log("Importing mixins..."); ////
-  const { mixins } = await Use.module("@/rollocomponent/mixins/mixins.js");
-  console.log("Importing author..."); ////
-  const { author } = await Use.module("@/rollocomponent/tools/author.js");
-  console.log("Importing base..."); ////
-  const { base } = await Use.module("@/rollocomponent/tools/base.js");
-  console.log("Importing component..."); ////
-  const { component } = await Use.module("@/rollocomponent/component.js");
-  console.log("Importing mix..."); ////
-  const { mix } = await Use.module("@/rollocomponent/tools/mix.js");
-  */
 
-  const build = async (wrapper, { path } = {}) => {
+
+  const build = async (dom, { path } = {}) => {
     const { Sheet } = await Use.module("@/rollosheet/");
     /* Build assets */
     const assets = {};
     /* Named sheets */
-    for (const element of wrapper.querySelectorAll("style[name]")) {
+    for (const element of dom.querySelectorAll("style[name]")) {
       const name = element.getAttribute("name");
       const sheet = new Sheet(element.textContent, {
         name: `${path.path}/${name}`,
@@ -161,7 +153,7 @@ await (async () => {
       }
     }
     /* Unnamed global sheets */
-    for (const element of wrapper.querySelectorAll(
+    for (const element of dom.querySelectorAll(
       "style[global]:not([name])"
     )) {
       new Sheet(element.textContent).adopt(document);
@@ -169,14 +161,14 @@ await (async () => {
 
     /* Sheets from src 
           NOTE Injected as links. Not included in 'assets'. */
-    for (const element of wrapper.querySelectorAll("style[src]")) {
+    for (const element of dom.querySelectorAll("style[src]")) {
       const src = element.getAttribute("src");
       await Use.module(src);
     }
     /* Templates 
           NOTE Templates can contain (unnamed) styles. These are not sheet-processed. 
           Can be useful for shadow templates.  */
-    for (const element of wrapper.querySelectorAll("template")) {
+    for (const element of dom.querySelectorAll("template")) {
       if (!element.hasAttribute("name")) {
         throw new Error(`Unnamed <template> in ${path.path}`);
       }
@@ -188,8 +180,6 @@ await (async () => {
   };
 
   //app.typeHooks.add({ py: (specifier) => AnvilLoaders.create(specifier) });//
-
-  console.log("Creating processors..."); ////
 
   /* Add .sheet.css support */
   Use.signatures
@@ -215,17 +205,17 @@ await (async () => {
     .processors.add({
       "x.html": new Processor(
         async (result, { owner, path }) => {
-          const wrapper = component.div({ innerHTML: result });
+          const dom = component.div({ innerHTML: result });
 
           const type = (() => {
-            const meta = wrapper.querySelector(`meta[type]`);
+            const meta = dom.querySelector(`meta[type]`);
             if (meta) {
               return meta.getAttribute("type");
             }
           })();
           if (type === "component") {
-            const assets = await build(wrapper);
-            const script = wrapper.querySelector("script[main]");
+            const assets = await build(dom);
+            const script = dom.querySelector("script[main]");
             /* Create module */
             const module = await construct(
               `${script.textContent.trim()}\n//# sourceURL=${path.path}`
@@ -233,11 +223,9 @@ await (async () => {
             /* Get cls */
             const cls = await module.default({
               assets,
-              author,
-              base,
-              dom: wrapper,
-              mix,
-              mixins,
+              
+              dom,
+              
               path,
             });
             /* Create instance factory */
@@ -253,19 +241,19 @@ await (async () => {
           }
 
           if (type === "assets") {
-            const assets = await build(wrapper, { path });
+            const assets = await build(dom, { path });
             return Object.freeze(assets);
           }
 
           if (!type) {
-            const assets = await build(wrapper, { path });
-            const script = wrapper.querySelector("script[main]");
+            const assets = await build(dom, { path });
+            const script = dom.querySelector("script[main]");
             if (script) {
               const module = await construct(
                 `${script.textContent.trim()}\n//# sourceURL=${path.path}`
               );
               if ("default" in module) {
-                return await module.default({ assets, dom: wrapper, path });
+                return await module.default({ assets, dom, path });
               } else {
                 if (Object.keys(assets).length) {
                   return Object.freeze({ ...assets, ...module });

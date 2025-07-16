@@ -6,12 +6,8 @@ v.1.2
 <meta type="component" />
 
 <script main type="module">
-  export default async ({assets, base, mix}) => {
-
-
-  
-
-
+  export default async ({ assets }) => {
+    const { base, mix } = await use("@/rollocomponent/");
     const input = (await use("/components/form/mixins/input.js")).default;
 
     return class extends mix(base("input"), {}, input) {

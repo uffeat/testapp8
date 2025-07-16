@@ -4,6 +4,24 @@ const { component } = await use("@/rollocomponent/");
 
 component.h1({ parent: app }, 'On a roll!')
 
+await (async () => {
+  const Input = await use("/components/form/input.x.html");
+
+  const uffe = Input({
+    parent: app,
+    name: "uffe",
+    //value: 'uff',
+    required: true,
+    validators: [
+      (value) => {
+        if (value !== "uffe") {
+          return "Not uffe";
+        }
+      },
+    ],
+  });
+})();
+
 /*
 const { server } = await use("@/rolloanvil/");
 server.echo({ echo: "Oh, my echo!" }).then((result) => {
