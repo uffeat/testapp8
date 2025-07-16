@@ -8,6 +8,8 @@ const { Modules } = await use("@/rollotools/modules.js");
 const { meta } = await use("@/meta.js");
 
 if (meta.env.DEV || meta.env.name === "preview") {
+  console.log("Setting up test utility..."); ///
+
   /* Utility for importing test modules. */
   const test = new Modules(
     import.meta.glob(["/src/rollotest/tests/**/*.test.js"]),
@@ -19,8 +21,14 @@ if (meta.env.DEV || meta.env.name === "preview") {
 
   /* Enable triggering of tests */
   window.addEventListener("keydown", async (event) => {
+    console.log("Event triggered");////
+
     /* Runs unit test */
     if (event.code === "KeyU" && event.shiftKey) {
+
+      console.log("Unit test requested");////
+
+
       const KEY = "unit_test";
       const path = prompt("Path:", localStorage.getItem(KEY) || "");
       if (path) {

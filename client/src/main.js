@@ -1,5 +1,3 @@
-//import "@/rollotest/__init__.js";
-
 const { component } = await use("@/rollocomponent/");
 
 component.h1({ parent: app }, "On a roll!");
