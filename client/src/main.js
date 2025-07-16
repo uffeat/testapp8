@@ -5,42 +5,16 @@ const { component } = await use("@/rollocomponent/");
 
 component.h1({ parent: app }, "On a roll!");
 
-await (async () => {
-  const Input = await use("/components/form/input.x.html");
-
-  const uffe = Input({
-    parent: app,
-    name: "uffe",
-    required: true,
-    validators: [
-      (value) => {
-        if (value !== "uffe") {
-          return "Not uffe";
-        }
-      },
-    ],
-  });
-})();
 
 await (async () => {
-  const { server } = await use("@/rolloanvil/");
-  server.echo({ echo: "Oh, my echo!" }).then((result) => {
-    console.log(result);
-    component.h1({ parent: app }, result.data.echo);
-  });
+  const { worker } = await use("@/rolloanvil/");
+  await worker.connect()
+
+  worker.api.echo({echo: 'Oh, my echo!'}).then((result) => console.log('Result:', result))
+  
 })();
 
-await (async () => {
-  const echo = await use("echo.server");
-  echo({ echo: "Echo-echo!" }).then((result) => {
-    console.log(result);
-    component.h1({ parent: app }, result.data.echo);
-  });
-})();
 
-console.log('size:', use.imports.size())
-
-//anvil/server
 
 /*
 const { Receivers } = await use("/rolloanvil/receivers.js");
