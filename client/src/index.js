@@ -17,8 +17,7 @@ const { meta } = await use("@/meta.js");
 console.info("Environment:", meta.env.name);
 
 
-/* tests */
-await use("@/rollotest/")
+
 
 
 

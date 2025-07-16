@@ -1,3 +1,6 @@
+/* tests */
+await use("@/rollotest/")
+
 const { component } = await use("@/rollocomponent/");
 
 component.h1({ parent: app }, "On a roll!");
