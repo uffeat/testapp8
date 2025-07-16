@@ -1,5 +1,5 @@
 /* tests */
-await use("@/rollotest/")
+use("@/rollotest/")
 
 const { component } = await use("@/rollocomponent/");
 
