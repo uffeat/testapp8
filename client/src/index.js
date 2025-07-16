@@ -7,10 +7,8 @@ index.js
 import "@/main.css";
 import "@/rollouse/use.js";
 
-
-//await use("@/rollolibs/bootstrap/")
-
-/* Dark mode */
+/* Bootstrap */
+await use("@/rollolibs/bootstrap/")
 document.querySelector("html").dataset.bsTheme = "dark";
 /* app */
 await use("@/rolloapp/");

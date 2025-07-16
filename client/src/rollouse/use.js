@@ -92,6 +92,11 @@ Object.defineProperty(window, "use", {
 
 /* Configure import capabilities */
 await (async () => {
+
+  console.log('Building import maps...')////
+
+
+
   /* Add js imports */
   Use.imports.add(
     import.meta.glob([
@@ -125,6 +130,8 @@ await (async () => {
       }),
       { raw: true }
     );
+
+  console.log('Importing component stuff...')////
 
   const { author, base, component, mix, mixins } = await Use.module(
     "@/rollocomponent/"
@@ -174,6 +181,9 @@ await (async () => {
   };
 
   //app.typeHooks.add({ py: (specifier) => AnvilLoaders.create(specifier) });//
+
+
+  console.log('Creating processors...')////
 
   /* Add .sheet.css support */
   Use.signatures
