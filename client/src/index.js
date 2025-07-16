@@ -18,7 +18,7 @@ console.info("Environment:", meta.env.name);
 
 
 /* tests */
-await use("@/rollotest/")
+use("@/rollotest/")
 
 
 
