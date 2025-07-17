@@ -5,54 +5,38 @@ const { component } = await use("@/rollocomponent/");
 
 component.h1({ parent: app }, "On a roll, Hugo!");
 
-
 const { main } = await use("@/rolloanvil/");
 
+await main.connect({}, (signal) =>
+  console.log("Receiver got signal:", signal.data)
+);
 
+component.menu(
+  "px-2.flex.gap-x-3",
+  { parent: app },
+  component.button(
+    "btn.btn-primary",
+    {
+      "@click": async (event) => {
+        main.attribute.modal = true;
+        main.api.foo({}, { timeout: false }).then((result) => {
+          console.log("Result:", result);
 
-//main.receivers.add((signal) => console.log('Receiver got signal:', signal.data))
-await main.connect({}, (signal) => console.log('Receiver got signal:', signal.data))
+          main.attribute.modal = false;
+        });
+      },
+    },
+    "Show modal"
+  )
+);
 
 await (async () => {
-  main.api.echo({echo: 'Oh, my echo!'}).then((result) => console.log('Result:', result))
+  main.api
+    .echo({ echo: "Oh, my echo!" })
+    .then((result) => console.log("Result:", result));
 })();
 
-await (async () => {
-  const container = app.shadow.find(`:has(slot[name="anvil"])`)
-
-  container.attribute.visible = true
-  
-  
-
-
-  //main.attribute.visible = true
-  main.api.foo({}, { timeout: false }).then((result) => {
-    console.log('Result:', result)
-    //main.attribute.visible = false
-
-    
-     container.attribute.visible = false
-  })
-})();
-
-
-
-
-//app.__.anvilDisplay = 'flex'
-
-
-
 /*
-const { Receivers } = await use("/rolloanvil/receivers.js");
-Receivers.add((data) => {
-  console.log('Receiver got signal:', data)
-})
-  */
-
-/*
-const foo = await use("foo.py");
-foo().then((result) => console.log(result));
-
 const echo = await use("echo.py");
 echo({ echo: "echo!echo" }).then((result) => console.log(result));
 */

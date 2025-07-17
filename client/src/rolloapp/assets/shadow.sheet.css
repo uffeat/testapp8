@@ -16,13 +16,17 @@
 }
 
 :has(> slot[name="anvil"]) {
+  /*
   display: none;
+  */
 }
 
 :has(> slot[name="anvil"])[visible] {
+  /*
   display: flex;
   flex-direction: column;
   height: 100%;
+  */
 
   /*
   border: 4px solid orange;
