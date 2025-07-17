@@ -196,15 +196,26 @@ const cls = class extends base("iframe") {
       this.#_.config = Object.freeze(config);
     }
 
+    /* Add receivers */
     receivers.length &&
       receivers.forEach((receiver) => this.receivers.add(receiver));
 
     await this.#load();
     await this.#handshake();
-    /* Add receivers */
+    
 
     this.attribute.ready = true;
     return this;
+  }
+
+  /* Sends signal to iframe. */
+  signal(data) {
+    if (!this.attribute.ready) throw new Error(`Not connected.`);
+    this.contentWindow.postMessage(
+      { __type__: "signal", __id__: this.id, data },
+      meta.anvil.origin
+    );
+    return this
   }
 
   /* Returns promise that resolves, when handshake completed. */

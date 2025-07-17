@@ -19,14 +19,38 @@ component.menu(
     {
       "@click": async (event) => {
         main.attribute.modal = true;
-        main.api.foo({}, { timeout: false }).then((result) => {
-          console.log("Result:", result);
+        main.attribute.plot = false;
 
-          main.attribute.modal = false;
-        });
+        await main.api.clear();
+
+        await main.api.modal({}, { timeout: false });
+        main.attribute.modal = false;
       },
     },
     "Show modal"
+  ),
+  component.button(
+    "btn.btn-primary",
+    {
+      "@click": async (event) => {
+        main.attribute.plot = true;
+        await main.api.plot({}, { timeout: false });
+      },
+    },
+    "Show plot"
+  ),
+  component.button(
+    "btn.btn-primary",
+    {
+      "@click": async (event) => {
+        
+
+        await main.api.clear();
+
+        main.attribute.plot = false;
+      },
+    },
+    "Hide plot"
   )
 );
 
