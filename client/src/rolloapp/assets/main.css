@@ -1,9 +1,10 @@
 rollo-app {
   flex-grow: 1;
+
+  display: flex;
+  flex-direction: column;
 }
 
 rollo-app:has(.modal) {
   position: relative;
 }
-
-

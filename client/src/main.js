@@ -10,14 +10,15 @@ const { main } = await use("@/rolloanvil/");
 
 
 
-main.receivers.add((signal) => console.log('Receiver got signal:', signal.data))
+//main.receivers.add((signal) => console.log('Receiver got signal:', signal.data))
 
-
-//await main.connect({receivers: [ (signal) => console.log('Receiver got signal:', signal.data)]})
+await main.connect({}, (signal) => console.log('Receiver got signal:', signal.data))
 
 await (async () => {
   main.api.echo({echo: 'Oh, my echo!'}).then((result) => console.log('Result:', result))
 })();
+
+//app.__.anvilDisplay = 'flex'
 
 
 

@@ -24,6 +24,7 @@ const cls = class extends mix(HTMLElement, {}, ..._mixins) {
 
   constructor(owner) {
     super();
+    this.id = 'root'
     this.#_.owner = owner;
 
     owner.attachShadow({ mode: "open" }).append(this);

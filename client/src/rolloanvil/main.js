@@ -11,14 +11,13 @@ import { Submission } from "./tools/submission.js";
 const { meta } = await use("@/meta.js");
 const { author, base } = await use("@/rollocomponent/");
 
+await use("@/rolloanvil/assets/main.css");
+
 const cls = class extends base("iframe") {
   static __key__ = "anvil-main";
 
   #_ = {
-    registries: {
-      /* Registry for undelivered signals */
-      signals: new Set(),
-    },
+    registries: {},
     /* Default timeout for calling worker api's */
     timeout: 3000,
   };
@@ -29,30 +28,6 @@ const cls = class extends base("iframe") {
 
     this.id = `${this.constructor.__key__}-${Id.create()}`;
 
-    /* signals */
-    this.#_.signals = new (class {
-      #_ = {};
-
-      constructor(registry) {
-        this.#_.registry = registry;
-      }
-
-      /* Returns number of undelivered signals. */
-      get size() {
-        return this.#_.registry.size;
-      }
-
-      /* Removes all undelivered signals */
-      clear() {
-        this.#_.registry.clear();
-      }
-
-      /* Returns undelivered signals. */
-      signals() {
-        this.#_.registry.values();
-      }
-    })(this.#_.registries.signals);
-
     /* receivers */
     this.#_.receivers = new (class {
       #_ = {
@@ -60,10 +35,6 @@ const cls = class extends base("iframe") {
           receivers: new Set(),
         },
       };
-
-      constructor(signals) {
-        this.#_.registries.signals = signals;
-      }
 
       /* Returns number of receivers. */
       get size() {
@@ -73,12 +44,7 @@ const cls = class extends base("iframe") {
       /* Adds receiver. */
       add(receiver) {
         this.#_.registries.receivers.add(receiver);
-        if (this.#_.registries.signals.size) {
-          for (const message of this.#_.registries.signals.values()) {
-            effect(message);
-          }
-        }
-        this.#_.registries.signals.clear();
+
         return receiver;
       }
 
@@ -98,7 +64,7 @@ const cls = class extends base("iframe") {
         this.#_.registries.receivers.delete(receiver);
         return owner;
       }
-    })(this.#_.registries.signals);
+    })();
     window.addEventListener(
       "message",
       /* Sends signals to receivers. */
@@ -118,8 +84,6 @@ const cls = class extends base("iframe") {
               owner: this,
             });
           }
-        } else {
-          this.#_.registries.signals.add(message);
         }
       }
     );
@@ -154,11 +118,6 @@ const cls = class extends base("iframe") {
     return this.#_.receivers;
   }
 
-  /* Returns controller for undelivered signals. */
-  get signals() {
-    return this.#_.signals;
-  }
-
   /* Returns controller for calling api's. */
   get api() {
     return this.#_.api;
@@ -166,6 +125,7 @@ const cls = class extends base("iframe") {
 
   /* Calls api. */
   async call(name, data, { timeout } = {}) {
+    if (!this.attribute.ready) throw new Error(`Not connected.`);
     const owner = this;
     /* Use default timeout, if non provided */
     if (timeout === undefined) {
@@ -230,43 +190,39 @@ const cls = class extends base("iframe") {
   }
 
   /* Initializes parent-iframe communication bridge. */
-  async connect({ config, receivers, timeout } = {}) {
+  async connect({ config,  } = {}, ...receivers) {
     /* Guard against multiple runs */
-    if (this.attribute.ready) return this;
-    await this.#load();
-    await this.#handshake({ config, timeout });
-    /* Add receivers */
-    receivers && receivers.forEach((effect) => this.receivers.add(effect));
-    this.attribute.ready = true;
-    return this;
-  }
-
-  /* Returns promise that resolves, when handshake completed. */
-  async #handshake({ config, timeout } = {}) {
-    const owner = this;
+    if (this.attribute.ready) throw new Error(`Already connected.`);
 
     if (config) {
       this.#_.config = Object.freeze(config);
     }
 
-    /* Use default timeout, if none provided */
-    if (timeout === undefined) {
-      timeout = this.#_.timeout;
-    }
+    receivers.length && receivers.forEach((receiver) => this.receivers.add(receiver));
+
+    await this.#load();
+    await this.#handshake();
+    /* Add receivers */
+    
+    this.attribute.ready = true;
+    return this;
+  }
+
+  /* Returns promise that resolves, when handshake completed. */
+  async #handshake() {
+    const owner = this;
+    const timeout = this.#_.timeout;
+
     const { promise, resolve, reject } = Promise.withResolvers();
-    /* Register message handler with timeout.
-    Wrap in a class instance, so that timeout and message handler 
-    can ref each other without the use of 'function' - and to encapsulate. */
+    /* Register message handler with timeout. */
     new (class {
       #_ = {};
       constructor() {
-        if (![false, null].includes(timeout)) {
-          this.#_.timer = setTimeout(() => {
-            const error = new Error(`Handshake did not complete in time.`);
-            meta.end.DEV ? reject(error) : resolve(error);
-            window.removeEventListener("message", this.onhandshake);
-          }, timeout);
-        }
+        this.#_.timer = setTimeout(() => {
+          const error = new Error(`Handshake did not complete in time.`);
+          meta.end.DEV ? reject(error) : resolve(error);
+          window.removeEventListener("message", this.onhandshake);
+        }, timeout);
         window.addEventListener("message", this.onhandshake);
       }
 
@@ -288,7 +244,7 @@ const cls = class extends base("iframe") {
     })();
     /* Initialize handshake */
     this.contentWindow.postMessage(
-      { __id__: this.id, config },
+      { __id__: this.id, config: this.config },
       meta.anvil.origin
     );
     return promise;
@@ -308,9 +264,9 @@ const cls = class extends base("iframe") {
 const AnvilMain = author(cls);
 
 export const main = AnvilMain({
-  slot: 'anvil',
+  slot: "anvil",
   parent: app,
   src: meta.anvil.origin,
 });
 
-await main.connect();
+
