@@ -91,9 +91,8 @@ const cls = class extends base("iframe") {
 
   __new__() {
     super.__new__?.();
-
+    /* Identify by component key */
     this.attribute[this.constructor.__key__] = true;
-    this.attribute.origin = meta.anvil.origin;
 
     /* Create proxy-version of 'call' */
     this.#_.api = new Proxy(
@@ -165,7 +164,6 @@ const cls = class extends base("iframe") {
         this.timer && clearTimeout(this.timer);
         if (message.__error__) {
           const error = new Error(message.__error__);
-
           meta.env.DEV ? reject(error) : resolve(error);
         } else {
           resolve(message.result);
@@ -173,17 +171,14 @@ const cls = class extends base("iframe") {
         window.removeEventListener("message", this.onresponse);
       };
     })();
+
     /* Send api request */
-    const message = {
-      __type__: "api",
-      __id__: this.id,
-      __submission__: submission,
-      name,
-    };
-    if (data !== undefined) {
-      message.data = data;
+    if (data) {
+      this.post("api", { data, name, __submission__: submission });
+    } else {
+      this.post("api", { name, __submission__: submission });
     }
-    this.contentWindow.postMessage(message, meta.anvil.origin);
+
     return promise;
   }
 
@@ -202,7 +197,23 @@ const cls = class extends base("iframe") {
 
     await this.#load();
     await this.#handshake();
-    
+
+    /* Set up special-purpose permanent handler for importing assets */
+    window.addEventListener("message", async (event) => {
+      const message = Message(event);
+      if (
+        meta.anvil.origin !== message.origin ||
+        this.id !== message.__id__ ||
+        message.__type__ !== "use" ||
+        !message.path
+      ) {
+        return;
+      }
+
+      const path = message.path
+      const text = await use(path, { raw: true });
+      this.post("use", { path, text });
+    });
 
     this.attribute.ready = true;
     return this;
@@ -211,11 +222,20 @@ const cls = class extends base("iframe") {
   /* Sends signal to iframe. */
   signal(data) {
     if (!this.attribute.ready) throw new Error(`Not connected.`);
+
+    //this.contentWindow.postMessage({ __type__: "signal", __id__: this.id, data }, meta.anvil.origin);
+    this.post("signal", data);
+
+    return this;
+  }
+
+  post(type, message = {}) {
+    if (!this.attribute.ready) throw new Error(`Not connected.`);
     this.contentWindow.postMessage(
-      { __type__: "signal", __id__: this.id, data },
+      { __type__: type, __id__: this.id, ...message },
       meta.anvil.origin
     );
-    return this
+    return this;
   }
 
   /* Returns promise that resolves, when handshake completed. */
@@ -223,8 +243,9 @@ const cls = class extends base("iframe") {
     const owner = this;
     const timeout = this.#_.timeout;
 
-    const { promise, resolve, reject } = Promise.withResolvers();
     /* Register message handler with timeout. */
+    const { promise, resolve, reject } = Promise.withResolvers();
+    /* iice */
     new (class {
       #_ = {};
       constructor() {
@@ -260,7 +281,7 @@ const cls = class extends base("iframe") {
     return promise;
   }
 
-  /* Returns promise that resolves, when ifram loaded. */
+  /* Returns promise that resolves, when iframe loaded. */
   async #load() {
     const { promise, resolve } = Promise.withResolvers();
     this.on.load$once = (event) => {
@@ -273,6 +294,7 @@ const cls = class extends base("iframe") {
 
 const AnvilMain = author(cls);
 
+/* Create and expose singleton */
 export const main = AnvilMain({
   slot: "anvil",
   parent: app,

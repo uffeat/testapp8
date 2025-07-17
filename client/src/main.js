@@ -57,6 +57,12 @@ await (async () => {
     .then((result) => console.log("Result:", result));
 })();
 
+await (async () => {
+  const result = await main.api.test();
+  console.log("Result:", result)
+  
+})();
+
 /*
 const echo = await use("echo.py");
 echo({ echo: "echo!echo" }).then((result) => console.log(result));

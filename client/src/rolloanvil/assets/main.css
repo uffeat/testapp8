@@ -1,33 +1,20 @@
-iframe[anvil-main] {
-  /*
-  flex-grow: 1;
-  */
-}
-
+/* Default */
 iframe[anvil-main] {
   display: none;
 }
 
+/* iframe can show Anvil modals */
 iframe[anvil-main][modal] {
   display: block;
   position: absolute;
   top: 0;
   height: 100vh;
-
-  /*
-  border: 4px solid green;
-  */
 }
 
+/* iframe can show Anvil plots */
 iframe[anvil-main][plot] {
   --height: 450px;
   display: block;
-
   height: var(--height);
-
-  transform: translateY(4rem);
-
-  /*
-  border: 4px solid green;
-  */
+  transform: translateY(2rem);
 }
