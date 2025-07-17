@@ -34,7 +34,26 @@ component.menu(
     {
       "@click": async (event) => {
         main.attribute.plot = true;
-        await main.api.plot({}, { timeout: false });
+        await main.api.plot(
+          [
+            {
+              name: "Europe",
+              x: [2019, 2020, 2021, 2022, 2023],
+              y: [510, 620, 687, 745, 881],
+            },
+            {
+              name: "America",
+              x: [2019, 2020, 2021, 2022, 2023],
+              y: [733, 880, 964, 980, 1058],
+            },
+            {
+              name: "Asia",
+              x: [2019, 2020, 2021, 2022, 2023],
+              y: [662, 728, 794, 814, 906],
+            },
+          ],
+          { timeout: false }
+        );
       },
     },
     "Show plot"
@@ -59,8 +78,7 @@ await (async () => {
 
 await (async () => {
   const result = await main.api.test();
-  console.log("Result:", result)
-  
+  console.log("Result:", result);
 })();
 
 /*
