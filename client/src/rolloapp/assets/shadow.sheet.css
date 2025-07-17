@@ -1,25 +1,31 @@
-
-
 #root {
   display: flex;
   flex-direction: column;
-  border: 4px solid green;
+  
   height: 100vh;
 
+  /* Reset, if reboot not applied:
   padding: 0;
   margin: 0;
   box-sizing: border-box;
+  */
 
-  
-
-
-
+  /*
+  border: 4px solid green;
+  */
 }
 
-
 :has(> slot[name="anvil"]) {
+  display: none;
+}
+
+:has(> slot[name="anvil"])[visible] {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
   /*
-  display: var(--anvilDisplay, none);
+  border: 4px solid orange;
   */
 }
 

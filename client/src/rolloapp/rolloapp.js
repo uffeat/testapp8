@@ -2,7 +2,6 @@
 
 */
 
-
 const { meta } = await use("@/meta.js");
 const { author, base, component } = await use("@/rollocomponent/");
 
@@ -44,9 +43,8 @@ Object.defineProperty(window, "app", {
   value: app,
 });
 
-const {bootstrap} = await use('@/rollolibs/bootstrap/')
-app.shadow.sheets.add(bootstrap.sheets.reboot)
+const { bootstrap } = await use("@/rollolibs/bootstrap/");
+app.shadow.sheets.add(bootstrap.sheets.reboot);
 
 await app.shadow.sheets.import("@/rolloapp/assets/shadow");
 await use("@/rolloapp/assets/main.css");
-

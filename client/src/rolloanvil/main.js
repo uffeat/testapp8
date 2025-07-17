@@ -140,11 +140,7 @@ const cls = class extends base("iframe") {
         if (![false, null].includes(timeout)) {
           this.#_.timer = setTimeout(() => {
             const error = new Error(`'${name}' did not respond in time.`);
-            if (meta.env.DEV) {
-              reject(error);
-            } else {
-              resolve(error);
-            }
+            meta.env.DEV ? reject(error) : resolve(error);
             window.removeEventListener("message", this.onresponse);
           }, timeout);
         }
@@ -168,7 +164,9 @@ const cls = class extends base("iframe") {
         }
         this.timer && clearTimeout(this.timer);
         if (message.__error__) {
-          reject(new Error(message.__error__));
+          const error = new Error(message.__error__);
+
+          meta.env.DEV ? reject(error) : resolve(error);
         } else {
           resolve(message.result);
         }
@@ -190,7 +188,7 @@ const cls = class extends base("iframe") {
   }
 
   /* Initializes parent-iframe communication bridge. */
-  async connect({ config,  } = {}, ...receivers) {
+  async connect({ config } = {}, ...receivers) {
     /* Guard against multiple runs */
     if (this.attribute.ready) throw new Error(`Already connected.`);
 
@@ -198,12 +196,13 @@ const cls = class extends base("iframe") {
       this.#_.config = Object.freeze(config);
     }
 
-    receivers.length && receivers.forEach((receiver) => this.receivers.add(receiver));
+    receivers.length &&
+      receivers.forEach((receiver) => this.receivers.add(receiver));
 
     await this.#load();
     await this.#handshake();
     /* Add receivers */
-    
+
     this.attribute.ready = true;
     return this;
   }
@@ -220,7 +219,7 @@ const cls = class extends base("iframe") {
       constructor() {
         this.#_.timer = setTimeout(() => {
           const error = new Error(`Handshake did not complete in time.`);
-          meta.end.DEV ? reject(error) : resolve(error);
+          meta.env.DEV ? reject(error) : resolve(error);
           window.removeEventListener("message", this.onhandshake);
         }, timeout);
         window.addEventListener("message", this.onhandshake);
@@ -268,5 +267,3 @@ export const main = AnvilMain({
   parent: app,
   src: meta.anvil.origin,
 });
-
-

@@ -11,12 +11,32 @@ const { main } = await use("@/rolloanvil/");
 
 
 //main.receivers.add((signal) => console.log('Receiver got signal:', signal.data))
-
 await main.connect({}, (signal) => console.log('Receiver got signal:', signal.data))
 
 await (async () => {
   main.api.echo({echo: 'Oh, my echo!'}).then((result) => console.log('Result:', result))
 })();
+
+await (async () => {
+  const container = app.shadow.find(`:has(slot[name="anvil"])`)
+
+  container.attribute.visible = true
+  
+  
+
+
+  //main.attribute.visible = true
+  main.api.foo({}, { timeout: false }).then((result) => {
+    console.log('Result:', result)
+    //main.attribute.visible = false
+
+    
+     container.attribute.visible = false
+  })
+})();
+
+
+
 
 //app.__.anvilDisplay = 'flex'
 
