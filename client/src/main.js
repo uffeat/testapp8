@@ -18,11 +18,11 @@ component.menu(
     "btn.btn-primary",
     {
       "@click": async (event) => {
-        main.attribute.modal = true;
         main.attribute.plot = false;
 
         await main.api.clear();
 
+        main.attribute.modal = true;
         await main.api.modal({}, { timeout: false });
         main.attribute.modal = false;
       },
@@ -42,11 +42,8 @@ component.menu(
   component.button(
     "btn.btn-primary",
     {
-      "@click": async (event) => {
-        
-
-        await main.api.clear();
-
+      "@click": (event) => {
+        main.api.clear();
         main.attribute.plot = false;
       },
     },
