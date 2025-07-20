@@ -7,3 +7,8 @@ rollo-app {
 rollo-app:has(.modal) {
   position: relative;
 }
+
+/**/
+rollo-app {
+  /*border: 4px solid skyblue;*/
+}

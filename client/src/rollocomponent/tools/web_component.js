@@ -5,7 +5,7 @@ v.1.1
 */
 
 
-import { author } from "./author.js";
+import { author } from "@/rollocomponent/tools/author.js";
 
 /* Returns instance of basic autonomous web component. */
 export const WebComponent = author(HTMLElement, "web-component");

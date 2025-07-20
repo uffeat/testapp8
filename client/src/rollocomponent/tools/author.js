@@ -4,8 +4,8 @@ import { author } from "@/rollocomponent/tools/author.js";
 v.1.0
 */
 
-import { factory } from "./factory.js";
-import { registry } from "./registry.js";
+import { factory } from "@/rollocomponent/tools/factory.js";
+import { registry } from "@/rollocomponent/tools/registry.js";
 
 
 /* Defines web component and returns instance factory function. */

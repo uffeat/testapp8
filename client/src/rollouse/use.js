@@ -18,9 +18,10 @@ export const Use = new (class {
   #_ = {};
 
   constructor() {
+    this.#_.imports = new Imports(this);
     this.#_.processors = new Processors(this);
     this.#_.signatures = new Signatures(this);
-    this.#_.imports = new Imports(this);
+    
     this.#_.typeHooks = new TypeHooks(this);
   }
 

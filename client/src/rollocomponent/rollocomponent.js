@@ -2,7 +2,6 @@
 import { component } from "@/rollocomponent/rollocomponent.js";
 */
 
-export { Icon } from "./tools/icon.js";
 export { author } from "./tools/author.js";
 export { base } from "./tools/base.js";
 export { component } from "./component.js";

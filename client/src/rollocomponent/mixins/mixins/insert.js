@@ -4,7 +4,7 @@ import insert from "@/rollocomponent/mixins/insert.js";
 v.1.0
 */
 
-import { Insert } from "../../tools/insert.js";
+import { Insert } from "@/rollocomponent/tools/insert.js";
 
 export default (parent, config, ...mixins) => {
   return class extends parent {

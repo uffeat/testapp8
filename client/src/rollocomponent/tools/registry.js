@@ -4,7 +4,7 @@ import { registry } from "@/rollocomponent/tools/registry.js";
 v.1.0
 */
 
-const { meta } = await use("@/meta.js");
+import { meta } from "@/meta.js";
 
 export const registry = new (class {
   #_ = {

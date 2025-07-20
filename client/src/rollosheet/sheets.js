@@ -4,10 +4,8 @@ import { Sheets } from "@/rollosheet/tools/sheets.js";
 v.1.0
 */
 
+import { remove } from "@/rollotools/array/remove.js";
 import { Sheet } from "./sheet.js";
-const { remove } = await use("/rollotools/array/remove.js");
-
-
 
 export class Sheets {
   #_ = {

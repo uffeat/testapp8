@@ -8,13 +8,15 @@
   margin: 0;
   box-sizing: border-box;
   */
-
-  /*
-  border: 4px solid green;
-  */
 }
 
 /* Hide data components */
 :has(> slot[name="data"]) {
   display: none;
+}
+
+
+/**/
+#root {
+  /*border: 4px solid green;*/
 }

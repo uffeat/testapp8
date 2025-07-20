@@ -1,1 +1,1 @@
-export { parse } from "./src/index.js";
+export { parse } from "@/rollolibs/yaml/src/index.js";

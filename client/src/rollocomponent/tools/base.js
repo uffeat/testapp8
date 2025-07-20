@@ -4,9 +4,9 @@ import { base } from "@/rollocomponent/tools/base.js";
 v.1.0
 */
 
-import { mixins } from "../mixins/mixins.js";
-import shadow from "../mixins/shadow.js";
-import { mix } from "./mix.js";
+import { mixins } from "@/rollocomponent/mixins/mixins.js";
+import { mix } from "@/rollocomponent/tools/mix.js";
+import shadow from "@/rollocomponent/mixins/mixins/shadow.js";
 
 /* */
 export const base = (...args) => {
@@ -29,11 +29,13 @@ export const base = (...args) => {
       native;
       throw new Error(`'${tag}' is not native.`);
     }
+
     if (is_shadow_ready(ref)) {
       _mixins.push(shadow);
     } else {
       _mixins.push(mixins.append);
     }
+
     if ("textContent" in ref) {
       _mixins.push(mixins.text);
     }

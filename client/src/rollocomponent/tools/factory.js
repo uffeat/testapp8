@@ -4,7 +4,7 @@ import { factory } from "@/rollocomponent/tools/factory.js";
 v.1.1
 */
 
-import { Args } from "./args.js";
+import { Args } from "@/rollocomponent/tools/args.js";
 
 /* Returns instance factory function.
 NOTE

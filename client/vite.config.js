@@ -2,7 +2,7 @@ import { defineConfig } from "vite";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 import tailwindcss from "@tailwindcss/vite";
-import react from "@vitejs/plugin-react";
+//import react from "@vitejs/plugin-react";
 //import vue from "@vitejs/plugin-vue";
 //import vueDevTools from "vite-plugin-vue-devtools";
 
@@ -41,7 +41,7 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [
       tailwindcss(),
-      react(),
+      //react(),
       //vue(),
       //vueDevTools(),
     ],
