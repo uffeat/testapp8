@@ -1,1 +1,0 @@
-export const url_for = (path) => `${import.meta.env.BASE_URL}${path}`

@@ -1,3 +1,4 @@
+
 const { component } = await use("@/rollocomponent/");
 
 /* Create and add iframe with scripts injected */
