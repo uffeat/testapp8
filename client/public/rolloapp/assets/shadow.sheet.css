@@ -1,3 +1,0 @@
-:has(> slot[name="data"]) {
-  display: none;
-}

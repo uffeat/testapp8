@@ -13,6 +13,10 @@ import { Signatures } from "@/rolloapp/tools/signatures.js";
 import { TypeHooks } from "@/rolloapp/tools/type_hooks.js";
 import { construct } from "@/rolloapp/tools/construct.js";
 
+
+/*  TODO 
+- .icon.svg */
+
 const App = author(
   class extends base() {
     static __key__ = "rollo-app";
@@ -137,6 +141,9 @@ app.config.imports.add(
   import.meta.glob([
     "/src/meta.js",
     "/src/rollocomponent/rollocomponent.js",
+     "/src/rollolibs/yaml/yaml.js",
+    "/src/rollolibs/marked.js",
+    "/src/rollolibs/papa.js",
     "/src/rollosheet/rollosheet.js",
     "/src/rollostate/rollostate.js",
      "/src/rollotest/rollotest.js",
@@ -250,6 +257,41 @@ app.config.processors.add({
     {
       cache: true,
     }
+  ),
+});
+
+/* Add '.md' processor */
+app.config.processors.add({
+  md: new Processor(
+    async (result, { owner, path }) => {
+      const { parse } = await owner.import("@/rollolibs/marked.js");
+      return parse(result).trim();
+    },
+    { cache: true }
+  ),
+});
+
+/* Add '.yaml' processor */
+app.config.processors.add({
+  yaml: new Processor(
+    async (result, { owner, path }) => {
+      const { parse } = await owner.import("@/rollolibs/yaml/");
+      return parse(result);
+    },
+    {
+      cache: false,
+    }
+  ),
+});
+
+/* Add '.csv' processor */
+app.config.processors.add({
+  csv: new Processor(
+    async (result, { owner, path }) => {
+      const { parse } = await owner.import("@/rollolibs/papa.js");
+      return parse(result);
+    },
+    { cache: false }
   ),
 });
 

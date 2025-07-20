@@ -12,4 +12,5 @@ await promise;
 const Papa = iframe.contentWindow.Papa
 iframe.remove()
 
-export { Papa };
+export const parse = Papa.parse
+
