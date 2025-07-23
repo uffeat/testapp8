@@ -2,9 +2,6 @@
 
 */
 
-
-
-
 /* Utility for managing a single processor callable. */
 export class Processor {
   #_ = {
@@ -12,8 +9,9 @@ export class Processor {
   };
 
   constructor(source, { cache = true, detail } = {}) {
-    this.#_.source = source;
+    this.#_.cache = cache;
     this.#_.detail = detail;
+    this.#_.source = source;
   }
 
   /* Calls source, subject to caching logic (inherent or as per call). */
